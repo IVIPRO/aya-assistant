@@ -1,24 +1,52 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, FlaskConical, Pencil, Brain, MessageCircle, Lock } from "lucide-react";
+import { ArrowLeft, BookOpen, Pencil, Brain, MessageCircle } from "lucide-react";
 import { elementarySubjects, SUBJECT_ACTIONS_LABELS, type Subject, type Topic } from "@/lib/curriculum";
 import type { LangCode } from "@/lib/i18n";
 import { cn } from "@/components/layout";
+import { LessonViewer } from "./lesson-viewer";
 
 interface SubjectPanelProps {
   lang: LangCode;
+  grade: number;
   childName: string;
   characterEmoji: string;
   onStart: (subject: Subject, topic: Topic | null) => void;
   onBack: () => void;
 }
 
-const ACTION_ICONS = [BookOpen, Pencil, FlaskConical, MessageCircle];
+type LessonMode = "lesson" | "practice" | "quiz";
 
-export function SubjectPanel({ lang, childName, characterEmoji, onStart, onBack }: SubjectPanelProps) {
+interface LessonContext {
+  subject: Subject;
+  topic: Topic;
+  mode: LessonMode;
+}
+
+export function SubjectPanel({ lang, grade, childName, characterEmoji, onStart, onBack }: SubjectPanelProps) {
   const [selected, setSelected] = useState<Subject | null>(null);
+  const [lessonCtx, setLessonCtx] = useState<LessonContext | null>(null);
   const labels = SUBJECT_ACTIONS_LABELS[lang];
 
+  // ── Lesson viewer mode ──────────────────────────────────────────
+  if (lessonCtx) {
+    return (
+      <LessonViewer
+        subject={lessonCtx.subject}
+        topic={lessonCtx.topic}
+        initialMode={lessonCtx.mode}
+        grade={grade}
+        lang={lang}
+        onBack={() => setLessonCtx(null)}
+        onAskAya={() => {
+          setLessonCtx(null);
+          onStart(lessonCtx.subject, lessonCtx.topic);
+        }}
+      />
+    );
+  }
+
+  // ── Subject / Topic selection ───────────────────────────────────
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
@@ -36,7 +64,9 @@ export function SubjectPanel({ lang, childName, characterEmoji, onStart, onBack 
         <div className="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-xl border border-white/50">
           <span className="text-lg">{characterEmoji}</span>
           <span className="font-bold text-sm text-junior-foreground">
-            {selected ? selected.label[lang] : (lang === "bg" ? "Избери предмет" : lang === "es" ? "Elige materia" : "Choose a subject")}
+            {selected
+              ? selected.label[lang]
+              : lang === "bg" ? "Избери предмет" : lang === "es" ? "Elige materia" : "Choose a subject"}
           </span>
         </div>
         <div className="w-24" />
@@ -44,6 +74,7 @@ export function SubjectPanel({ lang, childName, characterEmoji, onStart, onBack 
 
       <AnimatePresence mode="wait">
         {!selected ? (
+          /* ── Subject grid ───────────────────────────────────────── */
           <motion.div key="subject-grid" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div className="mb-4 text-center">
               <p className="text-muted-foreground text-sm">
@@ -82,6 +113,7 @@ export function SubjectPanel({ lang, childName, characterEmoji, onStart, onBack 
             </div>
           </motion.div>
         ) : (
+          /* ── Topic panel ────────────────────────────────────────── */
           <motion.div key="topic-panel" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             <div className={cn("rounded-3xl border-2 p-6 mb-5", selected.bgClass, selected.borderClass)}>
               <div className="flex items-center gap-3 mb-5">
@@ -107,29 +139,29 @@ export function SubjectPanel({ lang, childName, characterEmoji, onStart, onBack 
                       <p className="font-semibold text-sm text-foreground">{topic.label[lang]}</p>
                     </div>
                     <div className="grid grid-cols-4 border-t border-border/20">
-                      {[
-                        { key: "lessons",  Icon: BookOpen,    label: labels.lessons },
-                        { key: "practice", Icon: Pencil,      label: labels.practice },
-                        { key: "quiz",     Icon: Brain,       label: labels.quiz },
-                        { key: "askAya",   Icon: MessageCircle, label: labels.askAya },
-                      ].map(({ key, Icon, label }) => (
+                      {(
+                        [
+                          { key: "lessons",  mode: "lesson"   as LessonMode, Icon: BookOpen,     label: labels.lessons },
+                          { key: "practice", mode: "practice" as LessonMode, Icon: Pencil,       label: labels.practice },
+                          { key: "quiz",     mode: "quiz"     as LessonMode, Icon: Brain,        label: labels.quiz },
+                          { key: "askAya",   mode: null,                     Icon: MessageCircle, label: labels.askAya },
+                        ] as const
+                      ).map(({ key, mode, Icon, label }) => (
                         <button
                           key={key}
-                          onClick={key === "askAya" ? () => onStart(selected, topic) : undefined}
-                          disabled={key !== "askAya"}
-                          title={key !== "askAya" ? labels.comingSoon : label}
+                          onClick={() => {
+                            if (mode !== null) {
+                              setLessonCtx({ subject: selected, topic, mode });
+                            } else {
+                              onStart(selected, topic);
+                            }
+                          }}
                           className={cn(
-                            "flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold transition-colors",
-                            key === "askAya"
-                              ? cn("cursor-pointer hover:bg-junior/10", selected.colorClass)
-                              : "text-muted-foreground/40 cursor-not-allowed",
+                            "flex flex-col items-center gap-1 py-2.5 text-[10px] font-semibold transition-colors cursor-pointer hover:bg-white/50",
+                            selected.colorClass,
                           )}
                         >
-                          {key !== "askAya" ? (
-                            <Lock className="w-3.5 h-3.5" />
-                          ) : (
-                            <Icon className="w-3.5 h-3.5" />
-                          )}
+                          <Icon className="w-3.5 h-3.5" />
                           <span>{label}</span>
                         </button>
                       ))}

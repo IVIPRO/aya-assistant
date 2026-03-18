@@ -417,6 +417,7 @@ export function Junior() {
         ) : view === "subjects" ? (
           <SubjectPanel
             lang={childLang}
+            grade={activeChild?.grade ?? 2}
             childName={activeChild?.name ?? ""}
             characterEmoji={currentChar?.emoji ?? "🌟"}
             onStart={(subject, topic) => {

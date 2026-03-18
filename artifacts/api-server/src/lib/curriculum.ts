@@ -155,9 +155,39 @@ const CURRICULA: Record<string, GradeCurriculum> = {
   },
 };
 
+const COUNTRY_ALIASES: Record<string, string> = {
+  BULGARIA: "BG",
+  БЪЛЛГАРИЯ: "BG",
+  BG: "BG",
+  USA: "US",
+  "UNITED STATES": "US",
+  "UNITED STATES OF AMERICA": "US",
+  US: "US",
+  GERMANY: "DE",
+  DEUTSCHLAND: "DE",
+  DE: "DE",
+  SPAIN: "ES",
+  ESPAÑA: "ES",
+  ES: "ES",
+  "UNITED KINGDOM": "GB",
+  UK: "GB",
+  ENGLAND: "GB",
+  BRITAIN: "GB",
+  "GREAT BRITAIN": "GB",
+  GB: "GB",
+};
+
+export function normalizeCountryCode(country: string): string {
+  const upper = country.trim().toUpperCase();
+  if (COUNTRY_ALIASES[upper]) return COUNTRY_ALIASES[upper];
+  const twoLetter = upper.slice(0, 2);
+  if (CURRICULA[twoLetter]) return twoLetter;
+  return "GENERIC";
+}
+
 export function getMissionsForChild(country: string, grade: number): CurriculumMission[] {
-  const curriculumKey = country.toUpperCase().slice(0, 2);
-  const curriculum = CURRICULA[curriculumKey] || GENERIC;
+  const code = normalizeCountryCode(country);
+  const curriculum = CURRICULA[code] ?? GENERIC;
 
   const clampedGrade = Math.max(1, Math.min(4, grade));
   const gradeKey = `grade${clampedGrade}` as keyof GradeCurriculum;

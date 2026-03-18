@@ -79,6 +79,15 @@ router.post("/missions/:id/complete", requireAuth, async (req, res): Promise<voi
     .set({ xp: newXp, stars: newStars })
     .where(eq(childrenTable.id, mission.childId));
 
+  const completionScore = mission.difficulty === "easy" ? 70 : mission.difficulty === "hard" ? 90 : 80;
+  await db.insert(progressTable).values({
+    childId: mission.childId,
+    subject: mission.subject,
+    score: completionScore,
+    module: "junior",
+    notes: `Completed mission: ${mission.title} (${mission.difficulty ?? "easy"} difficulty)`,
+  });
+
   const recentProgress = await db
     .select()
     .from(progressTable)

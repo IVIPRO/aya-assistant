@@ -84,12 +84,37 @@ const VOICE_FEATURES = [
   },
 ];
 
-const JUNIOR_PROMPTS = [
-  "Help me with math",
-  "Let's read together",
-  "Ask me a logic question",
-  "Practice English",
-];
+const JUNIOR_PROMPTS_BY_LANG: Record<string, string[]> = {
+  en: [
+    "Help me with math",
+    "Let's read together",
+    "Ask me a logic question",
+    "Practice English",
+  ],
+  bg: [
+    "Помогни ми с математика",
+    "Да четем заедно",
+    "Задай ми логически въпрос",
+    "Упражнявай с мен английски",
+  ],
+  es: [
+    "Ayúdame con matemáticas",
+    "Leamos juntos",
+    "Hazme una pregunta de lógica",
+    "Practicar inglés",
+  ],
+};
+
+function getLang(language?: string | null): "bg" | "es" | "en" {
+  const l = (language ?? "").toLowerCase();
+  if (l.includes("bulgar") || l === "bg") return "bg";
+  if (l.includes("spanish") || l.includes("español") || l === "es") return "es";
+  return "en";
+}
+
+function getJuniorPrompts(language?: string | null): string[] {
+  return JUNIOR_PROMPTS_BY_LANG[getLang(language)] ?? JUNIOR_PROMPTS_BY_LANG.en;
+}
 
 function getMissionZone(mission: Mission): string {
   if (mission.zone) return mission.zone;
@@ -477,7 +502,7 @@ export function Junior() {
               themeColor="junior"
               character={character}
               greeting={greeting}
-              suggestedPrompts={JUNIOR_PROMPTS}
+              suggestedPrompts={getJuniorPrompts(activeChild?.language)}
             />
 
             <VoiceReadySection />

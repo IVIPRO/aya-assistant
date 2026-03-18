@@ -59,6 +59,22 @@ const CHARACTERS = [
 
 type JuniorLang = "en" | "bg" | "es";
 
+const ZONE_NAMES_I18N: Record<string, Record<JuniorLang, string>> = {
+  "Math Island":    { en: "Math Island",    bg: "Остров на математиката", es: "Isla de matemáticas" },
+  "Reading Forest": { en: "Reading Forest", bg: "Гора на четенето",        es: "Bosque de lectura" },
+  "Logic Mountain": { en: "Logic Mountain", bg: "Логическа планина",       es: "Montaña de lógica" },
+  "English City":   { en: "English City",   bg: "Английски град",          es: "Ciudad de inglés" },
+  "Science Planet": { en: "Science Planet", bg: "Планетата на науката",    es: "Planeta de ciencias" },
+};
+
+const ZONE_DESCS_I18N: Record<string, Record<JuniorLang, string>> = {
+  "Math Island":    { en: "Numbers & counting",   bg: "Числа и смятане",              es: "Números y cálculo" },
+  "Reading Forest": { en: "Words & stories",      bg: "Думи и истории",               es: "Palabras e historias" },
+  "Logic Mountain": { en: "Puzzles & patterns",   bg: "Загадки и закономерности",     es: "Acertijos y patrones" },
+  "English City":   { en: "Language & speaking",  bg: "Език и говорене",              es: "Idioma y habla" },
+  "Science Planet": { en: "Nature & discovery",   bg: "Природа и открития",           es: "Naturaleza y descubrimientos" },
+};
+
 const JUNIOR_LABELS: Record<JuniorLang, {
   welcomeBack: string;
   readyAdventure: (name: string) => string;
@@ -79,6 +95,14 @@ const JUNIOR_LABELS: Record<JuniorLang, {
   pickerSubtitle: string;
   currentCompanion: string;
   cancel: string;
+  back: string;
+  openWorldMap: string;
+  toneStyle: (tone: string) => string;
+  missionsCount: (done: number, total: number) => string;
+  noMissions: string;
+  allDone: string;
+  missionsLeft: (n: number) => string;
+  unlockAtXp: (xp: number) => string;
 }> = {
   en: {
     welcomeBack: "Welcome back,",
@@ -105,6 +129,14 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     pickerSubtitle: "Your companion will guide you through every mission with their own special teaching style 🎓",
     currentCompanion: "✓ Current companion",
     cancel: "Cancel",
+    back: "Back",
+    openWorldMap: "Open Full World Map",
+    toneStyle: (tone) => `· ${tone} style`,
+    missionsCount: (done, total) => `${done}/${total} missions`,
+    noMissions: "No missions yet",
+    allDone: "✅ All done!",
+    missionsLeft: (n) => `${n} missions left →`,
+    unlockAtXp: (xp) => `🔒 Unlock at ${xp} XP`,
   },
   bg: {
     welcomeBack: "Добре дошла,",
@@ -131,6 +163,14 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     pickerSubtitle: "Твоят компаньон ще те води през всяка мисия с особен стил на преподаване 🎓",
     currentCompanion: "✓ Текущ компаньон",
     cancel: "Отказ",
+    back: "Назад",
+    openWorldMap: "Отвори пълната карта на света",
+    toneStyle: (tone) => `· ${tone} стил`,
+    missionsCount: (done, total) => `${done}/${total} мисии`,
+    noMissions: "Все още няма мисии",
+    allDone: "✅ Всичко готово!",
+    missionsLeft: (n) => `${n} мисии остават →`,
+    unlockAtXp: (xp) => `🔒 Отключва се при ${xp} XP`,
   },
   es: {
     welcomeBack: "Bienvenida,",
@@ -157,6 +197,14 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     pickerSubtitle: "Tu compañero te guiará en cada misión con su propio estilo de enseñanza 🎓",
     currentCompanion: "✓ Compañero actual",
     cancel: "Cancelar",
+    back: "Atrás",
+    openWorldMap: "Abrir el mapa completo",
+    toneStyle: (tone) => `· estilo ${tone}`,
+    missionsCount: (done, total) => `${done}/${total} misiones`,
+    noMissions: "Aún sin misiones",
+    allDone: "✅ ¡Todo listo!",
+    missionsLeft: (n) => `${n} misiones restantes →`,
+    unlockAtXp: (xp) => `🔒 Se desbloquea en ${xp} XP`,
   },
 };
 
@@ -529,6 +577,7 @@ export function Junior() {
     : null;
 
   const juniorLang = getLang(activeChild?.language);
+  const lbl = JUNIOR_LABELS[juniorLang];
   const GREETING_LABELS: Record<JuniorLang, {
     subjectGreeting: (name: string, subject: string, topic: string | null) => string;
     mainGreeting: (name: string, charName: string) => string;
@@ -628,7 +677,7 @@ export function Junior() {
             <div className="flex items-center justify-between mb-6">
               <button onClick={() => setView("welcome")}
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors">
-                <ArrowLeft className="w-4 h-4" /> Back
+                <ArrowLeft className="w-4 h-4" /> {lbl.back}
               </button>
               <div className="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-xl border border-white/50">
                 <span className="text-lg">{currentChar?.emoji ?? "🌟"}</span>
@@ -647,6 +696,8 @@ export function Junior() {
                 const zoneMissions = missions.filter(m => getMissionZone(m) === zone.id);
                 const completedCount = zoneMissions.filter(m => m.completed).length;
                 const totalCount = zoneMissions.length;
+                const zoneName = ZONE_NAMES_I18N[zone.id]?.[juniorLang] ?? zone.id;
+                const zoneDesc = ZONE_DESCS_I18N[zone.id]?.[juniorLang] ?? zone.desc;
 
                 return (
                   <motion.div key={zone.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.07 }}>
@@ -662,15 +713,15 @@ export function Junior() {
                         )}
 
                         <div className="text-5xl mb-3">{zone.emoji}</div>
-                        <h3 className={`text-lg font-display font-bold mb-1 ${isUnlocked ? zone.color : 'text-muted-foreground'}`}>{zone.id}</h3>
-                        <p className="text-muted-foreground text-sm mb-3">{zone.desc}</p>
+                        <h3 className={`text-lg font-display font-bold mb-1 ${isUnlocked ? zone.color : 'text-muted-foreground'}`}>{zoneName}</h3>
+                        <p className="text-muted-foreground text-sm mb-3">{zoneDesc}</p>
 
                         {isUnlocked ? (
                           <div>
                             {totalCount > 0 && (
                               <>
                                 <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                                  <span>{completedCount}/{totalCount} missions</span>
+                                  <span>{lbl.missionsCount(completedCount, totalCount)}</span>
                                   <span>{Math.round((completedCount / totalCount) * 100)}%</span>
                                 </div>
                                 <div className="w-full h-2 bg-white/60 rounded-full overflow-hidden">
@@ -680,11 +731,11 @@ export function Junior() {
                               </>
                             )}
                             <div className={`mt-3 text-xs font-bold ${zone.color}`}>
-                              {totalCount === 0 ? "No missions yet" : completedCount === totalCount ? "✅ All done!" : `${totalCount - completedCount} missions left →`}
+                              {totalCount === 0 ? lbl.noMissions : completedCount === totalCount ? lbl.allDone : lbl.missionsLeft(totalCount - completedCount)}
                             </div>
                           </div>
                         ) : (
-                          <p className="text-xs text-muted-foreground font-medium">🔒 Unlock at {zone.xpRequired} XP</p>
+                          <p className="text-xs text-muted-foreground font-medium">{lbl.unlockAtXp(zone.xpRequired)}</p>
                         )}
                       </div>
                     </Link>
@@ -695,7 +746,7 @@ export function Junior() {
             <div className="mt-6 text-center">
               <Link href="/junior/world">
                 <button className="bg-junior text-junior-foreground px-6 py-3 rounded-2xl shadow-md border-b-4 border-yellow-600 hover:translate-y-1 hover:border-b-0 transition-all font-bold flex items-center gap-2 mx-auto">
-                  <Map className="w-5 h-5" /> Open Full World Map
+                  <Map className="w-5 h-5" /> {lbl.openWorldMap}
                 </button>
               </Link>
             </div>
@@ -705,12 +756,12 @@ export function Junior() {
             <div className="flex items-center justify-between mb-6">
               <button onClick={() => setView("subjects")}
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors">
-                <ArrowLeft className="w-4 h-4" /> Back
+                <ArrowLeft className="w-4 h-4" /> {lbl.back}
               </button>
               <div className="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-xl border border-white/50">
                 <span className="text-lg">{currentChar?.emoji ?? "🌟"}</span>
                 <span className="font-bold text-sm text-junior-foreground">{currentChar?.name ?? "AYA"}</span>
-                {currentChar && <span className="text-xs text-muted-foreground">· {currentChar.tone} style</span>}
+                {currentChar && <span className="text-xs text-muted-foreground">{lbl.toneStyle(currentChar.tone)}</span>}
               </div>
               <button onClick={() => setView("map")}
                 className="flex items-center gap-1.5 px-3 py-2 bg-white/60 rounded-xl border border-white/50 hover:bg-yellow-50 transition-colors text-sm font-bold text-junior-foreground">

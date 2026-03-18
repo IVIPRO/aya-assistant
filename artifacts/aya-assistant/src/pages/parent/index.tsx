@@ -373,16 +373,16 @@ export function ParentDashboard() {
   const badges = (progressChild?.badgesEarned ?? []) as Badge[];
 
   const tabs = [
-    { id: "children", label: "Children Profiles", icon: Users },
-    { id: "progress", label: "Learning Progress", icon: LineChart },
+    { id: "children", label: t.parent.tabChildren, icon: Users },
+    { id: "progress", label: t.parent.tabProgress, icon: LineChart },
     { id: "memories", label: "Memory Engine", icon: BrainCircuit },
   ];
 
   return (
     <Layout>
       <div className="mb-8">
-        <h1 className="text-4xl font-display font-bold text-foreground">Parent Control Panel</h1>
-        <p className="text-muted-foreground mt-2">Manage profiles, monitor progress, and review AI insights.</p>
+        <h1 className="text-4xl font-display font-bold text-foreground">{t.parent.title}</h1>
+        <p className="text-muted-foreground mt-2">{t.parent.subtitle}</p>
       </div>
 
       {!family && (
@@ -441,15 +441,15 @@ export function ParentDashboard() {
       )}
 
       <div className="flex gap-2 border-b border-border/50 mb-8 overflow-x-auto hide-scrollbar">
-        {tabs.map(t => (
+        {tabs.map(tabItem => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
+            key={tabItem.id}
+            onClick={() => setTab(tabItem.id)}
             className={`flex items-center gap-2 px-6 py-4 font-bold border-b-2 transition-all shrink-0 ${
-              tab === t.id ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
+              tab === tabItem.id ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
             }`}
           >
-            <t.icon className="w-5 h-5" /> {t.label}
+            <tabItem.icon className="w-5 h-5" /> {tabItem.label}
           </button>
         ))}
       </div>
@@ -457,7 +457,7 @@ export function ParentDashboard() {
       {tab === "children" && (
         <div>
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Child Profiles</h2>
+            <h2 className="text-2xl font-bold">{t.parent.sectionChildProfiles}</h2>
             {family && (
               <Dialog>
                 <DialogTrigger asChild>
@@ -606,7 +606,7 @@ export function ParentDashboard() {
       {tab === "progress" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold">Learning Progress</h2>
+            <h2 className="text-2xl font-bold">{t.parent.sectionLearningProgress}</h2>
             {children.length > 1 && (
               <select
                 value={progressChildId}

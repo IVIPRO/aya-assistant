@@ -46,6 +46,14 @@ export interface UITranslations {
     juniorPlaceholder: string;
     placeholder: string;
   };
+  parent: {
+    title: string;
+    subtitle: string;
+    tabChildren: string;
+    tabProgress: string;
+    sectionChildProfiles: string;
+    sectionLearningProgress: string;
+  };
 }
 
 export const translations: Record<LangCode, UITranslations> = {
@@ -88,6 +96,14 @@ export const translations: Record<LangCode, UITranslations> = {
       juniorPlaceholder: "Ask me anything! I'm here to guide you… 🌟",
       placeholder: "Type your message...",
     },
+    parent: {
+      title: "Parent Control Panel",
+      subtitle: "Manage profiles, monitor progress, and review AI insights.",
+      tabChildren: "Children Profiles",
+      tabProgress: "Learning Progress",
+      sectionChildProfiles: "Child Profiles",
+      sectionLearningProgress: "Learning Progress",
+    },
   },
   bg: {
     nav: {
@@ -128,6 +144,14 @@ export const translations: Record<LangCode, UITranslations> = {
       juniorPlaceholder: "Попитай ме нещо! Аз съм тук да помогна.",
       placeholder: "Напишете вашето съобщение...",
     },
+    parent: {
+      title: "Родителски контролен панел",
+      subtitle: "Управлявайте профили, следете напредъка и преглеждайте AI анализите.",
+      tabChildren: "Профили на деца",
+      tabProgress: "Напредък в обучението",
+      sectionChildProfiles: "Профили на деца",
+      sectionLearningProgress: "Напредък в обучението",
+    },
   },
   es: {
     nav: {
@@ -167,6 +191,14 @@ export const translations: Record<LangCode, UITranslations> = {
     chat: {
       juniorPlaceholder: "Pregúntame algo. Estoy aquí para ayudarte.",
       placeholder: "Escribe tu mensaje...",
+    },
+    parent: {
+      title: "Panel de control parental",
+      subtitle: "Administre perfiles, monitoree el progreso y revise los análisis de IA.",
+      tabChildren: "Perfiles de niños",
+      tabProgress: "Progreso de aprendizaje",
+      sectionChildProfiles: "Perfiles de niños",
+      sectionLearningProgress: "Progreso de aprendizaje",
     },
   },
 };

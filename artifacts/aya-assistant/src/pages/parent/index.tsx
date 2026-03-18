@@ -65,6 +65,66 @@ function getGradeDisplay(grade: number, language?: string | null): string {
   return `Grade ${grade}`;
 }
 
+function getProfileI18n(language?: string | null) {
+  const l = (language ?? "").toLowerCase();
+  if (l.includes("bulgar") || l === "bg") {
+    return {
+      editTitle: "Редакция на профил на дете",
+      nameLbl: "Име",
+      gradeLbl: "Клас",
+      langLbl: "Език",
+      countryLbl: "Държава",
+      saveLbl: "Запази промените",
+      gradeOptions: [
+        { value: 1, label: "1 клас" },
+        { value: 2, label: "2 клас" },
+        { value: 3, label: "3 клас" },
+        { value: 4, label: "4 клас" },
+      ],
+      noCompanion: "Все още няма избран компаньон — докоснете, за да изберете",
+      levelLbl: "Ниво",
+      xpLbl: "XP",
+      starsLbl: "Звезди",
+      badgesLbl: "Значки",
+    };
+  }
+  if (l.includes("spanish") || l.includes("español") || l === "es") {
+    return {
+      editTitle: "Editar perfil del niño",
+      nameLbl: "Nombre",
+      gradeLbl: "Grado escolar",
+      langLbl: "Idioma",
+      countryLbl: "País",
+      saveLbl: "Guardar cambios",
+      gradeOptions: [
+        { value: 1, label: "1° grado" },
+        { value: 2, label: "2° grado" },
+        { value: 3, label: "3° grado" },
+        { value: 4, label: "4° grado" },
+      ],
+      noCompanion: "Sin compañero seleccionado — toca para elegir",
+      levelLbl: "Nivel",
+      xpLbl: "XP",
+      starsLbl: "Estrellas",
+      badgesLbl: "Insignias",
+    };
+  }
+  return {
+    editTitle: "Edit Child Profile",
+    nameLbl: "Name",
+    gradeLbl: "School Grade",
+    langLbl: "Language",
+    countryLbl: "Country",
+    saveLbl: "Save Changes",
+    gradeOptions: GRADE_OPTIONS,
+    noCompanion: "No companion selected yet — tap to choose",
+    levelLbl: "Level",
+    xpLbl: "XP",
+    starsLbl: "Stars",
+    badgesLbl: "Badges",
+  };
+}
+
 const familySchema = z.object({
   name: z.string().min(1, "Family name is required"),
   country: z.string().min(1, "Country is required"),
@@ -127,6 +187,7 @@ export function ParentDashboard() {
   );
 
   const progressChild = children.find(c => c.id === progressChildId);
+  const editI18n = getProfileI18n(editingChild?.language);
 
   const createChild = useCreateChild();
   const deleteChild = useDeleteChild();
@@ -401,6 +462,7 @@ export function ParentDashboard() {
             {children.map(child => {
               const childBadges = (child.badgesEarned ?? []) as Badge[];
               const level = getLevel(child.xp);
+              const cardI18n = getProfileI18n(child.language);
               return (
                 <div key={child.id} className="bg-card p-6 rounded-[2rem] shadow-lg border border-border/50 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -445,24 +507,24 @@ export function ParentDashboard() {
                       className="flex items-center gap-2 mb-3 px-3 py-2 rounded-xl border border-dashed border-muted-foreground/30 hover:border-primary/40 hover:bg-primary/5 transition-all w-full text-left"
                     >
                       <Sparkles className="w-4 h-4 text-muted-foreground/50" />
-                      <span className="text-xs text-muted-foreground italic">No companion selected yet — tap to choose</span>
+                      <span className="text-xs text-muted-foreground italic">{cardI18n.noCompanion}</span>
                     </button>
                   )}
                   <div className="flex gap-4 mb-3">
                     <div className="flex flex-col">
-                      <span className="text-xs text-muted-foreground">Level</span>
+                      <span className="text-xs text-muted-foreground">{cardI18n.levelLbl}</span>
                       <span className="font-bold text-primary">{level}</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs text-muted-foreground">XP</span>
+                      <span className="text-xs text-muted-foreground">{cardI18n.xpLbl}</span>
                       <span className="font-bold text-orange-600">{child.xp}</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs text-muted-foreground">Stars</span>
+                      <span className="text-xs text-muted-foreground">{cardI18n.starsLbl}</span>
                       <span className="font-bold text-yellow-600">{child.stars}</span>
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-xs text-muted-foreground">Badges</span>
+                      <span className="text-xs text-muted-foreground">{cardI18n.badgesLbl}</span>
                       <span className="font-bold text-purple-600">{childBadges.length}</span>
                     </div>
                   </div>
@@ -781,24 +843,24 @@ export function ParentDashboard() {
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
-          <DialogHeader><DialogTitle>Edit Child Profile</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{editI18n.editTitle}</DialogTitle></DialogHeader>
           <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 pt-4">
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Name</label>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">{editI18n.nameLbl}</label>
               <input {...editForm.register("name")} placeholder="Child's name" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
               {editForm.formState.errors.name && <p className="text-destructive text-xs mt-1">{editForm.formState.errors.name.message}</p>}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">School Grade</label>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">{editI18n.gradeLbl}</label>
               <select {...editForm.register("grade")} className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white">
-                {GRADE_OPTIONS.map(g => (
+                {editI18n.gradeOptions.map(g => (
                   <option key={g.value} value={g.value}>{g.label}</option>
                 ))}
               </select>
               {editForm.formState.errors.grade && <p className="text-destructive text-xs mt-1">Please select a grade</p>}
             </div>
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Language</label>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">{editI18n.langLbl}</label>
               <select {...editForm.register("language")} className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white">
                 {LANGUAGE_OPTIONS.map(l => (
                   <option key={l} value={l}>{l}</option>
@@ -806,11 +868,11 @@ export function ParentDashboard() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Country</label>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">{editI18n.countryLbl}</label>
               <input {...editForm.register("country")} placeholder="e.g. USA, BG, DE, ES, GB" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
             </div>
             <button type="submit" disabled={updateChild.isPending} className="w-full bg-primary text-white p-3 rounded-xl font-bold hover:bg-primary/90">
-              {updateChild.isPending ? "Saving..." : "Save Changes"}
+              {updateChild.isPending ? "..." : editI18n.saveLbl}
             </button>
           </form>
         </DialogContent>

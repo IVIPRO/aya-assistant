@@ -119,6 +119,7 @@ router.patch("/children/:id", requireAuth, async (req, res): Promise<void> => {
   if (parsed.data.xp !== null && parsed.data.xp !== undefined) updateData.xp = parsed.data.xp;
   if (parsed.data.stars !== null && parsed.data.stars !== undefined) updateData.stars = parsed.data.stars;
   if ("aiCharacter" in parsed.data && parsed.data.aiCharacter !== undefined) updateData.aiCharacter = parsed.data.aiCharacter;
+  if ("badgesEarned" in parsed.data && parsed.data.badgesEarned !== undefined) updateData.badgesEarned = parsed.data.badgesEarned;
 
   const [child] = await db
     .update(childrenTable)

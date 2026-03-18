@@ -181,6 +181,17 @@ export const UpdateChildBody = zod.object({
   xp: zod.number().nullish(),
   stars: zod.number().nullish(),
   aiCharacter: zod.string().nullish(),
+  badgesEarned: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        title: zod.string(),
+        icon: zod.string(),
+        description: zod.string(),
+        earnedAt: zod.date(),
+      }),
+    )
+    .nullish(),
 });
 
 export const UpdateChildResponse = zod.object({

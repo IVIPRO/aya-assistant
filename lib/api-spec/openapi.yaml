@@ -714,6 +714,10 @@ components:
           type: ["integer", "null"]
         aiCharacter:
           type: ["string", "null"]
+        badgesEarned:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/Badge"
 
     Child:
       type: object

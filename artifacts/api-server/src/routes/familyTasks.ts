@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, familyTasksTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { CreateFamilyTaskBody, UpdateFamilyTaskBody, UpdateFamilyTaskParams, DeleteFamilyTaskParams } from "@workspace/api-zod";
 import { requireAuth, getUser } from "../lib/auth";
 
@@ -66,7 +66,15 @@ router.patch("/family-tasks/:id", requireAuth, async (req, res): Promise<void> =
     return;
   }
 
-  const updateData: Record<string, any> = {};
+  const { familyId } = getUser(req);
+  const [existing] = await db.select().from(familyTasksTable)
+    .where(and(eq(familyTasksTable.id, params.data.id), eq(familyTasksTable.familyId, familyId ?? -1)));
+  if (!existing) {
+    res.status(404).json({ error: "Task not found" });
+    return;
+  }
+
+  const updateData: Record<string, unknown> = {};
   if (parsed.data.title !== null && parsed.data.title !== undefined) updateData.title = parsed.data.title;
   if (parsed.data.description !== null && parsed.data.description !== undefined) updateData.description = parsed.data.description;
   if (parsed.data.completed !== null && parsed.data.completed !== undefined) updateData.completed = parsed.data.completed;
@@ -77,7 +85,7 @@ router.patch("/family-tasks/:id", requireAuth, async (req, res): Promise<void> =
   const [task] = await db
     .update(familyTasksTable)
     .set(updateData)
-    .where(eq(familyTasksTable.id, params.data.id))
+    .where(and(eq(familyTasksTable.id, params.data.id), eq(familyTasksTable.familyId, familyId ?? -1)))
     .returning();
 
   if (!task) {
@@ -95,7 +103,16 @@ router.delete("/family-tasks/:id", requireAuth, async (req, res): Promise<void> 
     return;
   }
 
-  await db.delete(familyTasksTable).where(eq(familyTasksTable.id, params.data.id));
+  const { familyId } = getUser(req);
+  const [existing] = await db.select().from(familyTasksTable)
+    .where(and(eq(familyTasksTable.id, params.data.id), eq(familyTasksTable.familyId, familyId ?? -1)));
+  if (!existing) {
+    res.status(404).json({ error: "Task not found" });
+    return;
+  }
+
+  await db.delete(familyTasksTable)
+    .where(and(eq(familyTasksTable.id, params.data.id), eq(familyTasksTable.familyId, familyId ?? -1)));
   res.sendStatus(204);
 });
 

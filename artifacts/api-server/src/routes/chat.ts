@@ -17,12 +17,21 @@ router.get("/chat/messages", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  let whereClause = and(eq(chatMessagesTable.userId, userId), eq(chatMessagesTable.module, module));
+  const childId = childIdStr ? parseInt(childIdStr, 10) : null;
+
+  const conditions = [
+    eq(chatMessagesTable.userId, userId),
+    eq(chatMessagesTable.module, module),
+  ];
+
+  if (childId !== null && !isNaN(childId)) {
+    conditions.push(eq(chatMessagesTable.childId, childId));
+  }
 
   const messages = await db
     .select()
     .from(chatMessagesTable)
-    .where(whereClause)
+    .where(and(...conditions))
     .orderBy(chatMessagesTable.createdAt);
 
   res.json(messages);

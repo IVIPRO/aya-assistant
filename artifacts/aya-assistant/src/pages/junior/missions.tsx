@@ -1,39 +1,33 @@
 import { Layout } from "@/components/layout";
-import { useListMissions, useCompleteMission } from "@workspace/api-client-react";
-import { useAuth } from "@/hooks/use-auth";
-import { Star, Trophy, ArrowLeft, CheckCircle2, Lock } from "lucide-react";
+import { Map, Star, Trophy, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
+import { useListMissions, useCompleteMission } from "@workspace/api-client-react";
+import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import Confetti from "react-confetti"; // Requires installing, but we'll use a CSS animation instead to avoid extra deps if not needed, wait let's just use simple animation
 
 export function Missions() {
   const { activeChildId } = useAuth();
   const { toast } = useToast();
-  
-  // Provide a default id of 0 if none selected, API will handle or return empty
-  const { data: missions = [], refetch } = useListMissions({ childId: activeChildId || 0 }, { query: { enabled: !!activeChildId } });
+
+  const { data: missions = [], refetch } = useListMissions(
+    { childId: activeChildId || 0 },
+    { query: { enabled: !!activeChildId } }
+  );
   const completeMutation = useCompleteMission();
 
   const handleComplete = async (id: number) => {
     try {
       await completeMutation.mutateAsync({ id });
       toast({
-        title: "Mission Completed! 🎉",
+        title: "Mission Completed!",
         description: "You earned XP and Stars!",
       });
       refetch();
-    } catch (e) {
+    } catch {
       toast({ title: "Error", variant: "destructive" });
     }
   };
-
-  // Mock missions if empty for demo purposes (the API might be empty)
-  const displayMissions = missions.length > 0 ? missions : [
-    { id: 1, title: "Math Master", description: "Count to 100", subject: "Math", xpReward: 50, starReward: 2, completed: true, childId: 1, createdAt: "", completedAt: "" },
-    { id: 2, title: "Word Wizard", description: "Learn 5 new words", subject: "Reading", xpReward: 30, starReward: 1, completed: false, childId: 1, createdAt: "", completedAt: "" },
-    { id: 3, title: "Science Explorer", description: "Find 3 bugs outside", subject: "Science", xpReward: 100, starReward: 3, completed: false, childId: 1, createdAt: "", completedAt: "" },
-  ];
 
   return (
     <Layout isJunior>
@@ -48,16 +42,28 @@ export function Missions() {
         </h1>
       </div>
 
+      {!activeChildId && (
+        <div className="py-16 text-center bg-muted/20 rounded-3xl border border-dashed">
+          <p className="text-muted-foreground text-lg">Select a child profile to view missions.</p>
+        </div>
+      )}
+
+      {activeChildId && missions.length === 0 && (
+        <div className="py-16 text-center bg-muted/20 rounded-3xl border border-dashed">
+          <p className="text-muted-foreground text-lg">No missions yet. Add a child profile to get started!</p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {displayMissions.map((mission, idx) => (
+        {missions.map((mission, idx) => (
           <motion.div
             key={mission.id}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: idx * 0.1 }}
             className={`relative p-6 rounded-[2rem] border-4 transition-all ${
-              mission.completed 
-                ? "bg-green-50 border-green-200" 
+              mission.completed
+                ? "bg-green-50 border-green-200"
                 : "bg-white border-junior shadow-xl shadow-junior/20 hover:-translate-y-2"
             }`}
           >
@@ -66,7 +72,7 @@ export function Missions() {
                 <CheckCircle2 className="w-6 h-6" />
               </div>
             )}
-            
+
             <div className="flex justify-between items-start mb-4">
               <span className="px-3 py-1 bg-muted rounded-full text-xs font-bold uppercase tracking-wider">
                 {mission.subject}
@@ -85,7 +91,7 @@ export function Missions() {
             <p className="text-muted-foreground font-medium mb-6">{mission.description}</p>
 
             {!mission.completed ? (
-              <button 
+              <button
                 onClick={() => handleComplete(mission.id)}
                 disabled={completeMutation.isPending}
                 className="w-full py-3 bg-junior text-junior-foreground font-bold rounded-xl border-b-4 border-yellow-600 hover:border-b-0 hover:translate-y-1 transition-all"
@@ -103,5 +109,3 @@ export function Missions() {
     </Layout>
   );
 }
-
-import { Map } from "lucide-react"; // add missing import at top conceptually

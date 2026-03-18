@@ -108,6 +108,8 @@ export interface UpdateChildBody {
   stars?: number | null;
   /** @nullable */
   aiCharacter?: string | null;
+  /** @nullable */
+  badgesEarned?: Badge[] | null;
 }
 
 export interface Child {

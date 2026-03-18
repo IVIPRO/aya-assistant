@@ -152,7 +152,36 @@ export function ParentDashboard() {
   const completedMissions = missions.filter(m => m.completed);
   const pendingMissions = missions.filter(m => !m.completed);
 
-  const estimatedMinutes = completedMissions.reduce((acc, m) => acc + (m.xpReward / 10), 0);
+  const totalLearningMinutes = (() => {
+    const withTimestamps = completedMissions
+      .filter(m => m.completedAt != null)
+      .sort((a, b) => new Date(a.completedAt!).getTime() - new Date(b.completedAt!).getTime());
+    if (withTimestamps.length === 0) return completedMissions.length * 5;
+
+    const SESSION_GAP_MS = 30 * 60 * 1000;
+    const MIN_PER_MISSION = 5;
+    let totalMinutes = 0;
+    let sessionStart = new Date(withTimestamps[0].completedAt!).getTime();
+    let sessionLast = sessionStart;
+    let sessionCount = 1;
+
+    for (let i = 1; i < withTimestamps.length; i++) {
+      const t = new Date(withTimestamps[i].completedAt!).getTime();
+      if (t - sessionLast <= SESSION_GAP_MS) {
+        sessionLast = t;
+        sessionCount++;
+      } else {
+        const sessionSpanMin = Math.round((sessionLast - sessionStart) / 60000);
+        totalMinutes += Math.max(sessionSpanMin + MIN_PER_MISSION, sessionCount * MIN_PER_MISSION);
+        sessionStart = t;
+        sessionLast = t;
+        sessionCount = 1;
+      }
+    }
+    const sessionSpanMin = Math.round((sessionLast - sessionStart) / 60000);
+    totalMinutes += Math.max(sessionSpanMin + MIN_PER_MISSION, sessionCount * MIN_PER_MISSION);
+    return totalMinutes;
+  })();
 
   const subjectScores: Record<string, { total: number; count: number }> = {};
   for (const p of progress) {
@@ -407,7 +436,7 @@ export function ParentDashboard() {
               <div className="bg-card p-4 rounded-2xl border shadow-sm text-center flex flex-col items-center">
                 <div className="flex items-center gap-1">
                   <Clock className="w-5 h-5 text-blue-400" />
-                  <span className="text-2xl font-bold text-blue-500">{Math.round(estimatedMinutes)}</span>
+                  <span className="text-2xl font-bold text-blue-500">{totalLearningMinutes}</span>
                 </div>
                 <div className="text-sm text-muted-foreground mt-1">Est. Minutes</div>
               </div>

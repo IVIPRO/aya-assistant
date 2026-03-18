@@ -54,14 +54,21 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
 
   let context: { grade?: number; country?: string; aiCharacter?: string; childName?: string } = {};
   if (module === "junior" && childId) {
-    const [childRecord] = await db.select().from(childrenTable).where(eq(childrenTable.id, childId));
-    if (childRecord) {
-      context = {
-        grade: childRecord.grade,
-        country: childRecord.country,
-        aiCharacter: childRecord.aiCharacter ?? undefined,
-        childName: childRecord.name,
-      };
+    const { getFamilyIdFromDb } = await import("../lib/auth");
+    const familyId = await getFamilyIdFromDb(userId);
+    if (familyId) {
+      const [childRecord] = await db
+        .select()
+        .from(childrenTable)
+        .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId)));
+      if (childRecord) {
+        context = {
+          grade: childRecord.grade,
+          country: childRecord.country,
+          aiCharacter: childRecord.aiCharacter ?? undefined,
+          childName: childRecord.name,
+        };
+      }
     }
   }
 

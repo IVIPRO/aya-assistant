@@ -92,7 +92,7 @@ export const translations: Record<LangCode, UITranslations> = {
   bg: {
     nav: {
       dashboard: "Табло",
-      junior: "Junior",
+      junior: "Деца",
       student: "Ученик",
       family: "Семейство",
       psychology: "Психология",
@@ -110,7 +110,7 @@ export const translations: Record<LangCode, UITranslations> = {
       gradeLevel: (grade, lv) => `${grade} клас · Ниво ${lv}`,
     },
     modules: {
-      juniorTitle: "AYA Junior",
+      juniorTitle: "AYA Деца",
       juniorDesc: "Учебен свят за класове 1–4",
       studentTitle: "AYA Ученик",
       studentDesc: "Умен помощник за учене и домашни",
@@ -132,7 +132,7 @@ export const translations: Record<LangCode, UITranslations> = {
   es: {
     nav: {
       dashboard: "Panel",
-      junior: "Junior",
+      junior: "Niños",
       student: "Estudiante",
       family: "Familia",
       psychology: "Psicología",
@@ -150,7 +150,7 @@ export const translations: Record<LangCode, UITranslations> = {
       gradeLevel: (grade, lv) => `${grade} grado · Nv ${lv}`,
     },
     modules: {
-      juniorTitle: "AYA Junior",
+      juniorTitle: "AYA Niños",
       juniorDesc: "Mundo de aprendizaje para Grados 1–4",
       studentTitle: "AYA Estudiante",
       studentDesc: "Compañero de estudio inteligente",

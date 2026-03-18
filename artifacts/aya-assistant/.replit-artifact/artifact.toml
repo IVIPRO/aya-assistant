@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "AYA Assistant"
+version = "1.0.0"
+id = "artifacts/aya-assistant"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 23586
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/aya-assistant run dev"
+
+[services.env]
+PORT = "23586"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/aya-assistant", "run", "build"]
+publicDir = "artifacts/aya-assistant/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"

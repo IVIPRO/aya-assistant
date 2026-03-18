@@ -1,22 +1,38 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AYA Assistant API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: families
+    description: Family management
+  - name: children
+    description: Child profile management
+  - name: chat
+    description: AI chat messages
+  - name: memories
+    description: AI Family Memory Engine
+  - name: missions
+    description: Gamified missions for AYA Junior
+  - name: calendar
+    description: Family calendar events
+  - name: tasks
+    description: Family tasks and reminders
+  - name: progress
+    description: Learning progress tracking
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +40,935 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ─── Auth ──────────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterBody"
+      responses:
+        "201":
+          description: Registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Email already in use
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Log in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginBody"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Log out
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ─── Families ──────────────────────────────────────────────────────────────
+  /families:
+    get:
+      operationId: getFamily
+      tags: [families]
+      summary: Get the current user's family
+      responses:
+        "200":
+          description: Family
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Family"
+        "404":
+          description: No family
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createFamily
+      tags: [families]
+      summary: Create a family
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFamilyBody"
+      responses:
+        "201":
+          description: Family created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Family"
+
+  # ─── Children ──────────────────────────────────────────────────────────────
+  /children:
+    get:
+      operationId: listChildren
+      tags: [children]
+      summary: List children in the family
+      responses:
+        "200":
+          description: List of children
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Child"
+    post:
+      operationId: createChild
+      tags: [children]
+      summary: Create a child profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChildBody"
+      responses:
+        "201":
+          description: Child created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Child"
+
+  /children/{id}:
+    get:
+      operationId: getChild
+      tags: [children]
+      summary: Get a child by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Child
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Child"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateChild
+      tags: [children]
+      summary: Update a child profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateChildBody"
+      responses:
+        "200":
+          description: Updated child
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Child"
+    delete:
+      operationId: deleteChild
+      tags: [children]
+      summary: Delete a child profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── Chat ──────────────────────────────────────────────────────────────────
+  /chat/messages:
+    get:
+      operationId: listChatMessages
+      tags: [chat]
+      summary: List chat messages
+      parameters:
+        - name: module
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [junior, student, family, psychology]
+        - name: childId
+          in: query
+          required: false
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+    post:
+      operationId: sendChatMessage
+      tags: [chat]
+      summary: Send a chat message and get AI response
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendChatMessageBody"
+      responses:
+        "201":
+          description: Message sent, AI response included
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessagePair"
+
+  # ─── Memories ──────────────────────────────────────────────────────────────
+  /memories:
+    get:
+      operationId: listMemories
+      tags: [memories]
+      summary: List AI Family Memory entries
+      parameters:
+        - name: childId
+          in: query
+          required: false
+          schema:
+            type: ["integer", "null"]
+      responses:
+        "200":
+          description: Memory entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Memory"
+    post:
+      operationId: createMemory
+      tags: [memories]
+      summary: Create a memory entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMemoryBody"
+      responses:
+        "201":
+          description: Memory created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Memory"
+
+  # ─── Missions ──────────────────────────────────────────────────────────────
+  /missions:
+    get:
+      operationId: listMissions
+      tags: [missions]
+      summary: List missions for a child
+      parameters:
+        - name: childId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Missions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Mission"
+
+  /missions/{id}/complete:
+    post:
+      operationId: completeMission
+      tags: [missions]
+      summary: Mark a mission as complete
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Mission completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mission"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ─── Calendar ──────────────────────────────────────────────────────────────
+  /calendar:
+    get:
+      operationId: listCalendarEvents
+      tags: [calendar]
+      summary: List family calendar events
+      responses:
+        "200":
+          description: Events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CalendarEvent"
+    post:
+      operationId: createCalendarEvent
+      tags: [calendar]
+      summary: Create a calendar event
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCalendarEventBody"
+      responses:
+        "201":
+          description: Event created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalendarEvent"
+
+  /calendar/{id}:
+    delete:
+      operationId: deleteCalendarEvent
+      tags: [calendar]
+      summary: Delete a calendar event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── Tasks ──────────────────────────────────────────────────────────────────
+  /family-tasks:
+    get:
+      operationId: listFamilyTasks
+      tags: [tasks]
+      summary: List family tasks
+      responses:
+        "200":
+          description: Tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FamilyTask"
+    post:
+      operationId: createFamilyTask
+      tags: [tasks]
+      summary: Create a family task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFamilyTaskBody"
+      responses:
+        "201":
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FamilyTask"
+
+  /family-tasks/{id}:
+    patch:
+      operationId: updateFamilyTask
+      tags: [tasks]
+      summary: Update a family task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateFamilyTaskBody"
+      responses:
+        "200":
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FamilyTask"
+    delete:
+      operationId: deleteFamilyTask
+      tags: [tasks]
+      summary: Delete a family task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  # ─── Progress ──────────────────────────────────────────────────────────────
+  /progress:
+    get:
+      operationId: listProgress
+      tags: [progress]
+      summary: List learning progress for a child
+      parameters:
+        - name: childId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Progress entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Progress"
+    post:
+      operationId: createProgress
+      tags: [progress]
+      summary: Record a progress entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProgressBody"
+      responses:
+        "201":
+          description: Progress recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Progress"
+
 components:
   schemas:
+    # ─── Shared ──────────────────────────────────────────────────────────────
     HealthStatus:
       type: object
       properties:
         status:
           type: string
-      required:
-        - status
+      required: [status]
 
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required: [message]
+
+    # ─── Auth ────────────────────────────────────────────────────────────────
+    RegisterBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        name:
+          type: string
+        role:
+          type: string
+          enum: [parent, child]
+          default: parent
+      required: [email, password, name]
+
+    LoginBody:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required: [email, password]
+
+    AuthResponse:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+      required: [user, token]
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          type: string
+        role:
+          type: string
+        familyId:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, email, name, role, familyId, createdAt]
+
+    # ─── Family ──────────────────────────────────────────────────────────────
+    CreateFamilyBody:
+      type: object
+      properties:
+        name:
+          type: string
+        country:
+          type: string
+        language:
+          type: string
+      required: [name, country, language]
+
+    Family:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        country:
+          type: string
+        language:
+          type: string
+        ownerId:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, country, language, ownerId, createdAt]
+
+    # ─── Children ────────────────────────────────────────────────────────────
+    CreateChildBody:
+      type: object
+      properties:
+        name:
+          type: string
+        grade:
+          type: integer
+          minimum: 1
+          maximum: 12
+        language:
+          type: string
+        country:
+          type: string
+        avatar:
+          type: ["string", "null"]
+      required: [name, grade, language, country]
+
+    UpdateChildBody:
+      type: object
+      properties:
+        name:
+          type: ["string", "null"]
+        grade:
+          type: ["integer", "null"]
+        language:
+          type: ["string", "null"]
+        country:
+          type: ["string", "null"]
+        avatar:
+          type: ["string", "null"]
+        xp:
+          type: ["integer", "null"]
+        stars:
+          type: ["integer", "null"]
+
+    Child:
+      type: object
+      properties:
+        id:
+          type: integer
+        familyId:
+          type: integer
+        name:
+          type: string
+        grade:
+          type: integer
+        language:
+          type: string
+        country:
+          type: string
+        avatar:
+          type: ["string", "null"]
+        xp:
+          type: integer
+        stars:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, familyId, name, grade, language, country, avatar, xp, stars, createdAt]
+
+    # ─── Chat ────────────────────────────────────────────────────────────────
+    SendChatMessageBody:
+      type: object
+      properties:
+        module:
+          type: string
+          enum: [junior, student, family, psychology]
+        content:
+          type: string
+        childId:
+          type: ["integer", "null"]
+      required: [module, content]
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        childId:
+          type: ["integer", "null"]
+        module:
+          type: string
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, userId, childId, module, role, content, createdAt]
+
+    ChatMessagePair:
+      type: object
+      properties:
+        userMessage:
+          $ref: "#/components/schemas/ChatMessage"
+        assistantMessage:
+          $ref: "#/components/schemas/ChatMessage"
+      required: [userMessage, assistantMessage]
+
+    # ─── Memories ────────────────────────────────────────────────────────────
+    CreateMemoryBody:
+      type: object
+      properties:
+        childId:
+          type: ["integer", "null"]
+        type:
+          type: string
+          enum: [preference, learning_progress, conversation_summary, interest, difficulty]
+        content:
+          type: string
+        module:
+          type: ["string", "null"]
+      required: [type, content]
+
+    Memory:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        childId:
+          type: ["integer", "null"]
+        type:
+          type: string
+        content:
+          type: string
+        module:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, userId, childId, type, content, module, createdAt]
+
+    # ─── Missions ────────────────────────────────────────────────────────────
+    Mission:
+      type: object
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        subject:
+          type: string
+        xpReward:
+          type: integer
+        starReward:
+          type: integer
+        completed:
+          type: boolean
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, childId, title, description, subject, xpReward, starReward, completed, completedAt, createdAt]
+
+    # ─── Calendar ────────────────────────────────────────────────────────────
+    CreateCalendarEventBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: ["string", "null"]
+          format: date-time
+        color:
+          type: ["string", "null"]
+      required: [title, startAt]
+
+    CalendarEvent:
+      type: object
+      properties:
+        id:
+          type: integer
+        familyId:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: ["string", "null"]
+          format: date-time
+        color:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, familyId, userId, title, description, startAt, endAt, color, createdAt]
+
+    # ─── Tasks ───────────────────────────────────────────────────────────────
+    CreateFamilyTaskBody:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        dueAt:
+          type: ["string", "null"]
+          format: date-time
+        priority:
+          type: string
+          enum: [low, medium, high]
+          default: medium
+        assignedTo:
+          type: ["integer", "null"]
+      required: [title]
+
+    UpdateFamilyTaskBody:
+      type: object
+      properties:
+        title:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        completed:
+          type: ["boolean", "null"]
+        dueAt:
+          type: ["string", "null"]
+          format: date-time
+        priority:
+          type: ["string", "null"]
+        assignedTo:
+          type: ["integer", "null"]
+
+    FamilyTask:
+      type: object
+      properties:
+        id:
+          type: integer
+        familyId:
+          type: integer
+        userId:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        completed:
+          type: boolean
+        dueAt:
+          type: ["string", "null"]
+          format: date-time
+        priority:
+          type: string
+        assignedTo:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, familyId, userId, title, description, completed, dueAt, priority, assignedTo, createdAt]
+
+    # ─── Progress ────────────────────────────────────────────────────────────
+    CreateProgressBody:
+      type: object
+      properties:
+        childId:
+          type: integer
+        module:
+          type: string
+          enum: [junior, student]
+        subject:
+          type: string
+        score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        notes:
+          type: ["string", "null"]
+      required: [childId, module, subject, score]
+
+    Progress:
+      type: object
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        module:
+          type: string
+        subject:
+          type: string
+        score:
+          type: integer
+        notes:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, childId, module, subject, score, notes, createdAt]

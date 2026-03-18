@@ -23,6 +23,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 
 const ZONE_ORDER = ["Math Island", "Reading Forest", "Logic Mountain", "English City", "Science Planet"];
@@ -171,6 +172,7 @@ export function ParentDashboard() {
   const [companionPickerOpen, setCompanionPickerOpen] = useState(false);
   const { toast } = useToast();
   const { refreshUser } = useAuth();
+  const { t } = useI18n();
 
   const { data: family, refetch: refetchFamily } = useGetFamily({ query: { queryKey: getGetFamilyQueryKey(), retry: false } });
   const { data: children = [], refetch: refetchChildren } = useListChildren({ query: { queryKey: getListChildrenQueryKey(), enabled: !!family } });
@@ -414,7 +416,7 @@ export function ParentDashboard() {
               <Dialog>
                 <DialogTrigger asChild>
                   <button className="bg-primary text-white px-4 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg hover:shadow-xl transition-all">
-                    <Plus className="w-5 h-5" /> Add Child
+                    <Plus className="w-5 h-5" /> {t.buttons.addChild}
                   </button>
                 </DialogTrigger>
                 <DialogContent>

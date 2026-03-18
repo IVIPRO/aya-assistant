@@ -2,12 +2,13 @@ import { Router, type IRouter } from "express";
 import { db, familyTasksTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { CreateFamilyTaskBody, UpdateFamilyTaskBody, UpdateFamilyTaskParams, DeleteFamilyTaskParams } from "@workspace/api-zod";
-import { requireAuth, getUser } from "../lib/auth";
+import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
 
 const router: IRouter = Router();
 
 router.get("/family-tasks", requireAuth, async (req, res): Promise<void> => {
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   if (!familyId) {
     res.json([]);
     return;
@@ -23,7 +24,8 @@ router.get("/family-tasks", requireAuth, async (req, res): Promise<void> => {
 });
 
 router.post("/family-tasks", requireAuth, async (req, res): Promise<void> => {
-  const { userId, familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   if (!familyId) {
     res.status(400).json({ error: "You must be in a family to create tasks" });
     return;
@@ -66,7 +68,8 @@ router.patch("/family-tasks/:id", requireAuth, async (req, res): Promise<void> =
     return;
   }
 
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   const [existing] = await db.select().from(familyTasksTable)
     .where(and(eq(familyTasksTable.id, params.data.id), eq(familyTasksTable.familyId, familyId ?? -1)));
   if (!existing) {
@@ -103,7 +106,8 @@ router.delete("/family-tasks/:id", requireAuth, async (req, res): Promise<void> 
     return;
   }
 
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   const [existing] = await db.select().from(familyTasksTable)
     .where(and(eq(familyTasksTable.id, params.data.id), eq(familyTasksTable.familyId, familyId ?? -1)));
   if (!existing) {

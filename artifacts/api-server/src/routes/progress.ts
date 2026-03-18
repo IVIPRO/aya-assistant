@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, progressTable, childrenTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { CreateProgressBody } from "@workspace/api-zod";
-import { requireAuth, getUser } from "../lib/auth";
+import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
 
 const router: IRouter = Router();
 
@@ -18,7 +18,8 @@ router.get("/progress", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   const [child] = await db.select().from(childrenTable)
     .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
   if (!child) {
@@ -42,7 +43,8 @@ router.post("/progress", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   const [child] = await db.select().from(childrenTable)
     .where(and(eq(childrenTable.id, parsed.data.childId), eq(childrenTable.familyId, familyId ?? -1)));
   if (!child) {

@@ -2,12 +2,13 @@ import { Router, type IRouter } from "express";
 import { db, familiesTable, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { CreateFamilyBody } from "@workspace/api-zod";
-import { requireAuth, getUser } from "../lib/auth";
+import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
 
 const router: IRouter = Router();
 
 router.get("/families", requireAuth, async (req, res): Promise<void> => {
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   if (!familyId) {
     res.status(404).json({ error: "No family found" });
     return;

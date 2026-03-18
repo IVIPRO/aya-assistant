@@ -10,10 +10,18 @@ router.get("/memories", requireAuth, async (req, res): Promise<void> => {
   const { userId } = getUser(req);
   const childIdStr = req.query.childId as string | undefined;
 
+  const conditions = [eq(memoriesTable.userId, userId)];
+  if (childIdStr) {
+    const childId = parseInt(childIdStr, 10);
+    if (!isNaN(childId)) {
+      conditions.push(eq(memoriesTable.childId, childId));
+    }
+  }
+
   const memories = await db
     .select()
     .from(memoriesTable)
-    .where(eq(memoriesTable.userId, userId))
+    .where(conditions.length === 1 ? conditions[0] : and(...conditions))
     .orderBy(memoriesTable.createdAt);
 
   res.json(memories);

@@ -9,6 +9,9 @@ import {
   useListMemories,
   useCreateFamily,
   useGetFamily,
+  getGetFamilyQueryKey,
+  getListChildrenQueryKey,
+  getListProgressQueryKey,
 } from "@workspace/api-client-react";
 import type { Child } from "@workspace/api-client-react";
 import { Activity, BrainCircuit, Users, LineChart, Plus, Trash2, Pencil, Home } from "lucide-react";
@@ -29,6 +32,8 @@ const childSchema = z.object({
 
 const familySchema = z.object({
   name: z.string().min(1, "Family name is required"),
+  country: z.string().min(1, "Country is required"),
+  language: z.string().min(1, "Language is required"),
 });
 
 type ChildFormData = z.infer<typeof childSchema>;
@@ -40,12 +45,12 @@ export function ParentDashboard() {
   const { toast } = useToast();
   const { refreshUser } = useAuth();
 
-  const { data: family, refetch: refetchFamily } = useGetFamily({ query: { retry: false } });
-  const { data: children = [], refetch: refetchChildren } = useListChildren({ query: { enabled: !!family } });
+  const { data: family, refetch: refetchFamily } = useGetFamily({ query: { queryKey: getGetFamilyQueryKey(), retry: false } });
+  const { data: children = [], refetch: refetchChildren } = useListChildren({ query: { queryKey: getListChildrenQueryKey(), enabled: !!family } });
   const { data: memories = [] } = useListMemories();
   const { data: progress = [] } = useListProgress(
     { childId: children[0]?.id || 0 },
-    { query: { enabled: children.length > 0 } }
+    { query: { queryKey: getListProgressQueryKey({ childId: children[0]?.id || 0 }), enabled: children.length > 0 } }
   );
 
   const createChild = useCreateChild();
@@ -134,12 +139,39 @@ export function ParentDashboard() {
               <p className="text-muted-foreground">Set up your family profile to start adding children.</p>
             </div>
           </div>
-          <form onSubmit={familyForm.handleSubmit(onFamilySubmit)} className="flex gap-4 max-w-md">
-            <input
-              {...familyForm.register("name")}
-              placeholder="Your family name (e.g. The Smiths)"
-              className="flex-1 p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
+          <form onSubmit={familyForm.handleSubmit(onFamilySubmit)} className="space-y-4 max-w-md">
+            <div>
+              <input
+                {...familyForm.register("name")}
+                placeholder="Family name (e.g. The Smiths)"
+                className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+              {familyForm.formState.errors.name && (
+                <p className="text-destructive text-sm mt-1">{familyForm.formState.errors.name.message}</p>
+              )}
+            </div>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <input
+                  {...familyForm.register("country")}
+                  placeholder="Country (e.g. USA)"
+                  className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+                {familyForm.formState.errors.country && (
+                  <p className="text-destructive text-sm mt-1">{familyForm.formState.errors.country.message}</p>
+                )}
+              </div>
+              <div className="flex-1">
+                <input
+                  {...familyForm.register("language")}
+                  placeholder="Language (e.g. English)"
+                  className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+                {familyForm.formState.errors.language && (
+                  <p className="text-destructive text-sm mt-1">{familyForm.formState.errors.language.message}</p>
+                )}
+              </div>
+            </div>
             <button
               type="submit"
               disabled={createFamily.isPending}
@@ -148,9 +180,6 @@ export function ParentDashboard() {
               {createFamily.isPending ? "Creating..." : "Create Family"}
             </button>
           </form>
-          {familyForm.formState.errors.name && (
-            <p className="text-destructive text-sm mt-2">{familyForm.formState.errors.name.message}</p>
-          )}
         </div>
       )}
 

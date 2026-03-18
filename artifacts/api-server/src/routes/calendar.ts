@@ -2,12 +2,13 @@ import { Router, type IRouter } from "express";
 import { db, calendarEventsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { CreateCalendarEventBody, DeleteCalendarEventParams } from "@workspace/api-zod";
-import { requireAuth, getUser } from "../lib/auth";
+import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
 
 const router: IRouter = Router();
 
 router.get("/calendar", requireAuth, async (req, res): Promise<void> => {
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   if (!familyId) {
     res.json([]);
     return;
@@ -23,7 +24,8 @@ router.get("/calendar", requireAuth, async (req, res): Promise<void> => {
 });
 
 router.post("/calendar", requireAuth, async (req, res): Promise<void> => {
-  const { userId, familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   if (!familyId) {
     res.status(400).json({ error: "You must be in a family to create events" });
     return;
@@ -58,7 +60,8 @@ router.delete("/calendar/:id", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   const [existing] = await db.select().from(calendarEventsTable)
     .where(and(eq(calendarEventsTable.id, params.data.id), eq(calendarEventsTable.familyId, familyId ?? -1)));
   if (!existing) {

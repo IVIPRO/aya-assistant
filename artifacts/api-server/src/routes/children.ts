@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, childrenTable, missionsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { CreateChildBody, UpdateChildBody, GetChildParams, UpdateChildParams, DeleteChildParams } from "@workspace/api-zod";
-import { requireAuth, getUser } from "../lib/auth";
+import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
 
 const router: IRouter = Router();
 
@@ -16,7 +16,8 @@ const STARTER_MISSIONS = [
 ];
 
 router.get("/children", requireAuth, async (req, res): Promise<void> => {
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   if (!familyId) {
     res.json([]);
     return;
@@ -26,7 +27,8 @@ router.get("/children", requireAuth, async (req, res): Promise<void> => {
 });
 
 router.post("/children", requireAuth, async (req, res): Promise<void> => {
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   if (!familyId) {
     res.status(400).json({ error: "You must be in a family to add children" });
     return;
@@ -69,7 +71,8 @@ router.get("/children/:id", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   const [child] = await db.select().from(childrenTable)
     .where(and(eq(childrenTable.id, params.data.id), eq(childrenTable.familyId, familyId ?? -1)));
 
@@ -94,7 +97,8 @@ router.patch("/children/:id", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   const [existing] = await db.select().from(childrenTable)
     .where(and(eq(childrenTable.id, params.data.id), eq(childrenTable.familyId, familyId ?? -1)));
   if (!existing) {
@@ -132,7 +136,8 @@ router.delete("/children/:id", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   const [existing] = await db.select().from(childrenTable)
     .where(and(eq(childrenTable.id, params.data.id), eq(childrenTable.familyId, familyId ?? -1)));
   if (!existing) {

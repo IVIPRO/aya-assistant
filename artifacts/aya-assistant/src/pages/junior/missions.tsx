@@ -2,7 +2,7 @@ import { Layout } from "@/components/layout";
 import { Map, Star, Trophy, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { useListMissions, useCompleteMission } from "@workspace/api-client-react";
+import { useListMissions, useCompleteMission, getListMissionsQueryKey } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -12,7 +12,7 @@ export function Missions() {
 
   const { data: missions = [], refetch } = useListMissions(
     { childId: activeChildId || 0 },
-    { query: { enabled: !!activeChildId } }
+    { query: { queryKey: getListMissionsQueryKey({ childId: activeChildId || 0 }), enabled: !!activeChildId } }
   );
   const completeMutation = useCompleteMission();
 

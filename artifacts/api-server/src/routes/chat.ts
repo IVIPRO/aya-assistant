@@ -52,7 +52,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
     .values({ userId, childId: childId ?? null, module, role: "user", content })
     .returning();
 
-  let context: { grade?: number; country?: string; aiCharacter?: string; childName?: string } = {};
+  let context: { grade?: number; country?: string; aiCharacter?: string; childName?: string; language?: string } = {};
   if (module === "junior" && childId) {
     const { getFamilyIdFromDb } = await import("../lib/auth");
     const familyId = await getFamilyIdFromDb(userId);
@@ -67,6 +67,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
           country: childRecord.country,
           aiCharacter: childRecord.aiCharacter ?? undefined,
           childName: childRecord.name,
+          language: childRecord.language ?? undefined,
         };
       }
     }

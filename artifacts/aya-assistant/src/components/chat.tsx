@@ -1,8 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useListChatMessages, useSendChatMessage, ListChatMessagesModule } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
-import { Send, Mic, Loader2, Sparkles } from "lucide-react";
+import { Send, Mic, Loader2, Sparkles, Camera, X, ImageIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "./layout";
 import { useToast } from "@/hooks/use-toast";
@@ -42,6 +42,43 @@ const CHARACTER_TONES: Record<string, string> = {
   owl: "calm",
 };
 
+const HOMEWORK_LABELS = {
+  en: {
+    cameraBtn: "Take photo of homework",
+    uploadBtn: "Upload photo",
+    analyzing: "AYA is analyzing your homework…",
+    userMsg: "📷 Homework photo",
+    error: "Could not analyze the image. Please try again.",
+  },
+  bg: {
+    cameraBtn: "Снимай домашното",
+    uploadBtn: "Качи снимка",
+    analyzing: "AYA анализира домашното…",
+    userMsg: "📷 Снимка на домашното",
+    error: "Неуспешен анализ на снимката. Опитай пак.",
+  },
+  es: {
+    cameraBtn: "Tomar foto de tarea",
+    uploadBtn: "Subir foto",
+    analyzing: "AYA está analizando tu tarea…",
+    userMsg: "📷 Foto de tarea",
+    error: "No se pudo analizar la imagen. Inténtalo de nuevo.",
+  },
+};
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(",")[1] ?? "";
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export function Chat({
   module,
   themeColor,
@@ -51,10 +88,14 @@ export function Chat({
   subjectContext,
 }: ChatProps) {
   const { activeChildId } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { toast } = useToast();
   const [input, setInput] = useState("");
+  const [homeworkPreview, setHomeworkPreview] = useState<string | null>(null);
+  const [homeworkFile, setHomeworkFile] = useState<File | null>(null);
+  const [analyzingHomework, setAnalyzingHomework] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: messages = [], isLoading, refetch } = useListChatMessages({
     module,
@@ -69,7 +110,7 @@ export function Chat({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, sendMutation.isPending]);
+  }, [messages, sendMutation.isPending, analyzingHomework]);
 
   const doSend = (content: string, onError?: () => void) => {
     if (!content.trim() || sendMutation.isPending) return;
@@ -113,6 +154,87 @@ export function Chat({
     });
   };
 
+  /* ── Homework vision flow ──────────────────────────────────────── */
+  const hwLang: "en" | "bg" | "es" = lang === "bg" ? "bg" : lang === "es" ? "es" : "en";
+  const hwLabels = HOMEWORK_LABELS[hwLang];
+
+  const handleFileSelect = useCallback(async (file: File) => {
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Please select an image file", variant: "destructive" });
+      return;
+    }
+
+    const previewUrl = URL.createObjectURL(file);
+    setHomeworkPreview(previewUrl);
+    setHomeworkFile(file);
+  }, [toast]);
+
+  const handleCameraClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const cancelHomework = () => {
+    setHomeworkPreview(null);
+    setHomeworkFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const sendHomework = useCallback(async () => {
+    if (!homeworkFile || analyzingHomework) return;
+
+    setAnalyzingHomework(true);
+    const userLabel = hwLabels.userMsg;
+
+    try {
+      const base64 = await fileToBase64(homeworkFile);
+      const mimeType = homeworkFile.type || "image/jpeg";
+
+      /* Insert user message immediately via chat API */
+      sendMutation.mutate({
+        data: { module, content: userLabel, childId: activeChildId }
+      });
+
+      /* Call vision API */
+      const token = localStorage.getItem("aya_token");
+      const response = await fetch("/api/vision/homework", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          childId: activeChildId,
+          image: base64,
+          mimeType,
+          lang: hwLang,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Vision API error");
+
+      const { explanation } = await response.json() as { explanation: string; problemText: string };
+
+      /* Insert AYA's response as an assistant message via chat API */
+      await new Promise<void>((resolve) => {
+        sendMutation.mutate(
+          { data: { module, content: explanation, childId: activeChildId } },
+          {
+            onSettled: () => resolve(),
+          }
+        );
+      });
+
+      await refetch();
+    } catch {
+      toast({ title: hwLabels.error, variant: "destructive" });
+    } finally {
+      setAnalyzingHomework(false);
+      setHomeworkPreview(null);
+      setHomeworkFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }, [homeworkFile, analyzingHomework, hwLang, hwLabels, module, activeChildId, sendMutation, refetch, toast]);
+
   const colorMap = {
     primary: "bg-primary text-primary-foreground",
     junior: "bg-junior text-junior-foreground",
@@ -146,6 +268,12 @@ export function Chat({
               <span className="text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2 py-0.5 rounded-full border border-green-200 flex items-center gap-1">
                 <Sparkles className="w-2.5 h-2.5" />
                 Montessori
+              </span>
+            )}
+            {isJunior && (
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200 flex items-center gap-1">
+                <Camera className="w-2.5 h-2.5" />
+                Homework Vision
               </span>
             )}
           </div>
@@ -216,7 +344,7 @@ export function Chat({
               ))}
             </AnimatePresence>
 
-            {sendMutation.isPending && (
+            {(sendMutation.isPending || analyzingHomework) && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -226,10 +354,19 @@ export function Chat({
                   <div className={cn("w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm opacity-70 text-sm", bubbleColor)}>
                     {charEmoji ?? "✨"}
                   </div>
-                  <div className="bg-muted/50 rounded-2xl rounded-tl-none px-5 py-3 flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-2 h-2 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-2 h-2 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <div className="bg-muted/50 rounded-2xl rounded-tl-none px-5 py-3 flex flex-col gap-1">
+                    {analyzingHomework ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>{hwLabels.analyzing}</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <span className="w-2 h-2 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <span className="w-2 h-2 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "300ms" }} />
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>
@@ -239,7 +376,7 @@ export function Chat({
         <div ref={messagesEndRef} />
       </div>
 
-      {isJunior && suggestedPrompts && suggestedPrompts.length > 0 && (
+      {isJunior && suggestedPrompts && suggestedPrompts.length > 0 && !homeworkPreview && (
         <div className="px-4 py-2 border-t border-border/30 bg-muted/10 flex gap-2 overflow-x-auto hide-scrollbar">
           {suggestedPrompts.map((prompt) => (
             <button
@@ -254,7 +391,71 @@ export function Chat({
         </div>
       )}
 
+      {/* Homework image preview */}
+      <AnimatePresence>
+        {homeworkPreview && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="px-4 py-3 border-t border-border/30 bg-amber-50"
+          >
+            <div className="flex items-start gap-3">
+              <div className="relative flex-shrink-0">
+                <img
+                  src={homeworkPreview}
+                  alt="Homework preview"
+                  className="w-20 h-20 object-cover rounded-xl border-2 border-amber-300 shadow-sm"
+                />
+                <button
+                  onClick={cancelHomework}
+                  className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <Camera className="w-4 h-4 text-amber-600" />
+                  <span className="text-sm font-semibold text-amber-800">
+                    {hwLang === "bg" ? "Домашно задание" : hwLang === "es" ? "Tarea" : "Homework"}
+                  </span>
+                </div>
+                <p className="text-xs text-amber-700 mb-2">
+                  {hwLang === "bg" ? "Готов? AYA ще обясни задачата стъпка по стъпка." : hwLang === "es" ? "¿Listo? AYA explicará el problema paso a paso." : "Ready? AYA will explain the problem step by step."}
+                </p>
+                <button
+                  onClick={sendHomework}
+                  disabled={analyzingHomework}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm transition-all disabled:opacity-60 shadow-sm"
+                >
+                  {analyzingHomework ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Sparkles className="w-4 h-4" />
+                  )}
+                  {hwLang === "bg" ? "Анализирай" : hwLang === "es" ? "Analizar" : "Analyze"}
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="p-4 bg-card border-t border-border/50">
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFileSelect(file);
+          }}
+        />
+
         <form onSubmit={handleSend} className="flex items-end gap-2 bg-muted/30 p-2 rounded-3xl border border-border/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 transition-all">
           <button
             type="button"
@@ -263,6 +464,25 @@ export function Chat({
           >
             <Mic className="w-5 h-5" />
           </button>
+
+          {/* Camera button — junior only */}
+          {isJunior && (
+            <button
+              type="button"
+              onClick={handleCameraClick}
+              disabled={analyzingHomework}
+              title={hwLabels.cameraBtn}
+              className={cn(
+                "p-3 transition-colors rounded-full flex-shrink-0",
+                homeworkPreview
+                  ? "text-amber-500 bg-amber-100 hover:bg-amber-200"
+                  : "text-muted-foreground hover:text-amber-500 hover:bg-amber-50",
+                "disabled:opacity-40"
+              )}
+            >
+              <Camera className="w-5 h-5" />
+            </button>
+          )}
 
           <textarea
             value={input}

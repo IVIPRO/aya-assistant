@@ -202,6 +202,19 @@ export function ParentDashboard() {
     staleTime: 30 * 1000,
   });
 
+  const { data: homeworkToday } = useQuery<{ count: number }>({
+    queryKey: ["homework-today", progressChildId],
+    queryFn: async () => {
+      if (!progressChildId) return { count: 0 };
+      const res = await fetch(`/api/vision/homework/today?childId=${progressChildId}`);
+      if (!res.ok) return { count: 0 };
+      return res.json();
+    },
+    enabled: progressChildId > 0,
+    staleTime: 60 * 1000,
+    refetchInterval: 60 * 1000,
+  });
+
   const createChild = useCreateChild();
   const deleteChild = useDeleteChild();
   const updateChild = useUpdateChild();
@@ -589,7 +602,7 @@ export function ParentDashboard() {
           </div>
 
           {progressChild && (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
                 <div className="text-3xl font-bold text-primary">{getLevel(progressChild.xp)}</div>
                 <div className="text-sm text-muted-foreground mt-1">Level</div>
@@ -610,6 +623,11 @@ export function ParentDashboard() {
                 <div className="text-2xl font-bold">{getCurrentZone(progressChild.xp).emoji}</div>
                 <div className="text-xs font-bold text-foreground mt-0.5 leading-tight">{getCurrentZone(progressChild.xp).name}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">Current Zone</div>
+              </div>
+              <div className={`p-4 rounded-2xl border shadow-sm text-center ${(homeworkToday?.count ?? 0) > 0 ? "bg-amber-50 border-amber-200" : "bg-card"}`}>
+                <div className="text-3xl font-bold text-amber-500">{homeworkToday?.count ?? 0}</div>
+                <div className="text-xs font-semibold text-amber-700 mt-0.5">📷 Homework</div>
+                <div className="text-xs text-muted-foreground">solved today</div>
               </div>
             </div>
           )}

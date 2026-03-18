@@ -11,6 +11,7 @@ import familyTasksRouter from "./familyTasks";
 import progressRouter from "./progress";
 import lessonsRouter from "./lessons";
 import learningRouter from "./learning";
+import visionRouter from "./vision";
 
 const router: IRouter = Router();
 
@@ -26,5 +27,6 @@ router.use(familyTasksRouter);
 router.use(progressRouter);
 router.use(lessonsRouter);
 router.use(learningRouter);
+router.use(visionRouter);
 
 export default router;

@@ -1,0 +1,193 @@
+Continue developing AYA Junior by implementing the full AI Companion System for each child profile.
+
+Goal:
+Turn AYA Junior into a real child-facing AI learning companion experience, where each child has a selected AYA companion that guides learning with a Montessori-inspired tone.
+
+Do not redesign the full application.
+Extend the current working architecture in a clean, modular and stable way.
+
+====================================
+1. Companion Selection for Child Profiles
+
+Add companion selection for each child profile.
+
+Available companions:
+- AYA Panda
+- AYA Fox
+- AYA Robot
+- AYA Owl
+
+Each companion must have:
+- companion_id
+- display_name
+- avatar placeholder
+- short description
+- tone style
+
+Example tone styles:
+- gentle
+- playful
+- encouraging
+- calm
+
+Store the selected companion for each child profile and make it editable from the Parent area.
+
+====================================
+2. Parent Area Upgrade
+
+In Parent > Child Profiles, improve each child card to show:
+- selected companion
+- companion avatar placeholder
+- short companion description
+- edit/change companion button
+
+If no companion is selected, clearly show:
+“No companion selected yet”
+
+Add a simple companion selection flow for the parent:
+- choose companion
+- save companion
+- confirm selection
+
+====================================
+3. Junior Welcome Screen Personalization
+
+Update the Junior welcome experience so it uses the selected companion.
+
+Show:
+- child name
+- selected companion name
+- companion avatar
+- companion greeting
+- class / grade
+- country
+- language
+- level
+- XP
+- stars
+- badges
+
+Example greeting:
+“Welcome back, Magdalena! AYA Panda is ready for today’s Montessori learning adventure.”
+
+Buttons:
+- Enter Learning World
+- Chat with AYA
+- Change Companion
+
+====================================
+4. Montessori Companion Tone Layer
+
+Make the selected companion affect the tone of the Junior experience.
+
+For all Junior texts and guidance, use Montessori-inspired teaching principles:
+- encourage discovery
+- ask guiding questions
+- break problems into small steps
+- praise effort and curiosity
+- be emotionally safe
+- use simple child-friendly language
+
+Examples:
+AYA Panda → gentle and encouraging
+AYA Fox → playful and curious
+AYA Robot → structured and precise
+AYA Owl → calm and thoughtful
+
+Represent this tone in:
+- welcome screen
+- mission intro
+- suggested prompts
+- AI chat opening messages
+
+====================================
+5. Junior Chat Upgrade
+
+Improve AYA Junior chat so it feels like a child-safe AI teacher conversation.
+
+Add:
+- selected companion name
+- selected companion avatar
+- Montessori-style greeting
+- child-safe visual style
+- suggested prompts for children
+
+Suggested prompts:
+- Help me with math
+- Let’s read together
+- Explain step by step
+- Ask me an easy question
+- Practice English
+- Give me a fun challenge
+
+The chat should feel warm, friendly and safe.
+
+====================================
+6. Mission Intro Companion Guidance
+
+When opening a mission, add a small mission intro section that includes:
+- mission title
+- subject
+- difficulty
+- XP reward
+- stars reward
+- companion guidance message
+
+Example:
+“AYA Panda says: Let’s solve this together slowly and carefully.”
+
+This should appear before or above the mission content.
+
+====================================
+7. Parent Visibility for Companion Activity
+
+In the Parent area, add visibility for:
+- selected companion
+- child’s current zone
+- recent mission activity
+- level
+- XP
+- stars
+- badges
+
+Keep the design clean and easy to scan.
+
+====================================
+8. Data Model Requirements
+
+Extend the existing child profile data minimally to support:
+- selected_companion
+- companion_tone
+- companion_description
+
+Do not overcomplicate the schema.
+Keep it simple and MVP-focused.
+
+====================================
+9. Technical Requirements
+
+- no TypeScript errors
+- preserve existing routing
+- preserve existing child profile and world map logic
+- modular reusable components
+- no unnecessary full refactor
+- stable preview behavior
+
+====================================
+10. Scope Limits
+
+This prompt is for:
+- companion selection
+- companion-based Junior personalization
+- Montessori tone layer
+- child-safe Junior chat polish
+- mission intro guidance
+
+Do NOT implement:
+- real voice
+- video avatar
+- advanced long-term memory
+- massive curriculum generation
+- complex backend redesign
+
+Build only the professional MVP foundation for AI companions.

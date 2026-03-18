@@ -16,7 +16,7 @@ import {
   getListMissionsQueryKey,
 } from "@workspace/api-client-react";
 import type { Child, Badge } from "@workspace/api-client-react";
-import { Activity, BrainCircuit, Users, LineChart, Plus, Trash2, Pencil, Home, Clock, Award, TrendingUp, TrendingDown } from "lucide-react";
+import { Activity, BrainCircuit, Users, LineChart, Plus, Trash2, Pencil, Home, Clock, Award, TrendingUp, TrendingDown, Sparkles } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -57,8 +57,23 @@ const familySchema = z.object({
 
 type ChildFormData = z.infer<typeof childSchema>;
 
+const COMPANION_CHARS = [
+  { id: "panda", emoji: "🐼", name: "AYA Panda", desc: "Patient and gentle", tone: "gentle", color: "bg-green-100 border-green-300", accentColor: "text-green-700" },
+  { id: "robot", emoji: "🤖", name: "AYA Robot", desc: "Logical and precise", tone: "encouraging", color: "bg-blue-100 border-blue-300", accentColor: "text-blue-700" },
+  { id: "fox",   emoji: "🦊", name: "AYA Fox",   desc: "Creative and playful", tone: "playful",    color: "bg-orange-100 border-orange-300", accentColor: "text-orange-700" },
+  { id: "owl",   emoji: "🦉", name: "AYA Owl",   desc: "Wise and thoughtful", tone: "calm",       color: "bg-purple-100 border-purple-300", accentColor: "text-purple-700" },
+];
+
 function getLevel(xp: number): number {
   return Math.floor(xp / 100) + 1;
+}
+
+function getCurrentZone(xp: number): { name: string; emoji: string } {
+  if (xp >= 250) return { name: "Science Planet", emoji: "🌍" };
+  if (xp >= 150) return { name: "English City", emoji: "🏙️" };
+  if (xp >= 80) return { name: "Logic Mountain", emoji: "⛰️" };
+  if (xp >= 30) return { name: "Reading Forest", emoji: "🌲" };
+  return { name: "Math Island", emoji: "🏝️" };
 }
 
 function getMissionZone(mission: { zone?: string | null; subject: string }): string {
@@ -76,6 +91,8 @@ export function ParentDashboard() {
   const [editingChild, setEditingChild] = useState<Child | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
+  const [companionPickerChild, setCompanionPickerChild] = useState<Child | null>(null);
+  const [companionPickerOpen, setCompanionPickerOpen] = useState(false);
   const { toast } = useToast();
   const { refreshUser } = useAuth();
 
@@ -143,6 +160,24 @@ export function ParentDashboard() {
     setEditingChild(child);
     editForm.reset({ name: child.name, grade: child.grade, language: child.language, country: child.country });
     setEditDialogOpen(true);
+  };
+
+  const openCompanionPicker = (child: Child) => {
+    setCompanionPickerChild(child);
+    setCompanionPickerOpen(true);
+  };
+
+  const handleSelectCompanion = async (charId: string) => {
+    if (!companionPickerChild) return;
+    try {
+      await updateChild.mutateAsync({ id: companionPickerChild.id, data: { aiCharacter: charId as "panda" | "robot" | "fox" | "owl" } });
+      toast({ title: "Companion updated!", description: `${COMPANION_CHARS.find(c => c.id === charId)?.name} is now ${companionPickerChild.name}'s companion.` });
+      refetchChildren();
+      setCompanionPickerOpen(false);
+      setCompanionPickerChild(null);
+    } catch {
+      toast({ title: "Error updating companion", variant: "destructive" });
+    }
   };
 
   const onFamilySubmit = async (data: z.infer<typeof familySchema>) => {
@@ -358,17 +393,30 @@ export function ParentDashboard() {
                   <h3 className="text-xl font-bold">{child.name}</h3>
                   <p className="text-muted-foreground mb-2">Grade {child.grade} · {child.country}</p>
                   {child.aiCharacter && COMPANION_DATA[child.aiCharacter] ? (
-                    <div className={`flex items-center gap-3 mb-3 px-3 py-2 rounded-xl border ${COMPANION_DATA[child.aiCharacter].color}`}>
+                    <div className={`flex items-center gap-2 mb-3 px-3 py-2 rounded-xl border ${COMPANION_DATA[child.aiCharacter].color}`}>
                       <span className="text-2xl">{COMPANION_DATA[child.aiCharacter].emoji}</span>
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <div className="font-bold text-sm">{COMPANION_DATA[child.aiCharacter].name}</div>
                         <div className={`text-[10px] font-semibold uppercase tracking-wider ${COMPANION_DATA[child.aiCharacter].accentColor}`}>
                           {COMPANION_DATA[child.aiCharacter].tone} style · AI Companion
                         </div>
                       </div>
+                      <button
+                        onClick={() => openCompanionPicker(child)}
+                        className="flex-shrink-0 p-1.5 rounded-lg hover:bg-white/60 transition-colors"
+                        title="Change companion"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-muted-foreground" />
+                      </button>
                     </div>
                   ) : (
-                    <p className="text-xs text-muted-foreground mb-3 italic">No companion selected yet</p>
+                    <button
+                      onClick={() => openCompanionPicker(child)}
+                      className="flex items-center gap-2 mb-3 px-3 py-2 rounded-xl border border-dashed border-muted-foreground/30 hover:border-primary/40 hover:bg-primary/5 transition-all w-full text-left"
+                    >
+                      <Sparkles className="w-4 h-4 text-muted-foreground/50" />
+                      <span className="text-xs text-muted-foreground italic">No companion selected yet — tap to choose</span>
+                    </button>
                   )}
                   <div className="flex gap-4 mb-3">
                     <div className="flex flex-col">
@@ -436,25 +484,27 @@ export function ParentDashboard() {
           </div>
 
           {progressChild && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
                 <div className="text-3xl font-bold text-primary">{getLevel(progressChild.xp)}</div>
-                <div className="text-sm text-muted-foreground mt-1">Current Level</div>
+                <div className="text-sm text-muted-foreground mt-1">Level</div>
               </div>
               <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
-                <div className="text-3xl font-bold text-orange-500">{completedMissions.length}</div>
-                <div className="text-sm text-muted-foreground mt-1">Missions Done</div>
+                <div className="text-3xl font-bold text-orange-500">{progressChild.xp}</div>
+                <div className="text-sm text-muted-foreground mt-1">Total XP</div>
               </div>
               <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
                 <div className="text-3xl font-bold text-yellow-500">{progressChild.stars}</div>
-                <div className="text-sm text-muted-foreground mt-1">Stars Earned</div>
+                <div className="text-sm text-muted-foreground mt-1">Stars</div>
               </div>
-              <div className="bg-card p-4 rounded-2xl border shadow-sm text-center flex flex-col items-center">
-                <div className="flex items-center gap-1">
-                  <Clock className="w-5 h-5 text-blue-400" />
-                  <span className="text-2xl font-bold text-blue-500">{totalLearningMinutes}</span>
-                </div>
-                <div className="text-sm text-muted-foreground mt-1">Est. Minutes</div>
+              <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
+                <div className="text-3xl font-bold text-green-500">{completedMissions.length}</div>
+                <div className="text-sm text-muted-foreground mt-1">Missions Done</div>
+              </div>
+              <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
+                <div className="text-2xl font-bold">{getCurrentZone(progressChild.xp).emoji}</div>
+                <div className="text-xs font-bold text-foreground mt-0.5 leading-tight">{getCurrentZone(progressChild.xp).name}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">Current Zone</div>
               </div>
             </div>
           )}
@@ -658,6 +708,46 @@ export function ParentDashboard() {
           </div>
         </div>
       )}
+
+      <Dialog open={companionPickerOpen} onOpenChange={setCompanionPickerOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Choose a Learning Companion</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground -mt-2 mb-4">
+            {companionPickerChild ? `Select a companion for ${companionPickerChild.name}` : "Select a companion"}
+          </p>
+          <div className="grid grid-cols-2 gap-3">
+            {COMPANION_CHARS.map(char => {
+              const isSelected = companionPickerChild?.aiCharacter === char.id;
+              return (
+                <button
+                  key={char.id}
+                  onClick={() => handleSelectCompanion(char.id)}
+                  disabled={updateChild.isPending}
+                  className={`p-4 rounded-2xl border-2 transition-all hover:scale-[1.02] hover:shadow-md text-left ${
+                    isSelected ? 'ring-2 ring-primary/50 border-primary shadow-md' : 'border-transparent hover:border-primary/30'
+                  } ${char.color}`}
+                >
+                  <div className="text-4xl mb-2">{char.emoji}</div>
+                  <div className="font-bold text-sm">{char.name}</div>
+                  <div className={`text-[10px] font-semibold uppercase tracking-wider mb-1 ${char.accentColor}`}>{char.tone} tone</div>
+                  <div className="text-xs text-muted-foreground leading-relaxed">{char.desc}</div>
+                  {isSelected && (
+                    <div className="mt-2 text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full inline-block">✓ Current</div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <button
+            onClick={() => setCompanionPickerOpen(false)}
+            className="mt-2 w-full py-2 text-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
+          >
+            Cancel
+          </button>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>

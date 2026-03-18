@@ -2,13 +2,13 @@ import { Layout } from "@/components/layout";
 import { Link } from "wouter";
 import { Smile, BookOpen, CalendarHeart, HeartHandshake, ArrowRight, UserPlus } from "lucide-react";
 import { motion } from "framer-motion";
-import { useGetFamily, useListChildren } from "@workspace/api-client-react";
+import { useGetFamily, useListChildren, getGetFamilyQueryKey, getListChildrenQueryKey } from "@workspace/api-client-react";
 import { useAuth as useLocalAuth } from "@/hooks/use-auth";
 
 export function Dashboard() {
   const { user } = useLocalAuth();
-  const { data: family } = useGetFamily({ query: { retry: false } });
-  const { data: children = [] } = useListChildren({ query: { enabled: !!family } });
+  const { data: family } = useGetFamily({ query: { queryKey: getGetFamilyQueryKey(), retry: false } });
+  const { data: children = [] } = useListChildren({ query: { queryKey: getListChildrenQueryKey(), enabled: !!family } });
 
   const modules = [
     {

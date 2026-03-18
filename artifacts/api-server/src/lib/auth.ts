@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { db, usersTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
 
 declare module "express" {
   interface Request {
@@ -7,10 +9,11 @@ declare module "express" {
   }
 }
 
-const JWT_SECRET = process.env.JWT_SECRET;
-if (!JWT_SECRET) {
+const _jwtSecret = process.env.JWT_SECRET;
+if (!_jwtSecret) {
   throw new Error("JWT_SECRET environment variable is required");
 }
+const JWT_SECRET: string = _jwtSecret;
 
 export interface AuthPayload {
   userId: number;
@@ -52,4 +55,9 @@ export function getUser(req: Request): AuthPayload {
     throw new Error("requireAuth middleware must be called before getUser");
   }
   return req.authUser;
+}
+
+export async function getFamilyIdFromDb(userId: number): Promise<number | null> {
+  const [user] = await db.select({ familyId: usersTable.familyId }).from(usersTable).where(eq(usersTable.id, userId));
+  return user?.familyId ?? null;
 }

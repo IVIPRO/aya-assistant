@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, missionsTable, childrenTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { CompleteMissionParams } from "@workspace/api-zod";
-import { requireAuth, getUser } from "../lib/auth";
+import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
 
 const router: IRouter = Router();
 
@@ -18,7 +18,8 @@ router.get("/missions", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   const [child] = await db.select().from(childrenTable)
     .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
   if (!child) {
@@ -49,7 +50,8 @@ router.post("/missions/:id/complete", requireAuth, async (req, res): Promise<voi
     return;
   }
 
-  const { familyId } = getUser(req);
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
   const [child] = await db.select().from(childrenTable)
     .where(and(eq(childrenTable.id, mission.childId), eq(childrenTable.familyId, familyId ?? -1)));
   if (!child) {

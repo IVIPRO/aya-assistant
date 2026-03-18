@@ -50,6 +50,11 @@ router.post("/missions/:id/complete", requireAuth, async (req, res): Promise<voi
     return;
   }
 
+  if (mission.completed) {
+    res.status(409).json({ error: "Mission already completed" });
+    return;
+  }
+
   const { userId } = getUser(req);
   const familyId = await getFamilyIdFromDb(userId);
   const [child] = await db.select().from(childrenTable)
@@ -62,7 +67,7 @@ router.post("/missions/:id/complete", requireAuth, async (req, res): Promise<voi
   const [updated] = await db
     .update(missionsTable)
     .set({ completed: true, completedAt: new Date() })
-    .where(eq(missionsTable.id, params.data.id))
+    .where(and(eq(missionsTable.id, params.data.id), eq(missionsTable.completed, false)))
     .returning();
 
   await db

@@ -20,10 +20,11 @@ export function Login() {
         data: { email, password }
       });
       login(res);
-    } catch (err: any) {
+    } catch (err) {
+      const e = err as { data?: { error?: string }; message?: string };
       toast({
         title: "Login failed",
-        description: err?.data?.error || err?.message || "Invalid credentials",
+        description: e?.data?.error || e?.message || "Invalid credentials",
         variant: "destructive"
       });
     }

@@ -9,6 +9,15 @@ declare module "express" {
   }
 }
 
+declare module "express-session" {
+  interface SessionData {
+    userId?: number;
+    email?: string;
+    role?: string;
+    familyId?: number | null;
+  }
+}
+
 const _jwtSecret = process.env.JWT_SECRET;
 if (!_jwtSecret) {
   throw new Error("JWT_SECRET environment variable is required");
@@ -34,7 +43,35 @@ export function verifyToken(token: string): AuthPayload | null {
   }
 }
 
+export function setSession(req: Request, payload: AuthPayload): void {
+  req.session.userId = payload.userId;
+  req.session.email = payload.email;
+  req.session.role = payload.role;
+  req.session.familyId = payload.familyId;
+}
+
+export function clearSession(req: Request): Promise<void> {
+  return new Promise((resolve, reject) => {
+    req.session.destroy((err) => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+}
+
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
+  const sessionUserId = req.session.userId;
+  if (sessionUserId) {
+    req.authUser = {
+      userId: sessionUserId,
+      email: req.session.email ?? "",
+      role: req.session.role ?? "parent",
+      familyId: req.session.familyId ?? null,
+    };
+    next();
+    return;
+  }
+
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     res.status(401).json({ error: "Not authenticated" });

@@ -1,9 +1,9 @@
 import { Router, type IRouter } from "express";
 import bcryptjs from "bcryptjs";
-import { db, usersTable, familiesTable } from "@workspace/db";
+import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { RegisterBody, LoginBody } from "@workspace/api-zod";
-import { signToken, requireAuth, getUser } from "../lib/auth";
+import { signToken, requireAuth, getUser, setSession, clearSession } from "../lib/auth";
 
 const router: IRouter = Router();
 
@@ -29,7 +29,10 @@ router.post("/auth/register", async (req, res): Promise<void> => {
     .values({ email, passwordHash, name, role: role ?? "parent", familyId: null })
     .returning();
 
-  const token = signToken({ userId: user.id, email: user.email, role: user.role, familyId: user.familyId });
+  const payload = { userId: user.id, email: user.email, role: user.role, familyId: user.familyId };
+  setSession(req, payload);
+  const token = signToken(payload);
+
   res.status(201).json({
     user: { id: user.id, email: user.email, name: user.name, role: user.role, familyId: user.familyId, createdAt: user.createdAt },
     token,
@@ -57,17 +60,25 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
-  const freshUser = await db.select().from(usersTable).where(eq(usersTable.id, user.id));
-  const u = freshUser[0];
+  const [freshUser] = await db.select().from(usersTable).where(eq(usersTable.id, user.id));
+  const u = freshUser;
 
-  const token = signToken({ userId: u.id, email: u.email, role: u.role, familyId: u.familyId });
+  const payload = { userId: u.id, email: u.email, role: u.role, familyId: u.familyId };
+  setSession(req, payload);
+  const token = signToken(payload);
+
   res.json({
     user: { id: u.id, email: u.email, name: u.name, role: u.role, familyId: u.familyId, createdAt: u.createdAt },
     token,
   });
 });
 
-router.post("/auth/logout", (_req, res): void => {
+router.post("/auth/logout", async (req, res): Promise<void> => {
+  try {
+    await clearSession(req);
+  } catch {
+    /* session may not exist */
+  }
   res.json({ message: "Logged out" });
 });
 

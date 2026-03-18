@@ -22,6 +22,8 @@ import type {
   ChatMessage,
   ChatMessagePair,
   Child,
+  CompleteMissionBody,
+  CompleteMissionResponse,
   CreateCalendarEventBody,
   CreateChildBody,
   CreateFamilyBody,
@@ -1480,11 +1482,14 @@ export const getCompleteMissionUrl = (id: number) => {
 
 export const completeMission = async (
   id: number,
+  completeMissionBody?: CompleteMissionBody,
   options?: RequestInit,
-): Promise<Mission> => {
-  return customFetch<Mission>(getCompleteMissionUrl(id), {
+): Promise<CompleteMissionResponse> => {
+  return customFetch<CompleteMissionResponse>(getCompleteMissionUrl(id), {
     ...options,
     method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(completeMissionBody),
   });
 };
 
@@ -1495,14 +1500,14 @@ export const getCompleteMissionMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof completeMission>>,
     TError,
-    { id: number },
+    { id: number; data: BodyType<CompleteMissionBody> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof completeMission>>,
   TError,
-  { id: number },
+  { id: number; data: BodyType<CompleteMissionBody> },
   TContext
 > => {
   const mutationKey = ["completeMission"];
@@ -1516,11 +1521,11 @@ export const getCompleteMissionMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof completeMission>>,
-    { id: number }
+    { id: number; data: BodyType<CompleteMissionBody> }
   > = (props) => {
-    const { id } = props ?? {};
+    const { id, data } = props ?? {};
 
-    return completeMission(id, requestOptions);
+    return completeMission(id, data, requestOptions);
   };
 
   return { mutationFn, ...mutationOptions };
@@ -1529,7 +1534,7 @@ export const getCompleteMissionMutationOptions = <
 export type CompleteMissionMutationResult = NonNullable<
   Awaited<ReturnType<typeof completeMission>>
 >;
-
+export type CompleteMissionMutationBody = BodyType<CompleteMissionBody>;
 export type CompleteMissionMutationError = ErrorType<ErrorResponse>;
 
 /**
@@ -1542,14 +1547,14 @@ export const useCompleteMission = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof completeMission>>,
     TError,
-    { id: number },
+    { id: number; data: BodyType<CompleteMissionBody> },
     TContext
   >;
   request?: SecondParameter<typeof customFetch>;
 }): UseMutationResult<
   Awaited<ReturnType<typeof completeMission>>,
   TError,
-  { id: number },
+  { id: number; data: BodyType<CompleteMissionBody> },
   TContext
 > => {
   return useMutation(getCompleteMissionMutationOptions(options));

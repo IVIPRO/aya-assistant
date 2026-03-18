@@ -230,6 +230,51 @@ export interface Mission {
   createdAt: string;
 }
 
+export interface CompleteMissionBody {
+  /**
+   * How long the child spent on the mission in milliseconds
+   * @nullable
+   */
+  responseTimeMs?: number | null;
+  /**
+   * Whether the child answered correctly (for adaptive difficulty)
+   * @nullable
+   */
+  correct?: boolean | null;
+  /**
+   * Child's self-rating of difficulty (1=easy, 2=ok, 3=hard)
+   * @nullable
+   */
+  selfRating?: number | null;
+}
+
+export type CompleteMissionResponseDifficulty =
+  (typeof CompleteMissionResponseDifficulty)[keyof typeof CompleteMissionResponseDifficulty];
+
+export const CompleteMissionResponseDifficulty = {
+  easy: "easy",
+  medium: "medium",
+  hard: "hard",
+} as const;
+
+export interface CompleteMissionResponse {
+  id: number;
+  childId: number;
+  title: string;
+  description: string;
+  subject: string;
+  /** @nullable */
+  zone?: string | null;
+  difficulty?: CompleteMissionResponseDifficulty;
+  xpReward: number;
+  starReward: number;
+  completed: boolean;
+  /** @nullable */
+  completedAt: string | null;
+  createdAt: string;
+  newBadges: Badge[];
+}
+
 export interface CreateCalendarEventBody {
   title: string;
   /** @nullable */

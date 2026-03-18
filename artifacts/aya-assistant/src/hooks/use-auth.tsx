@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useGetMe, User, AuthResponse, getGetMeQueryKey } from "@workspace/api-client-react";
+import { useGetMe, User, AuthResponse, getGetMeQueryKey, logout as apiLogout } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 
@@ -51,9 +51,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (data: AuthResponse) => {
     localStorage.setItem("aya_token", data.token);
     setToken(data.token);
+    setLocation("/dashboard");
   };
 
   const logout = () => {
+    apiLogout().catch(() => { /* ignore server errors on logout */ });
     localStorage.removeItem("aya_token");
     localStorage.removeItem("aya_active_child");
     setToken(null);

@@ -42,15 +42,18 @@ export function ParentDashboard() {
   const [tab, setTab] = useState("children");
   const [editingChild, setEditingChild] = useState<Child | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [selectedChildId, setSelectedChildId] = useState<number | null>(null);
   const { toast } = useToast();
   const { refreshUser } = useAuth();
 
   const { data: family, refetch: refetchFamily } = useGetFamily({ query: { queryKey: getGetFamilyQueryKey(), retry: false } });
   const { data: children = [], refetch: refetchChildren } = useListChildren({ query: { queryKey: getListChildrenQueryKey(), enabled: !!family } });
   const { data: memories = [] } = useListMemories();
+
+  const progressChildId = selectedChildId ?? children[0]?.id ?? 0;
   const { data: progress = [] } = useListProgress(
-    { childId: children[0]?.id || 0 },
-    { query: { queryKey: getListProgressQueryKey({ childId: children[0]?.id || 0 }), enabled: children.length > 0 } }
+    { childId: progressChildId },
+    { query: { queryKey: getListProgressQueryKey({ childId: progressChildId }), enabled: children.length > 0 && progressChildId > 0 } }
   );
 
   const createChild = useCreateChild();
@@ -284,7 +287,23 @@ export function ParentDashboard() {
 
       {tab === "progress" && (
         <div className="bg-card p-6 md:p-8 rounded-[2rem] shadow-lg border border-border/50">
-          <h2 className="text-2xl font-bold mb-6">Subject Performance</h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold">Subject Performance</h2>
+            {children.length > 1 && (
+              <select
+                value={progressChildId}
+                onChange={(e) => setSelectedChildId(Number(e.target.value))}
+                className="p-2 rounded-xl border border-border text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                {children.map(c => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            )}
+            {children.length === 1 && children[0] && (
+              <span className="text-sm text-muted-foreground font-medium">{children[0].name}</span>
+            )}
+          </div>
           {progress.length > 0 ? (
             <div className="h-80 w-full">
               <ResponsiveContainer width="100%" height="100%">

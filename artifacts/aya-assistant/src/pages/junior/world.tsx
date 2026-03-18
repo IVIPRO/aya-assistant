@@ -9,6 +9,123 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import type { Mission } from "@workspace/api-client-react";
 
+type WorldLang = "en" | "bg" | "es";
+
+function getLang(language?: string | null): WorldLang {
+  const l = (language ?? "").toLowerCase();
+  if (l.includes("bulgar") || l === "bg") return "bg";
+  if (l.includes("spanish") || l.includes("español") || l === "es") return "es";
+  return "en";
+}
+
+const ZONE_NAMES_I18N: Record<string, Record<WorldLang, string>> = {
+  "Math Island":    { en: "Math Island",    bg: "Остров на математиката", es: "Isla de matemáticas" },
+  "Reading Forest": { en: "Reading Forest", bg: "Гора на четенето",        es: "Bosque de lectura" },
+  "Logic Mountain": { en: "Logic Mountain", bg: "Логическа планина",       es: "Montaña de lógica" },
+  "English City":   { en: "English City",   bg: "Английски град",          es: "Ciudad de inglés" },
+  "Science Planet": { en: "Science Planet", bg: "Планетата на науката",    es: "Planeta de ciencias" },
+};
+
+const ZONE_DESCS_I18N: Record<string, Record<WorldLang, string>> = {
+  "Math Island":    { en: "Count, add, subtract, multiply and explore the magic of numbers!", bg: "Брой, събирай, изваждай, умножавай и изследвай магията на числата!", es: "¡Cuenta, suma, resta, multiplica y explora la magia de los números!" },
+  "Reading Forest": { en: "Read stories, learn words, and discover the power of language!", bg: "Четете истории, учете думи и открийте силата на езика!", es: "¡Lee historias, aprende palabras y descubre el poder del lenguaje!" },
+  "Logic Mountain": { en: "Solve puzzles, find patterns, and train your brilliant brain!", bg: "Решавай загадки, намирай закономерности и тренирай брилянтния си мозък!", es: "¡Resuelve acertijos, encuentra patrones y entrena tu brillante cerebro!" },
+  "English City":   { en: "Practice English, learn new words, and speak with confidence!", bg: "Практикувай английски, учи нови думи и говори с увереност!", es: "¡Practica inglés, aprende nuevas palabras y habla con confianza!" },
+  "Science Planet": { en: "Explore nature, animals, space, and how the world works!", bg: "Изследвай природата, животните, Космоса и как работи светът!", es: "¡Explora la naturaleza, los animales, el espacio y cómo funciona el mundo!" },
+};
+
+const WORLD_LABELS: Record<WorldLang, {
+  backToLearning: string;
+  mapTitle: string;
+  mapSubtitle: string;
+  noChildSelected: string;
+  backToWorldMap: string;
+  noMissionsZone: string;
+  completeMission: string;
+  completed: string;
+  noMissions: string;
+  allDone: string;
+  remaining: (n: number) => string;
+  missionsCount: (done: number, total: number) => string;
+  enterZone: string;
+  unlockAt: (xp: number, need: number) => string;
+  companionSays: (name: string) => string;
+  defaultCompanionMsg: string;
+}> = {
+  en: {
+    backToLearning: "Back to Learning",
+    mapTitle: "🗺️ Learning World Map",
+    mapSubtitle: "Explore different zones and complete missions!",
+    noChildSelected: "Select a child profile to explore the Learning World!",
+    backToWorldMap: "Back to World Map",
+    noMissionsZone: "No missions in this zone yet.",
+    completeMission: "Complete Mission ✨",
+    completed: "Completed!",
+    noMissions: "No missions yet",
+    allDone: "✅ All done!",
+    remaining: (n) => `${n} remaining`,
+    enterZone: "Enter →",
+    unlockAt: (xp, need) => `🔒 Unlock at ${xp} XP (need ${need} more)`,
+    companionSays: (name) => `${name} says:`,
+    defaultCompanionMsg: "Let's explore this zone together and learn something amazing!",
+    missionsCount: (done, total) => `${done}/${total} missions`,
+  },
+  bg: {
+    backToLearning: "Назад към ученето",
+    mapTitle: "🗺️ Карта на учебния свят",
+    mapSubtitle: "Разгледай различните зони и изпълнявай мисии!",
+    noChildSelected: "Изберете профил на дете, за да изследвате Учебния свят!",
+    backToWorldMap: "Назад към картата на света",
+    noMissionsZone: "Все още няма мисии в тази зона.",
+    completeMission: "Завърши мисията ✨",
+    completed: "Завършена!",
+    noMissions: "Все още няма мисии",
+    allDone: "✅ Всичко готово!",
+    remaining: (n) => `${n} остават`,
+    enterZone: "Влез →",
+    unlockAt: (xp, need) => `🔒 Отключва се при ${xp} XP (нужни са още ${need})`,
+    companionSays: (name) => `${name} казва:`,
+    defaultCompanionMsg: "Нека изследваме тази зона заедно и научим нещо невероятно!",
+    missionsCount: (done, total) => `${done}/${total} мисии`,
+  },
+  es: {
+    backToLearning: "Volver al aprendizaje",
+    mapTitle: "🗺️ Mapa del mundo de aprendizaje",
+    mapSubtitle: "¡Explora zonas y completa misiones!",
+    noChildSelected: "¡Selecciona un perfil de niño para explorar el Mundo de Aprendizaje!",
+    backToWorldMap: "Volver al mapa del mundo",
+    noMissionsZone: "Aún no hay misiones en esta zona.",
+    completeMission: "Completar misión ✨",
+    completed: "¡Completada!",
+    noMissions: "Aún sin misiones",
+    allDone: "✅ ¡Todo listo!",
+    remaining: (n) => `${n} restantes`,
+    enterZone: "Entrar →",
+    unlockAt: (xp, need) => `🔒 Se desbloquea en ${xp} XP (faltan ${need})`,
+    companionSays: (name) => `${name} dice:`,
+    defaultCompanionMsg: "¡Exploremos esta zona juntos y aprendamos algo increíble!",
+    missionsCount: (done, total) => `${done}/${total} misiones`,
+  },
+};
+
+const DIFFICULTY_LABELS: Record<WorldLang, Record<string, { label: string; color: string }>> = {
+  en: {
+    easy:   { label: "Easy",   color: "bg-green-100 text-green-700" },
+    medium: { label: "Medium", color: "bg-yellow-100 text-yellow-700" },
+    hard:   { label: "Hard",   color: "bg-red-100 text-red-700" },
+  },
+  bg: {
+    easy:   { label: "Лесно",  color: "bg-green-100 text-green-700" },
+    medium: { label: "Средно", color: "bg-yellow-100 text-yellow-700" },
+    hard:   { label: "Трудно", color: "bg-red-100 text-red-700" },
+  },
+  es: {
+    easy:   { label: "Fácil",  color: "bg-green-100 text-green-700" },
+    medium: { label: "Medio",  color: "bg-yellow-100 text-yellow-700" },
+    hard:   { label: "Difícil",color: "bg-red-100 text-red-700" },
+  },
+};
+
 const COMPANION_INFO: Record<string, { emoji: string; name: string; color: string; borderColor: string; textColor: string }> = {
   panda: { emoji: "🐼", name: "AYA Panda", color: "bg-green-50", borderColor: "border-green-200", textColor: "text-green-700" },
   robot: { emoji: "🤖", name: "AYA Robot", color: "bg-blue-50", borderColor: "border-blue-200", textColor: "text-blue-700" },
@@ -16,42 +133,109 @@ const COMPANION_INFO: Record<string, { emoji: string; name: string; color: strin
   owl:   { emoji: "🦉", name: "AYA Owl",   color: "bg-purple-50", borderColor: "border-purple-200", textColor: "text-purple-700" },
 };
 
-const ZONE_COMPANION_MESSAGES: Record<string, Record<string, string>> = {
-  panda: {
-    "Math Island":    "Let's solve each number puzzle together, slowly and carefully. You've got this! 🌿",
-    "Reading Forest": "Every word is a new adventure. Let's read and discover the story together! 📖",
-    "Logic Mountain": "Take your time — there's no rush. Let's find the pattern step by step! 🧩",
-    "English City":   "We'll learn new words gently, and I'll cheer for every one you get right! 🌟",
-    "Science Planet": "Nature is full of wonders. Let's explore and ask questions together! 🌱",
+const ZONE_COMPANION_MESSAGES: Record<WorldLang, Record<string, Record<string, string>>> = {
+  en: {
+    panda: {
+      "Math Island":    "Let's solve each number puzzle together, slowly and carefully. You've got this! 🌿",
+      "Reading Forest": "Every word is a new adventure. Let's read and discover the story together! 📖",
+      "Logic Mountain": "Take your time — there's no rush. Let's find the pattern step by step! 🧩",
+      "English City":   "We'll learn new words gently, and I'll cheer for every one you get right! 🌟",
+      "Science Planet": "Nature is full of wonders. Let's explore and ask questions together! 🌱",
+    },
+    robot: {
+      "Math Island":    "Calculating the best path forward! Every correct answer powers up your progress! ⚡",
+      "Reading Forest": "Let's process each word systematically. Comprehension: initializing! 🤖",
+      "Logic Mountain": "Logic circuits: online. Let's find the pattern and crack each puzzle! 💡",
+      "English City":   "Language module: active! I'll celebrate every correct answer with you! 🎉",
+      "Science Planet": "Science mode engaged! Let's observe, hypothesize, and discover! 🔬",
+    },
+    fox: {
+      "Math Island":    "Ooh, numbers are like little puzzles — and I LOVE puzzles! Let's play! 🦊",
+      "Reading Forest": "Words are magic spells! Let's read fast and discover the secrets inside! 🌟",
+      "Logic Mountain": "A challenge? Oh yes! I love a good brain teaser. Let's outsmart this one! 🧠",
+      "English City":   "English is an adventure! New words, new powers. Let's collect them all! 🎯",
+      "Science Planet": "Science is the BEST kind of exploring. What cool thing will we find today?! 🚀",
+    },
+    owl: {
+      "Math Island":    "Numbers have a beautiful order. Let's think clearly and find the answer together. 🦉",
+      "Reading Forest": "Good reading starts with patience. Let's absorb each sentence thoughtfully. 📚",
+      "Logic Mountain": "Every puzzle has a solution. Let's think it through with calm and focus. 🌙",
+      "English City":   "Language reveals wisdom. Let's explore each word and its meaning carefully. 💫",
+      "Science Planet": "The universe is endlessly fascinating. Let's observe and reflect together. 🌌",
+    },
   },
-  robot: {
-    "Math Island":    "Calculating the best path forward! Every correct answer powers up your progress! ⚡",
-    "Reading Forest": "Let's process each word systematically. Comprehension: initializing! 🤖",
-    "Logic Mountain": "Logic circuits: online. Let's find the pattern and crack each puzzle! 💡",
-    "English City":   "Language module: active! I'll celebrate every correct answer with you! 🎉",
-    "Science Planet": "Science mode engaged! Let's observe, hypothesize, and discover! 🔬",
+  bg: {
+    panda: {
+      "Math Island":    "Нека решаваме всяка числова загадка заедно, бавно и внимателно. Ти можеш! 🌿",
+      "Reading Forest": "Всяка дума е ново приключение. Нека четем и открием историята заедно! 📖",
+      "Logic Mountain": "Не бързай — нито аз бързам. Нека намерим закономерността стъпка по стъпка! 🧩",
+      "English City":   "Ще учим нови думи нежно, и аз ще те насърчавам за всяка правилна! 🌟",
+      "Science Planet": "Природата е пълна с чудеса. Нека изследваме и задаваме въпроси заедно! 🌱",
+    },
+    robot: {
+      "Math Island":    "Изчислявам най-добрия маршрут! Всеки верен отговор ускорява прогреса ти! ⚡",
+      "Reading Forest": "Нека обработим всяка дума систематично. Разбирането: инициализиране! 🤖",
+      "Logic Mountain": "Логически вериги: включени. Нека намерим закономерността и разбием загадката! 💡",
+      "English City":   "Езиков модул: активен! Ще отбележа всеки верен отговор заедно с теб! 🎉",
+      "Science Planet": "Научен режим: включен! Нека наблюдаваме, хипотезираме и откриваме! 🔬",
+    },
+    fox: {
+      "Math Island":    "О, числата са като малки загадки — а аз ОБИЧАМ загадките! Нека играем! 🦊",
+      "Reading Forest": "Думите са магически заклинания! Нека четем бързо и открием скритите тайни! 🌟",
+      "Logic Mountain": "Предизвикателство? Да! Обичам добра задача за мозъка. Нека го надхитрим! 🧠",
+      "English City":   "Английският е приключение! Нови думи, нови сили. Нека ги събираме всички! 🎯",
+      "Science Planet": "Науката е НАЙ-добрият вид изследване. Какво интересно ще открием днес?! 🚀",
+    },
+    owl: {
+      "Math Island":    "Числата имат красив ред. Нека мислим ясно и намерим отговора заедно. 🦉",
+      "Reading Forest": "Доброто четене започва с търпение. Нека усвоим всяко изречение замислено. 📚",
+      "Logic Mountain": "Всяка загадка има решение. Нека го мислим спокойно и съсредоточено. 🌙",
+      "English City":   "Езикът разкрива мъдрост. Нека изследваме всяка дума и нейното значение. 💫",
+      "Science Planet": "Вселената е безкрайно завладяваща. Нека наблюдаваме и размишляваме заедно. 🌌",
+    },
   },
-  fox: {
-    "Math Island":    "Ooh, numbers are like little puzzles — and I LOVE puzzles! Let's play! 🦊",
-    "Reading Forest": "Words are magic spells! Let's read fast and discover the secrets inside! 🌟",
-    "Logic Mountain": "A challenge? Oh yes! I love a good brain teaser. Let's outsmart this one! 🧠",
-    "English City":   "English is an adventure! New words, new powers. Let's collect them all! 🎯",
-    "Science Planet": "Science is the BEST kind of exploring. What cool thing will we find today?! 🚀",
-  },
-  owl: {
-    "Math Island":    "Numbers have a beautiful order. Let's think clearly and find the answer together. 🦉",
-    "Reading Forest": "Good reading starts with patience. Let's absorb each sentence thoughtfully. 📚",
-    "Logic Mountain": "Every puzzle has a solution. Let's think it through with calm and focus. 🌙",
-    "English City":   "Language reveals wisdom. Let's explore each word and its meaning carefully. 💫",
-    "Science Planet": "The universe is endlessly fascinating. Let's observe and reflect together. 🌌",
+  es: {
+    panda: {
+      "Math Island":    "¡Resolvamos cada acertijo de números juntos, despacio y con cuidado. Tú puedes! 🌿",
+      "Reading Forest": "¡Cada palabra es una nueva aventura! ¡Leamos y descubramos la historia juntos! 📖",
+      "Logic Mountain": "Tómate tu tiempo — sin apuros. ¡Encontremos el patrón paso a paso! 🧩",
+      "English City":   "Aprenderemos palabras nuevas suavemente, ¡y celebraré cada respuesta correcta! 🌟",
+      "Science Planet": "¡La naturaleza está llena de maravillas. ¡Exploremos y hagamos preguntas juntos! 🌱",
+    },
+    robot: {
+      "Math Island":    "¡Calculando la mejor ruta! ¡Cada respuesta correcta potencia tu progreso! ⚡",
+      "Reading Forest": "¡Procesemos cada palabra sistemáticamente. Comprensión: inicializando! 🤖",
+      "Logic Mountain": "¡Circuitos lógicos: activos. Encontremos el patrón y resolvamos el acertijo! 💡",
+      "English City":   "¡Módulo de idiomas: activo! ¡Celebraré cada respuesta correcta contigo! 🎉",
+      "Science Planet": "¡Modo ciencia activado! ¡Observemos, hipoticemos y descubramos! 🔬",
+    },
+    fox: {
+      "Math Island":    "¡Los números son como pequeños acertijos — y me ENCANTAN los acertijos! ¡A jugar! 🦊",
+      "Reading Forest": "¡Las palabras son hechizos mágicos! ¡Leamos rápido y descubramos los secretos! 🌟",
+      "Logic Mountain": "¿Un reto? ¡Oh sí! ¡Me encanta un buen desafío mental. ¡Superémoslo juntos! 🧠",
+      "English City":   "¡El inglés es una aventura! Nuevas palabras, nuevos poderes. ¡A coleccionarlas! 🎯",
+      "Science Planet": "¡La ciencia es el MEJOR tipo de exploración. ¡Qué cosa genial descubriremos hoy?! 🚀",
+    },
+    owl: {
+      "Math Island":    "Los números tienen un orden hermoso. Pensemos con claridad y encontremos la respuesta. 🦉",
+      "Reading Forest": "La buena lectura empieza con paciencia. Absorbamos cada oración con reflexión. 📚",
+      "Logic Mountain": "Todo acertijo tiene solución. Pensémoslo con calma y concentración. 🌙",
+      "English City":   "El idioma revela sabiduría. Exploremos cada palabra y su significado con cuidado. 💫",
+      "Science Planet": "El universo es infinitamente fascinante. Observemos y reflexionemos juntos. 🌌",
+    },
   },
 };
 
-function CompanionGuidance({ companionId, zoneName }: { companionId: string | null | undefined; zoneName: string }) {
+function CompanionGuidance({ companionId, zoneName, lang }: {
+  companionId: string | null | undefined;
+  zoneName: string;
+  lang: WorldLang;
+}) {
   if (!companionId || !COMPANION_INFO[companionId]) return null;
   const companion = COMPANION_INFO[companionId];
-  const messages = ZONE_COMPANION_MESSAGES[companionId] ?? {};
-  const message = messages[zoneName] ?? "Let's explore this zone together and learn something amazing!";
+  const lbl = WORLD_LABELS[lang];
+  const messages = ZONE_COMPANION_MESSAGES[lang][companionId] ?? {};
+  const message = messages[zoneName] ?? lbl.defaultCompanionMsg;
   return (
     <motion.div
       initial={{ opacity: 0, y: -8 }}
@@ -60,7 +244,7 @@ function CompanionGuidance({ companionId, zoneName }: { companionId: string | nu
     >
       <div className="text-4xl flex-shrink-0">{companion.emoji}</div>
       <div>
-        <div className={`font-bold text-sm mb-0.5 ${companion.textColor}`}>{companion.name} says:</div>
+        <div className={`font-bold text-sm mb-0.5 ${companion.textColor}`}>{lbl.companionSays(companion.name)}</div>
         <p className="text-sm text-foreground/80 leading-relaxed">{message}</p>
       </div>
     </motion.div>
@@ -148,12 +332,8 @@ function getMissionZone(mission: Mission): string {
   return "Science Planet";
 }
 
-function DifficultyBadge({ difficulty }: { difficulty?: string | null }) {
-  const map: Record<string, { label: string; color: string }> = {
-    easy: { label: "Easy", color: "bg-green-100 text-green-700" },
-    medium: { label: "Medium", color: "bg-yellow-100 text-yellow-700" },
-    hard: { label: "Hard", color: "bg-red-100 text-red-700" },
-  };
+function DifficultyBadge({ difficulty, lang }: { difficulty?: string | null; lang: WorldLang }) {
+  const map = DIFFICULTY_LABELS[lang];
   const d = map[difficulty ?? "easy"] ?? map.easy;
   return <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${d.color}`}>{d.label}</span>;
 }
@@ -187,6 +367,8 @@ export function WorldMap() {
   const completeMutation = useCompleteMission();
   const activeChild = children.find(c => c.id === activeChildId);
   const childXp = activeChild?.xp ?? 0;
+  const lang = getLang(activeChild?.language);
+  const lbl = WORLD_LABELS[lang];
 
   const handleComplete = async (id: number) => {
     const responseTimeMs = zoneOpenedAtRef.current ? Date.now() - zoneOpenedAtRef.current : undefined;
@@ -212,14 +394,14 @@ export function WorldMap() {
       <div className="mb-6">
         <Link href="/junior" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold mb-4 bg-white/50 px-4 py-2 rounded-xl">
           <ArrowLeft className="w-5 h-5" />
-          Back to Learning
+          {lbl.backToLearning}
         </Link>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-display font-bold text-junior-foreground flex items-center gap-3">
-              🗺️ Learning World Map
+              {lbl.mapTitle}
             </h1>
-            <p className="text-muted-foreground mt-1">Explore different zones and complete missions!</p>
+            <p className="text-muted-foreground mt-1">{lbl.mapSubtitle}</p>
           </div>
           {activeChild && (
             <div className="flex gap-3">
@@ -238,7 +420,7 @@ export function WorldMap() {
 
       {!activeChildId && (
         <div className="py-16 text-center bg-muted/20 rounded-3xl border border-dashed">
-          <p className="text-muted-foreground text-lg">Select a child profile to explore the Learning World!</p>
+          <p className="text-muted-foreground text-lg">{lbl.noChildSelected}</p>
         </div>
       )}
 
@@ -255,24 +437,28 @@ export function WorldMap() {
               className="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/50 px-4 py-2 rounded-xl"
             >
               <ArrowLeft className="w-5 h-5" />
-              Back to World Map
+              {lbl.backToWorldMap}
             </button>
 
             <div className={`p-6 rounded-2xl mb-4 ${activeZone.bgColor} border ${activeZone.borderColor}`}>
               <div className="flex items-center gap-4">
                 <span className="text-5xl">{activeZone.emoji}</span>
                 <div>
-                  <h2 className={`text-2xl font-display font-bold ${activeZone.color}`}>{activeZone.name}</h2>
-                  <p className="text-muted-foreground">{activeZone.description}</p>
+                  <h2 className={`text-2xl font-display font-bold ${activeZone.color}`}>
+                    {ZONE_NAMES_I18N[activeZone.id]?.[lang] ?? activeZone.name}
+                  </h2>
+                  <p className="text-muted-foreground">
+                    {ZONE_DESCS_I18N[activeZone.id]?.[lang] ?? activeZone.description}
+                  </p>
                 </div>
               </div>
             </div>
 
-            <CompanionGuidance companionId={activeChild?.aiCharacter} zoneName={activeZone.name} />
+            <CompanionGuidance companionId={activeChild?.aiCharacter} zoneName={activeZone.id} lang={lang} />
 
             {activeMissions.length === 0 ? (
               <div className="py-16 text-center bg-muted/20 rounded-3xl border border-dashed">
-                <p className="text-muted-foreground">No missions in this zone yet.</p>
+                <p className="text-muted-foreground">{lbl.noMissionsZone}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -295,7 +481,7 @@ export function WorldMap() {
                     )}
 
                     <div className="flex justify-between items-start mb-3">
-                      <DifficultyBadge difficulty={mission.difficulty} />
+                      <DifficultyBadge difficulty={mission.difficulty} lang={lang} />
                       <div className="flex gap-1">
                         <span className="flex items-center gap-1 text-xs font-bold text-orange-600 bg-orange-50 px-2 py-1 rounded-lg">
                           <Trophy className="w-3 h-3" /> {mission.xpReward}
@@ -313,13 +499,13 @@ export function WorldMap() {
                       <button
                         onClick={() => handleComplete(mission.id)}
                         disabled={completeMutation.isPending}
-                        className={`w-full py-2.5 font-bold rounded-xl border-b-4 border-yellow-600 hover:border-b-0 hover:translate-y-1 transition-all text-sm bg-junior text-junior-foreground`}
+                        className="w-full py-2.5 font-bold rounded-xl border-b-4 border-yellow-600 hover:border-b-0 hover:translate-y-1 transition-all text-sm bg-junior text-junior-foreground"
                       >
-                        Complete Mission ✨
+                        {lbl.completeMission}
                       </button>
                     ) : (
                       <button disabled className="w-full py-2.5 bg-green-100 text-green-700 font-bold rounded-xl flex justify-center items-center gap-2 text-sm">
-                        <CheckCircle2 className="w-4 h-4" /> Completed!
+                        <CheckCircle2 className="w-4 h-4" /> {lbl.completed}
                       </button>
                     )}
                   </motion.div>
@@ -339,6 +525,8 @@ export function WorldMap() {
               const isUnlocked = childXp >= zone.xpRequired;
               const completedCount = zMissions.filter(m => m.completed).length;
               const totalCount = zMissions.length;
+              const zoneName = ZONE_NAMES_I18N[zone.id]?.[lang] ?? zone.name;
+              const zoneDesc = ZONE_DESCS_I18N[zone.id]?.[lang] ?? zone.description;
 
               return (
                 <motion.div
@@ -361,14 +549,14 @@ export function WorldMap() {
 
                   <div className="text-5xl mb-4">{zone.emoji}</div>
                   <h3 className={`text-xl font-display font-bold mb-1 ${isUnlocked ? zone.color : 'text-muted-foreground'}`}>
-                    {zone.name}
+                    {zoneName}
                   </h3>
-                  <p className="text-muted-foreground text-sm mb-4">{zone.description}</p>
+                  <p className="text-muted-foreground text-sm mb-4">{zoneDesc}</p>
 
                   {isUnlocked ? (
                     <div className="space-y-2">
                       <div className="flex justify-between text-xs font-medium text-muted-foreground">
-                        <span>{completedCount}/{totalCount} missions</span>
+                        <span>{lbl.missionsCount(completedCount, totalCount)}</span>
                         {totalCount > 0 && <span>{Math.round((completedCount / totalCount) * 100)}%</span>}
                       </div>
                       {totalCount > 0 && (
@@ -381,18 +569,18 @@ export function WorldMap() {
                       )}
                       <div className="flex items-center justify-between mt-3">
                         <span className="text-xs font-bold text-muted-foreground">
-                          {totalCount === 0 ? "No missions yet" : completedCount === totalCount ? "✅ All done!" : `${totalCount - completedCount} remaining`}
+                          {totalCount === 0 ? lbl.noMissions : completedCount === totalCount ? lbl.allDone : lbl.remaining(totalCount - completedCount)}
                         </span>
                         {activeChildId && (
                           <span className={`text-xs font-bold px-2 py-1 rounded-lg ${zone.color} bg-white/60`}>
-                            Enter →
+                            {lbl.enterZone}
                           </span>
                         )}
                       </div>
                     </div>
                   ) : (
                     <div className="text-sm text-muted-foreground font-medium">
-                      🔒 Unlock at {zone.xpRequired} XP (need {zone.xpRequired - childXp} more)
+                      {lbl.unlockAt(zone.xpRequired, zone.xpRequired - childXp)}
                     </div>
                   )}
                 </motion.div>

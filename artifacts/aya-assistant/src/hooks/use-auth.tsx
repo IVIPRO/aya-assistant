@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { useGetMe, User, AuthResponse } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { getGetMeQueryKey } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
 
 interface AuthContextType {
@@ -10,6 +12,7 @@ interface AuthContextType {
   login: (data: AuthResponse) => void;
   logout: () => void;
   setActiveChildId: (id: number | null) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.getItem("aya_active_child") ? Number(localStorage.getItem("aya_active_child")) : null
   );
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
 
   const { data: user, isLoading, isError } = useGetMe({
     query: {
@@ -66,6 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setActiveChildIdState(id);
   };
 
+  const refreshUser = async () => {
+    await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
+  };
+
   return (
     <AuthContext.Provider value={{
       user: user || null,
@@ -74,7 +82,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       activeChildId,
       login,
       logout,
-      setActiveChildId
+      setActiveChildId,
+      refreshUser,
     }}>
       {children}
     </AuthContext.Provider>

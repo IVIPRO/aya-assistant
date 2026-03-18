@@ -2,7 +2,7 @@ import { Router, type IRouter } from "express";
 import { db, familiesTable, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { CreateFamilyBody } from "@workspace/api-zod";
-import { requireAuth, getUser, signToken } from "../lib/auth";
+import { requireAuth, getUser } from "../lib/auth";
 
 const router: IRouter = Router();
 
@@ -22,7 +22,7 @@ router.get("/families", requireAuth, async (req, res): Promise<void> => {
 });
 
 router.post("/families", requireAuth, async (req, res): Promise<void> => {
-  const { userId, email, role } = getUser(req);
+  const { userId } = getUser(req);
   const parsed = CreateFamilyBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -36,9 +36,7 @@ router.post("/families", requireAuth, async (req, res): Promise<void> => {
 
   await db.update(usersTable).set({ familyId: family.id }).where(eq(usersTable.id, userId));
 
-  const token = signToken({ userId, email, role, familyId: family.id });
-
-  res.status(201).json({ family, token });
+  res.status(201).json(family);
 });
 
 export default router;

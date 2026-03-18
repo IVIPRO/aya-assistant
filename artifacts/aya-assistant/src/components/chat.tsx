@@ -44,6 +44,48 @@ const CHARACTER_TONES: Record<string, string> = {
   owl: "calm",
 };
 
+const TONE_STYLE_LABELS: Record<"en" | "bg" | "es", Record<string, string>> = {
+  en: {
+    gentle:      "GENTLE STYLE",
+    encouraging: "ENCOURAGING STYLE",
+    playful:     "PLAYFUL STYLE",
+    calm:        "CALM STYLE",
+  },
+  bg: {
+    gentle:      "НЕЖЕН СТИЛ",
+    encouraging: "НАСЪРЧАВАЩ СТИЛ",
+    playful:     "ИГРИВ СТИЛ",
+    calm:        "СПОКОЕН СТИЛ",
+  },
+  es: {
+    gentle:      "ESTILO SUAVE",
+    encouraging: "ESTILO MOTIVADOR",
+    playful:     "ESTILO LÚDICO",
+    calm:        "ESTILO TRANQUILO",
+  },
+};
+
+const COMPANION_META_LABELS = {
+  en: {
+    homeworkVision: "HOMEWORK VISION",
+    voiceTutor:     "VOICE TUTOR",
+    companionDesc:  "Your personal learning companion · guides discovery, not just answers",
+    alwaysHere:     "Always here to help",
+  },
+  bg: {
+    homeworkVision: "ДОМАШНО ОТ СНИМКА",
+    voiceTutor:     "ГЛАСОВ УЧИТЕЛ",
+    companionDesc:  "Твоят личен учебен компаньон – насочва към откриване, а не само дава отговори.",
+    alwaysHere:     "Винаги тук, за да помогна",
+  },
+  es: {
+    homeworkVision: "TAREA POR FOTO",
+    voiceTutor:     "TUTOR DE VOZ",
+    companionDesc:  "Tu compañero de aprendizaje personal – guía el descubrimiento, no solo da respuestas.",
+    alwaysHere:     "Siempre aquí para ayudarte",
+  },
+};
+
 const HOMEWORK_LABELS = {
   en: {
     cameraBtn: "Take photo of homework",
@@ -129,6 +171,8 @@ export function Chat({
   const hwLang: "en" | "bg" | "es" = lang === "bg" ? "bg" : lang === "es" ? "es" : "en";
   const hwLabels = HOMEWORK_LABELS[hwLang];
   const voiceLabels = VOICE_LABELS[hwLang];
+  const metaLbl = COMPANION_META_LABELS[hwLang];
+  const toneStyleLbl = TONE_STYLE_LABELS[hwLang];
 
   const { data: messages = [], isLoading, refetch } = useListChatMessages({
     module,
@@ -308,7 +352,7 @@ export function Chat({
             </h2>
             {charTone && isJunior && (
               <span className="text-[10px] font-bold uppercase tracking-wider bg-junior/20 text-junior-foreground px-2 py-0.5 rounded-full border border-junior/30">
-                {charTone} style
+                {toneStyleLbl[charTone] ?? `${charTone} style`}
               </span>
             )}
             {isJunior && (
@@ -320,16 +364,16 @@ export function Chat({
             {isJunior && (
               <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200 flex items-center gap-1">
                 <Camera className="w-2.5 h-2.5" />
-                Homework Vision
+                {metaLbl.homeworkVision}
               </span>
             )}
             <span className="text-[10px] font-bold uppercase tracking-wider bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full border border-violet-200 flex items-center gap-1">
               <Mic className="w-2.5 h-2.5" />
-              Voice Tutor
+              {metaLbl.voiceTutor}
             </span>
           </div>
           <p className="text-xs text-muted-foreground truncate">
-            {character ? "Your personal learning companion · guides discovery, not just answers" : "Always here to help"}
+            {character ? metaLbl.companionDesc : metaLbl.alwaysHere}
           </p>
           {subjectContext && (
             <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">

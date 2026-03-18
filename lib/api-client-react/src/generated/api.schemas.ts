@@ -76,6 +76,20 @@ export interface Badge {
   earnedAt: string;
 }
 
+/**
+ * @nullable
+ */
+export type CreateChildBodyAiCharacter =
+  | (typeof CreateChildBodyAiCharacter)[keyof typeof CreateChildBodyAiCharacter]
+  | null;
+
+export const CreateChildBodyAiCharacter = {
+  panda: "panda",
+  robot: "robot",
+  fox: "fox",
+  owl: "owl",
+} as const;
+
 export interface CreateChildBody {
   name: string;
   /**
@@ -88,8 +102,22 @@ export interface CreateChildBody {
   /** @nullable */
   avatar?: string | null;
   /** @nullable */
-  aiCharacter?: string | null;
+  aiCharacter?: CreateChildBodyAiCharacter;
 }
+
+/**
+ * @nullable
+ */
+export type UpdateChildBodyAiCharacter =
+  | (typeof UpdateChildBodyAiCharacter)[keyof typeof UpdateChildBodyAiCharacter]
+  | null;
+
+export const UpdateChildBodyAiCharacter = {
+  panda: "panda",
+  robot: "robot",
+  fox: "fox",
+  owl: "owl",
+} as const;
 
 export interface UpdateChildBody {
   /** @nullable */
@@ -107,10 +135,24 @@ export interface UpdateChildBody {
   /** @nullable */
   stars?: number | null;
   /** @nullable */
-  aiCharacter?: string | null;
+  aiCharacter?: UpdateChildBodyAiCharacter;
   /** @nullable */
   badgesEarned?: Badge[] | null;
 }
+
+/**
+ * @nullable
+ */
+export type ChildAiCharacter =
+  | (typeof ChildAiCharacter)[keyof typeof ChildAiCharacter]
+  | null;
+
+export const ChildAiCharacter = {
+  panda: "panda",
+  robot: "robot",
+  fox: "fox",
+  owl: "owl",
+} as const;
 
 export interface Child {
   id: number;
@@ -122,7 +164,7 @@ export interface Child {
   /** @nullable */
   avatar: string | null;
   /** @nullable */
-  aiCharacter?: string | null;
+  aiCharacter?: ChildAiCharacter;
   /** @nullable */
   badgesEarned?: Badge[] | null;
   xp: number;

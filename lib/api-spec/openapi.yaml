@@ -699,6 +699,7 @@ components:
           type: ["string", "null"]
         aiCharacter:
           type: ["string", "null"]
+          enum: [panda, robot, fox, owl, null]
       required: [name, grade, language, country]
 
     UpdateChildBody:
@@ -720,6 +721,7 @@ components:
           type: ["integer", "null"]
         aiCharacter:
           type: ["string", "null"]
+          enum: [panda, robot, fox, owl, null]
         badgesEarned:
           type: ["array", "null"]
           items:
@@ -744,6 +746,7 @@ components:
           type: ["string", "null"]
         aiCharacter:
           type: ["string", "null"]
+          enum: [panda, robot, fox, owl, null]
         badgesEarned:
           type: ["array", "null"]
           items:

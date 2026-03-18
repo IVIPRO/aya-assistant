@@ -7,7 +7,7 @@ import { useListChildren, useUpdateChild, useListMissions, getListChildrenQueryK
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
-import type { Badge, Child, Mission } from "@workspace/api-client-react";
+import type { Badge, Child, Mission, UpdateChildBodyAiCharacter } from "@workspace/api-client-react";
 
 const CHARACTERS = [
   { id: "panda", name: "Panda Teacher", emoji: "🐼", color: "bg-green-100 border-green-300", desc: "Patient and gentle" },
@@ -37,7 +37,7 @@ function getMissionZone(mission: Mission): string {
 function getLevel(xp: number): number { return Math.floor(xp / 100) + 1; }
 function getLevelProgress(xp: number): number { return xp % 100; }
 
-function CharacterPicker({ child, onSelect, onClose }: { child: Child; onSelect: (char: string) => void; onClose: () => void }) {
+function CharacterPicker({ child, onSelect, onClose }: { child: Child; onSelect: (char: UpdateChildBodyAiCharacter) => void; onClose: () => void }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
@@ -47,7 +47,7 @@ function CharacterPicker({ child, onSelect, onClose }: { child: Child; onSelect:
         <p className="text-muted-foreground text-center mb-6">Your companion will guide you through every mission 🎓</p>
         <div className="grid grid-cols-2 gap-4">
           {CHARACTERS.map(char => (
-            <button key={char.id} onClick={() => onSelect(char.id)}
+            <button key={char.id} onClick={() => onSelect(char.id as UpdateChildBodyAiCharacter)}
               className={`p-4 rounded-2xl border-2 transition-all hover:scale-105 hover:shadow-lg ${child.aiCharacter === char.id ? 'border-junior shadow-lg ring-2 ring-junior/50' : 'border-transparent hover:border-junior/50'} ${char.color}`}>
               <div className="text-5xl mb-2">{char.emoji}</div>
               <div className="font-bold text-sm">{char.name}</div>
@@ -89,7 +89,7 @@ export function Junior() {
   const badges = (activeChild?.badgesEarned ?? []) as Badge[];
   const childXp = activeChild?.xp ?? 0;
 
-  const handleSelectCharacter = async (charId: string) => {
+  const handleSelectCharacter = async (charId: UpdateChildBodyAiCharacter) => {
     if (!activeChildIdResolved) return;
     try {
       await updateChild.mutateAsync({ id: activeChildIdResolved, data: { aiCharacter: charId } });
@@ -186,7 +186,7 @@ export function Junior() {
 
                 return (
                   <motion.div key={zone.id} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: idx * 0.07 }}>
-                    <Link href={isUnlocked && activeChildIdResolved ? `/junior/world` : "#"}>
+                    <Link href={isUnlocked && activeChildIdResolved ? `/junior/world?zone=${encodeURIComponent(zone.id)}` : "#"}>
                       <div className={`relative p-6 rounded-[2rem] border-4 transition-all ${isUnlocked
                         ? `${zone.bgColor} ${zone.borderColor} cursor-pointer hover:-translate-y-2 hover:shadow-xl`
                         : "bg-muted/30 border-muted-foreground/20 cursor-not-allowed opacity-60"}`}>

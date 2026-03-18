@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useListChatMessages, useSendChatMessage, ListChatMessagesModule } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
 import { Send, Mic, Loader2, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "./layout";
@@ -43,6 +44,7 @@ export function Chat({
   suggestedPrompts,
 }: ChatProps) {
   const { activeChildId } = useAuth();
+  const { t } = useI18n();
   const { toast } = useToast();
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -243,7 +245,7 @@ export function Chat({
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={isJunior ? "Ask me anything! I'm here to guide you… 🌟" : "Type your message..."}
+            placeholder={isJunior ? t.chat.juniorPlaceholder : t.chat.placeholder}
             className="flex-1 bg-transparent border-none focus:ring-0 resize-none max-h-32 min-h-[44px] py-3 px-2 text-foreground placeholder:text-muted-foreground"
             rows={1}
             onKeyDown={(e) => {

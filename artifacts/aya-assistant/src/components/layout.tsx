@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
 import { 
   Home, 
   Smile, 
@@ -9,7 +10,6 @@ import {
   HeartHandshake, 
   Users,
   LogOut,
-  Settings
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { clsx, type ClassValue } from "clsx";
@@ -22,17 +22,18 @@ export function cn(...inputs: ClassValue[]) {
 export function Layout({ children, isJunior = false }: { children: ReactNode, isJunior?: boolean }) {
   const [location] = useLocation();
   const { user, logout } = useAuth();
+  const { t } = useI18n();
 
   const navItems = [
-    { href: "/dashboard", label: "Dashboard", icon: Home, color: "text-foreground" },
-    { href: "/junior", label: "Junior", icon: Smile, color: "text-junior" },
-    { href: "/student", label: "Student", icon: BookOpen, color: "text-student" },
-    { href: "/family", label: "Family", icon: CalendarHeart, color: "text-family" },
-    { href: "/psychology", label: "Psychology", icon: HeartHandshake, color: "text-psychology" },
+    { href: "/dashboard", label: t.nav.dashboard, icon: Home, color: "text-foreground" },
+    { href: "/junior",    label: t.nav.junior,    icon: Smile,        color: "text-junior" },
+    { href: "/student",   label: t.nav.student,   icon: BookOpen,     color: "text-student" },
+    { href: "/family",    label: t.nav.family,    icon: CalendarHeart, color: "text-family" },
+    { href: "/psychology",label: t.nav.psychology, icon: HeartHandshake, color: "text-psychology" },
   ];
 
   if (user?.role === "parent") {
-    navItems.push({ href: "/parent", label: "Parent", icon: Users, color: "text-primary" });
+    navItems.push({ href: "/parent", label: t.nav.parent, icon: Users, color: "text-primary" });
   }
 
   return (
@@ -92,7 +93,7 @@ export function Layout({ children, isJunior = false }: { children: ReactNode, is
               className="flex items-center justify-center gap-2 w-full py-2 text-sm text-destructive hover:bg-destructive/10 rounded-xl transition-colors"
             >
               <LogOut className="w-4 h-4" />
-              Sign Out
+              {t.nav.signOut}
             </button>
           </div>
         </div>

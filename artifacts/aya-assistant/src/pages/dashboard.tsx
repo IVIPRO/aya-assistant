@@ -4,6 +4,7 @@ import { Smile, BookOpen, CalendarHeart, HeartHandshake, ArrowRight } from "luci
 import { motion } from "framer-motion";
 import { useGetFamily, useListChildren, getGetFamilyQueryKey, getListChildrenQueryKey } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useI18n } from "@/hooks/use-i18n";
 import type { Badge } from "@workspace/api-client-react";
 
 const CHARACTER_EMOJIS: Record<string, string> = {
@@ -19,6 +20,7 @@ function getLevel(xp: number): number {
 
 export function Dashboard() {
   const { user, activeChildId, setActiveChildId } = useAuth();
+  const { t } = useI18n();
   const { data: family } = useGetFamily({ query: { queryKey: getGetFamilyQueryKey(), retry: false } });
   const { data: children = [] } = useListChildren({ query: { queryKey: getListChildrenQueryKey(), enabled: !!family } });
 
@@ -27,8 +29,8 @@ export function Dashboard() {
   const modules = [
     {
       id: "junior",
-      title: "AYA Junior",
-      desc: "Learning World for Grades 1–4",
+      title: t.modules.juniorTitle,
+      desc: t.modules.juniorDesc,
       icon: Smile,
       color: "bg-junior text-junior-foreground",
       link: "/junior",
@@ -36,8 +38,8 @@ export function Dashboard() {
     },
     {
       id: "student",
-      title: "AYA Student",
-      desc: "Smart study companion & homework help",
+      title: t.modules.studentTitle,
+      desc: t.modules.studentDesc,
       icon: BookOpen,
       color: "bg-student text-student-foreground",
       link: "/student",
@@ -45,8 +47,8 @@ export function Dashboard() {
     },
     {
       id: "family",
-      title: "AYA Family",
-      desc: "Shared calendar, tasks & household coordination",
+      title: t.modules.familyTitle,
+      desc: t.modules.familyDesc,
       icon: CalendarHeart,
       color: "bg-family text-family-foreground",
       link: "/family",
@@ -54,8 +56,8 @@ export function Dashboard() {
     },
     {
       id: "psychology",
-      title: "AYA Psychology",
-      desc: "Warm emotional support & thoughtful conversations",
+      title: t.modules.psychologyTitle,
+      desc: t.modules.psychologyDesc,
       icon: HeartHandshake,
       color: "bg-psychology text-psychology-foreground",
       link: "/psychology",
@@ -67,10 +69,10 @@ export function Dashboard() {
     <Layout>
       <div className="mb-10">
         <h1 className="text-4xl md:text-5xl font-display font-bold text-foreground">
-          Good morning, {user?.name?.split(" ")[0]}! ☀️
+          {t.dashboard.greeting(user?.name?.split(" ")[0] ?? "")}
         </h1>
         <p className="mt-3 text-lg text-muted-foreground max-w-2xl">
-          Welcome to your family's command center. Where would you like to go today?
+          {t.dashboard.subtitle}
         </p>
       </div>
 
@@ -81,11 +83,11 @@ export function Dashboard() {
           className="bg-primary/10 border border-primary/20 rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4"
         >
           <div>
-            <h3 className="text-xl font-bold text-foreground">Set up your Family</h3>
-            <p className="text-muted-foreground mt-1">Create a family profile to add children and share calendars.</p>
+            <h3 className="text-xl font-bold text-foreground">{t.dashboard.setupFamily}</h3>
+            <p className="text-muted-foreground mt-1">{t.dashboard.setupFamilyDesc}</p>
           </div>
           <Link href="/parent" className="px-6 py-3 bg-primary text-white rounded-xl font-bold shadow-md hover:shadow-lg transition-all shrink-0">
-            Go to Settings
+            {t.dashboard.goToSettings}
           </Link>
         </motion.div>
       )}
@@ -125,7 +127,9 @@ export function Dashboard() {
                     <div className="text-xl">{activeChild.avatar || "👦"}</div>
                     <div>
                       <p className="text-sm font-bold">{activeChild.name}</p>
-                      <p className="text-xs text-muted-foreground">Level {getLevel(activeChild.xp)} · {activeChild.xp} XP · ⭐ {activeChild.stars}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t.dashboard.childLevel(getLevel(activeChild.xp), activeChild.xp, activeChild.stars)}
+                      </p>
                     </div>
                     {((activeChild.badgesEarned ?? []) as Badge[]).length > 0 && (
                       <div className="ml-auto flex gap-0.5">
@@ -144,7 +148,7 @@ export function Dashboard() {
 
       {children.length > 0 && (
         <div className="mt-12">
-          <h3 className="text-xl font-bold mb-4">Quick switch child</h3>
+          <h3 className="text-xl font-bold mb-4">{t.dashboard.quickSwitch}</h3>
           <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar">
             {children.map(child => (
               <div
@@ -157,7 +161,9 @@ export function Dashboard() {
                 </div>
                 <div>
                   <p className="font-bold text-sm">{child.name}</p>
-                  <p className="text-xs text-muted-foreground">Grade {child.grade} · Lv {getLevel(child.xp)}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t.dashboard.gradeLevel(child.grade, getLevel(child.xp))}
+                  </p>
                 </div>
                 {child.aiCharacter && (
                   <span className="text-lg">{CHARACTER_EMOJIS[child.aiCharacter]}</span>

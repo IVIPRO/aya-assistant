@@ -215,6 +215,19 @@ export function ParentDashboard() {
     refetchInterval: 60 * 1000,
   });
 
+  const { data: voiceStats } = useQuery<{ sessionsToday: number; minutesListened: number }>({
+    queryKey: ["voice-stats", progressChildId],
+    queryFn: async () => {
+      if (!progressChildId) return { sessionsToday: 0, minutesListened: 0 };
+      const res = await fetch(`/api/voice/stats?childId=${progressChildId}`);
+      if (!res.ok) return { sessionsToday: 0, minutesListened: 0 };
+      return res.json();
+    },
+    enabled: progressChildId > 0,
+    staleTime: 60 * 1000,
+    refetchInterval: 60 * 1000,
+  });
+
   const createChild = useCreateChild();
   const deleteChild = useDeleteChild();
   const updateChild = useUpdateChild();
@@ -628,6 +641,22 @@ export function ParentDashboard() {
                 <div className="text-3xl font-bold text-amber-500">{homeworkToday?.count ?? 0}</div>
                 <div className="text-xs font-semibold text-amber-700 mt-0.5">📷 Homework</div>
                 <div className="text-xs text-muted-foreground">solved today</div>
+              </div>
+            </div>
+          )}
+
+          {/* ── Voice Tutor stats ───────────────────────────────────── */}
+          {progressChild && (
+            <div className="grid grid-cols-2 gap-4">
+              <div className={`p-4 rounded-2xl border shadow-sm text-center ${(voiceStats?.sessionsToday ?? 0) > 0 ? "bg-violet-50 border-violet-200" : "bg-card"}`}>
+                <div className="text-3xl font-bold text-violet-500">{voiceStats?.sessionsToday ?? 0}</div>
+                <div className="text-xs font-semibold text-violet-700 mt-0.5">🎙️ Voice Sessions</div>
+                <div className="text-xs text-muted-foreground">today</div>
+              </div>
+              <div className={`p-4 rounded-2xl border shadow-sm text-center ${(voiceStats?.minutesListened ?? 0) > 0 ? "bg-violet-50 border-violet-200" : "bg-card"}`}>
+                <div className="text-3xl font-bold text-violet-500">{voiceStats?.minutesListened ?? 0}</div>
+                <div className="text-xs font-semibold text-violet-700 mt-0.5">🔊 Min. Listened</div>
+                <div className="text-xs text-muted-foreground">today</div>
               </div>
             </div>
           )}

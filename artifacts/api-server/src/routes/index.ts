@@ -12,6 +12,7 @@ import progressRouter from "./progress";
 import lessonsRouter from "./lessons";
 import learningRouter from "./learning";
 import visionRouter from "./vision";
+import voiceRouter from "./voice";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(progressRouter);
 router.use(lessonsRouter);
 router.use(learningRouter);
 router.use(visionRouter);
+router.use(voiceRouter);
 
 export default router;

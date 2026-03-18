@@ -660,6 +660,22 @@ components:
       required: [id, name, country, language, ownerId, createdAt]
 
     # ─── Children ────────────────────────────────────────────────────────────
+    Badge:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        icon:
+          type: string
+        description:
+          type: string
+        earnedAt:
+          type: string
+          format: date-time
+      required: [id, title, icon, description, earnedAt]
+
     CreateChildBody:
       type: object
       properties:
@@ -674,6 +690,8 @@ components:
         country:
           type: string
         avatar:
+          type: ["string", "null"]
+        aiCharacter:
           type: ["string", "null"]
       required: [name, grade, language, country]
 
@@ -694,6 +712,8 @@ components:
           type: ["integer", "null"]
         stars:
           type: ["integer", "null"]
+        aiCharacter:
+          type: ["string", "null"]
 
     Child:
       type: object
@@ -712,6 +732,12 @@ components:
           type: string
         avatar:
           type: ["string", "null"]
+        aiCharacter:
+          type: ["string", "null"]
+        badgesEarned:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/Badge"
         xp:
           type: integer
         stars:
@@ -719,7 +745,10 @@ components:
         createdAt:
           type: string
           format: date-time
-      required: [id, familyId, name, grade, language, country, avatar, xp, stars, createdAt]
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, familyId, name, grade, language, country, avatar, xp, stars, createdAt, updatedAt]
 
     # ─── Chat ────────────────────────────────────────────────────────────────
     SendChatMessageBody:
@@ -813,6 +842,12 @@ components:
           type: string
         subject:
           type: string
+        zone:
+          type: ["string", "null"]
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+          default: easy
         xpReward:
           type: integer
         starReward:

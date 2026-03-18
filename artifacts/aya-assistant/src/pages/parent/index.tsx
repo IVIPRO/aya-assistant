@@ -6,15 +6,17 @@ import {
   useDeleteChild,
   useUpdateChild,
   useListProgress,
+  useListMissions,
   useListMemories,
   useCreateFamily,
   useGetFamily,
   getGetFamilyQueryKey,
   getListChildrenQueryKey,
   getListProgressQueryKey,
+  getListMissionsQueryKey,
 } from "@workspace/api-client-react";
-import type { Child } from "@workspace/api-client-react";
-import { Activity, BrainCircuit, Users, LineChart, Plus, Trash2, Pencil, Home } from "lucide-react";
+import type { Child, Badge } from "@workspace/api-client-react";
+import { Activity, BrainCircuit, Users, LineChart, Plus, Trash2, Pencil, Home, Clock, Award, TrendingUp, TrendingDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,6 +24,15 @@ import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
+
+const ZONE_ORDER = ["Math Island", "Reading Forest", "Logic Mountain", "English City", "Science Planet"];
+const ZONE_EMOJIS: Record<string, string> = {
+  "Math Island": "🏝️",
+  "Reading Forest": "🌲",
+  "Logic Mountain": "⛰️",
+  "English City": "🏙️",
+  "Science Planet": "🌍",
+};
 
 const childSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -37,6 +48,20 @@ const familySchema = z.object({
 });
 
 type ChildFormData = z.infer<typeof childSchema>;
+
+function getLevel(xp: number): number {
+  return Math.floor(xp / 100) + 1;
+}
+
+function getMissionZone(mission: { zone?: string | null; subject: string }): string {
+  if (mission.zone) return mission.zone;
+  const subj = mission.subject.toLowerCase();
+  if (subj.includes("math") || subj.includes("матем") || subj.includes("maths")) return "Math Island";
+  if (subj.includes("read") || subj.includes("четен") || subj.includes("deutsch") || subj.includes("lengua")) return "Reading Forest";
+  if (subj.includes("logic") || subj.includes("логика")) return "Logic Mountain";
+  if (subj.includes("english") || subj.includes("английски") || subj.includes("englisch") || subj.includes("inglés")) return "English City";
+  return "Science Planet";
+}
 
 export function ParentDashboard() {
   const [tab, setTab] = useState("children");
@@ -55,6 +80,12 @@ export function ParentDashboard() {
     { childId: progressChildId },
     { query: { queryKey: getListProgressQueryKey({ childId: progressChildId }), enabled: children.length > 0 && progressChildId > 0 } }
   );
+  const { data: missions = [] } = useListMissions(
+    { childId: progressChildId },
+    { query: { queryKey: getListMissionsQueryKey({ childId: progressChildId }), enabled: children.length > 0 && progressChildId > 0 } }
+  );
+
+  const progressChild = children.find(c => c.id === progressChildId);
 
   const createChild = useCreateChild();
   const deleteChild = useDeleteChild();
@@ -117,6 +148,32 @@ export function ParentDashboard() {
       toast({ title: "Error creating family", variant: "destructive" });
     }
   };
+
+  const completedMissions = missions.filter(m => m.completed);
+  const pendingMissions = missions.filter(m => !m.completed);
+
+  const estimatedMinutes = completedMissions.reduce((acc, m) => acc + (m.xpReward / 10), 0);
+
+  const subjectScores: Record<string, { total: number; count: number }> = {};
+  for (const p of progress) {
+    if (!subjectScores[p.subject]) subjectScores[p.subject] = { total: 0, count: 0 };
+    subjectScores[p.subject].total += p.score;
+    subjectScores[p.subject].count += 1;
+  }
+  const avgBySubject = Object.entries(subjectScores).map(([subject, { total, count }]) => ({
+    subject,
+    score: Math.round(total / count),
+  })).sort((a, b) => b.score - a.score);
+
+  const strengths = avgBySubject.slice(0, 2);
+  const weaknesses = avgBySubject.slice(-2).reverse().filter(s => s.score < 70);
+
+  const unlockedZones = ZONE_ORDER.filter(zoneName => {
+    const zone = { "Math Island": 0, "Reading Forest": 30, "Logic Mountain": 80, "English City": 150, "Science Planet": 250 };
+    return (progressChild?.xp ?? 0) >= zone[zoneName as keyof typeof zone];
+  });
+
+  const badges = (progressChild?.badgesEarned ?? []) as Badge[];
 
   const tabs = [
     { id: "children", label: "Children Profiles", icon: Users },
@@ -219,14 +276,15 @@ export function ParentDashboard() {
                       {childForm.formState.errors.name && <p className="text-destructive text-xs mt-1">{childForm.formState.errors.name.message}</p>}
                     </div>
                     <div>
-                      <input type="number" {...childForm.register("grade")} placeholder="Grade (1-12)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                      <input type="number" {...childForm.register("grade")} placeholder="Grade (1-4 for Junior)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
                       {childForm.formState.errors.grade && <p className="text-destructive text-xs mt-1">{childForm.formState.errors.grade.message}</p>}
                     </div>
                     <div>
-                      <input {...childForm.register("language")} placeholder="Language (e.g. English)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                      <input {...childForm.register("language")} placeholder="Language (e.g. English, Bulgarian)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
                     </div>
                     <div>
-                      <input {...childForm.register("country")} placeholder="Country" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                      <input {...childForm.register("country")} placeholder="Country (e.g. USA, BG, DE, ES, GB)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                      <p className="text-xs text-muted-foreground mt-1">Used to set the right curriculum for your child</p>
                     </div>
                     <button type="submit" disabled={createChild.isPending} className="w-full bg-primary text-white p-3 rounded-xl font-bold hover:bg-primary/90">
                       {createChild.isPending ? "Saving..." : "Save Profile"}
@@ -238,39 +296,66 @@ export function ParentDashboard() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {children.map(child => (
-              <div key={child.id} className="bg-card p-6 rounded-[2rem] shadow-lg border border-border/50 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => openEditDialog(child)}
-                    className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full transition-colors"
-                  >
-                    <Pencil className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteChild(child.id)}
-                    className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center text-3xl mb-4">
-                  {child.avatar || "👦"}
-                </div>
-                <h3 className="text-xl font-bold">{child.name}</h3>
-                <p className="text-muted-foreground mb-4">Grade {child.grade} · {child.country}</p>
-                <div className="flex gap-4">
-                  <div className="flex flex-col">
-                    <span className="text-sm text-muted-foreground">XP</span>
-                    <span className="font-bold text-orange-600">{child.xp}</span>
+            {children.map(child => {
+              const childBadges = (child.badgesEarned ?? []) as Badge[];
+              const level = getLevel(child.xp);
+              return (
+                <div key={child.id} className="bg-card p-6 rounded-[2rem] shadow-lg border border-border/50 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => openEditDialog(child)}
+                      className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-full transition-colors"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteChild(child.id)}
+                      className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm text-muted-foreground">Stars</span>
-                    <span className="font-bold text-yellow-600">{child.stars}</span>
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center text-3xl mb-4">
+                    {child.avatar || "👦"}
                   </div>
+                  <h3 className="text-xl font-bold">{child.name}</h3>
+                  <p className="text-muted-foreground mb-2">Grade {child.grade} · {child.country}</p>
+                  {child.aiCharacter && (
+                    <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1">
+                      Companion: {child.aiCharacter === 'panda' ? '🐼' : child.aiCharacter === 'robot' ? '🤖' : child.aiCharacter === 'fox' ? '🦊' : '🦉'} {child.aiCharacter.charAt(0).toUpperCase() + child.aiCharacter.slice(1)}
+                    </p>
+                  )}
+                  <div className="flex gap-4 mb-3">
+                    <div className="flex flex-col">
+                      <span className="text-xs text-muted-foreground">Level</span>
+                      <span className="font-bold text-primary">{level}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-muted-foreground">XP</span>
+                      <span className="font-bold text-orange-600">{child.xp}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-muted-foreground">Stars</span>
+                      <span className="font-bold text-yellow-600">{child.stars}</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-xs text-muted-foreground">Badges</span>
+                      <span className="font-bold text-purple-600">{childBadges.length}</span>
+                    </div>
+                  </div>
+                  {childBadges.length > 0 && (
+                    <div className="flex gap-1 flex-wrap">
+                      {childBadges.slice(0, 5).map(b => (
+                        <span key={b.id} title={b.title} className="text-lg">{b.icon}</span>
+                      ))}
+                      {childBadges.length > 5 && (
+                        <span className="text-xs text-muted-foreground">+{childBadges.length - 5}</span>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {children.length === 0 && family && (
               <div className="col-span-full py-12 text-center text-muted-foreground bg-muted/10 rounded-3xl border border-dashed">
                 No child profiles yet. Click "Add Child" to get started!
@@ -286,9 +371,9 @@ export function ParentDashboard() {
       )}
 
       {tab === "progress" && (
-        <div className="bg-card p-6 md:p-8 rounded-[2rem] shadow-lg border border-border/50">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold">Subject Performance</h2>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">Learning Progress</h2>
             {children.length > 1 && (
               <select
                 value={progressChildId}
@@ -304,22 +389,149 @@ export function ParentDashboard() {
               <span className="text-sm text-muted-foreground font-medium">{children[0].name}</span>
             )}
           </div>
+
+          {progressChild && (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
+                <div className="text-3xl font-bold text-primary">{getLevel(progressChild.xp)}</div>
+                <div className="text-sm text-muted-foreground mt-1">Current Level</div>
+              </div>
+              <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
+                <div className="text-3xl font-bold text-orange-500">{completedMissions.length}</div>
+                <div className="text-sm text-muted-foreground mt-1">Missions Done</div>
+              </div>
+              <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
+                <div className="text-3xl font-bold text-yellow-500">{progressChild.stars}</div>
+                <div className="text-sm text-muted-foreground mt-1">Stars Earned</div>
+              </div>
+              <div className="bg-card p-4 rounded-2xl border shadow-sm text-center flex flex-col items-center">
+                <div className="flex items-center gap-1">
+                  <Clock className="w-5 h-5 text-blue-400" />
+                  <span className="text-2xl font-bold text-blue-500">{Math.round(estimatedMinutes)}</span>
+                </div>
+                <div className="text-sm text-muted-foreground mt-1">Est. Minutes</div>
+              </div>
+            </div>
+          )}
+
+          {(strengths.length > 0 || weaknesses.length > 0) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {strengths.length > 0 && (
+                <div className="bg-green-50 p-5 rounded-2xl border border-green-200">
+                  <h3 className="font-bold mb-3 flex items-center gap-2 text-green-700">
+                    <TrendingUp className="w-5 h-5" /> Subject Strengths
+                  </h3>
+                  {strengths.map(s => (
+                    <div key={s.subject} className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-green-800">{s.subject}</span>
+                      <span className="text-sm font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">{s.score}%</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {weaknesses.length > 0 && (
+                <div className="bg-orange-50 p-5 rounded-2xl border border-orange-200">
+                  <h3 className="font-bold mb-3 flex items-center gap-2 text-orange-700">
+                    <TrendingDown className="w-5 h-5" /> Needs Practice
+                  </h3>
+                  {weaknesses.map(s => (
+                    <div key={s.subject} className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-orange-800">{s.subject}</span>
+                      <span className="text-sm font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">{s.score}%</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="bg-card p-6 rounded-2xl border shadow-sm">
+            <h3 className="font-bold mb-4 flex items-center gap-2">
+              🗺️ Unlocked Learning Zones
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              {ZONE_ORDER.map(zoneName => {
+                const isUnlocked = unlockedZones.includes(zoneName);
+                return (
+                  <div
+                    key={zoneName}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border ${
+                      isUnlocked ? 'bg-green-50 border-green-200 text-green-700' : 'bg-muted/50 border-muted text-muted-foreground opacity-60'
+                    }`}
+                  >
+                    <span>{ZONE_EMOJIS[zoneName]}</span>
+                    <span>{zoneName}</span>
+                    {isUnlocked ? <span>✅</span> : <span>🔒</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {badges.length > 0 && (
+            <div className="bg-card p-6 rounded-2xl border shadow-sm">
+              <h3 className="font-bold mb-4 flex items-center gap-2">
+                <Award className="w-5 h-5 text-yellow-500" /> Earned Badges ({badges.length})
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {badges.map(badge => (
+                  <div key={badge.id} className="flex flex-col items-center gap-1 p-3 bg-yellow-50 rounded-xl border border-yellow-200 min-w-[72px] text-center">
+                    <span className="text-2xl">{badge.icon}</span>
+                    <span className="text-xs font-bold">{badge.title}</span>
+                    <span className="text-[10px] text-muted-foreground">{new Date(badge.earnedAt).toLocaleDateString()}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {progress.length > 0 ? (
-            <div className="h-80 w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={progress}>
-                  <XAxis dataKey="subject" />
-                  <YAxis />
-                  <Tooltip
-                    cursor={{ fill: 'transparent' }}
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
-                  />
-                  <Bar dataKey="score" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="bg-card p-6 rounded-2xl border shadow-sm">
+              <h3 className="font-bold mb-4">Subject Performance Chart</h3>
+              <div className="h-64 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={avgBySubject}>
+                    <XAxis dataKey="subject" tick={{ fontSize: 12 }} />
+                    <YAxis domain={[0, 100]} />
+                    <Tooltip
+                      cursor={{ fill: 'transparent' }}
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+                    />
+                    <Bar dataKey="score" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           ) : (
-            <p className="text-muted-foreground text-center py-10">Not enough data to display progress yet.</p>
+            <p className="text-muted-foreground text-center py-10 bg-card rounded-2xl border">Not enough progress data yet. Encourage your child to complete missions!</p>
+          )}
+
+          {missions.length > 0 && (
+            <div className="bg-card p-6 rounded-2xl border shadow-sm">
+              <h3 className="font-bold mb-4 flex items-center gap-2">
+                <Activity className="w-5 h-5" /> Mission Activity
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
+                {completedMissions.slice(-10).reverse().map(m => (
+                  <div key={m.id} className="flex items-center gap-3 p-3 bg-green-50 rounded-xl border border-green-100">
+                    <span className="text-green-500 text-lg">✅</span>
+                    <div>
+                      <p className="text-sm font-medium">{m.title}</p>
+                      <p className="text-xs text-muted-foreground">{m.subject} · {m.completedAt ? new Date(m.completedAt as string).toLocaleDateString() : ''}</p>
+                    </div>
+                  </div>
+                ))}
+                {pendingMissions.slice(0, 4).map(m => (
+                  <div key={m.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-xl border">
+                    <span className="text-muted-foreground text-lg">⏳</span>
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">{m.title}</p>
+                      <p className="text-xs text-muted-foreground">{m.subject} · Pending</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -376,7 +588,7 @@ export function ParentDashboard() {
               {editForm.formState.errors.grade && <p className="text-destructive text-xs mt-1">{editForm.formState.errors.grade.message}</p>}
             </div>
             <input {...editForm.register("language")} placeholder="Language (e.g. English)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
-            <input {...editForm.register("country")} placeholder="Country" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            <input {...editForm.register("country")} placeholder="Country (e.g. USA, BG, DE, ES, GB)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
             <button type="submit" disabled={updateChild.isPending} className="w-full bg-primary text-white p-3 rounded-xl font-bold hover:bg-primary/90">
               {updateChild.isPending ? "Saving..." : "Save Changes"}
             </button>

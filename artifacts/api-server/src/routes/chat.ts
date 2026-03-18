@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, chatMessagesTable, memoriesTable } from "@workspace/db";
+import { db, chatMessagesTable, memoriesTable, childrenTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { SendChatMessageBody } from "@workspace/api-zod";
 import { requireAuth, getUser } from "../lib/auth";
@@ -52,7 +52,20 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
     .values({ userId, childId: childId ?? null, module, role: "user", content })
     .returning();
 
-  const aiContent = getAIResponse(module, content);
+  let context: { grade?: number; country?: string; aiCharacter?: string; childName?: string } = {};
+  if (module === "junior" && childId) {
+    const [childRecord] = await db.select().from(childrenTable).where(eq(childrenTable.id, childId));
+    if (childRecord) {
+      context = {
+        grade: childRecord.grade,
+        country: childRecord.country,
+        aiCharacter: childRecord.aiCharacter ?? undefined,
+        childName: childRecord.name,
+      };
+    }
+  }
+
+  const aiContent = getAIResponse(module, content, context);
 
   const [assistantMsg] = await db
     .insert(chatMessagesTable)

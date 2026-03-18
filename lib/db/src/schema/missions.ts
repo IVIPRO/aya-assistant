@@ -8,6 +8,8 @@ export const missionsTable = pgTable("missions", {
   title: text("title").notNull(),
   description: text("description").notNull(),
   subject: text("subject").notNull(),
+  zone: text("zone"),
+  difficulty: text("difficulty").notNull().default("easy"),
   xpReward: integer("xp_reward").notNull().default(50),
   starReward: integer("star_reward").notNull().default(1),
   completed: boolean("completed").notNull().default(false),

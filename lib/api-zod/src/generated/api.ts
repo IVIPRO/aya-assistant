@@ -99,9 +99,22 @@ export const ListChildrenResponseItem = zod.object({
   language: zod.string(),
   country: zod.string(),
   avatar: zod.string().nullable(),
+  aiCharacter: zod.string().nullish(),
+  badgesEarned: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        title: zod.string(),
+        icon: zod.string(),
+        description: zod.string(),
+        earnedAt: zod.date(),
+      }),
+    )
+    .nullish(),
   xp: zod.number(),
   stars: zod.number(),
   createdAt: zod.date(),
+  updatedAt: zod.date(),
 });
 export const ListChildrenResponse = zod.array(ListChildrenResponseItem);
 
@@ -116,6 +129,7 @@ export const CreateChildBody = zod.object({
   language: zod.string(),
   country: zod.string(),
   avatar: zod.string().nullish(),
+  aiCharacter: zod.string().nullish(),
 });
 
 /**
@@ -133,9 +147,22 @@ export const GetChildResponse = zod.object({
   language: zod.string(),
   country: zod.string(),
   avatar: zod.string().nullable(),
+  aiCharacter: zod.string().nullish(),
+  badgesEarned: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        title: zod.string(),
+        icon: zod.string(),
+        description: zod.string(),
+        earnedAt: zod.date(),
+      }),
+    )
+    .nullish(),
   xp: zod.number(),
   stars: zod.number(),
   createdAt: zod.date(),
+  updatedAt: zod.date(),
 });
 
 /**
@@ -153,6 +180,7 @@ export const UpdateChildBody = zod.object({
   avatar: zod.string().nullish(),
   xp: zod.number().nullish(),
   stars: zod.number().nullish(),
+  aiCharacter: zod.string().nullish(),
 });
 
 export const UpdateChildResponse = zod.object({
@@ -163,9 +191,22 @@ export const UpdateChildResponse = zod.object({
   language: zod.string(),
   country: zod.string(),
   avatar: zod.string().nullable(),
+  aiCharacter: zod.string().nullish(),
+  badgesEarned: zod
+    .array(
+      zod.object({
+        id: zod.string(),
+        title: zod.string(),
+        icon: zod.string(),
+        description: zod.string(),
+        earnedAt: zod.date(),
+      }),
+    )
+    .nullish(),
   xp: zod.number(),
   stars: zod.number(),
   createdAt: zod.date(),
+  updatedAt: zod.date(),
 });
 
 /**
@@ -244,12 +285,18 @@ export const ListMissionsQueryParams = zod.object({
   childId: zod.coerce.number(),
 });
 
+export const listMissionsResponseDifficultyDefault = `easy`;
+
 export const ListMissionsResponseItem = zod.object({
   id: zod.number(),
   childId: zod.number(),
   title: zod.string(),
   description: zod.string(),
   subject: zod.string(),
+  zone: zod.string().nullish(),
+  difficulty: zod
+    .enum(["easy", "medium", "hard"])
+    .default(listMissionsResponseDifficultyDefault),
   xpReward: zod.number(),
   starReward: zod.number(),
   completed: zod.boolean(),
@@ -265,12 +312,18 @@ export const CompleteMissionParams = zod.object({
   id: zod.coerce.number(),
 });
 
+export const completeMissionResponseDifficultyDefault = `easy`;
+
 export const CompleteMissionResponse = zod.object({
   id: zod.number(),
   childId: zod.number(),
   title: zod.string(),
   description: zod.string(),
   subject: zod.string(),
+  zone: zod.string().nullish(),
+  difficulty: zod
+    .enum(["easy", "medium", "hard"])
+    .default(completeMissionResponseDifficultyDefault),
   xpReward: zod.number(),
   starReward: zod.number(),
   completed: zod.boolean(),

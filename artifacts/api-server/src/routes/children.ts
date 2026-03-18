@@ -3,17 +3,9 @@ import { db, childrenTable, missionsTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
 import { CreateChildBody, UpdateChildBody, GetChildParams, UpdateChildParams, DeleteChildParams } from "@workspace/api-zod";
 import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
+import { getMissionsForChild } from "../lib/curriculum";
 
 const router: IRouter = Router();
-
-const STARTER_MISSIONS = [
-  { title: "Count to 20", description: "Practice counting from 1 to 20 out loud", subject: "Math", xpReward: 30, starReward: 1 },
-  { title: "Read a short story", description: "Read a short story and tell AYA what it was about", subject: "Reading", xpReward: 40, starReward: 1 },
-  { title: "Draw your family", description: "Draw a picture of your family and describe each person", subject: "Art", xpReward: 25, starReward: 1 },
-  { title: "Name 5 animals", description: "Name 5 animals and tell one fact about each", subject: "Science", xpReward: 35, starReward: 1 },
-  { title: "Learn your address", description: "Practice saying your home address", subject: "Life Skills", xpReward: 20, starReward: 1 },
-  { title: "Identify shapes", description: "Find 3 circles, 3 squares, and 3 triangles around the house", subject: "Math", xpReward: 30, starReward: 1 },
-];
 
 router.get("/children", requireAuth, async (req, res): Promise<void> => {
   const { userId } = getUser(req);
@@ -45,15 +37,27 @@ router.post("/children", requireAuth, async (req, res): Promise<void> => {
 
   const [child] = await db
     .insert(childrenTable)
-    .values({ ...parsed.data, familyId, avatar, xp: 0, stars: 0 })
+    .values({
+      ...parsed.data,
+      familyId,
+      avatar,
+      aiCharacter: parsed.data.aiCharacter ?? null,
+      badgesEarned: [],
+      xp: 0,
+      stars: 0,
+    })
     .returning();
 
+  const curriculumMissions = getMissionsForChild(parsed.data.country, parsed.data.grade);
+
   await db.insert(missionsTable).values(
-    STARTER_MISSIONS.map(m => ({
+    curriculumMissions.map(m => ({
       childId: child.id,
       title: m.title,
       description: m.description,
       subject: m.subject,
+      zone: m.zone,
+      difficulty: m.difficulty,
       xpReward: m.xpReward,
       starReward: m.starReward,
       completed: false,
@@ -114,6 +118,7 @@ router.patch("/children/:id", requireAuth, async (req, res): Promise<void> => {
   if (parsed.data.avatar !== null && parsed.data.avatar !== undefined) updateData.avatar = parsed.data.avatar;
   if (parsed.data.xp !== null && parsed.data.xp !== undefined) updateData.xp = parsed.data.xp;
   if (parsed.data.stars !== null && parsed.data.stars !== undefined) updateData.stars = parsed.data.stars;
+  if ("aiCharacter" in parsed.data && parsed.data.aiCharacter !== undefined) updateData.aiCharacter = parsed.data.aiCharacter;
 
   const [child] = await db
     .update(childrenTable)

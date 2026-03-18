@@ -5,6 +5,7 @@
  * AYA Assistant API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { Badge } from "./badge";
 
 export interface Child {
   id: number;
@@ -15,7 +16,12 @@ export interface Child {
   country: string;
   /** @nullable */
   avatar: string | null;
+  /** @nullable */
+  aiCharacter?: string | null;
+  /** @nullable */
+  badgesEarned?: Badge[] | null;
   xp: number;
   stars: number;
   createdAt: Date;
+  updatedAt: Date;
 }

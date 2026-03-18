@@ -1,24 +1,38 @@
 import { Layout } from "@/components/layout";
 import { Link } from "wouter";
-import { Smile, BookOpen, CalendarHeart, HeartHandshake, ArrowRight, UserPlus } from "lucide-react";
+import { Smile, BookOpen, CalendarHeart, HeartHandshake, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useGetFamily, useListChildren, getGetFamilyQueryKey, getListChildrenQueryKey } from "@workspace/api-client-react";
-import { useAuth as useLocalAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
+import type { Badge } from "@workspace/api-client-react";
+
+const CHARACTER_EMOJIS: Record<string, string> = {
+  panda: "🐼",
+  robot: "🤖",
+  fox: "🦊",
+  owl: "🦉",
+};
+
+function getLevel(xp: number): number {
+  return Math.floor(xp / 100) + 1;
+}
 
 export function Dashboard() {
-  const { user } = useLocalAuth();
+  const { user, activeChildId, setActiveChildId } = useAuth();
   const { data: family } = useGetFamily({ query: { queryKey: getGetFamilyQueryKey(), retry: false } });
   const { data: children = [] } = useListChildren({ query: { queryKey: getListChildrenQueryKey(), enabled: !!family } });
+
+  const activeChild = children.find(c => c.id === activeChildId) ?? children[0] ?? null;
 
   const modules = [
     {
       id: "junior",
       title: "AYA Junior",
-      desc: "Playful learning & missions for kids (Grades 1-4)",
+      desc: "Learning World for Grades 1–4",
       icon: Smile,
       color: "bg-junior text-junior-foreground",
       link: "/junior",
-      delay: 0.1
+      delay: 0.1,
     },
     {
       id: "student",
@@ -27,7 +41,7 @@ export function Dashboard() {
       icon: BookOpen,
       color: "bg-student text-student-foreground",
       link: "/student",
-      delay: 0.2
+      delay: 0.2,
     },
     {
       id: "family",
@@ -36,7 +50,7 @@ export function Dashboard() {
       icon: CalendarHeart,
       color: "bg-family text-family-foreground",
       link: "/family",
-      delay: 0.3
+      delay: 0.3,
     },
     {
       id: "psychology",
@@ -45,8 +59,8 @@ export function Dashboard() {
       icon: HeartHandshake,
       color: "bg-psychology text-psychology-foreground",
       link: "/psychology",
-      delay: 0.4
-    }
+      delay: 0.4,
+    },
   ];
 
   return (
@@ -61,7 +75,7 @@ export function Dashboard() {
       </div>
 
       {!family && user?.role === "parent" && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-primary/10 border border-primary/20 rounded-3xl p-6 mb-8 flex flex-col md:flex-row items-center justify-between gap-4"
@@ -79,6 +93,8 @@ export function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {modules.map((m) => {
           const Icon = m.icon;
+          const isJunior = m.id === "junior";
+
           return (
             <Link key={m.id} href={m.link}>
               <motion.div
@@ -88,18 +104,38 @@ export function Dashboard() {
                 className="group relative bg-card p-8 rounded-[2rem] shadow-lg shadow-black/5 border border-border/50 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer overflow-hidden"
               >
                 <div className={`absolute top-0 right-0 w-32 h-32 opacity-10 rounded-full blur-3xl -mr-10 -mt-10 transition-transform duration-500 group-hover:scale-150 ${m.color.split(' ')[0]}`} />
-                
+
                 <div className="flex items-start justify-between relative z-10">
                   <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg mb-6 transform transition-transform group-hover:scale-110 group-hover:rotate-3 ${m.color}`}>
-                    <Icon className="w-8 h-8" />
+                    {isJunior && activeChild?.aiCharacter
+                      ? <span className="text-2xl">{CHARACTER_EMOJIS[activeChild.aiCharacter] ?? <Icon className="w-8 h-8" />}</span>
+                      : <Icon className="w-8 h-8" />
+                    }
                   </div>
                   <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center group-hover:bg-foreground group-hover:text-background transition-colors">
                     <ArrowRight className="w-5 h-5" />
                   </div>
                 </div>
-                
+
                 <h2 className="text-2xl font-display font-bold text-foreground mb-2">{m.title}</h2>
                 <p className="text-muted-foreground">{m.desc}</p>
+
+                {isJunior && activeChild && (
+                  <div className="mt-4 flex items-center gap-3 pt-3 border-t border-border/50">
+                    <div className="text-xl">{activeChild.avatar || "👦"}</div>
+                    <div>
+                      <p className="text-sm font-bold">{activeChild.name}</p>
+                      <p className="text-xs text-muted-foreground">Level {getLevel(activeChild.xp)} · {activeChild.xp} XP · ⭐ {activeChild.stars}</p>
+                    </div>
+                    {((activeChild.badgesEarned ?? []) as Badge[]).length > 0 && (
+                      <div className="ml-auto flex gap-0.5">
+                        {((activeChild.badgesEarned ?? []) as Badge[]).slice(0, 3).map(b => (
+                          <span key={b.id} className="text-base" title={b.title}>{b.icon}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </motion.div>
             </Link>
           );
@@ -111,14 +147,21 @@ export function Dashboard() {
           <h3 className="text-xl font-bold mb-4">Quick switch child</h3>
           <div className="flex gap-4 overflow-x-auto pb-4 hide-scrollbar">
             {children.map(child => (
-              <div key={child.id} className="bg-card px-4 py-3 rounded-2xl shadow-sm border border-border flex items-center gap-3 shrink-0 cursor-pointer hover:border-primary transition-colors">
+              <div
+                key={child.id}
+                onClick={() => setActiveChildId(child.id)}
+                className={`bg-card px-4 py-3 rounded-2xl shadow-sm border flex items-center gap-3 shrink-0 cursor-pointer transition-colors ${activeChildId === child.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary'}`}
+              >
                 <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-xl">
                   {child.avatar || "👦"}
                 </div>
                 <div>
                   <p className="font-bold text-sm">{child.name}</p>
-                  <p className="text-xs text-muted-foreground">Grade {child.grade}</p>
+                  <p className="text-xs text-muted-foreground">Grade {child.grade} · Lv {getLevel(child.xp)}</p>
                 </div>
+                {child.aiCharacter && (
+                  <span className="text-lg">{CHARACTER_EMOJIS[child.aiCharacter]}</span>
+                )}
               </div>
             ))}
           </div>

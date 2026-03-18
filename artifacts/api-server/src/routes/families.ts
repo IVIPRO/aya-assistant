@@ -22,7 +22,7 @@ router.get("/families", requireAuth, async (req, res): Promise<void> => {
 });
 
 router.post("/families", requireAuth, async (req, res): Promise<void> => {
-  const { userId } = getUser(req);
+  const { userId, email, role } = getUser(req);
   const parsed = CreateFamilyBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -36,7 +36,9 @@ router.post("/families", requireAuth, async (req, res): Promise<void> => {
 
   await db.update(usersTable).set({ familyId: family.id }).where(eq(usersTable.id, userId));
 
-  res.status(201).json(family);
+  const token = signToken({ userId, email, role, familyId: family.id });
+
+  res.status(201).json({ family, token });
 });
 
 export default router;

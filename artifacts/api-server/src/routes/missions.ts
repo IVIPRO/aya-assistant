@@ -13,6 +13,18 @@ router.get("/missions", requireAuth, async (req, res): Promise<void> => {
     return;
   }
   const childId = parseInt(childIdStr, 10);
+  if (isNaN(childId)) {
+    res.status(400).json({ error: "Invalid childId" });
+    return;
+  }
+
+  const { familyId } = getUser(req);
+  const [child] = await db.select().from(childrenTable)
+    .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
 
   const missions = await db
     .select()
@@ -37,22 +49,27 @@ router.post("/missions/:id/complete", requireAuth, async (req, res): Promise<voi
     return;
   }
 
+  const { familyId } = getUser(req);
+  const [child] = await db.select().from(childrenTable)
+    .where(and(eq(childrenTable.id, mission.childId), eq(childrenTable.familyId, familyId ?? -1)));
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
   const [updated] = await db
     .update(missionsTable)
     .set({ completed: true, completedAt: new Date() })
     .where(eq(missionsTable.id, params.data.id))
     .returning();
 
-  const [child] = await db.select().from(childrenTable).where(eq(childrenTable.id, mission.childId));
-  if (child) {
-    await db
-      .update(childrenTable)
-      .set({
-        xp: (child.xp || 0) + mission.xpReward,
-        stars: (child.stars || 0) + mission.starReward,
-      })
-      .where(eq(childrenTable.id, mission.childId));
-  }
+  await db
+    .update(childrenTable)
+    .set({
+      xp: (child.xp || 0) + mission.xpReward,
+      stars: (child.stars || 0) + mission.starReward,
+    })
+    .where(eq(childrenTable.id, mission.childId));
 
   res.json(updated);
 });

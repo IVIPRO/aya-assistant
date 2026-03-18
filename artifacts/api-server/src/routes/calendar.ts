@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, calendarEventsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { CreateCalendarEventBody, DeleteCalendarEventParams } from "@workspace/api-zod";
 import { requireAuth, getUser } from "../lib/auth";
 
@@ -58,7 +58,16 @@ router.delete("/calendar/:id", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  await db.delete(calendarEventsTable).where(eq(calendarEventsTable.id, params.data.id));
+  const { familyId } = getUser(req);
+  const [existing] = await db.select().from(calendarEventsTable)
+    .where(and(eq(calendarEventsTable.id, params.data.id), eq(calendarEventsTable.familyId, familyId ?? -1)));
+  if (!existing) {
+    res.status(404).json({ error: "Event not found" });
+    return;
+  }
+
+  await db.delete(calendarEventsTable)
+    .where(and(eq(calendarEventsTable.id, params.data.id), eq(calendarEventsTable.familyId, familyId ?? -1)));
   res.sendStatus(204);
 });
 

@@ -94,7 +94,15 @@ router.patch("/children/:id", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const updateData: Record<string, any> = {};
+  const { familyId } = getUser(req);
+  const [existing] = await db.select().from(childrenTable)
+    .where(and(eq(childrenTable.id, params.data.id), eq(childrenTable.familyId, familyId ?? -1)));
+  if (!existing) {
+    res.status(404).json({ error: "Child not found" });
+    return;
+  }
+
+  const updateData: Record<string, unknown> = {};
   if (parsed.data.name !== null && parsed.data.name !== undefined) updateData.name = parsed.data.name;
   if (parsed.data.grade !== null && parsed.data.grade !== undefined) updateData.grade = parsed.data.grade;
   if (parsed.data.language !== null && parsed.data.language !== undefined) updateData.language = parsed.data.language;
@@ -106,7 +114,7 @@ router.patch("/children/:id", requireAuth, async (req, res): Promise<void> => {
   const [child] = await db
     .update(childrenTable)
     .set(updateData)
-    .where(eq(childrenTable.id, params.data.id))
+    .where(and(eq(childrenTable.id, params.data.id), eq(childrenTable.familyId, familyId ?? -1)))
     .returning();
 
   if (!child) {
@@ -124,7 +132,16 @@ router.delete("/children/:id", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  await db.delete(childrenTable).where(eq(childrenTable.id, params.data.id));
+  const { familyId } = getUser(req);
+  const [existing] = await db.select().from(childrenTable)
+    .where(and(eq(childrenTable.id, params.data.id), eq(childrenTable.familyId, familyId ?? -1)));
+  if (!existing) {
+    res.status(404).json({ error: "Child not found" });
+    return;
+  }
+
+  await db.delete(childrenTable)
+    .where(and(eq(childrenTable.id, params.data.id), eq(childrenTable.familyId, familyId ?? -1)));
   res.sendStatus(204);
 });
 

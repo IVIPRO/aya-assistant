@@ -1,0 +1,30 @@
+packages:
+  "framer-motion": "For playful animations in Junior mode and smooth page transitions"
+  "date-fns": "For formatting and manipulating dates in the Family Calendar"
+  "recharts": "For rendering progress charts in the Parent Dashboard"
+  "@hookform/resolvers": "Zod validation for forms"
+  "react-hook-form": "Managing complex forms like child creation and task creation"
+  "clsx": "Utility for constructing className strings conditionally"
+  "tailwind-merge": "Utility to safely merge Tailwind classes"
+
+images:
+  - path: "artifacts/aya-assistant/public/images/hero-family.png"
+    description: "A warm, modern 3D illustration of a happy diverse family interacting with a friendly glowing AI orb, soft pastel colors, clean lighting"
+    aspect_ratio: "16:9"
+  - path: "artifacts/aya-assistant/public/images/junior-mascot.png"
+    description: "A cute, colorful, friendly robot owl mascot with a big smile, 3D clay style, bright vibrant colors"
+    aspect_ratio: "1:1"
+  - path: "artifacts/aya-assistant/public/images/student-mascot.png"
+    description: "A smart, friendly robot dog wearing glasses and holding a book, 3D clay style, soft blue and teal colors"
+    aspect_ratio: "1:1"
+  - path: "artifacts/aya-assistant/public/images/psychology-mascot.png"
+    description: "A calming, soft glowing orb with gentle eyes surrounded by floating abstract shapes, warm coral and peach colors, 3D ambient style"
+    aspect_ratio: "1:1"
+  - path: "artifacts/aya-assistant/public/images/empty-state.png"
+    description: "A simple, soft 3D illustration of an empty open box with a little sprout growing out of it, minimal, pastel"
+    aspect_ratio: "1:1"
+
+notes:
+  - Using generated hooks from @workspace/api-client-react
+  - Overriding window.fetch in main.tsx to automatically append the Bearer token for all customFetch calls
+  - Storing token and activeChildId in localStorage

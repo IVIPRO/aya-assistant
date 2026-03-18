@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useListChatMessages, useSendChatMessage, ListChatMessagesModule } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
-import { Send, Mic, Loader2 } from "lucide-react";
+import { Send, Mic, Loader2, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "./layout";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,7 @@ interface ChatProps {
   themeColor: "primary" | "junior" | "student" | "psychology";
   greeting?: string;
   character?: string | null;
+  suggestedPrompts?: string[];
 }
 
 const CHARACTER_EMOJIS: Record<string, string> = {
@@ -21,13 +22,26 @@ const CHARACTER_EMOJIS: Record<string, string> = {
 };
 
 const CHARACTER_NAMES: Record<string, string> = {
-  panda: "Panda Teacher",
-  robot: "Robot Guide",
-  fox: "Fox Mentor",
-  owl: "Owl Professor",
+  panda: "AYA Panda",
+  robot: "AYA Robot",
+  fox: "AYA Fox",
+  owl: "AYA Owl",
 };
 
-export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I help you today?", character }: ChatProps) {
+const CHARACTER_TONES: Record<string, string> = {
+  panda: "gentle",
+  robot: "encouraging",
+  fox: "playful",
+  owl: "calm",
+};
+
+export function Chat({
+  module,
+  themeColor,
+  greeting = "Hello! I'm AYA. How can I help you today?",
+  character,
+  suggestedPrompts,
+}: ChatProps) {
   const { activeChildId } = useAuth();
   const { toast } = useToast();
   const [input, setInput] = useState("");
@@ -48,30 +62,36 @@ export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I
     scrollToBottom();
   }, [messages, sendMutation.isPending]);
 
-  const handleSend = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (!input.trim() || sendMutation.isPending) return;
-
-    const content = input;
-    setInput("");
-
-    try {
-      await sendMutation.mutateAsync({
-        data: {
-          module,
-          content,
-          childId: activeChildId
+  const doSend = (content: string, onError?: () => void) => {
+    if (!content.trim() || sendMutation.isPending) return;
+    sendMutation.mutate(
+      { data: { module, content, childId: activeChildId } },
+      {
+        onSuccess: () => {
+          refetch().catch(() => {});
+        },
+        onError: () => {
+          toast({
+            title: "Error sending message",
+            description: "Please try again.",
+            variant: "destructive"
+          });
+          onError?.();
         }
-      });
-      refetch();
-    } catch {
-      toast({
-        title: "Error sending message",
-        description: "Please try again.",
-        variant: "destructive"
-      });
-      setInput(content);
-    }
+      }
+    );
+  };
+
+  const handleSend = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    const content = input;
+    if (!content.trim() || sendMutation.isPending) return;
+    setInput("");
+    doSend(content, () => setInput(content));
+  };
+
+  const handlePromptClick = (prompt: string) => {
+    doSend(prompt);
   };
 
   const handleMic = () => {
@@ -91,19 +111,34 @@ export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I
   const bubbleColor = colorMap[themeColor];
   const charEmoji = character ? (CHARACTER_EMOJIS[character] ?? "✨") : null;
   const charName = character ? (CHARACTER_NAMES[character] ?? "AYA Junior") : null;
+  const charTone = character ? CHARACTER_TONES[character] : null;
+  const isJunior = module === "junior";
 
   return (
-    <div className="flex flex-col h-[calc(100vh-12rem)] md:h-[calc(100vh-8rem)] bg-card rounded-3xl shadow-xl shadow-black/5 border border-border/50 overflow-hidden">
+    <div className="flex flex-col h-[calc(100vh-14rem)] md:h-[calc(100vh-10rem)] bg-card rounded-3xl shadow-xl shadow-black/5 border border-border/50 overflow-hidden">
       <div className="px-6 py-4 border-b border-border/50 bg-muted/20 flex items-center gap-4">
-        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shadow-md text-lg", bubbleColor)}>
+        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-md text-2xl flex-shrink-0", bubbleColor)}>
           {charEmoji ?? "✨"}
         </div>
-        <div>
-          <h2 className="font-display font-semibold text-lg capitalize">
-            {charName ?? `AYA ${module}`}
-          </h2>
-          <p className="text-xs text-muted-foreground">
-            {character ? "Your personal learning companion" : "Always here to help"}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="font-display font-semibold text-lg capitalize">
+              {charName ?? `AYA ${module}`}
+            </h2>
+            {charTone && isJunior && (
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-junior/20 text-junior-foreground px-2 py-0.5 rounded-full border border-junior/30">
+                {charTone} style
+              </span>
+            )}
+            {isJunior && (
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2 py-0.5 rounded-full border border-green-200 flex items-center gap-1">
+                <Sparkles className="w-2.5 h-2.5" />
+                Montessori
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground truncate">
+            {character ? "Your personal learning companion · guides discovery, not just answers" : "Always here to help"}
           </p>
         </div>
       </div>
@@ -180,6 +215,21 @@ export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I
         <div ref={messagesEndRef} />
       </div>
 
+      {isJunior && suggestedPrompts && suggestedPrompts.length > 0 && (
+        <div className="px-4 py-2 border-t border-border/30 bg-muted/10 flex gap-2 overflow-x-auto hide-scrollbar">
+          {suggestedPrompts.map((prompt) => (
+            <button
+              key={prompt}
+              onClick={() => handlePromptClick(prompt)}
+              disabled={sendMutation.isPending}
+              className="flex-shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full border border-junior/40 bg-junior/10 text-junior-foreground hover:bg-junior/20 transition-colors disabled:opacity-50"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="p-4 bg-card border-t border-border/50">
         <form onSubmit={handleSend} className="flex items-end gap-2 bg-muted/30 p-2 rounded-3xl border border-border/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 transition-all">
           <button
@@ -193,7 +243,7 @@ export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
+            placeholder={isJunior ? "Ask me anything! I'm here to guide you… 🌟" : "Type your message..."}
             className="flex-1 bg-transparent border-none focus:ring-0 resize-none max-h-32 min-h-[44px] py-3 px-2 text-foreground placeholder:text-muted-foreground"
             rows={1}
             onKeyDown={(e) => {

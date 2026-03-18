@@ -1,0 +1,213 @@
+Continue developing AYA Family Hub by upgrading AYA Junior into a guided AI companion learning experience for children.
+
+Goal:
+Turn AYA Junior from a simple learning module into an AI companion-based Montessori learning product for children in primary school (classes 1–4 depending on country).
+
+Do not redesign the whole platform.
+Extend the current architecture professionally and keep it scalable.
+
+====================================
+1. Core Product Direction
+AYA Junior should feel like an AI learning companion for children, supervised by parents.
+
+The experience should combine:
+- AI companion character
+- Montessori teaching principles
+- guided learning missions
+- light gamification
+- parent-controlled setup
+
+====================================
+2. AYA Companion System
+
+Create a structured companion system inside AYA Junior.
+
+AYA is the main brand character.
+Add selectable companion styles for the child:
+
+- AYA Panda
+- AYA Fox
+- AYA Robot
+- AYA Owl
+
+Each companion should have:
+- display name
+- short personality description
+- visual placeholder/avatar card
+- teaching tone metadata
+
+Example tones:
+- gentle
+- playful
+- encouraging
+- calm
+
+The parent should be able to select the child’s companion.
+The selected companion should be displayed throughout the Junior experience.
+
+====================================
+3. Junior Welcome Experience
+
+Upgrade the AYA Junior entry flow.
+
+When entering AYA Junior for a selected child, show a proper welcome screen with:
+
+- child name
+- selected AYA companion
+- class / grade
+- country
+- preferred language
+- level
+- XP progress
+- a friendly welcome message
+
+Example:
+"Welcome back, Maggie! AYA Panda is ready for today’s learning adventure."
+
+Add buttons:
+- Enter Learning World
+- Chat with AYA
+- Change Companion
+
+====================================
+4. Montessori Teaching Mode
+
+Add a Montessori-style teaching behavior layer for AYA Junior.
+
+The AI companion should:
+- encourage discovery instead of immediately giving the answer
+- ask guiding questions
+- break learning into small steps
+- praise effort and curiosity
+- use warm, simple and child-friendly language
+- keep the tone calm, supportive and playful
+
+This should be represented in the architecture and UI text so it is clear that AYA Junior follows a Montessori-inspired teaching style.
+
+====================================
+5. Guided Mission Structure
+
+Improve the learning zones so each zone feels like a guided mission system.
+
+For each zone, support:
+- mission title
+- subject
+- short goal
+- difficulty level
+- XP reward
+- completion state
+
+Examples:
+- Count to 10
+- Match the right word
+- Find the missing number
+- Read the short story
+
+Do not build massive content.
+Create a reusable mission structure and sample mission cards for MVP.
+
+====================================
+6. AI Chat Upgrade for Junior
+
+Upgrade the Junior chat area so it feels like a child-safe AI teacher chat.
+
+Requirements:
+- companion name and avatar visible
+- Montessori-style greeting
+- child-friendly prompt suggestions
+- simple input area
+- safe and supportive tone
+
+Example suggested prompts:
+- Help me with math
+- Let’s read together
+- Ask me a logic question
+- Practice English
+
+====================================
+7. Voice-Ready Architecture
+
+Prepare AYA Junior for future AI voice and video teacher features.
+
+Do not implement full video generation yet.
+
+Instead:
+- add a “voice-ready” structure in the code
+- create placeholder UI elements for:
+  - Talk with AYA
+  - Listen mode
+  - Future video teacher
+- keep the architecture modular for future integration of:
+  - text-to-speech
+  - speech-to-text
+  - animated avatar
+  - AI video teacher
+
+====================================
+8. Parent Supervision Layer
+
+In the parent area, show the selected companion and learning mode for each child.
+
+Add visibility for:
+- active companion
+- recent mission activity
+- current level
+- recent strengths
+- areas needing support
+
+Keep it clean and not overloaded.
+
+====================================
+9. Data Model Additions
+
+Extend the data model carefully for MVP.
+
+Suggested additions:
+- child_companion_preference
+- companion_tone
+- mission_templates
+- child_mission_progress
+- junior_session_summary
+
+Keep the implementation lightweight and scalable.
+
+====================================
+10. UX / Design Direction
+
+The AYA Junior experience should feel:
+- child-friendly
+- warm
+- magical but clean
+- emotionally safe
+- easy for parents to understand
+
+Avoid clutter.
+Do not overbuild animations.
+Focus on structure, usability and product quality.
+
+====================================
+11. Technical Requirements
+
+- maintain current routing and architecture
+- no TypeScript errors
+- reusable components
+- clean modular implementation
+- stable MVP behavior
+- avoid unnecessary refactors
+
+====================================
+12. Important Scope Rule
+
+This prompt is for:
+- AI companion system
+- Montessori guided experience
+- mission structure
+- voice/video-ready placeholders
+
+This prompt is NOT for:
+- full real-time voice implementation
+- full video avatar generation
+- advanced long-term memory orchestration
+- massive curriculum libraries
+
+Build the professional MVP foundation only.

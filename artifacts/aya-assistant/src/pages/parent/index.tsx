@@ -26,6 +26,14 @@ import { useAuth } from "@/hooks/use-auth";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 
 const ZONE_ORDER = ["Math Island", "Reading Forest", "Logic Mountain", "English City", "Science Planet"];
+
+const COMPANION_DATA: Record<string, { emoji: string; name: string; tone: string; color: string; accentColor: string }> = {
+  panda: { emoji: "🐼", name: "AYA Panda", tone: "gentle", color: "bg-green-50 border-green-200", accentColor: "text-green-700" },
+  robot: { emoji: "🤖", name: "AYA Robot", tone: "encouraging", color: "bg-blue-50 border-blue-200", accentColor: "text-blue-700" },
+  fox:   { emoji: "🦊", name: "AYA Fox",   tone: "playful",    color: "bg-orange-50 border-orange-200", accentColor: "text-orange-700" },
+  owl:   { emoji: "🦉", name: "AYA Owl",   tone: "calm",       color: "bg-purple-50 border-purple-200", accentColor: "text-purple-700" },
+};
+
 const ZONE_EMOJIS: Record<string, string> = {
   "Math Island": "🏝️",
   "Reading Forest": "🌲",
@@ -349,10 +357,18 @@ export function ParentDashboard() {
                   </div>
                   <h3 className="text-xl font-bold">{child.name}</h3>
                   <p className="text-muted-foreground mb-2">Grade {child.grade} · {child.country}</p>
-                  {child.aiCharacter && (
-                    <p className="text-xs text-muted-foreground mb-3 flex items-center gap-1">
-                      Companion: {child.aiCharacter === 'panda' ? '🐼' : child.aiCharacter === 'robot' ? '🤖' : child.aiCharacter === 'fox' ? '🦊' : '🦉'} {child.aiCharacter.charAt(0).toUpperCase() + child.aiCharacter.slice(1)}
-                    </p>
+                  {child.aiCharacter && COMPANION_DATA[child.aiCharacter] ? (
+                    <div className={`flex items-center gap-3 mb-3 px-3 py-2 rounded-xl border ${COMPANION_DATA[child.aiCharacter].color}`}>
+                      <span className="text-2xl">{COMPANION_DATA[child.aiCharacter].emoji}</span>
+                      <div>
+                        <div className="font-bold text-sm">{COMPANION_DATA[child.aiCharacter].name}</div>
+                        <div className={`text-[10px] font-semibold uppercase tracking-wider ${COMPANION_DATA[child.aiCharacter].accentColor}`}>
+                          {COMPANION_DATA[child.aiCharacter].tone} style · AI Companion
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground mb-3 italic">No companion selected yet</p>
                   )}
                   <div className="flex gap-4 mb-3">
                     <div className="flex flex-col">
@@ -439,6 +455,45 @@ export function ParentDashboard() {
                   <span className="text-2xl font-bold text-blue-500">{totalLearningMinutes}</span>
                 </div>
                 <div className="text-sm text-muted-foreground mt-1">Est. Minutes</div>
+              </div>
+            </div>
+          )}
+
+          {progressChild && progressChild.aiCharacter && COMPANION_DATA[progressChild.aiCharacter] && (
+            <div className={`flex items-start gap-4 p-4 rounded-2xl border ${COMPANION_DATA[progressChild.aiCharacter].color}`}>
+              <span className="text-4xl">{COMPANION_DATA[progressChild.aiCharacter].emoji}</span>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold">{COMPANION_DATA[progressChild.aiCharacter].name}</div>
+                <div className={`text-xs font-semibold uppercase tracking-wider mb-1 ${COMPANION_DATA[progressChild.aiCharacter].accentColor}`}>
+                  {COMPANION_DATA[progressChild.aiCharacter].tone} teaching style · Montessori AI Companion
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {progressChild.name}'s selected learning companion for all Junior modules. The companion adapts questions and encouragement to guide discovery.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {completedMissions.length > 0 && (
+            <div className="bg-card p-5 rounded-2xl border shadow-sm">
+              <h3 className="font-bold mb-3 flex items-center gap-2 text-sm">
+                <Activity className="w-4 h-4" /> Recent Mission Activity
+              </h3>
+              <div className="space-y-2">
+                {completedMissions.slice(-3).reverse().map(m => (
+                  <div key={m.id} className="flex items-center gap-3 p-3 bg-green-50 rounded-xl border border-green-100">
+                    <span className="text-green-500">✅</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{m.title}</p>
+                      <p className="text-xs text-muted-foreground">{m.subject}</p>
+                    </div>
+                    {m.completedAt && (
+                      <span className="text-xs text-muted-foreground flex-shrink-0">
+                        {new Date(m.completedAt as string).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}

@@ -157,7 +157,7 @@ const CURRICULA: Record<string, GradeCurriculum> = {
 
 const COUNTRY_ALIASES: Record<string, string> = {
   BULGARIA: "BG",
-  БЪЛЛГАРИЯ: "BG",
+  БЪЛГАРИЯ: "BG",
   BG: "BG",
   USA: "US",
   "UNITED STATES": "US",

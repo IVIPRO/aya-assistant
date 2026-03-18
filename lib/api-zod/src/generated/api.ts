@@ -323,7 +323,20 @@ export const CompleteMissionParams = zod.object({
   id: zod.coerce.number(),
 });
 
-export const completeMissionResponseDifficultyDefault = `easy`;
+export const CompleteMissionBody = zod.object({
+  responseTimeMs: zod
+    .number()
+    .nullish()
+    .describe("How long the child spent on the mission in milliseconds"),
+  correct: zod
+    .boolean()
+    .nullish()
+    .describe("Whether the child answered correctly (for adaptive difficulty)"),
+  selfRating: zod
+    .number()
+    .nullish()
+    .describe("Child's self-rating of difficulty (1=easy, 2=ok, 3=hard)"),
+});
 
 export const CompleteMissionResponse = zod.object({
   id: zod.number(),
@@ -332,14 +345,21 @@ export const CompleteMissionResponse = zod.object({
   description: zod.string(),
   subject: zod.string(),
   zone: zod.string().nullish(),
-  difficulty: zod
-    .enum(["easy", "medium", "hard"])
-    .default(completeMissionResponseDifficultyDefault),
+  difficulty: zod.enum(["easy", "medium", "hard"]).optional(),
   xpReward: zod.number(),
   starReward: zod.number(),
   completed: zod.boolean(),
   completedAt: zod.date().nullable(),
   createdAt: zod.date(),
+  newBadges: zod.array(
+    zod.object({
+      id: zod.string(),
+      title: zod.string(),
+      icon: zod.string(),
+      description: zod.string(),
+      earnedAt: zod.date(),
+    }),
+  ),
 });
 
 /**

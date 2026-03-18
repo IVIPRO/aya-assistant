@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { db, missionsTable, childrenTable, progressTable, type BadgeRecord } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
-import { CompleteMissionParams } from "@workspace/api-zod";
+import { CompleteMissionParams, CompleteMissionBody } from "@workspace/api-zod";
 import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
 import { evaluateBadges, type BadgeStats } from "../lib/badges";
 
@@ -79,13 +79,26 @@ router.post("/missions/:id/complete", requireAuth, async (req, res): Promise<voi
     .set({ xp: newXp, stars: newStars })
     .where(eq(childrenTable.id, mission.childId));
 
-  const completionScore = mission.difficulty === "easy" ? 70 : mission.difficulty === "hard" ? 90 : 80;
+  const completionMeta = CompleteMissionBody.safeParse(req.body ?? {});
+  const meta = completionMeta.success ? completionMeta.data : {};
+
+  let completionScore = mission.difficulty === "easy" ? 70 : mission.difficulty === "hard" ? 90 : 80;
+  if (meta.correct === false) completionScore = Math.max(completionScore - 15, 40);
+  else if (meta.correct === true) completionScore = Math.min(completionScore + 10, 100);
+  if (meta.selfRating === 3) completionScore = Math.max(completionScore - 5, 40);
+  else if (meta.selfRating === 1) completionScore = Math.min(completionScore + 5, 100);
+
+  const notesParts: string[] = [`Completed: ${mission.title} (${mission.difficulty ?? "easy"} difficulty)`];
+  if (meta.responseTimeMs != null) notesParts.push(`response_time=${meta.responseTimeMs}ms`);
+  if (meta.correct != null) notesParts.push(`correct=${meta.correct}`);
+  if (meta.selfRating != null) notesParts.push(`self_rating=${meta.selfRating}/3`);
+
   await db.insert(progressTable).values({
     childId: mission.childId,
     subject: mission.subject,
     score: completionScore,
     module: "junior",
-    notes: `Completed mission: ${mission.title} (${mission.difficulty ?? "easy"} difficulty)`,
+    notes: notesParts.join("; "),
   });
 
   const recentProgress = await db

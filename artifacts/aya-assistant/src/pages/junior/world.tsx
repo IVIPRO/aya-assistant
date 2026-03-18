@@ -116,7 +116,7 @@ export function WorldMap() {
 
   const handleComplete = async (id: number) => {
     try {
-      await completeMutation.mutateAsync({ id });
+      await completeMutation.mutateAsync({ id, data: {} });
       toast({ title: "Mission Completed! 🎉", description: "You earned XP and Stars!" });
       refetch();
     } catch {

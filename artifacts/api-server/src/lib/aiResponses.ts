@@ -65,12 +65,18 @@ function getGradeMathHint(grade: number, lang: "bg" | "es" | "en"): string {
   return hints[lang][idx];
 }
 
+function getGradeLabelByLang(grade: number, lang: "bg" | "es" | "en"): string {
+  if (lang === "bg") return `${grade} клас`;
+  if (lang === "es") return `${grade} grado`;
+  return `Grade ${grade}`;
+}
+
 function getMontessoriGuidingResponse(userMessage: string, context: JuniorContext): string {
   const charKey = context.aiCharacter ?? "panda";
   const charEmoji = CHARACTER_EMOJIS[charKey] ?? "🐼";
-  const gradeLabel = context.grade ? getGradeLabel(context.grade, context.country) : null;
   const childName = context.childName ?? "explorer";
   const lang = getLang(context.language);
+  const gradeLabel = context.grade ? getGradeLabelByLang(context.grade, lang) : null;
   const charName = getCharName(charKey, lang);
   const grade = context.grade ?? 1;
 

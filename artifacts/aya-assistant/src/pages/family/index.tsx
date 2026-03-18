@@ -3,6 +3,7 @@ import { useState } from "react";
 import { format, startOfWeek, addDays, startOfMonth, endOfMonth, endOfWeek, isSameMonth, isSameDay, addMonths, subMonths } from "date-fns";
 import { ChevronLeft, ChevronRight, Plus, CheckCircle2, Circle, Clock, Calendar as CalendarIcon } from "lucide-react";
 import { useListCalendarEvents, useListFamilyTasks, useCreateFamilyTask, useUpdateFamilyTask, useCreateCalendarEvent } from "@workspace/api-client-react";
+import type { FamilyTask } from "@workspace/api-client-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -60,7 +61,7 @@ export function Family() {
     }
   };
 
-  const toggleTask = async (task: any) => {
+  const toggleTask = async (task: FamilyTask) => {
     await updateTask.mutateAsync({ id: task.id, data: { completed: !task.completed } });
     refetchTasks();
   };

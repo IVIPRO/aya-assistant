@@ -1,6 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
+declare module "express" {
+  interface Request {
+    authUser?: AuthPayload;
+  }
+}
+
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET environment variable is required");
@@ -37,10 +43,13 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
     res.status(401).json({ error: "Invalid or expired token" });
     return;
   }
-  (req as any).user = payload;
+  req.authUser = payload;
   next();
 }
 
 export function getUser(req: Request): AuthPayload {
-  return (req as any).user as AuthPayload;
+  if (!req.authUser) {
+    throw new Error("requireAuth middleware must be called before getUser");
+  }
+  return req.authUser;
 }

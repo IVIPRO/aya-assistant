@@ -538,7 +538,7 @@ export function ParentDashboard() {
                       <div className="flex-1 min-w-0">
                         <div className="font-bold text-sm">{COMPANION_DATA[child.aiCharacter].name}</div>
                         <div className={`text-[10px] font-semibold uppercase tracking-wider ${COMPANION_DATA[child.aiCharacter].accentColor}`}>
-                          {COMPANION_DATA[child.aiCharacter].tone} style · AI Companion
+                          {t.parent.toneStyle[COMPANION_DATA[child.aiCharacter].tone] ?? `${COMPANION_DATA[child.aiCharacter].tone} style`} · {t.parent.aiCompanion}
                         </div>
                       </div>
                       <button
@@ -701,7 +701,7 @@ export function ParentDashboard() {
               <div className="flex-1 min-w-0">
                 <div className="font-bold">{COMPANION_DATA[progressChild.aiCharacter].name}</div>
                 <div className={`text-xs font-semibold uppercase tracking-wider mb-1 ${COMPANION_DATA[progressChild.aiCharacter].accentColor}`}>
-                  {COMPANION_DATA[progressChild.aiCharacter].tone} teaching style · Montessori AI Companion
+                  {t.parent.toneStyle[COMPANION_DATA[progressChild.aiCharacter].tone] ?? `${COMPANION_DATA[progressChild.aiCharacter].tone} teaching style`} · Montessori {t.parent.aiCompanion}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {progressChild.name}'s selected learning companion for all Junior modules. The companion adapts questions and encouragement to guide discovery.

@@ -85,7 +85,7 @@ export function Layout({ children, isJunior = false }: { children: ReactNode, is
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground truncate">{user?.name}</p>
-                <p className="text-xs text-muted-foreground capitalize">{user?.role}</p>
+                <p className="text-xs text-muted-foreground capitalize">{user?.role === "parent" ? t.nav.parent : (user?.role ?? "")}</p>
               </div>
             </div>
             <button 

@@ -1,0 +1,87 @@
+Perform a full localization cleanup across the entire AYA app.
+
+Goal:
+Find and replace all remaining hardcoded English UI strings so the interface is fully localized based on the active app/user/child language.
+
+Supported languages:
+- Bulgarian
+- English
+- Spanish
+
+Global rule:
+If the current language is Bulgarian, every visible UI label, helper text, badge, section title, role label, tab label, card label, button text, placeholder, and status text must appear in Bulgarian.
+If Spanish, they must appear in Spanish.
+If English, keep English.
+
+Important:
+Keep these brand/product names unchanged:
+- AYA
+- AYA Panda
+- AYA Fox
+- AYA Owl
+- Montessori
+
+Search for remaining hardcoded English strings in all user-facing components, including but not limited to:
+- Sidebar
+- Dashboard
+- Parent module
+- Child Profiles
+- Learning Progress
+- Junior / Elementary module
+- Learning World Map
+- Subject selection
+- Topic cards
+- Companion cards
+- Hero/welcome sections
+- Chat UI
+- Placeholders
+- Buttons
+- Badges
+- Difficulty chips
+- Status chips
+- Role labels
+- Progress widgets
+- XP/Stars/Badges labels
+- Homework camera / upload labels
+- Voice tutor labels
+
+Examples of strings that must never remain hardcoded in English when Bulgarian is active:
+- Parent
+- Children Profiles
+- Learning Progress
+- Child Profiles
+- Active child
+- Subject
+- Topic
+- Welcome back
+- Learning World Map
+- Explore different zones...
+- Math Island
+- Reading Forest
+- Easy / Medium / Hard
+- Complete Mission
+- Unlock at
+- Enter
+- remaining / missions
+- gentle style
+- AI companion
+- homework vision
+- voice tutor
+- any helper or subtitle text
+
+Requirements:
+
+1. Reuse the existing localization dictionary/system.
+2. Do not create duplicate language logic.
+3. Replace all hardcoded user-facing strings with translation keys.
+4. Audit all visible pages and components for missing localization.
+5. If a string is dynamic, ensure its prefix/label is localized too.
+6. Keep layout, routing, and functionality unchanged.
+7. Only perform localization cleanup.
+
+After implementation:
+- verify Bulgarian UI is fully Bulgarian
+- verify Spanish UI is fully Spanish
+- verify English UI remains unchanged
+
+If needed, add missing translation keys to the central translations dictionary.

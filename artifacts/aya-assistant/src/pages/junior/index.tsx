@@ -106,6 +106,17 @@ const JUNIOR_LABELS: Record<JuniorLang, {
   allDone: string;
   missionsLeft: (n: number) => string;
   unlockAtXp: (xp: number) => string;
+  levelLabel: string;
+  comingSoon: string;
+  loadingProfile: string;
+  noChildFound: string;
+  noChildFoundHint: string;
+  voiceTalkTitle: string;
+  voiceTalkDesc: string;
+  voiceListenTitle: string;
+  voiceListenDesc: string;
+  voiceVideoTitle: string;
+  voiceVideoDesc: string;
 }> = {
   en: {
     welcomeBack: "Welcome back,",
@@ -143,6 +154,17 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     allDone: "✅ All done!",
     missionsLeft: (n) => `${n} missions left →`,
     unlockAtXp: (xp) => `🔒 Unlock at ${xp} XP`,
+    levelLabel: "Level",
+    comingSoon: "Coming Soon",
+    loadingProfile: "Loading profile…",
+    noChildFound: "No child profile found.",
+    noChildFoundHint: "Ask your parent to add a profile.",
+    voiceTalkTitle: "Talk with AYA",
+    voiceTalkDesc: "Speak your questions and AYA will listen and respond to your voice.",
+    voiceListenTitle: "Listen Mode",
+    voiceListenDesc: "AYA reads lessons, stories, and missions aloud for you.",
+    voiceVideoTitle: "Video Teacher",
+    voiceVideoDesc: "Meet AYA's animated video teacher for interactive face-to-face lessons.",
   },
   bg: {
     welcomeBack: "Добре дошла,",
@@ -180,6 +202,17 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     allDone: "✅ Всичко готово!",
     missionsLeft: (n) => `${n} мисии остават →`,
     unlockAtXp: (xp) => `🔒 Отключва се при ${xp} XP`,
+    levelLabel: "Ниво",
+    comingSoon: "Очаквайте",
+    loadingProfile: "Зарежда профил…",
+    noChildFound: "Профилът не е намерен.",
+    noChildFoundHint: "Поискайте от родителя си да добави профил.",
+    voiceTalkTitle: "Говори с AYA",
+    voiceTalkDesc: "Говори въпросите си и AYA ще слуша и отговаря на гласа ти.",
+    voiceListenTitle: "Режим на слушане",
+    voiceListenDesc: "AYA чете уроци, истории и мисии на глас за теб.",
+    voiceVideoTitle: "Видео учител",
+    voiceVideoDesc: "Запознай се с анимирания видео учител на AYA за интерактивни уроци лице в лице.",
   },
   es: {
     welcomeBack: "Bienvenida,",
@@ -217,6 +250,17 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     allDone: "✅ ¡Todo listo!",
     missionsLeft: (n) => `${n} misiones restantes →`,
     unlockAtXp: (xp) => `🔒 Se desbloquea en ${xp} XP`,
+    levelLabel: "Nivel",
+    comingSoon: "Próximamente",
+    loadingProfile: "Cargando perfil…",
+    noChildFound: "No se encontró perfil.",
+    noChildFoundHint: "Pide a tu padre que añada un perfil.",
+    voiceTalkTitle: "Habla con AYA",
+    voiceTalkDesc: "Habla tus preguntas y AYA escuchará y responderá a tu voz.",
+    voiceListenTitle: "Modo de escucha",
+    voiceListenDesc: "AYA lee lecciones, historias y misiones en voz alta para ti.",
+    voiceVideoTitle: "Maestro en video",
+    voiceVideoDesc: "Conoce al maestro de video animado de AYA para lecciones interactivas cara a cara.",
   },
 };
 
@@ -249,30 +293,6 @@ const ZONES = [
   { id: "Logic Mountain", emoji: "⛰️", color: "text-blue-600", bgColor: "bg-gradient-to-br from-blue-100 to-sky-50", borderColor: "border-blue-300", xpRequired: 80, desc: "Puzzles & patterns" },
   { id: "English City", emoji: "🏙️", color: "text-purple-600", bgColor: "bg-gradient-to-br from-purple-100 to-violet-50", borderColor: "border-purple-300", xpRequired: 150, desc: "Language & speaking" },
   { id: "Science Planet", emoji: "🌍", color: "text-teal-600", bgColor: "bg-gradient-to-br from-teal-100 to-cyan-50", borderColor: "border-teal-300", xpRequired: 250, desc: "Nature & discovery" },
-];
-
-const VOICE_FEATURES = [
-  {
-    icon: Mic,
-    title: "Talk with AYA",
-    desc: "Speak your questions and AYA will listen and respond to your voice.",
-    color: "from-blue-50 to-sky-50 border-blue-200",
-    iconColor: "text-blue-500 bg-blue-100",
-  },
-  {
-    icon: Volume2,
-    title: "Listen Mode",
-    desc: "AYA reads lessons, stories, and missions aloud for you.",
-    color: "from-green-50 to-emerald-50 border-green-200",
-    iconColor: "text-green-500 bg-green-100",
-  },
-  {
-    icon: Video,
-    title: "Video Teacher",
-    desc: "Meet AYA's animated video teacher for interactive face-to-face lessons.",
-    color: "from-purple-50 to-violet-50 border-purple-200",
-    iconColor: "text-purple-500 bg-purple-100",
-  },
 ];
 
 const JUNIOR_PROMPTS_BY_LANG: Record<string, string[]> = {
@@ -438,7 +458,7 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onChangeCompani
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-orange-400" />
-                <span className="font-bold text-sm">Level {level}</span>
+                <span className="font-bold text-sm">{lbl.levelLabel} {level}</span>
               </div>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
@@ -500,16 +520,39 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onChangeCompani
   );
 }
 
-function VoiceReadySection() {
+function VoiceReadySection({ lbl }: { lbl: typeof JUNIOR_LABELS["en"] }) {
+  const voiceFeatures = [
+    {
+      icon: Mic,
+      title: lbl.voiceTalkTitle,
+      desc: lbl.voiceTalkDesc,
+      color: "from-blue-50 to-sky-50 border-blue-200",
+      iconColor: "text-blue-500 bg-blue-100",
+    },
+    {
+      icon: Volume2,
+      title: lbl.voiceListenTitle,
+      desc: lbl.voiceListenDesc,
+      color: "from-green-50 to-emerald-50 border-green-200",
+      iconColor: "text-green-500 bg-green-100",
+    },
+    {
+      icon: Video,
+      title: lbl.voiceVideoTitle,
+      desc: lbl.voiceVideoDesc,
+      color: "from-purple-50 to-violet-50 border-purple-200",
+      iconColor: "text-purple-500 bg-purple-100",
+    },
+  ];
   return (
     <div className="mt-8">
       <div className="flex items-center gap-2 mb-4">
         <div className="h-px flex-1 bg-border/40" />
-        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-3">Coming Soon</span>
+        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-3">{lbl.comingSoon}</span>
         <div className="h-px flex-1 bg-border/40" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        {VOICE_FEATURES.map((f) => (
+        {voiceFeatures.map((f) => (
           <div key={f.title}
             className={`bg-gradient-to-br ${f.color} border rounded-2xl p-4 flex flex-col gap-3 opacity-80`}>
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${f.iconColor}`}>
@@ -521,7 +564,7 @@ function VoiceReadySection() {
             </div>
             <div className="mt-auto">
               <span className="text-[10px] font-bold uppercase tracking-wider bg-white/60 text-muted-foreground px-2 py-1 rounded-full border border-border/30">
-                Coming Soon
+                {lbl.comingSoon}
               </span>
             </div>
           </div>
@@ -662,13 +705,13 @@ export function Junior() {
         ) : view === "welcome" && childrenLoading ? (
           <motion.div key="loading" className="text-center py-20 text-muted-foreground">
             <div className="w-12 h-12 mx-auto mb-4 rounded-full border-4 border-junior/30 border-t-junior animate-spin" />
-            <p className="text-sm">Loading profile…</p>
+            <p className="text-sm">{lbl.loadingProfile}</p>
           </motion.div>
         ) : view === "welcome" && !activeChild && !childrenLoading ? (
           <motion.div key="no-child" className="text-center py-20 text-muted-foreground">
             <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-30" />
-            <p className="text-lg font-medium">No child profile found.</p>
-            <p className="text-sm">Ask a parent to set up your learning profile in the Parent area.</p>
+            <p className="text-lg font-medium">{lbl.noChildFound}</p>
+            <p className="text-sm">{lbl.noChildFoundHint}</p>
           </motion.div>
         ) : view === "subjects" ? (
           <SubjectPanel
@@ -694,7 +737,7 @@ export function Junior() {
               <div className="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-xl border border-white/50">
                 <span className="text-lg">{currentChar?.emoji ?? "🌟"}</span>
                 <span className="font-bold text-sm text-junior-foreground">{currentChar?.name ?? "AYA"}</span>
-                <span className="text-xs text-muted-foreground">· Level {level} · {childXp} XP</span>
+                <span className="text-xs text-muted-foreground">· {lbl.levelLabel} {level} · {childXp} XP</span>
               </div>
               <button onClick={() => setShowCharPicker(true)}
                 className="flex items-center gap-1.5 px-3 py-2 bg-white/60 rounded-xl border border-white/50 hover:bg-purple-50 transition-colors">
@@ -790,7 +833,7 @@ export function Junior() {
               subjectContext={subjectContext}
             />
 
-            <VoiceReadySection />
+            <VoiceReadySection lbl={lbl} />
           </motion.div>
         )}
       </AnimatePresence>

@@ -25,6 +25,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
+import type { LangCode } from "@/lib/i18n";
 import { BookOpen, Brain } from "lucide-react";
 import { getLevel } from "@/lib/levelSystem";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
@@ -144,6 +145,253 @@ const COMPANION_CHARS = [
   { id: "owl",   emoji: "🦉", name: "AYA Owl",   desc: "Wise and thoughtful", tone: "calm",       color: "bg-purple-100 border-purple-300", accentColor: "text-purple-700" },
 ];
 
+type ParentLang = LangCode;
+
+const PARENT_ZONE_NAMES: Record<string, Record<ParentLang, string>> = {
+  "Math Island":    { en: "Math Island",    bg: "Остров на математиката", es: "Isla de matemáticas" },
+  "Reading Forest": { en: "Reading Forest", bg: "Гора на четенето",        es: "Bosque de lectura" },
+  "Logic Mountain": { en: "Logic Mountain", bg: "Логическа планина",       es: "Montaña de lógica" },
+  "English City":   { en: "English City",   bg: "Английски град",          es: "Ciudad de inglés" },
+  "Science Planet": { en: "Science Planet", bg: "Планетата на науката",    es: "Planeta de ciencias" },
+};
+
+const COMPANION_CHAR_DESCS: Record<string, Record<ParentLang, string>> = {
+  panda: { en: "Patient and gentle",   bg: "Търпелива и нежна",   es: "Paciente y suave" },
+  robot: { en: "Logical and precise",  bg: "Логичен и точен",     es: "Lógico y preciso" },
+  fox:   { en: "Creative and playful", bg: "Творческа и игрива",  es: "Creativa y lúdica" },
+  owl:   { en: "Wise and thoughtful",  bg: "Мъдра и вдумчива",   es: "Sabia y reflexiva" },
+};
+
+const PARENT_LABELS: Record<ParentLang, {
+  tabMemories: string;
+  createFamilyTitle: string;
+  createFamilySubtitle: string;
+  familyNamePlaceholder: string;
+  countryPlaceholder: string;
+  languagePlaceholder: string;
+  creatingFamily: string;
+  createFamilyBtn: string;
+  addChildDialogTitle: string;
+  addChildNameLabel: string;
+  addChildGradeLabel: string;
+  addChildLanguageLabel: string;
+  addChildCountryLabel: string;
+  addChildCountryHint: string;
+  addChildNamePlaceholder: string;
+  selectGrade: string;
+  selectLanguage: string;
+  savingProfile: string;
+  saveProfile: string;
+  noChildProfiles: string;
+  noFamilyYet: string;
+  statLevel: string;
+  statTotalXP: string;
+  statStars: string;
+  statMissionsDone: string;
+  statCurrentZone: string;
+  statHomework: string;
+  statSolvedToday: string;
+  statVoiceSessions: string;
+  statMinListened: string;
+  statToday: string;
+  curriculumEngineTitle: string;
+  statLessonsDone: string;
+  statPracticeSets: string;
+  statQuizzesPassed: string;
+  companionSupportText: (name: string) => string;
+  recentMissionActivity: string;
+  subjectStrengths: string;
+  needsPractice: string;
+  unlockedZones: string;
+  subjectPerformanceChart: string;
+  notEnoughData: string;
+  missionActivity: string;
+  earnedBadges: (n: number) => string;
+  missionPending: string;
+  memoryEngineTitle: string;
+  memoryEngineSubtitle: string;
+  memoryEngineGathering: string;
+  memoryVia: string;
+  companionPickerTitle: string;
+  companionPickerDesc: (name: string) => string;
+  companionPickerDescGeneric: string;
+  companionPickerCurrent: string;
+  companionPickerCancel: string;
+  changeCompanionTitle: string;
+}> = {
+  en: {
+    tabMemories: "Memory Engine",
+    createFamilyTitle: "Create Your Family",
+    createFamilySubtitle: "Set up your family profile to start adding children.",
+    familyNamePlaceholder: "Family name (e.g. The Smiths)",
+    countryPlaceholder: "Country (e.g. USA)",
+    languagePlaceholder: "Language (e.g. English)",
+    creatingFamily: "Creating...",
+    createFamilyBtn: "Create Family",
+    addChildDialogTitle: "Add New Profile",
+    addChildNameLabel: "Name",
+    addChildGradeLabel: "School Grade",
+    addChildLanguageLabel: "Language",
+    addChildCountryLabel: "Country",
+    addChildCountryHint: "Used to set the right curriculum for your child",
+    addChildNamePlaceholder: "Child's name",
+    selectGrade: "Select grade…",
+    selectLanguage: "Select language…",
+    savingProfile: "Saving...",
+    saveProfile: "Save Profile",
+    noChildProfiles: "No child profiles yet. Click \"Add Child\" to get started!",
+    noFamilyYet: "Create your family first to add children.",
+    statLevel: "Level",
+    statTotalXP: "Total XP",
+    statStars: "Stars",
+    statMissionsDone: "Missions Done",
+    statCurrentZone: "Current Zone",
+    statHomework: "📷 Homework",
+    statSolvedToday: "solved today",
+    statVoiceSessions: "🎙️ Voice Sessions",
+    statMinListened: "🔊 Min. Listened",
+    statToday: "today",
+    curriculumEngineTitle: "Curriculum Engine Progress",
+    statLessonsDone: "Lessons Done",
+    statPracticeSets: "Practice Sets",
+    statQuizzesPassed: "Quizzes Passed",
+    companionSupportText: (name) => `${name}'s selected learning companion for all Junior modules. The companion adapts questions and encouragement to guide discovery.`,
+    recentMissionActivity: "Recent Mission Activity",
+    subjectStrengths: "Subject Strengths",
+    needsPractice: "Needs Practice",
+    unlockedZones: "🗺️ Unlocked Learning Zones",
+    subjectPerformanceChart: "Subject Performance Chart",
+    notEnoughData: "Not enough progress data yet. Encourage your child to complete missions!",
+    missionActivity: "Mission Activity",
+    earnedBadges: (n) => `Earned Badges (${n})`,
+    missionPending: "Pending",
+    memoryEngineTitle: "AI Family Memory Engine",
+    memoryEngineSubtitle: "Insights learned from family interactions.",
+    memoryEngineGathering: "The Memory Engine is gathering insights...",
+    memoryVia: "via",
+    companionPickerTitle: "Choose a Learning Companion",
+    companionPickerDesc: (name) => `Select a companion for ${name}`,
+    companionPickerDescGeneric: "Select a companion",
+    companionPickerCurrent: "✓ Current",
+    companionPickerCancel: "Cancel",
+    changeCompanionTitle: "Change companion",
+  },
+  bg: {
+    tabMemories: "Паметта на AYA",
+    createFamilyTitle: "Създайте вашето семейство",
+    createFamilySubtitle: "Настройте семейния профил, за да добавите деца.",
+    familyNamePlaceholder: "Фамилия (напр. Петрови)",
+    countryPlaceholder: "Държава (напр. BG)",
+    languagePlaceholder: "Език (напр. Български)",
+    creatingFamily: "Създаване...",
+    createFamilyBtn: "Създай семейство",
+    addChildDialogTitle: "Добави нов профил",
+    addChildNameLabel: "Име",
+    addChildGradeLabel: "Клас",
+    addChildLanguageLabel: "Език",
+    addChildCountryLabel: "Държава",
+    addChildCountryHint: "Използва се за задаване на правилната учебна програма за детето",
+    addChildNamePlaceholder: "Името на детето",
+    selectGrade: "Изберете клас…",
+    selectLanguage: "Изберете език…",
+    savingProfile: "Запазване...",
+    saveProfile: "Запази профила",
+    noChildProfiles: 'Все още няма детски профили. Натиснете „Добави дете", за да започнете!',
+    noFamilyYet: "Първо създайте семейство, за да добавите деца.",
+    statLevel: "Ниво",
+    statTotalXP: "Общо XP",
+    statStars: "Звезди",
+    statMissionsDone: "Завършени мисии",
+    statCurrentZone: "Текуща зона",
+    statHomework: "📷 Домашно",
+    statSolvedToday: "решено днес",
+    statVoiceSessions: "🎙️ Гласови сесии",
+    statMinListened: "🔊 Мин. слушане",
+    statToday: "днес",
+    curriculumEngineTitle: "Напредък по учебна програма",
+    statLessonsDone: "Завършени уроци",
+    statPracticeSets: "Упражнения",
+    statQuizzesPassed: "Успешни тестове",
+    companionSupportText: (name) => `Избраният учебен компаньон на ${name} за всички начални модули. Компаньонът адаптира въпросите и насърчението, за да ръководи откритието.`,
+    recentMissionActivity: "Последна мисионна активност",
+    subjectStrengths: "Силни предмети",
+    needsPractice: "Нуждае се от упражнения",
+    unlockedZones: "🗺️ Отключени учебни зони",
+    subjectPerformanceChart: "Диаграма на успеваемостта",
+    notEnoughData: "Все още няма достатъчно данни. Насърчете детето да завърши мисии!",
+    missionActivity: "Мисионна активност",
+    earnedBadges: (n) => `Спечелени значки (${n})`,
+    missionPending: "Изчакващо",
+    memoryEngineTitle: "AI Семейна памет",
+    memoryEngineSubtitle: "Данни научени от семейните взаимодействия.",
+    memoryEngineGathering: "Паметта събира данни...",
+    memoryVia: "чрез",
+    companionPickerTitle: "Изберете учебен компаньон",
+    companionPickerDesc: (name) => `Изберете компаньон за ${name}`,
+    companionPickerDescGeneric: "Изберете компаньон",
+    companionPickerCurrent: "✓ Текущ",
+    companionPickerCancel: "Отказ",
+    changeCompanionTitle: "Смени компаньона",
+  },
+  es: {
+    tabMemories: "Memoria AYA",
+    createFamilyTitle: "Crea tu familia",
+    createFamilySubtitle: "Configura el perfil familiar para comenzar a agregar niños.",
+    familyNamePlaceholder: "Nombre familiar (ej. Los García)",
+    countryPlaceholder: "País (ej. ES)",
+    languagePlaceholder: "Idioma (ej. Español)",
+    creatingFamily: "Creando...",
+    createFamilyBtn: "Crear familia",
+    addChildDialogTitle: "Añadir nuevo perfil",
+    addChildNameLabel: "Nombre",
+    addChildGradeLabel: "Grado escolar",
+    addChildLanguageLabel: "Idioma",
+    addChildCountryLabel: "País",
+    addChildCountryHint: "Utilizado para configurar el currículo adecuado para tu niño",
+    addChildNamePlaceholder: "Nombre del niño",
+    selectGrade: "Seleccionar grado…",
+    selectLanguage: "Seleccionar idioma…",
+    savingProfile: "Guardando...",
+    saveProfile: "Guardar perfil",
+    noChildProfiles: "Aún no hay perfiles de niños. ¡Pulsa \"Añadir niño\" para empezar!",
+    noFamilyYet: "Primero crea tu familia para añadir niños.",
+    statLevel: "Nivel",
+    statTotalXP: "XP total",
+    statStars: "Estrellas",
+    statMissionsDone: "Misiones completadas",
+    statCurrentZone: "Zona actual",
+    statHomework: "📷 Tarea",
+    statSolvedToday: "resueltas hoy",
+    statVoiceSessions: "🎙️ Sesiones de voz",
+    statMinListened: "🔊 Min. escuchados",
+    statToday: "hoy",
+    curriculumEngineTitle: "Progreso del currículo",
+    statLessonsDone: "Lecciones",
+    statPracticeSets: "Ejercicios",
+    statQuizzesPassed: "Cuestionarios",
+    companionSupportText: (name) => `El compañero de aprendizaje elegido por ${name} para todos los módulos de primaria. El compañero adapta preguntas y motivación para guiar el descubrimiento.`,
+    recentMissionActivity: "Actividad reciente de misiones",
+    subjectStrengths: "Puntos fuertes",
+    needsPractice: "Necesita práctica",
+    unlockedZones: "🗺️ Zonas de aprendizaje desbloqueadas",
+    subjectPerformanceChart: "Gráfico de rendimiento",
+    notEnoughData: "Aún no hay datos suficientes. ¡Anima a tu niño a completar misiones!",
+    missionActivity: "Actividad de misiones",
+    earnedBadges: (n) => `Insignias ganadas (${n})`,
+    missionPending: "Pendiente",
+    memoryEngineTitle: "Motor de memoria familiar IA",
+    memoryEngineSubtitle: "Conocimientos aprendidos de las interacciones familiares.",
+    memoryEngineGathering: "El motor de memoria está recopilando datos...",
+    memoryVia: "vía",
+    companionPickerTitle: "Elige un compañero de aprendizaje",
+    companionPickerDesc: (name) => `Seleccionar un compañero para ${name}`,
+    companionPickerDescGeneric: "Seleccionar un compañero",
+    companionPickerCurrent: "✓ Actual",
+    companionPickerCancel: "Cancelar",
+    changeCompanionTitle: "Cambiar compañero",
+  },
+};
+
 function getCurrentZone(xp: number): { name: string; emoji: string } {
   if (xp >= 250) return { name: "Science Planet", emoji: "🌍" };
   if (xp >= 150) return { name: "English City", emoji: "🏙️" };
@@ -171,7 +419,8 @@ export function ParentDashboard() {
   const [companionPickerOpen, setCompanionPickerOpen] = useState(false);
   const { toast } = useToast();
   const { refreshUser, activeChildId, setActiveChildId } = useAuth();
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+  const plbl = PARENT_LABELS[lang];
 
   const { data: family, refetch: refetchFamily } = useGetFamily({ query: { queryKey: getGetFamilyQueryKey(), retry: false } });
   const { data: children = [], refetch: refetchChildren } = useListChildren({ query: { queryKey: getListChildrenQueryKey(), enabled: !!family } });
@@ -375,7 +624,7 @@ export function ParentDashboard() {
   const tabs = [
     { id: "children", label: t.parent.tabChildren, icon: Users },
     { id: "progress", label: t.parent.tabProgress, icon: LineChart },
-    { id: "memories", label: "Memory Engine", icon: BrainCircuit },
+    { id: "memories", label: plbl.tabMemories, icon: BrainCircuit },
   ];
 
   return (
@@ -392,15 +641,15 @@ export function ParentDashboard() {
               <Home className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Create Your Family</h2>
-              <p className="text-muted-foreground">Set up your family profile to start adding children.</p>
+              <h2 className="text-2xl font-bold">{plbl.createFamilyTitle}</h2>
+              <p className="text-muted-foreground">{plbl.createFamilySubtitle}</p>
             </div>
           </div>
           <form onSubmit={familyForm.handleSubmit(onFamilySubmit)} className="space-y-4 max-w-md">
             <div>
               <input
                 {...familyForm.register("name")}
-                placeholder="Family name (e.g. The Smiths)"
+                placeholder={plbl.familyNamePlaceholder}
                 className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
               {familyForm.formState.errors.name && (
@@ -411,7 +660,7 @@ export function ParentDashboard() {
               <div className="flex-1">
                 <input
                   {...familyForm.register("country")}
-                  placeholder="Country (e.g. USA)"
+                  placeholder={plbl.countryPlaceholder}
                   className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
                 {familyForm.formState.errors.country && (
@@ -421,7 +670,7 @@ export function ParentDashboard() {
               <div className="flex-1">
                 <input
                   {...familyForm.register("language")}
-                  placeholder="Language (e.g. English)"
+                  placeholder={plbl.languagePlaceholder}
                   className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
                 {familyForm.formState.errors.language && (
@@ -434,7 +683,7 @@ export function ParentDashboard() {
               disabled={createFamily.isPending}
               className="px-6 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition-colors"
             >
-              {createFamily.isPending ? "Creating..." : "Create Family"}
+              {createFamily.isPending ? plbl.creatingFamily : plbl.createFamilyBtn}
             </button>
           </form>
         </div>
@@ -466,39 +715,39 @@ export function ParentDashboard() {
                   </button>
                 </DialogTrigger>
                 <DialogContent>
-                  <DialogHeader><DialogTitle>Add New Profile</DialogTitle></DialogHeader>
+                  <DialogHeader><DialogTitle>{plbl.addChildDialogTitle}</DialogTitle></DialogHeader>
                   <form onSubmit={childForm.handleSubmit(onChildSubmit)} className="space-y-4 pt-4">
                     <div>
-                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Name</label>
-                      <input {...childForm.register("name")} placeholder="Child's name" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">{plbl.addChildNameLabel}</label>
+                      <input {...childForm.register("name")} placeholder={plbl.addChildNamePlaceholder} className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
                       {childForm.formState.errors.name && <p className="text-destructive text-xs mt-1">{childForm.formState.errors.name.message}</p>}
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">School Grade</label>
+                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">{plbl.addChildGradeLabel}</label>
                       <select {...childForm.register("grade")} className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white">
-                        <option value="">Select grade…</option>
+                        <option value="">{plbl.selectGrade}</option>
                         {GRADE_OPTIONS.map(g => (
                           <option key={g.value} value={g.value}>{g.label}</option>
                         ))}
                       </select>
-                      {childForm.formState.errors.grade && <p className="text-destructive text-xs mt-1">Please select a grade</p>}
+                      {childForm.formState.errors.grade && <p className="text-destructive text-xs mt-1">{plbl.selectGrade}</p>}
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Language</label>
+                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">{plbl.addChildLanguageLabel}</label>
                       <select {...childForm.register("language")} className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white">
-                        <option value="">Select language…</option>
+                        <option value="">{plbl.selectLanguage}</option>
                         {LANGUAGE_OPTIONS.map(l => (
                           <option key={l} value={l}>{l}</option>
                         ))}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Country</label>
+                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">{plbl.addChildCountryLabel}</label>
                       <input {...childForm.register("country")} placeholder="e.g. USA, BG, DE, ES, GB" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
-                      <p className="text-xs text-muted-foreground mt-1">Used to set the right curriculum for your child</p>
+                      <p className="text-xs text-muted-foreground mt-1">{plbl.addChildCountryHint}</p>
                     </div>
                     <button type="submit" disabled={createChild.isPending} className="w-full bg-primary text-white p-3 rounded-xl font-bold hover:bg-primary/90">
-                      {createChild.isPending ? "Saving..." : "Save Profile"}
+                      {createChild.isPending ? plbl.savingProfile : plbl.saveProfile}
                     </button>
                   </form>
                 </DialogContent>
@@ -591,12 +840,12 @@ export function ParentDashboard() {
             })}
             {children.length === 0 && family && (
               <div className="col-span-full py-12 text-center text-muted-foreground bg-muted/10 rounded-3xl border border-dashed">
-                No child profiles yet. Click "Add Child" to get started!
+                {plbl.noChildProfiles}
               </div>
             )}
             {!family && (
               <div className="col-span-full py-12 text-center text-muted-foreground bg-muted/10 rounded-3xl border border-dashed">
-                Create your family first to add children.
+                {plbl.noFamilyYet}
               </div>
             )}
           </div>
@@ -627,29 +876,29 @@ export function ParentDashboard() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
               <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
                 <div className="text-3xl font-bold text-primary">{getLevel(progressChild.xp)}</div>
-                <div className="text-sm text-muted-foreground mt-1">Level</div>
+                <div className="text-sm text-muted-foreground mt-1">{plbl.statLevel}</div>
               </div>
               <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
                 <div className="text-3xl font-bold text-orange-500">{progressChild.xp}</div>
-                <div className="text-sm text-muted-foreground mt-1">Total XP</div>
+                <div className="text-sm text-muted-foreground mt-1">{plbl.statTotalXP}</div>
               </div>
               <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
                 <div className="text-3xl font-bold text-yellow-500">{progressChild.stars}</div>
-                <div className="text-sm text-muted-foreground mt-1">Stars</div>
+                <div className="text-sm text-muted-foreground mt-1">{plbl.statStars}</div>
               </div>
               <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
                 <div className="text-3xl font-bold text-green-500">{completedMissions.length}</div>
-                <div className="text-sm text-muted-foreground mt-1">Missions Done</div>
+                <div className="text-sm text-muted-foreground mt-1">{plbl.statMissionsDone}</div>
               </div>
               <div className="bg-card p-4 rounded-2xl border shadow-sm text-center">
                 <div className="text-2xl font-bold">{getCurrentZone(progressChild.xp).emoji}</div>
-                <div className="text-xs font-bold text-foreground mt-0.5 leading-tight">{getCurrentZone(progressChild.xp).name}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">Current Zone</div>
+                <div className="text-xs font-bold text-foreground mt-0.5 leading-tight">{PARENT_ZONE_NAMES[getCurrentZone(progressChild.xp).name]?.[lang] ?? getCurrentZone(progressChild.xp).name}</div>
+                <div className="text-xs text-muted-foreground mt-0.5">{plbl.statCurrentZone}</div>
               </div>
               <div className={`p-4 rounded-2xl border shadow-sm text-center ${(homeworkToday?.count ?? 0) > 0 ? "bg-amber-50 border-amber-200" : "bg-card"}`}>
                 <div className="text-3xl font-bold text-amber-500">{homeworkToday?.count ?? 0}</div>
-                <div className="text-xs font-semibold text-amber-700 mt-0.5">📷 Homework</div>
-                <div className="text-xs text-muted-foreground">solved today</div>
+                <div className="text-xs font-semibold text-amber-700 mt-0.5">{plbl.statHomework}</div>
+                <div className="text-xs text-muted-foreground">{plbl.statSolvedToday}</div>
               </div>
             </div>
           )}
@@ -659,13 +908,13 @@ export function ParentDashboard() {
             <div className="grid grid-cols-2 gap-4">
               <div className={`p-4 rounded-2xl border shadow-sm text-center ${(voiceStats?.sessionsToday ?? 0) > 0 ? "bg-violet-50 border-violet-200" : "bg-card"}`}>
                 <div className="text-3xl font-bold text-violet-500">{voiceStats?.sessionsToday ?? 0}</div>
-                <div className="text-xs font-semibold text-violet-700 mt-0.5">🎙️ Voice Sessions</div>
-                <div className="text-xs text-muted-foreground">today</div>
+                <div className="text-xs font-semibold text-violet-700 mt-0.5">{plbl.statVoiceSessions}</div>
+                <div className="text-xs text-muted-foreground">{plbl.statToday}</div>
               </div>
               <div className={`p-4 rounded-2xl border shadow-sm text-center ${(voiceStats?.minutesListened ?? 0) > 0 ? "bg-violet-50 border-violet-200" : "bg-card"}`}>
                 <div className="text-3xl font-bold text-violet-500">{voiceStats?.minutesListened ?? 0}</div>
-                <div className="text-xs font-semibold text-violet-700 mt-0.5">🔊 Min. Listened</div>
-                <div className="text-xs text-muted-foreground">today</div>
+                <div className="text-xs font-semibold text-violet-700 mt-0.5">{plbl.statMinListened}</div>
+                <div className="text-xs text-muted-foreground">{plbl.statToday}</div>
               </div>
             </div>
           )}
@@ -673,23 +922,23 @@ export function ParentDashboard() {
           {topicProgressData && (topicProgressData.summary.totalLessons > 0 || topicProgressData.summary.totalPractice > 0 || topicProgressData.summary.totalQuizzes > 0) && (
             <div className="bg-card p-5 rounded-2xl border shadow-sm">
               <h3 className="font-bold mb-3 flex items-center gap-2 text-sm">
-                <BookOpen className="w-4 h-4 text-blue-500" /> Curriculum Engine Progress
+                <BookOpen className="w-4 h-4 text-blue-500" /> {plbl.curriculumEngineTitle}
               </h3>
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-blue-50 rounded-xl p-3 text-center">
                   <div className="flex items-center justify-center mb-1"><BookOpen className="w-4 h-4 text-blue-600" /></div>
                   <div className="text-2xl font-bold text-blue-700">{topicProgressData.summary.totalLessons}</div>
-                  <div className="text-xs text-blue-600 font-medium mt-0.5">Lessons Done</div>
+                  <div className="text-xs text-blue-600 font-medium mt-0.5">{plbl.statLessonsDone}</div>
                 </div>
                 <div className="bg-green-50 rounded-xl p-3 text-center">
                   <div className="flex items-center justify-center mb-1"><span className="text-green-600">✏️</span></div>
                   <div className="text-2xl font-bold text-green-700">{topicProgressData.summary.totalPractice}</div>
-                  <div className="text-xs text-green-600 font-medium mt-0.5">Practice Sets</div>
+                  <div className="text-xs text-green-600 font-medium mt-0.5">{plbl.statPracticeSets}</div>
                 </div>
                 <div className="bg-purple-50 rounded-xl p-3 text-center">
                   <div className="flex items-center justify-center mb-1"><Brain className="w-4 h-4 text-purple-600" /></div>
                   <div className="text-2xl font-bold text-purple-700">{topicProgressData.summary.totalQuizzes}</div>
-                  <div className="text-xs text-purple-600 font-medium mt-0.5">Quizzes Passed</div>
+                  <div className="text-xs text-purple-600 font-medium mt-0.5">{plbl.statQuizzesPassed}</div>
                 </div>
               </div>
             </div>
@@ -704,7 +953,7 @@ export function ParentDashboard() {
                   {t.parent.toneStyle[COMPANION_DATA[progressChild.aiCharacter].tone] ?? `${COMPANION_DATA[progressChild.aiCharacter].tone} teaching style`} · Montessori {t.parent.aiCompanion}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {progressChild.name}'s selected learning companion for all Junior modules. The companion adapts questions and encouragement to guide discovery.
+                  {plbl.companionSupportText(progressChild.name)}
                 </p>
               </div>
             </div>
@@ -713,7 +962,7 @@ export function ParentDashboard() {
           {completedMissions.length > 0 && (
             <div className="bg-card p-5 rounded-2xl border shadow-sm">
               <h3 className="font-bold mb-3 flex items-center gap-2 text-sm">
-                <Activity className="w-4 h-4" /> Recent Mission Activity
+                <Activity className="w-4 h-4" /> {plbl.recentMissionActivity}
               </h3>
               <div className="space-y-2">
                 {completedMissions.slice(-3).reverse().map(m => (
@@ -739,7 +988,7 @@ export function ParentDashboard() {
               {strengths.length > 0 && (
                 <div className="bg-green-50 p-5 rounded-2xl border border-green-200">
                   <h3 className="font-bold mb-3 flex items-center gap-2 text-green-700">
-                    <TrendingUp className="w-5 h-5" /> Subject Strengths
+                    <TrendingUp className="w-5 h-5" /> {plbl.subjectStrengths}
                   </h3>
                   {strengths.map(s => (
                     <div key={s.subject} className="flex items-center justify-between mb-2">
@@ -752,7 +1001,7 @@ export function ParentDashboard() {
               {weaknesses.length > 0 && (
                 <div className="bg-orange-50 p-5 rounded-2xl border border-orange-200">
                   <h3 className="font-bold mb-3 flex items-center gap-2 text-orange-700">
-                    <TrendingDown className="w-5 h-5" /> Needs Practice
+                    <TrendingDown className="w-5 h-5" /> {plbl.needsPractice}
                   </h3>
                   {weaknesses.map(s => (
                     <div key={s.subject} className="flex items-center justify-between mb-2">
@@ -767,7 +1016,7 @@ export function ParentDashboard() {
 
           <div className="bg-card p-6 rounded-2xl border shadow-sm">
             <h3 className="font-bold mb-4 flex items-center gap-2">
-              🗺️ Unlocked Learning Zones
+              {plbl.unlockedZones}
             </h3>
             <div className="flex flex-wrap gap-3">
               {ZONE_ORDER.map(zoneName => {
@@ -780,7 +1029,7 @@ export function ParentDashboard() {
                     }`}
                   >
                     <span>{ZONE_EMOJIS[zoneName]}</span>
-                    <span>{zoneName}</span>
+                    <span>{PARENT_ZONE_NAMES[zoneName]?.[lang] ?? zoneName}</span>
                     {isUnlocked ? <span>✅</span> : <span>🔒</span>}
                   </div>
                 );
@@ -791,7 +1040,7 @@ export function ParentDashboard() {
           {badges.length > 0 && (
             <div className="bg-card p-6 rounded-2xl border shadow-sm">
               <h3 className="font-bold mb-4 flex items-center gap-2">
-                <Award className="w-5 h-5 text-yellow-500" /> Earned Badges ({badges.length})
+                <Award className="w-5 h-5 text-yellow-500" /> {plbl.earnedBadges(badges.length)}
               </h3>
               <div className="flex flex-wrap gap-3">
                 {badges.map(badge => (
@@ -807,7 +1056,7 @@ export function ParentDashboard() {
 
           {progress.length > 0 ? (
             <div className="bg-card p-6 rounded-2xl border shadow-sm">
-              <h3 className="font-bold mb-4">Subject Performance Chart</h3>
+              <h3 className="font-bold mb-4">{plbl.subjectPerformanceChart}</h3>
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={avgBySubject}>
@@ -823,13 +1072,13 @@ export function ParentDashboard() {
               </div>
             </div>
           ) : (
-            <p className="text-muted-foreground text-center py-10 bg-card rounded-2xl border">Not enough progress data yet. Encourage your child to complete missions!</p>
+            <p className="text-muted-foreground text-center py-10 bg-card rounded-2xl border">{plbl.notEnoughData}</p>
           )}
 
           {missions.length > 0 && (
             <div className="bg-card p-6 rounded-2xl border shadow-sm">
               <h3 className="font-bold mb-4 flex items-center gap-2">
-                <Activity className="w-5 h-5" /> Mission Activity
+                <Activity className="w-5 h-5" /> {plbl.missionActivity}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-64 overflow-y-auto">
                 {completedMissions.slice(-10).reverse().map(m => (
@@ -846,7 +1095,7 @@ export function ParentDashboard() {
                     <span className="text-muted-foreground text-lg">⏳</span>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">{m.title}</p>
-                      <p className="text-xs text-muted-foreground">{m.subject} · Pending</p>
+                      <p className="text-xs text-muted-foreground">{m.subject} · {plbl.missionPending}</p>
                     </div>
                   </div>
                 ))}
@@ -861,8 +1110,8 @@ export function ParentDashboard() {
           <div className="flex items-center gap-3 mb-6 bg-gradient-to-r from-psychology/20 to-transparent p-4 rounded-2xl">
             <BrainCircuit className="w-8 h-8 text-psychology" />
             <div>
-              <h2 className="text-xl font-bold">AI Family Memory Engine</h2>
-              <p className="text-sm text-muted-foreground">Insights learned from family interactions.</p>
+              <h2 className="text-xl font-bold">{plbl.memoryEngineTitle}</h2>
+              <p className="text-sm text-muted-foreground">{plbl.memoryEngineSubtitle}</p>
             </div>
           </div>
 
@@ -877,7 +1126,7 @@ export function ParentDashboard() {
                     </span>
                     {mem.module && (
                       <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                        via {mem.module}
+                        {plbl.memoryVia} {mem.module}
                       </span>
                     )}
                   </div>
@@ -888,7 +1137,7 @@ export function ParentDashboard() {
             ))}
             {memories.length === 0 && (
               <div className="col-span-full py-12 text-center text-muted-foreground">
-                The Memory Engine is gathering insights...
+                {plbl.memoryEngineGathering}
               </div>
             )}
           </div>
@@ -898,10 +1147,10 @@ export function ParentDashboard() {
       <Dialog open={companionPickerOpen} onOpenChange={setCompanionPickerOpen}>
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>Choose a Learning Companion</DialogTitle>
+            <DialogTitle>{plbl.companionPickerTitle}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground -mt-2 mb-4">
-            {companionPickerChild ? `Select a companion for ${companionPickerChild.name}` : "Select a companion"}
+            {companionPickerChild ? plbl.companionPickerDesc(companionPickerChild.name) : plbl.companionPickerDescGeneric}
           </p>
           <div className="grid grid-cols-2 gap-3">
             {COMPANION_CHARS.map(char => {
@@ -917,10 +1166,10 @@ export function ParentDashboard() {
                 >
                   <div className="text-4xl mb-2">{char.emoji}</div>
                   <div className="font-bold text-sm">{char.name}</div>
-                  <div className={`text-[10px] font-semibold uppercase tracking-wider mb-1 ${char.accentColor}`}>{char.tone} tone</div>
-                  <div className="text-xs text-muted-foreground leading-relaxed">{char.desc}</div>
+                  <div className={`text-[10px] font-semibold uppercase tracking-wider mb-1 ${char.accentColor}`}>{t.parent.toneStyle[char.tone] ?? char.tone}</div>
+                  <div className="text-xs text-muted-foreground leading-relaxed">{COMPANION_CHAR_DESCS[char.id]?.[lang] ?? char.desc}</div>
                   {isSelected && (
-                    <div className="mt-2 text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full inline-block">✓ Current</div>
+                    <div className="mt-2 text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full inline-block">{plbl.companionPickerCurrent}</div>
                   )}
                 </button>
               );
@@ -930,7 +1179,7 @@ export function ParentDashboard() {
             onClick={() => setCompanionPickerOpen(false)}
             className="mt-2 w-full py-2 text-sm text-muted-foreground hover:text-foreground font-medium transition-colors"
           >
-            Cancel
+            {plbl.companionPickerCancel}
           </button>
         </DialogContent>
       </Dialog>
@@ -941,7 +1190,7 @@ export function ParentDashboard() {
           <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 pt-4">
             <div>
               <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">{editI18n.nameLbl}</label>
-              <input {...editForm.register("name")} placeholder="Child's name" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+              <input {...editForm.register("name")} placeholder={plbl.addChildNamePlaceholder} className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
               {editForm.formState.errors.name && <p className="text-destructive text-xs mt-1">{editForm.formState.errors.name.message}</p>}
             </div>
             <div>
@@ -951,7 +1200,7 @@ export function ParentDashboard() {
                   <option key={g.value} value={g.value}>{g.label}</option>
                 ))}
               </select>
-              {editForm.formState.errors.grade && <p className="text-destructive text-xs mt-1">Please select a grade</p>}
+              {editForm.formState.errors.grade && <p className="text-destructive text-xs mt-1">{plbl.selectGrade}</p>}
             </div>
             <div>
               <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">{editI18n.langLbl}</label>

@@ -2,10 +2,12 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useListChatMessages, useSendChatMessage, ListChatMessagesModule } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
-import { Send, Mic, Loader2, Sparkles, Camera, X, ImageIcon } from "lucide-react";
+import { Send, Mic, Loader2, Sparkles, Camera, X, ImageIcon, Volume2, Square, MicOff } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "./layout";
 import { useToast } from "@/hooks/use-toast";
+import { useVoiceRecorder } from "@/hooks/use-voice-recorder";
+import { useVoiceSpeaker } from "@/hooks/use-voice-speaker";
 
 interface SubjectContext {
   subjectLabel: string;
@@ -66,6 +68,33 @@ const HOMEWORK_LABELS = {
   },
 };
 
+const VOICE_LABELS = {
+  en: {
+    mic: "Talk to AYA",
+    listen: "Listen to AYA",
+    stop: "Stop",
+    record: "Record question",
+    micDenied: "Microphone access denied",
+    transcribing: "Listening…",
+  },
+  bg: {
+    mic: "Говори с AYA",
+    listen: "Слушай AYA",
+    stop: "Спри",
+    record: "Запиши въпрос",
+    micDenied: "Микрофонът е отказан",
+    transcribing: "Слушам…",
+  },
+  es: {
+    mic: "Habla con AYA",
+    listen: "Escucha a AYA",
+    stop: "Detener",
+    record: "Grabar pregunta",
+    micDenied: "Acceso al micrófono denegado",
+    transcribing: "Escuchando…",
+  },
+};
+
 function fileToBase64(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -97,12 +126,37 @@ export function Chat({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const hwLang: "en" | "bg" | "es" = lang === "bg" ? "bg" : lang === "es" ? "es" : "en";
+  const hwLabels = HOMEWORK_LABELS[hwLang];
+  const voiceLabels = VOICE_LABELS[hwLang];
+
   const { data: messages = [], isLoading, refetch } = useListChatMessages({
     module,
     childId: activeChildId
   });
 
   const sendMutation = useSendChatMessage();
+
+  /* ── Voice Recorder ────────────────────────────────────────────── */
+  const voiceRecorder = useVoiceRecorder({
+    lang: hwLang,
+    childId: activeChildId,
+    onTranscript: (text) => {
+      setInput(text);
+    },
+    onError: (msg) => {
+      toast({ title: msg, variant: "destructive" });
+    },
+  });
+
+  /* ── Voice Speaker ─────────────────────────────────────────────── */
+  const voiceSpeaker = useVoiceSpeaker({
+    lang: hwLang,
+    childId: activeChildId,
+    onError: (msg) => {
+      toast({ title: msg, variant: "destructive" });
+    },
+  });
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -147,17 +201,11 @@ export function Chat({
     doSend(prompt);
   };
 
-  const handleMic = () => {
-    toast({
-      title: "Voice Input",
-      description: "Voice features are coming in the next update!",
-    });
+  const handleMicToggle = () => {
+    voiceRecorder.toggle();
   };
 
   /* ── Homework vision flow ──────────────────────────────────────── */
-  const hwLang: "en" | "bg" | "es" = lang === "bg" ? "bg" : lang === "es" ? "es" : "en";
-  const hwLabels = HOMEWORK_LABELS[hwLang];
-
   const handleFileSelect = useCallback(async (file: File) => {
     if (!file.type.startsWith("image/")) {
       toast({ title: "Please select an image file", variant: "destructive" });
@@ -189,12 +237,10 @@ export function Chat({
       const base64 = await fileToBase64(homeworkFile);
       const mimeType = homeworkFile.type || "image/jpeg";
 
-      /* Insert user message immediately via chat API */
       sendMutation.mutate({
         data: { module, content: userLabel, childId: activeChildId }
       });
 
-      /* Call vision API */
       const token = localStorage.getItem("aya_token");
       const response = await fetch("/api/vision/homework", {
         method: "POST",
@@ -214,13 +260,10 @@ export function Chat({
 
       const { explanation } = await response.json() as { explanation: string; problemText: string };
 
-      /* Insert AYA's response as an assistant message via chat API */
       await new Promise<void>((resolve) => {
         sendMutation.mutate(
           { data: { module, content: explanation, childId: activeChildId } },
-          {
-            onSettled: () => resolve(),
-          }
+          { onSettled: () => resolve() }
         );
       });
 
@@ -248,8 +291,12 @@ export function Chat({
   const charTone = character ? CHARACTER_TONES[character] : null;
   const isJunior = module === "junior";
 
+  const isRecording = voiceRecorder.state === "recording";
+  const isTranscribing = voiceRecorder.state === "processing";
+
   return (
     <div className="flex flex-col h-[calc(100vh-14rem)] md:h-[calc(100vh-10rem)] bg-card rounded-3xl shadow-xl shadow-black/5 border border-border/50 overflow-hidden">
+      {/* ── Header ─────────────────────────────────────────────────── */}
       <div className="px-6 py-4 border-b border-border/50 bg-muted/20 flex items-center gap-4">
         <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center shadow-md text-2xl flex-shrink-0", bubbleColor)}>
           {charEmoji ?? "✨"}
@@ -276,6 +323,10 @@ export function Chat({
                 Homework Vision
               </span>
             )}
+            <span className="text-[10px] font-bold uppercase tracking-wider bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full border border-violet-200 flex items-center gap-1">
+              <Mic className="w-2.5 h-2.5" />
+              Voice Tutor
+            </span>
           </div>
           <p className="text-xs text-muted-foreground truncate">
             {character ? "Your personal learning companion · guides discovery, not just answers" : "Always here to help"}
@@ -295,6 +346,7 @@ export function Chat({
         </div>
       </div>
 
+      {/* ── Messages ───────────────────────────────────────────────── */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
@@ -302,6 +354,7 @@ export function Chat({
           </div>
         ) : (
           <>
+            {/* Greeting */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -311,8 +364,17 @@ export function Chat({
                 <div className={cn("w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm text-sm", bubbleColor)}>
                   {charEmoji ?? "✨"}
                 </div>
-                <div className="bg-muted/50 rounded-2xl rounded-tl-none px-5 py-3 text-foreground shadow-sm">
-                  {greeting}
+                <div className="group relative">
+                  <div className="bg-muted/50 rounded-2xl rounded-tl-none px-5 py-3 text-foreground shadow-sm">
+                    {greeting}
+                  </div>
+                  <PlayButton
+                    text={greeting}
+                    msgId="greeting"
+                    voiceSpeaker={voiceSpeaker}
+                    label={voiceLabels.listen}
+                    stopLabel={voiceLabels.stop}
+                  />
                 </div>
               </div>
             </motion.div>
@@ -332,18 +394,33 @@ export function Chat({
                       </div>
                     )}
                     <div className={cn(
-                      "px-5 py-3 shadow-md",
-                      msg.role === "user"
-                        ? cn(bubbleColor, "rounded-2xl rounded-tr-none")
-                        : "bg-muted/50 text-foreground rounded-2xl rounded-tl-none border border-border/50"
+                      "relative group",
+                      msg.role === "user" ? "flex flex-col items-end" : "flex flex-col items-start"
                     )}>
-                      <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                      <div className={cn(
+                        "px-5 py-3 shadow-md",
+                        msg.role === "user"
+                          ? cn(bubbleColor, "rounded-2xl rounded-tr-none")
+                          : "bg-muted/50 text-foreground rounded-2xl rounded-tl-none border border-border/50"
+                      )}>
+                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                      </div>
+                      {msg.role === "assistant" && (
+                        <PlayButton
+                          text={msg.content}
+                          msgId={String(msg.id)}
+                          voiceSpeaker={voiceSpeaker}
+                          label={voiceLabels.listen}
+                          stopLabel={voiceLabels.stop}
+                        />
+                      )}
                     </div>
                   </div>
                 </motion.div>
               ))}
             </AnimatePresence>
 
+            {/* Typing / analyzing indicator */}
             {(sendMutation.isPending || analyzingHomework) && (
               <motion.div
                 initial={{ opacity: 0 }}
@@ -376,6 +453,7 @@ export function Chat({
         <div ref={messagesEndRef} />
       </div>
 
+      {/* ── Suggested prompts ──────────────────────────────────────── */}
       {isJunior && suggestedPrompts && suggestedPrompts.length > 0 && !homeworkPreview && (
         <div className="px-4 py-2 border-t border-border/30 bg-muted/10 flex gap-2 overflow-x-auto hide-scrollbar">
           {suggestedPrompts.map((prompt) => (
@@ -391,7 +469,7 @@ export function Chat({
         </div>
       )}
 
-      {/* Homework image preview */}
+      {/* ── Homework preview panel ─────────────────────────────────── */}
       <AnimatePresence>
         {homeworkPreview && (
           <motion.div
@@ -442,8 +520,37 @@ export function Chat({
         )}
       </AnimatePresence>
 
+      {/* ── Recording indicator ────────────────────────────────────── */}
+      <AnimatePresence>
+        {(isRecording || isTranscribing) && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="px-4 py-2 border-t border-violet-200 bg-violet-50 flex items-center gap-3"
+          >
+            <span className={cn(
+              "w-3 h-3 rounded-full flex-shrink-0",
+              isRecording ? "bg-red-500 animate-pulse" : "bg-violet-400 animate-spin"
+            )} />
+            <span className="text-sm font-semibold text-violet-700">
+              {isRecording ? voiceLabels.record : voiceLabels.transcribing}
+            </span>
+            {isRecording && (
+              <button
+                onClick={() => voiceRecorder.stop()}
+                className="ml-auto flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 hover:bg-red-200 text-red-600 text-xs font-bold transition-colors"
+              >
+                <Square className="w-3 h-3 fill-current" />
+                {voiceLabels.stop}
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Input bar ─────────────────────────────────────────────── */}
       <div className="p-4 bg-card border-t border-border/50">
-        {/* Hidden file input */}
         <input
           ref={fileInputRef}
           type="file"
@@ -457,12 +564,28 @@ export function Chat({
         />
 
         <form onSubmit={handleSend} className="flex items-end gap-2 bg-muted/30 p-2 rounded-3xl border border-border/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 transition-all">
+          {/* Microphone button */}
           <button
             type="button"
-            onClick={handleMic}
-            className="p-3 text-muted-foreground hover:text-primary transition-colors rounded-full hover:bg-primary/10 flex-shrink-0"
+            onClick={handleMicToggle}
+            disabled={isTranscribing}
+            title={isRecording ? voiceLabels.stop : voiceLabels.mic}
+            className={cn(
+              "p-3 transition-all rounded-full flex-shrink-0",
+              isRecording
+                ? "text-white bg-red-500 hover:bg-red-600 shadow-md shadow-red-200 animate-pulse"
+                : isTranscribing
+                ? "text-violet-500 bg-violet-100"
+                : "text-muted-foreground hover:text-violet-600 hover:bg-violet-50"
+            )}
           >
-            <Mic className="w-5 h-5" />
+            {isTranscribing ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : isRecording ? (
+              <Square className="w-5 h-5 fill-current" />
+            ) : (
+              <Mic className="w-5 h-5" />
+            )}
           </button>
 
           {/* Camera button — junior only */}
@@ -511,5 +634,49 @@ export function Chat({
         </form>
       </div>
     </div>
+  );
+}
+
+/* ── PlayButton sub-component ──────────────────────────────────── */
+interface PlayButtonProps {
+  text: string;
+  msgId: string;
+  voiceSpeaker: ReturnType<typeof useVoiceSpeaker>;
+  label: string;
+  stopLabel: string;
+}
+
+function PlayButton({ text, msgId, voiceSpeaker, label, stopLabel }: PlayButtonProps) {
+  const isThisPlaying = voiceSpeaker.playingId === msgId && voiceSpeaker.speakerState === "playing";
+  const isThisLoading = voiceSpeaker.playingId === msgId && voiceSpeaker.speakerState === "loading";
+
+  return (
+    <button
+      onClick={() => {
+        if (isThisPlaying) {
+          voiceSpeaker.stop();
+        } else {
+          void voiceSpeaker.speak(text, msgId);
+        }
+      }}
+      title={isThisPlaying ? stopLabel : label}
+      className={cn(
+        "mt-1 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all",
+        isThisPlaying
+          ? "bg-violet-100 text-violet-700 border border-violet-300 hover:bg-violet-200"
+          : isThisLoading
+          ? "bg-violet-50 text-violet-400 border border-violet-200"
+          : "bg-muted/40 text-muted-foreground/60 border border-border/30 hover:bg-violet-50 hover:text-violet-600 hover:border-violet-200 opacity-0 group-hover:opacity-100"
+      )}
+    >
+      {isThisLoading ? (
+        <Loader2 className="w-3 h-3 animate-spin" />
+      ) : isThisPlaying ? (
+        <Square className="w-3 h-3 fill-current" />
+      ) : (
+        <Volume2 className="w-3 h-3" />
+      )}
+      {isThisLoading ? "…" : isThisPlaying ? stopLabel : label}
+    </button>
   );
 }

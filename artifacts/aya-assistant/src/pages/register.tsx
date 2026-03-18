@@ -23,10 +23,11 @@ export function Register() {
         data: { ...formData, role: "parent" }
       });
       login(res);
-    } catch (err: any) {
+    } catch (err) {
+      const e = err as { data?: { error?: string }; message?: string };
       toast({
         title: "Registration failed",
-        description: err?.data?.error || err?.message || "Please check your inputs",
+        description: e?.data?.error || e?.message || "Please check your inputs",
         variant: "destructive"
       });
     }

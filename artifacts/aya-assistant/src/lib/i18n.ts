@@ -53,6 +53,8 @@ export interface UITranslations {
     tabProgress: string;
     sectionChildProfiles: string;
     sectionLearningProgress: string;
+    toneStyle: Record<string, string>;
+    aiCompanion: string;
   };
 }
 
@@ -103,6 +105,13 @@ export const translations: Record<LangCode, UITranslations> = {
       tabProgress: "Learning Progress",
       sectionChildProfiles: "Child Profiles",
       sectionLearningProgress: "Learning Progress",
+      toneStyle: {
+        gentle:      "gentle style",
+        encouraging: "encouraging style",
+        playful:     "playful style",
+        calm:        "calm style",
+      },
+      aiCompanion: "AI Companion",
     },
   },
   bg: {
@@ -151,6 +160,13 @@ export const translations: Record<LangCode, UITranslations> = {
       tabProgress: "Напредък в обучението",
       sectionChildProfiles: "Профили на деца",
       sectionLearningProgress: "Напредък в обучението",
+      toneStyle: {
+        gentle:      "нежен стил",
+        encouraging: "насърчаващ стил",
+        playful:     "игрив стил",
+        calm:        "спокоен стил",
+      },
+      aiCompanion: "AI Компаньон",
     },
   },
   es: {
@@ -199,6 +215,13 @@ export const translations: Record<LangCode, UITranslations> = {
       tabProgress: "Progreso de aprendizaje",
       sectionChildProfiles: "Perfiles de niños",
       sectionLearningProgress: "Progreso de aprendizaje",
+      toneStyle: {
+        gentle:      "estilo suave",
+        encouraging: "estilo motivador",
+        playful:     "estilo lúdico",
+        calm:        "estilo tranquilo",
+      },
+      aiCompanion: "Compañero IA",
     },
   },
 };

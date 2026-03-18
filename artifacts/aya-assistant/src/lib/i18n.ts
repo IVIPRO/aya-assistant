@@ -52,8 +52,8 @@ export const translations: Record<LangCode, UITranslations> = {
   en: {
     nav: {
       dashboard: "Dashboard",
-      junior: "Junior",
-      student: "Student",
+      junior: "Elementary",
+      student: "Middle School",
       family: "Family",
       psychology: "Psychology",
       parent: "Parent",
@@ -70,10 +70,10 @@ export const translations: Record<LangCode, UITranslations> = {
       gradeLevel: (grade, lv) => `Grade ${grade} · Lv ${lv}`,
     },
     modules: {
-      juniorTitle: "AYA Junior",
-      juniorDesc: "Learning World for Grades 1–4",
-      studentTitle: "AYA Student",
-      studentDesc: "Smart study companion & homework help",
+      juniorTitle: "AYA Elementary",
+      juniorDesc: "Learning world for Grades 1–4",
+      studentTitle: "AYA Middle School",
+      studentDesc: "Smart companion for Grades 5–7",
       familyTitle: "AYA Family",
       familyDesc: "Shared calendar, tasks & household coordination",
       psychologyTitle: "AYA Psychology",
@@ -92,8 +92,8 @@ export const translations: Record<LangCode, UITranslations> = {
   bg: {
     nav: {
       dashboard: "Табло",
-      junior: "Деца",
-      student: "Ученик",
+      junior: "Начален етап",
+      student: "Прогимназия",
       family: "Семейство",
       psychology: "Психология",
       parent: "Родител",
@@ -110,10 +110,10 @@ export const translations: Record<LangCode, UITranslations> = {
       gradeLevel: (grade, lv) => `${grade} клас · Ниво ${lv}`,
     },
     modules: {
-      juniorTitle: "AYA Деца",
-      juniorDesc: "Учебен свят за класове 1–4",
-      studentTitle: "AYA Ученик",
-      studentDesc: "Умен помощник за учене и домашни",
+      juniorTitle: "AYA Начален етап",
+      juniorDesc: "Учебен свят за 1–4 клас",
+      studentTitle: "AYA Прогимназия",
+      studentDesc: "Умен помощник за 5–7 клас",
       familyTitle: "AYA Семейство",
       familyDesc: "Споделен календар, задачи и домашна координация",
       psychologyTitle: "AYA Психология",
@@ -132,8 +132,8 @@ export const translations: Record<LangCode, UITranslations> = {
   es: {
     nav: {
       dashboard: "Panel",
-      junior: "Niños",
-      student: "Estudiante",
+      junior: "Primaria",
+      student: "Secundaria",
       family: "Familia",
       psychology: "Psicología",
       parent: "Padre",
@@ -150,10 +150,10 @@ export const translations: Record<LangCode, UITranslations> = {
       gradeLevel: (grade, lv) => `${grade} grado · Nv ${lv}`,
     },
     modules: {
-      juniorTitle: "AYA Niños",
-      juniorDesc: "Mundo de aprendizaje para Grados 1–4",
-      studentTitle: "AYA Estudiante",
-      studentDesc: "Compañero de estudio inteligente",
+      juniorTitle: "AYA Primaria",
+      juniorDesc: "Mundo de aprendizaje para 1–4",
+      studentTitle: "AYA Secundaria",
+      studentDesc: "Compañero inteligente para 5–7",
       familyTitle: "AYA Familia",
       familyDesc: "Calendario compartido y coordinación del hogar",
       psychologyTitle: "AYA Psicología",

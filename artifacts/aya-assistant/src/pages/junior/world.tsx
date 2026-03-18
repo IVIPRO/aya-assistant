@@ -9,6 +9,64 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import type { Mission } from "@workspace/api-client-react";
 
+const COMPANION_INFO: Record<string, { emoji: string; name: string; color: string; borderColor: string; textColor: string }> = {
+  panda: { emoji: "🐼", name: "AYA Panda", color: "bg-green-50", borderColor: "border-green-200", textColor: "text-green-700" },
+  robot: { emoji: "🤖", name: "AYA Robot", color: "bg-blue-50", borderColor: "border-blue-200", textColor: "text-blue-700" },
+  fox:   { emoji: "🦊", name: "AYA Fox",   color: "bg-orange-50", borderColor: "border-orange-200", textColor: "text-orange-700" },
+  owl:   { emoji: "🦉", name: "AYA Owl",   color: "bg-purple-50", borderColor: "border-purple-200", textColor: "text-purple-700" },
+};
+
+const ZONE_COMPANION_MESSAGES: Record<string, Record<string, string>> = {
+  panda: {
+    "Math Island":    "Let's solve each number puzzle together, slowly and carefully. You've got this! 🌿",
+    "Reading Forest": "Every word is a new adventure. Let's read and discover the story together! 📖",
+    "Logic Mountain": "Take your time — there's no rush. Let's find the pattern step by step! 🧩",
+    "English City":   "We'll learn new words gently, and I'll cheer for every one you get right! 🌟",
+    "Science Planet": "Nature is full of wonders. Let's explore and ask questions together! 🌱",
+  },
+  robot: {
+    "Math Island":    "Calculating the best path forward! Every correct answer powers up your progress! ⚡",
+    "Reading Forest": "Let's process each word systematically. Comprehension: initializing! 🤖",
+    "Logic Mountain": "Logic circuits: online. Let's find the pattern and crack each puzzle! 💡",
+    "English City":   "Language module: active! I'll celebrate every correct answer with you! 🎉",
+    "Science Planet": "Science mode engaged! Let's observe, hypothesize, and discover! 🔬",
+  },
+  fox: {
+    "Math Island":    "Ooh, numbers are like little puzzles — and I LOVE puzzles! Let's play! 🦊",
+    "Reading Forest": "Words are magic spells! Let's read fast and discover the secrets inside! 🌟",
+    "Logic Mountain": "A challenge? Oh yes! I love a good brain teaser. Let's outsmart this one! 🧠",
+    "English City":   "English is an adventure! New words, new powers. Let's collect them all! 🎯",
+    "Science Planet": "Science is the BEST kind of exploring. What cool thing will we find today?! 🚀",
+  },
+  owl: {
+    "Math Island":    "Numbers have a beautiful order. Let's think clearly and find the answer together. 🦉",
+    "Reading Forest": "Good reading starts with patience. Let's absorb each sentence thoughtfully. 📚",
+    "Logic Mountain": "Every puzzle has a solution. Let's think it through with calm and focus. 🌙",
+    "English City":   "Language reveals wisdom. Let's explore each word and its meaning carefully. 💫",
+    "Science Planet": "The universe is endlessly fascinating. Let's observe and reflect together. 🌌",
+  },
+};
+
+function CompanionGuidance({ companionId, zoneName }: { companionId: string | null | undefined; zoneName: string }) {
+  if (!companionId || !COMPANION_INFO[companionId]) return null;
+  const companion = COMPANION_INFO[companionId];
+  const messages = ZONE_COMPANION_MESSAGES[companionId] ?? {};
+  const message = messages[zoneName] ?? "Let's explore this zone together and learn something amazing!";
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`flex items-start gap-4 p-4 rounded-2xl border-2 mb-6 ${companion.color} ${companion.borderColor}`}
+    >
+      <div className="text-4xl flex-shrink-0">{companion.emoji}</div>
+      <div>
+        <div className={`font-bold text-sm mb-0.5 ${companion.textColor}`}>{companion.name} says:</div>
+        <p className="text-sm text-foreground/80 leading-relaxed">{message}</p>
+      </div>
+    </motion.div>
+  );
+}
+
 interface Zone {
   id: string;
   name: string;
@@ -200,7 +258,7 @@ export function WorldMap() {
               Back to World Map
             </button>
 
-            <div className={`p-6 rounded-2xl mb-6 ${activeZone.bgColor} border ${activeZone.borderColor}`}>
+            <div className={`p-6 rounded-2xl mb-4 ${activeZone.bgColor} border ${activeZone.borderColor}`}>
               <div className="flex items-center gap-4">
                 <span className="text-5xl">{activeZone.emoji}</span>
                 <div>
@@ -209,6 +267,8 @@ export function WorldMap() {
                 </div>
               </div>
             </div>
+
+            <CompanionGuidance companionId={activeChild?.aiCharacter} zoneName={activeZone.name} />
 
             {activeMissions.length === 0 ? (
               <div className="py-16 text-center bg-muted/20 rounded-3xl border border-dashed">

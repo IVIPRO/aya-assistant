@@ -12,11 +12,12 @@ window.fetch = async (...args) => {
   const isApiRequest = typeof resource === 'string' && resource.startsWith('/api');
 
   if (token && isApiRequest) {
-    const newConfig = config || {};
-    newConfig.headers = {
-      ...newConfig.headers,
-      Authorization: `Bearer ${token}`
-    };
+    // Use Headers API to properly copy existing headers (including Content-Type)
+    // Spreading a Headers instance with {...} loses all headers, so we use new Headers()
+    const mergedHeaders = new Headers(config?.headers);
+    mergedHeaders.set('Authorization', `Bearer ${token}`);
+
+    const newConfig = { ...(config || {}), headers: mergedHeaders };
     
     try {
       const response = await originalFetch(resource, newConfig);

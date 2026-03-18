@@ -1,6 +1,8 @@
 import { Layout } from "@/components/layout";
 import { Chat } from "@/components/chat";
 import { SubjectPanel } from "./subjects";
+import { AnimatedTeacher } from "@/components/AnimatedTeacher";
+import type { TeacherState } from "@/components/AnimatedTeacher";
 import { Link } from "wouter";
 import { Star, Trophy, Sparkles, Map, MessageCircle, Lock, CheckCircle2, Mic, Volume2, Video, ChevronRight, ArrowLeft, BookOpen } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -837,6 +839,20 @@ export function Junior() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {activeChild && (
+        <AnimatedTeacher
+          characterEmoji={currentChar?.emoji ?? "🐼"}
+          characterName={currentChar?.name ?? "AYA"}
+          lang={juniorLang}
+          state={
+            (view === "chat"       ? "talking"     :
+             view === "subjects"   ? "thinking"    :
+             view === "map"        ? "encouraging" :
+             "idle") as TeacherState
+          }
+        />
+      )}
     </Layout>
   );
 }

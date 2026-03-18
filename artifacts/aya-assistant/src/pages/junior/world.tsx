@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useListMissions, useCompleteMission, useListChildren, getListMissionsQueryKey, getListChildrenQueryKey } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useLocation } from "wouter";
 import type { Mission } from "@workspace/api-client-react";
 
 interface Zone {
@@ -102,7 +103,22 @@ function DifficultyBadge({ difficulty }: { difficulty?: string | null }) {
 export function WorldMap() {
   const { activeChildId } = useAuth();
   const { toast } = useToast();
-  const [selectedZone, setSelectedZone] = useState<string | null>(null);
+  const [location] = useLocation();
+  const zoneFromUrl = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("zone") : null;
+  const [selectedZone, setSelectedZone] = useState<string | null>(zoneFromUrl);
+  const zoneOpenedAtRef = useRef<number | null>(zoneFromUrl ? Date.now() : null);
+
+  const handleSetZone = (zoneId: string | null) => {
+    setSelectedZone(zoneId);
+    zoneOpenedAtRef.current = zoneId ? Date.now() : null;
+  };
+
+  useEffect(() => {
+    if (zoneFromUrl && selectedZone === null) {
+      setSelectedZone(zoneFromUrl);
+      zoneOpenedAtRef.current = Date.now();
+    }
+  }, [location]);
 
   const { data: children = [] } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
   const { data: missions = [], refetch } = useListMissions(
@@ -115,8 +131,9 @@ export function WorldMap() {
   const childXp = activeChild?.xp ?? 0;
 
   const handleComplete = async (id: number) => {
+    const responseTimeMs = zoneOpenedAtRef.current ? Date.now() - zoneOpenedAtRef.current : undefined;
     try {
-      await completeMutation.mutateAsync({ id, data: {} });
+      await completeMutation.mutateAsync({ id, data: { responseTimeMs: responseTimeMs ?? null } });
       toast({ title: "Mission Completed! 🎉", description: "You earned XP and Stars!" });
       refetch();
     } catch {
@@ -176,7 +193,7 @@ export function WorldMap() {
             exit={{ opacity: 0, x: -30 }}
           >
             <button
-              onClick={() => setSelectedZone(null)}
+              onClick={() => handleSetZone(null)}
               className="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/50 px-4 py-2 rounded-xl"
             >
               <ArrowLeft className="w-5 h-5" />
@@ -269,7 +286,7 @@ export function WorldMap() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
-                  onClick={() => isUnlocked && activeChildId && setSelectedZone(zone.id)}
+                  onClick={() => isUnlocked && activeChildId && handleSetZone(zone.id)}
                   className={`relative p-6 rounded-[2rem] border-4 transition-all ${
                     isUnlocked
                       ? `${zone.bgColor} ${zone.borderColor} cursor-pointer hover:-translate-y-2 hover:shadow-xl`

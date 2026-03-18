@@ -99,7 +99,15 @@ export const ListChildrenResponseItem = zod.object({
   language: zod.string(),
   country: zod.string(),
   avatar: zod.string().nullable(),
-  aiCharacter: zod.string().nullish(),
+  aiCharacter: zod
+    .union([
+      zod.literal("panda"),
+      zod.literal("robot"),
+      zod.literal("fox"),
+      zod.literal("owl"),
+      zod.literal(null),
+    ])
+    .nullish(),
   badgesEarned: zod
     .array(
       zod.object({
@@ -129,7 +137,15 @@ export const CreateChildBody = zod.object({
   language: zod.string(),
   country: zod.string(),
   avatar: zod.string().nullish(),
-  aiCharacter: zod.string().nullish(),
+  aiCharacter: zod
+    .union([
+      zod.literal("panda"),
+      zod.literal("robot"),
+      zod.literal("fox"),
+      zod.literal("owl"),
+      zod.literal(null),
+    ])
+    .nullish(),
 });
 
 /**
@@ -147,7 +163,15 @@ export const GetChildResponse = zod.object({
   language: zod.string(),
   country: zod.string(),
   avatar: zod.string().nullable(),
-  aiCharacter: zod.string().nullish(),
+  aiCharacter: zod
+    .union([
+      zod.literal("panda"),
+      zod.literal("robot"),
+      zod.literal("fox"),
+      zod.literal("owl"),
+      zod.literal(null),
+    ])
+    .nullish(),
   badgesEarned: zod
     .array(
       zod.object({
@@ -180,7 +204,15 @@ export const UpdateChildBody = zod.object({
   avatar: zod.string().nullish(),
   xp: zod.number().nullish(),
   stars: zod.number().nullish(),
-  aiCharacter: zod.string().nullish(),
+  aiCharacter: zod
+    .union([
+      zod.literal("panda"),
+      zod.literal("robot"),
+      zod.literal("fox"),
+      zod.literal("owl"),
+      zod.literal(null),
+    ])
+    .nullish(),
   badgesEarned: zod
     .array(
       zod.object({
@@ -202,7 +234,15 @@ export const UpdateChildResponse = zod.object({
   language: zod.string(),
   country: zod.string(),
   avatar: zod.string().nullable(),
-  aiCharacter: zod.string().nullish(),
+  aiCharacter: zod
+    .union([
+      zod.literal("panda"),
+      zod.literal("robot"),
+      zod.literal("fox"),
+      zod.literal("owl"),
+      zod.literal(null),
+    ])
+    .nullish(),
   badgesEarned: zod
     .array(
       zod.object({

@@ -71,18 +71,24 @@ const COMPANION_META_LABELS = {
     voiceTutor:     "VOICE TUTOR",
     companionDesc:  "Your personal learning companion · guides discovery, not just answers",
     alwaysHere:     "Always here to help",
+    subjectPrefix:  "Subject",
+    topicPrefix:    "Topic",
   },
   bg: {
     homeworkVision: "ДОМАШНО ОТ СНИМКА",
     voiceTutor:     "ГЛАСОВ УЧИТЕЛ",
     companionDesc:  "Твоят личен учебен компаньон – насочва към откриване, а не само дава отговори.",
     alwaysHere:     "Винаги тук, за да помогна",
+    subjectPrefix:  "Предмет",
+    topicPrefix:    "Тема",
   },
   es: {
     homeworkVision: "TAREA POR FOTO",
     voiceTutor:     "TUTOR DE VOZ",
     companionDesc:  "Tu compañero de aprendizaje personal – guía el descubrimiento, no solo da respuestas.",
     alwaysHere:     "Siempre aquí para ayudarte",
+    subjectPrefix:  "Asignatura",
+    topicPrefix:    "Tema",
   },
 };
 
@@ -213,7 +219,7 @@ export function Chat({
   const doSend = (content: string, onError?: () => void) => {
     if (!content.trim() || sendMutation.isPending) return;
     const fullContent = subjectContext
-      ? `Subject: ${subjectContext.subjectLabel}${subjectContext.topicLabel ? ` | Topic: ${subjectContext.topicLabel}` : ""}\n${content}`
+      ? `${metaLbl.subjectPrefix}: ${subjectContext.subjectLabel}${subjectContext.topicLabel ? ` | ${metaLbl.topicPrefix}: ${subjectContext.topicLabel}` : ""}\n${content}`
       : content;
     sendMutation.mutate(
       { data: { module, content: fullContent, childId: activeChildId } },

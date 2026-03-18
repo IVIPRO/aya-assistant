@@ -1,10 +1,15 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, Pencil, Brain, CheckCircle2, XCircle, ChevronRight, RotateCcw, Loader2 } from "lucide-react";
+import {
+  ArrowLeft, BookOpen, Pencil, Brain, CheckCircle2, XCircle,
+  ChevronRight, RotateCcw, Loader2,
+} from "lucide-react";
 import { cn } from "@/components/layout";
+import { getListChildrenQueryKey } from "@workspace/api-client-react";
 import type { LangCode } from "@/lib/i18n";
 import type { Subject, Topic } from "@/lib/curriculum";
+import { XpToast, type XpReward } from "@/components/xp-toast";
 
 type LessonMode = "lesson" | "practice" | "quiz";
 
@@ -34,42 +39,46 @@ const TAB_LABELS: Record<LangCode, { lesson: string; practice: string; quiz: str
 const UI: Record<LangCode, {
   check: string; correct: string; wrong: string; next: string; retry: string;
   score: (n: number, t: number) => string; loading: string; back: string;
-  showHint: string; yourAnswer: string; placeholder: string;
+  showHint: string; placeholder: string;
 }> = {
   en: {
     check: "Check", correct: "Correct! ✅", wrong: "Not quite ❌", next: "Next →",
     retry: "Try again", score: (n, t) => `You got ${n} out of ${t} correct!`,
     loading: "Loading lesson...", back: "← Back", showHint: "Show hint",
-    yourAnswer: "Your answer", placeholder: "Type your answer…",
+    placeholder: "Type your answer…",
   },
   bg: {
     check: "Провери", correct: "Правилно! ✅", wrong: "Не съвсем ❌", next: "Следващ →",
     retry: "Опитай пак", score: (n, t) => `Верни отговори: ${n} от ${t}!`,
     loading: "Зареждам урока...", back: "← Назад", showHint: "Покажи подсказка",
-    yourAnswer: "Твоят отговор", placeholder: "Напиши отговора си…",
+    placeholder: "Напиши отговора си…",
   },
   es: {
     check: "Comprobar", correct: "¡Correcto! ✅", wrong: "No del todo ❌", next: "Siguiente →",
     retry: "Intentar de nuevo", score: (n, t) => `¡Acertaste ${n} de ${t}!`,
     loading: "Cargando lección...", back: "← Atrás", showHint: "Mostrar pista",
-    yourAnswer: "Tu respuesta", placeholder: "Escribe tu respuesta…",
+    placeholder: "Escribe tu respuesta…",
   },
 };
 
-interface LessonViewerProps {
-  subject: Subject;
-  topic: Topic;
-  initialMode: LessonMode;
-  grade: number;
-  lang: LangCode;
-  onBack: () => void;
-  onAskAya: () => void;
-}
-
 /* ─── Lesson Panel ─────────────────────────────────────────────── */
-function LessonPanel({ data, lang, subject }: { data: LessonContent; lang: LangCode; subject: Subject }) {
+interface LessonPanelProps {
+  data: LessonContent;
+  lang: LangCode;
+  subject: Subject;
+  onView: () => void;
+}
+function LessonPanel({ data, lang, subject, onView }: LessonPanelProps) {
   const [showHints, setShowHints] = useState<boolean[]>(data.lesson.examples.map(() => false));
   const ui = UI[lang];
+  const firedRef = useRef(false);
+
+  useEffect(() => {
+    if (!firedRef.current) {
+      firedRef.current = true;
+      onView();
+    }
+  }, []);
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
@@ -112,10 +121,26 @@ function LessonPanel({ data, lang, subject }: { data: LessonContent; lang: LangC
 }
 
 /* ─── Practice Panel ───────────────────────────────────────────── */
-function PracticePanel({ data, lang, subject }: { data: LessonContent; lang: LangCode; subject: Subject }) {
+interface PracticePanelProps {
+  data: LessonContent;
+  lang: LangCode;
+  subject: Subject;
+  onComplete: (correctCount: number) => void;
+}
+function PracticePanel({ data, lang, subject, onComplete }: PracticePanelProps) {
   const ui = UI[lang];
   const [answers, setAnswers] = useState<string[]>(data.practice.problems.map(() => ""));
   const [checked, setChecked] = useState<(boolean | null)[]>(data.practice.problems.map(() => null));
+  const firedRef = useRef(false);
+
+  useEffect(() => {
+    const allChecked = checked.every(c => c !== null);
+    if (allChecked && !firedRef.current) {
+      firedRef.current = true;
+      const correctCount = checked.filter(c => c === true).length;
+      onComplete(correctCount);
+    }
+  }, [checked]);
 
   const checkOne = (i: number) => {
     const correct = data.practice.problems[i].answer.trim().toLowerCase();
@@ -126,6 +151,7 @@ function PracticePanel({ data, lang, subject }: { data: LessonContent; lang: Lan
   const resetOne = (i: number) => {
     setAnswers(a => a.map((v, j) => j === i ? "" : v));
     setChecked(c => c.map((v, j) => j === i ? null : v));
+    firedRef.current = false;
   };
 
   return (
@@ -190,13 +216,27 @@ function PracticePanel({ data, lang, subject }: { data: LessonContent; lang: Lan
 }
 
 /* ─── Quiz Panel ───────────────────────────────────────────────── */
-function QuizPanel({ data, lang, subject }: { data: LessonContent; lang: LangCode; subject: Subject }) {
+interface QuizPanelProps {
+  data: LessonContent;
+  lang: LangCode;
+  subject: Subject;
+  onComplete: (score: number) => void;
+}
+function QuizPanel({ data, lang, subject, onComplete }: QuizPanelProps) {
   const ui = UI[lang];
   const questions = data.quiz.questions;
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
+  const firedRef = useRef(false);
+
+  useEffect(() => {
+    if (done && !firedRef.current) {
+      firedRef.current = true;
+      onComplete(score);
+    }
+  }, [done, score]);
 
   const handleSelect = (idx: number) => {
     if (selected !== null) return;
@@ -213,7 +253,10 @@ function QuizPanel({ data, lang, subject }: { data: LessonContent; lang: LangCod
     }
   };
 
-  const restart = () => { setCurrent(0); setSelected(null); setScore(0); setDone(false); };
+  const restart = () => {
+    setCurrent(0); setSelected(null); setScore(0); setDone(false);
+    firedRef.current = false;
+  };
 
   if (done) {
     const pct = Math.round((score / questions.length) * 100);
@@ -246,7 +289,9 @@ function QuizPanel({ data, lang, subject }: { data: LessonContent; lang: LangCod
         </p>
         <div className="flex gap-1">
           {questions.map((_, i) => (
-            <div key={i} className={cn("w-2 h-2 rounded-full", i < current ? subject.colorClass.replace("text-", "bg-") : i === current ? subject.colorClass.replace("text-", "bg-") + " ring-2 ring-offset-1 " + subject.colorClass.replace("text-", "ring-") : "bg-muted")} />
+            <div key={i} className={cn("w-2 h-2 rounded-full",
+              i < current ? "bg-green-500" : i === current ? subject.colorClass.replace("text-", "bg-") : "bg-muted"
+            )} />
           ))}
         </div>
       </div>
@@ -266,7 +311,6 @@ function QuizPanel({ data, lang, subject }: { data: LessonContent; lang: LangCod
                 revealed && isCorrect && "border-green-400 bg-green-50 text-green-700",
                 revealed && isSelected && !isCorrect && "border-red-400 bg-red-50 text-red-600",
                 revealed && !isSelected && !isCorrect && "border-border/30 bg-muted/30 text-muted-foreground opacity-60",
-                !revealed && "hover:border-" + subject.borderClass.replace("border-", ""),
               )}>
               {opt}
             </button>
@@ -286,11 +330,25 @@ function QuizPanel({ data, lang, subject }: { data: LessonContent; lang: LangCod
 }
 
 /* ─── Main LessonViewer ────────────────────────────────────────── */
-export function LessonViewer({ subject, topic, initialMode, grade, lang, onBack, onAskAya }: LessonViewerProps) {
+export interface LessonViewerProps {
+  subject: Subject;
+  topic: Topic;
+  initialMode: LessonMode;
+  grade: number;
+  lang: LangCode;
+  childId: number;
+  onBack: () => void;
+  onAskAya: () => void;
+}
+
+export function LessonViewer({ subject, topic, initialMode, grade, lang, childId, onBack, onAskAya }: LessonViewerProps) {
   const [mode, setMode] = useState<LessonMode>(initialMode);
+  const [reward, setReward] = useState<XpReward | null>(null);
   const ui = UI[lang];
   const tabs = TAB_LABELS[lang];
+  const queryClient = useQueryClient();
 
+  /* Fetch lesson content */
   const { data, isLoading, isError } = useQuery<LessonContent>({
     queryKey: ["lesson", subject.id, topic.id, grade, lang],
     queryFn: async () => {
@@ -301,6 +359,34 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, onBack,
     staleTime: 5 * 60 * 1000,
   });
 
+  /* Record completion and receive XP */
+  const completeMutation = useMutation({
+    mutationFn: async ({ action, correctCount }: { action: "lesson" | "practice" | "quiz"; correctCount: number }) => {
+      const res = await fetch("/api/learning/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ childId, subjectId: subject.id, topicId: topic.id, action, correctCount }),
+      });
+      if (!res.ok) throw new Error("Failed to record progress");
+      return res.json() as Promise<XpReward & { newBadges: Array<{ icon: string; title: string }> }>;
+    },
+    onSuccess: (result) => {
+      if (result.xpGained > 0 || result.starsGained > 0) {
+        setReward(result);
+      }
+      // Refresh child data so XP/stars/level update in the UI
+      queryClient.invalidateQueries({ queryKey: getListChildrenQueryKey() });
+      // Refresh topic progress
+      queryClient.invalidateQueries({ queryKey: ["learning-progress", childId] });
+    },
+  });
+
+  const recordCompletion = useCallback((action: "lesson" | "practice" | "quiz", correctCount: number) => {
+    if (childId > 0) {
+      completeMutation.mutate({ action, correctCount });
+    }
+  }, [childId]);
+
   const TABS: Array<{ id: LessonMode; label: string; Icon: typeof BookOpen }> = [
     { id: "lesson",   label: tabs.lesson,   Icon: BookOpen },
     { id: "practice", label: tabs.practice, Icon: Pencil },
@@ -309,6 +395,9 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, onBack,
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+      {/* XP reward toast */}
+      <XpToast reward={reward} lang={lang} onDismiss={() => setReward(null)} />
+
       <div className="flex items-center justify-between mb-5">
         <button onClick={onBack}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors">
@@ -348,9 +437,33 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, onBack,
         </div>
       ) : (
         <AnimatePresence mode="wait">
-          {mode === "lesson" && <LessonPanel key="lesson" data={data} lang={lang} subject={subject} />}
-          {mode === "practice" && <PracticePanel key="practice" data={data} lang={lang} subject={subject} />}
-          {mode === "quiz" && <QuizPanel key="quiz" data={data} lang={lang} subject={subject} />}
+          {mode === "lesson" && (
+            <LessonPanel
+              key="lesson"
+              data={data}
+              lang={lang}
+              subject={subject}
+              onView={() => recordCompletion("lesson", 0)}
+            />
+          )}
+          {mode === "practice" && (
+            <PracticePanel
+              key={`practice-${topic.id}`}
+              data={data}
+              lang={lang}
+              subject={subject}
+              onComplete={(n) => recordCompletion("practice", n)}
+            />
+          )}
+          {mode === "quiz" && (
+            <QuizPanel
+              key={`quiz-${topic.id}`}
+              data={data}
+              lang={lang}
+              subject={subject}
+              onComplete={(score) => recordCompletion("quiz", score)}
+            />
+          )}
         </AnimatePresence>
       )}
     </motion.div>

@@ -21,9 +21,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/hooks/use-i18n";
+import { BookOpen, Brain } from "lucide-react";
+import { getLevel } from "@/lib/levelSystem";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recharts";
 
 const ZONE_ORDER = ["Math Island", "Reading Forest", "Logic Mountain", "English City", "Science Planet"];
@@ -141,10 +144,6 @@ const COMPANION_CHARS = [
   { id: "owl",   emoji: "🦉", name: "AYA Owl",   desc: "Wise and thoughtful", tone: "calm",       color: "bg-purple-100 border-purple-300", accentColor: "text-purple-700" },
 ];
 
-function getLevel(xp: number): number {
-  return Math.floor(xp / 100) + 1;
-}
-
 function getCurrentZone(xp: number): { name: string; emoji: string } {
   if (xp >= 250) return { name: "Science Planet", emoji: "🌍" };
   if (xp >= 150) return { name: "English City", emoji: "🏙️" };
@@ -190,6 +189,18 @@ export function ParentDashboard() {
 
   const progressChild = children.find(c => c.id === progressChildId);
   const editI18n = getProfileI18n(editingChild?.language);
+
+  const { data: topicProgressData } = useQuery<{ topics: Array<{ subjectId: string; lessonDone: boolean; practiceDone: boolean; quizPassed: boolean }>; summary: { totalLessons: number; totalPractice: number; totalQuizzes: number } }>({
+    queryKey: ["learning-progress", progressChildId],
+    queryFn: async () => {
+      if (!progressChildId) return { topics: [], summary: { totalLessons: 0, totalPractice: 0, totalQuizzes: 0 } };
+      const res = await fetch(`/api/learning/progress?childId=${progressChildId}`);
+      if (!res.ok) return { topics: [], summary: { totalLessons: 0, totalPractice: 0, totalQuizzes: 0 } };
+      return res.json();
+    },
+    enabled: progressChildId > 0,
+    staleTime: 30 * 1000,
+  });
 
   const createChild = useCreateChild();
   const deleteChild = useDeleteChild();
@@ -599,6 +610,31 @@ export function ParentDashboard() {
                 <div className="text-2xl font-bold">{getCurrentZone(progressChild.xp).emoji}</div>
                 <div className="text-xs font-bold text-foreground mt-0.5 leading-tight">{getCurrentZone(progressChild.xp).name}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">Current Zone</div>
+              </div>
+            </div>
+          )}
+
+          {topicProgressData && (topicProgressData.summary.totalLessons > 0 || topicProgressData.summary.totalPractice > 0 || topicProgressData.summary.totalQuizzes > 0) && (
+            <div className="bg-card p-5 rounded-2xl border shadow-sm">
+              <h3 className="font-bold mb-3 flex items-center gap-2 text-sm">
+                <BookOpen className="w-4 h-4 text-blue-500" /> Curriculum Engine Progress
+              </h3>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-blue-50 rounded-xl p-3 text-center">
+                  <div className="flex items-center justify-center mb-1"><BookOpen className="w-4 h-4 text-blue-600" /></div>
+                  <div className="text-2xl font-bold text-blue-700">{topicProgressData.summary.totalLessons}</div>
+                  <div className="text-xs text-blue-600 font-medium mt-0.5">Lessons Done</div>
+                </div>
+                <div className="bg-green-50 rounded-xl p-3 text-center">
+                  <div className="flex items-center justify-center mb-1"><span className="text-green-600">✏️</span></div>
+                  <div className="text-2xl font-bold text-green-700">{topicProgressData.summary.totalPractice}</div>
+                  <div className="text-xs text-green-600 font-medium mt-0.5">Practice Sets</div>
+                </div>
+                <div className="bg-purple-50 rounded-xl p-3 text-center">
+                  <div className="flex items-center justify-center mb-1"><Brain className="w-4 h-4 text-purple-600" /></div>
+                  <div className="text-2xl font-bold text-purple-700">{topicProgressData.summary.totalQuizzes}</div>
+                  <div className="text-xs text-purple-600 font-medium mt-0.5">Quizzes Passed</div>
+                </div>
               </div>
             </div>
           )}

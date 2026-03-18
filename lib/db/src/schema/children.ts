@@ -1,6 +1,14 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+
+export interface BadgeRecord {
+  id: string;
+  title: string;
+  icon: string;
+  description: string;
+  earnedAt: string;
+}
 
 export const childrenTable = pgTable("children", {
   id: serial("id").primaryKey(),
@@ -10,6 +18,8 @@ export const childrenTable = pgTable("children", {
   language: text("language").notNull(),
   country: text("country").notNull(),
   avatar: text("avatar"),
+  aiCharacter: text("ai_character"),
+  badgesEarned: jsonb("badges_earned").$type<BadgeRecord[]>(),
   xp: integer("xp").notNull().default(0),
   stars: integer("stars").notNull().default(0),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

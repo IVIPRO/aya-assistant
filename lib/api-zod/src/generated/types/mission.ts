@@ -5,6 +5,7 @@
  * AYA Assistant API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { MissionDifficulty } from "./missionDifficulty";
 
 export interface Mission {
   id: number;
@@ -12,6 +13,9 @@ export interface Mission {
   title: string;
   description: string;
   subject: string;
+  /** @nullable */
+  zone?: string | null;
+  difficulty?: MissionDifficulty;
   xpReward: number;
   starReward: number;
   completed: boolean;

@@ -7,6 +7,7 @@
  */
 
 export * from "./authResponse";
+export * from "./badge";
 export * from "./calendarEvent";
 export * from "./chatMessage";
 export * from "./chatMessagePair";
@@ -34,6 +35,7 @@ export * from "./loginBody";
 export * from "./memory";
 export * from "./messageResponse";
 export * from "./mission";
+export * from "./missionDifficulty";
 export * from "./progress";
 export * from "./registerBody";
 export * from "./registerBodyRole";

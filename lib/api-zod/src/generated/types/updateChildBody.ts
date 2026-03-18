@@ -21,4 +21,6 @@ export interface UpdateChildBody {
   xp?: number | null;
   /** @nullable */
   stars?: number | null;
+  /** @nullable */
+  aiCharacter?: string | null;
 }

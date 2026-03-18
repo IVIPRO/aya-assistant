@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useListChatMessages, useSendChatMessage, ListChatMessagesModule } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
-import { Send, Mic, Sparkles, Loader2 } from "lucide-react";
+import { Send, Mic, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "./layout";
 import { useToast } from "@/hooks/use-toast";
@@ -10,9 +10,24 @@ interface ChatProps {
   module: ListChatMessagesModule;
   themeColor: "primary" | "junior" | "student" | "psychology";
   greeting?: string;
+  character?: string | null;
 }
 
-export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I help you today?" }: ChatProps) {
+const CHARACTER_EMOJIS: Record<string, string> = {
+  panda: "🐼",
+  robot: "🤖",
+  fox: "🦊",
+  owl: "🦉",
+};
+
+const CHARACTER_NAMES: Record<string, string> = {
+  panda: "Panda Teacher",
+  robot: "Robot Guide",
+  fox: "Fox Mentor",
+  owl: "Owl Professor",
+};
+
+export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I help you today?", character }: ChatProps) {
   const { activeChildId } = useAuth();
   const { toast } = useToast();
   const [input, setInput] = useState("");
@@ -49,13 +64,13 @@ export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I
         }
       });
       refetch();
-    } catch (error) {
+    } catch {
       toast({
         title: "Error sending message",
         description: "Please try again.",
         variant: "destructive"
       });
-      setInput(content); // restore
+      setInput(content);
     }
   };
 
@@ -74,21 +89,25 @@ export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I
   };
 
   const bubbleColor = colorMap[themeColor];
+  const charEmoji = character ? (CHARACTER_EMOJIS[character] ?? "✨") : null;
+  const charName = character ? (CHARACTER_NAMES[character] ?? "AYA Junior") : null;
 
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)] md:h-[calc(100vh-8rem)] bg-card rounded-3xl shadow-xl shadow-black/5 border border-border/50 overflow-hidden">
-      {/* Header */}
       <div className="px-6 py-4 border-b border-border/50 bg-muted/20 flex items-center gap-4">
-        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shadow-md", bubbleColor)}>
-          <Sparkles className="w-5 h-5" />
+        <div className={cn("w-10 h-10 rounded-full flex items-center justify-center shadow-md text-lg", bubbleColor)}>
+          {charEmoji ?? "✨"}
         </div>
         <div>
-          <h2 className="font-display font-semibold text-lg capitalize">AYA {module}</h2>
-          <p className="text-xs text-muted-foreground">Always here to help</p>
+          <h2 className="font-display font-semibold text-lg capitalize">
+            {charName ?? `AYA ${module}`}
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            {character ? "Your personal learning companion" : "Always here to help"}
+          </p>
         </div>
       </div>
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
@@ -96,14 +115,14 @@ export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I
           </div>
         ) : (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="flex justify-start"
             >
               <div className="flex gap-3 max-w-[85%]">
-                <div className={cn("w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm", bubbleColor)}>
-                  <Sparkles className="w-4 h-4" />
+                <div className={cn("w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm text-sm", bubbleColor)}>
+                  {charEmoji ?? "✨"}
                 </div>
                 <div className="bg-muted/50 rounded-2xl rounded-tl-none px-5 py-3 text-foreground shadow-sm">
                   {greeting}
@@ -121,13 +140,13 @@ export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I
                 >
                   <div className={cn("flex gap-3 max-w-[85%]", msg.role === "user" ? "flex-row-reverse" : "flex-row")}>
                     {msg.role === "assistant" && (
-                      <div className={cn("w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm", bubbleColor)}>
-                        <Sparkles className="w-4 h-4" />
+                      <div className={cn("w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm text-sm", bubbleColor)}>
+                        {charEmoji ?? "✨"}
                       </div>
                     )}
                     <div className={cn(
                       "px-5 py-3 shadow-md",
-                      msg.role === "user" 
+                      msg.role === "user"
                         ? cn(bubbleColor, "rounded-2xl rounded-tr-none")
                         : "bg-muted/50 text-foreground rounded-2xl rounded-tl-none border border-border/50"
                     )}>
@@ -139,14 +158,14 @@ export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I
             </AnimatePresence>
 
             {sendMutation.isPending && (
-              <motion.div 
+              <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="flex justify-start"
               >
                 <div className="flex gap-3 max-w-[85%]">
-                  <div className={cn("w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm opacity-70", bubbleColor)}>
-                    <Sparkles className="w-4 h-4 animate-pulse" />
+                  <div className={cn("w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center shadow-sm opacity-70 text-sm", bubbleColor)}>
+                    {charEmoji ?? "✨"}
                   </div>
                   <div className="bg-muted/50 rounded-2xl rounded-tl-none px-5 py-3 flex items-center gap-1">
                     <span className="w-2 h-2 rounded-full bg-foreground/30 animate-bounce" style={{ animationDelay: "0ms" }} />
@@ -161,7 +180,6 @@ export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <div className="p-4 bg-card border-t border-border/50">
         <form onSubmit={handleSend} className="flex items-end gap-2 bg-muted/30 p-2 rounded-3xl border border-border/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 transition-all">
           <button
@@ -171,7 +189,7 @@ export function Chat({ module, themeColor, greeting = "Hello! I'm AYA. How can I
           >
             <Mic className="w-5 h-5" />
           </button>
-          
+
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}

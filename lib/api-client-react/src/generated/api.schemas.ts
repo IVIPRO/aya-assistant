@@ -68,6 +68,14 @@ export interface Family {
   createdAt: string;
 }
 
+export interface Badge {
+  id: string;
+  title: string;
+  icon: string;
+  description: string;
+  earnedAt: string;
+}
+
 export interface CreateChildBody {
   name: string;
   /**
@@ -79,6 +87,8 @@ export interface CreateChildBody {
   country: string;
   /** @nullable */
   avatar?: string | null;
+  /** @nullable */
+  aiCharacter?: string | null;
 }
 
 export interface UpdateChildBody {
@@ -96,6 +106,8 @@ export interface UpdateChildBody {
   xp?: number | null;
   /** @nullable */
   stars?: number | null;
+  /** @nullable */
+  aiCharacter?: string | null;
 }
 
 export interface Child {
@@ -107,9 +119,14 @@ export interface Child {
   country: string;
   /** @nullable */
   avatar: string | null;
+  /** @nullable */
+  aiCharacter?: string | null;
+  /** @nullable */
+  badgesEarned?: Badge[] | null;
   xp: number;
   stars: number;
   createdAt: string;
+  updatedAt: string;
 }
 
 export type SendChatMessageBodyModule =
@@ -185,12 +202,24 @@ export interface Memory {
   createdAt: string;
 }
 
+export type MissionDifficulty =
+  (typeof MissionDifficulty)[keyof typeof MissionDifficulty];
+
+export const MissionDifficulty = {
+  easy: "easy",
+  medium: "medium",
+  hard: "hard",
+} as const;
+
 export interface Mission {
   id: number;
   childId: number;
   title: string;
   description: string;
   subject: string;
+  /** @nullable */
+  zone?: string | null;
+  difficulty?: MissionDifficulty;
   xpReward: number;
   starReward: number;
   completed: boolean;

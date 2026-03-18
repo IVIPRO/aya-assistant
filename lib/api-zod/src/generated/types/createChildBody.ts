@@ -17,4 +17,6 @@ export interface CreateChildBody {
   country: string;
   /** @nullable */
   avatar?: string | null;
+  /** @nullable */
+  aiCharacter?: string | null;
 }

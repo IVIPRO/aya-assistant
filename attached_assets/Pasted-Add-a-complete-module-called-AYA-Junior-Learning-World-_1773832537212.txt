@@ -1,0 +1,127 @@
+Add a complete module called **AYA Junior Learning World**.
+
+AYA Junior is an AI-powered learning environment for children in primary school, specifically classes 1–4 depending on the country’s education system. This refers to school classes/grades, not ages 1–4.
+
+The system must adapt the learning curriculum based on the country where the user registers. Each country may have different subjects, class structures and learning expectations for primary school classes 1–4.
+
+Create a child-friendly section of the platform with the following features:
+
+1. **AYA Junior Dashboard**
+A colorful interface designed for children.
+Show the child’s avatar, current level, progress and today’s missions.
+
+2. **Learning World Map**
+Create a visual learning world with different themed learning zones:
+
+- Math Island
+- Reading Forest
+- Logic Mountain
+- English City
+- Science Planet
+
+Each zone contains missions and exercises appropriate for primary school classes 1–4 depending on the child’s country and curriculum.
+
+3. **AI Teacher Character System**
+Allow children to choose an AI learning companion character:
+
+- Panda Teacher
+- Robot Guide
+- Fox Mentor
+- Owl Professor
+
+The character should guide the child through missions, explain concepts and give encouragement.
+
+4. **Gamified Learning System**
+Add a progression system including:
+
+- stars
+- badges
+- levels
+- experience points
+- rewards
+
+Completing missions unlocks new levels and learning zones.
+
+5. **Adaptive Difficulty Engine**
+Track each child’s learning progress and adapt difficulty dynamically based on:
+
+- correct answers
+- mistakes
+- response time
+- previous performance
+- completed lessons
+
+6. **Montessori Teaching Mode**
+When interacting with the child, the AI should:
+
+- encourage discovery instead of giving direct answers immediately
+- ask guiding questions
+- explain concepts step-by-step
+- maintain a supportive, patient and friendly tone
+- make learning feel playful and motivating
+
+7. **Country-Based Curriculum Support**
+The platform must store the child’s country and use the appropriate primary school curriculum for that country.
+
+Examples:
+- Bulgaria → classes 1–4 primary school subjects and structure
+- Germany → Klasse 1–4
+- USA → Grade 1–4
+- Spain → Educación Primaria
+- UK → Key Stage / primary equivalents
+
+The architecture must be designed so more countries and curriculum systems can be added easily in the future.
+
+8. **Child Profile Data**
+Each child profile should include:
+
+- name
+- school class / grade
+- country
+- preferred language
+- chosen AI character
+- progress history
+- completed missions
+- unlocked learning zones
+- subject strengths
+- areas needing improvement
+
+9. **Parent Monitoring**
+Update the parent dashboard so parents can view:
+
+- learning progress
+- completed missions
+- time spent learning
+- subject strengths
+- areas needing improvement
+- current level
+- unlocked rewards
+
+10. **AYA Junior AI Chat**
+Add a basic AI chat interface inside AYA Junior where the AI behaves like a Montessori primary school teacher.
+
+The AI should:
+- support children in classes 1–4
+- adapt explanations to the child’s school level
+- use the curriculum of the child’s registered country
+- give age-appropriate and school-level-appropriate explanations
+- be warm, safe and encouraging
+
+11. **Main Dashboard Integration**
+Integrate AYA Junior Learning World into the main dashboard as a selectable module card.
+
+12. **Design Style**
+Design should be:
+- bright
+- friendly
+- colorful
+- motivating for children
+- clean and modern
+- easy to navigate for both children and parents
+
+Build this in a scalable way so future features can be added later, including:
+- country-specific curriculum libraries
+- AI Family Memory Engine
+- voice interaction
+- multilingual support
+- personalized lesson plans

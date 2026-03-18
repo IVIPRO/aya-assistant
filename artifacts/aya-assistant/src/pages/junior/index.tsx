@@ -5,7 +5,8 @@ import { Link } from "wouter";
 import { Star, Trophy, Sparkles, Map, MessageCircle, Lock, CheckCircle2, Mic, Volume2, Video, ChevronRight, ArrowLeft, BookOpen } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useListChildren, useUpdateChild, useListMissions, getListChildrenQueryKey, getListMissionsQueryKey } from "@workspace/api-client-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import type { Badge, Child, Mission, UpdateChildBodyAiCharacter } from "@workspace/api-client-react";
@@ -339,11 +340,24 @@ export function Junior() {
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
 
-  const { data: children = [], refetch } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
+  const { data: children = [], isLoading: childrenLoading, refetch } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
   const updateChild = useUpdateChild();
 
+  /* ── Auto-select first child when no active child is set ────────── */
+  useEffect(() => {
+    if (!activeChildId && children.length > 0) {
+      setActiveChildId(children[0].id);
+    }
+  }, [children, activeChildId, setActiveChildId]);
+
+  /* ── Validate stored activeChildId still exists ─────────────────── */
+  useEffect(() => {
+    if (activeChildId && children.length > 0 && !children.find(c => c.id === activeChildId)) {
+      setActiveChildId(children[0].id);
+    }
+  }, [children, activeChildId, setActiveChildId]);
+
   const activeChildIdResolved = activeChildId ?? children[0]?.id ?? null;
-  if (!activeChildId && children.length > 0) setActiveChildId(children[0].id);
 
   const { data: missions = [] } = useListMissions(
     { childId: activeChildIdResolved ?? 0 },
@@ -389,8 +403,19 @@ export function Junior() {
         )}
       </AnimatePresence>
 
+      {/* ── Active child indicator / child switcher ──────────────── */}
+      {children.length === 1 && activeChild && (
+        <div className="mb-4 flex items-center gap-2">
+          <span className="text-xs font-semibold text-muted-foreground bg-white/60 px-3 py-1.5 rounded-full border border-white/50 shadow-sm">
+            👤 {activeChild.language === "bg" ? "Активно дете" : activeChild.language === "es" ? "Niño activo" : "Active child"}:
+            <span className="ml-1 text-junior-foreground font-bold">{activeChild.name}</span>
+          </span>
+        </div>
+      )}
+
       {children.length > 1 && (
-        <div className="mb-4 flex gap-2 overflow-x-auto hide-scrollbar">
+        <div className="mb-4 flex gap-2 overflow-x-auto hide-scrollbar items-center">
+          <span className="text-xs text-muted-foreground font-semibold flex-shrink-0">👤</span>
           {children.map(c => (
             <button key={c.id} onClick={() => { setActiveChildId(c.id); setView("welcome"); }}
               className={`px-3 py-1.5 rounded-full text-sm font-bold whitespace-nowrap ${activeChildId === c.id ? 'bg-junior text-junior-foreground shadow-sm' : 'bg-white/50 text-muted-foreground hover:bg-white'}`}>
@@ -411,7 +436,12 @@ export function Junior() {
               onChangeCompanion={() => setShowCharPicker(true)}
             />
           </motion.div>
-        ) : view === "welcome" && !activeChild ? (
+        ) : view === "welcome" && childrenLoading ? (
+          <motion.div key="loading" className="text-center py-20 text-muted-foreground">
+            <div className="w-12 h-12 mx-auto mb-4 rounded-full border-4 border-junior/30 border-t-junior animate-spin" />
+            <p className="text-sm">Loading profile…</p>
+          </motion.div>
+        ) : view === "welcome" && !activeChild && !childrenLoading ? (
           <motion.div key="no-child" className="text-center py-20 text-muted-foreground">
             <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-30" />
             <p className="text-lg font-medium">No child profile found.</p>

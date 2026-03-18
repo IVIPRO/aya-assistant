@@ -10,6 +10,7 @@ import calendarRouter from "./calendar";
 import familyTasksRouter from "./familyTasks";
 import progressRouter from "./progress";
 import lessonsRouter from "./lessons";
+import learningRouter from "./learning";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(calendarRouter);
 router.use(familyTasksRouter);
 router.use(progressRouter);
 router.use(lessonsRouter);
+router.use(learningRouter);
 
 export default router;

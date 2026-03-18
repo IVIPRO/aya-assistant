@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { Badge, Child, Mission, UpdateChildBodyAiCharacter } from "@workspace/api-client-react";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { resolveLang } from "@/lib/i18n";
+import { getLevel, getLevelProgress as getLevelProgressObj, LEVEL_THRESHOLDS, LEVEL_NAMES } from "@/lib/levelSystem";
 
 const CHARACTERS = [
   {
@@ -129,8 +130,10 @@ function getMissionZone(mission: Mission): string {
   return "Science Planet";
 }
 
-function getLevel(xp: number): number { return Math.floor(xp / 100) + 1; }
-function getLevelProgress(xp: number): number { return xp % 100; }
+function getLevelProgress(xp: number): number {
+  const p = getLevelProgressObj(xp);
+  return p.xpInLevel;
+}
 
 function getGradeLabel(grade: number, country: string): string {
   const c = (country ?? "").toUpperCase().slice(0, 2);
@@ -418,6 +421,7 @@ export function Junior() {
           <SubjectPanel
             lang={childLang}
             grade={activeChild?.grade ?? 2}
+            childId={activeChildIdResolved ?? 0}
             childName={activeChild?.name ?? ""}
             characterEmoji={currentChar?.emoji ?? "🌟"}
             onStart={(subject, topic) => {

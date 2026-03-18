@@ -57,6 +57,132 @@ const CHARACTERS = [
   },
 ];
 
+type JuniorLang = "en" | "bg" | "es";
+
+const JUNIOR_LABELS: Record<JuniorLang, {
+  welcomeBack: string;
+  readyAdventure: (name: string) => string;
+  readyAdventureNoChar: string;
+  toneLabel: (tone: string) => string;
+  toneBadge: Record<string, string>;
+  montessoriNote: string;
+  classLabel: string;
+  countryLabel: string;
+  languageLabel: string;
+  enterWorld: string;
+  chatWith: (charFirstName: string) => string;
+  changeCompanion: string;
+  xpToNextLevel: (current: number) => string;
+  starsLabel: string;
+  xpTotalLabel: string;
+  pickerTitle: string;
+  pickerSubtitle: string;
+  currentCompanion: string;
+  cancel: string;
+}> = {
+  en: {
+    welcomeBack: "Welcome back,",
+    readyAdventure: (name) => `${name} is ready for today's learning adventure! Let's discover something amazing together.`,
+    readyAdventureNoChar: "AYA is ready for today's learning adventure!",
+    toneLabel: (tone) => `${tone} learning style`,
+    toneBadge: {
+      gentle: "GENTLE LEARNING STYLE",
+      encouraging: "ENCOURAGING LEARNING STYLE",
+      playful: "PLAYFUL LEARNING STYLE",
+      calm: "CALM LEARNING STYLE",
+    },
+    montessoriNote: "AYA uses a Montessori-inspired learning style — guiding discovery, not just giving answers ✨",
+    classLabel: "Class",
+    countryLabel: "Country",
+    languageLabel: "Language",
+    enterWorld: "Enter Learning World",
+    chatWith: (n) => `Chat with ${n}`,
+    changeCompanion: "Change Companion",
+    xpToNextLevel: (cur) => `${cur}/100 XP to next level`,
+    starsLabel: "stars",
+    xpTotalLabel: "XP total",
+    pickerTitle: "Choose Your Learning Companion!",
+    pickerSubtitle: "Your companion will guide you through every mission with their own special teaching style 🎓",
+    currentCompanion: "✓ Current companion",
+    cancel: "Cancel",
+  },
+  bg: {
+    welcomeBack: "Добре дошла,",
+    readyAdventure: (name) => `${name} е готова за днешното учебно приключение! Нека открием нещо чудесно заедно.`,
+    readyAdventureNoChar: "AYA е готова за днешното учебно приключение!",
+    toneLabel: (tone) => `${tone} стил на учене`,
+    toneBadge: {
+      gentle: "НЕЖЕН СТИЛ НА УЧЕНЕ",
+      encouraging: "НАСЪРЧАВАЩ СТИЛ НА УЧЕНЕ",
+      playful: "ИГРИВ СТИЛ НА УЧЕНЕ",
+      calm: "СПОКОЕН СТИЛ НА УЧЕНЕ",
+    },
+    montessoriNote: "AYA използва Монтесори-вдъхновен стил на учене — насочва откритието, а не просто дава отговори ✨",
+    classLabel: "Клас",
+    countryLabel: "Страна",
+    languageLabel: "Език",
+    enterWorld: "Влез в Учебния свят",
+    chatWith: (n) => `Чат с ${n}`,
+    changeCompanion: "Смени компаньона",
+    xpToNextLevel: (cur) => `${cur}/100 XP до следващо ниво`,
+    starsLabel: "звезди",
+    xpTotalLabel: "XP общо",
+    pickerTitle: "Избери своя учебен компаньон!",
+    pickerSubtitle: "Твоят компаньон ще те води през всяка мисия с особен стил на преподаване 🎓",
+    currentCompanion: "✓ Текущ компаньон",
+    cancel: "Отказ",
+  },
+  es: {
+    welcomeBack: "Bienvenida,",
+    readyAdventure: (name) => `¡${name} está lista para la aventura de aprendizaje de hoy! Descubramos algo increíble juntos.`,
+    readyAdventureNoChar: "¡AYA está lista para la aventura de aprendizaje de hoy!",
+    toneLabel: (tone) => `estilo ${tone}`,
+    toneBadge: {
+      gentle: "ESTILO SUAVE",
+      encouraging: "ESTILO MOTIVADOR",
+      playful: "ESTILO LÚDICO",
+      calm: "ESTILO TRANQUILO",
+    },
+    montessoriNote: "AYA usa un estilo de aprendizaje inspirado en Montessori — guiando el descubrimiento, no solo dando respuestas ✨",
+    classLabel: "Clase",
+    countryLabel: "País",
+    languageLabel: "Idioma",
+    enterWorld: "Entrar al Mundo de Aprendizaje",
+    chatWith: (n) => `Chat con ${n}`,
+    changeCompanion: "Cambiar compañero",
+    xpToNextLevel: (cur) => `${cur}/100 XP al siguiente nivel`,
+    starsLabel: "estrellas",
+    xpTotalLabel: "XP total",
+    pickerTitle: "¡Elige tu compañero de aprendizaje!",
+    pickerSubtitle: "Tu compañero te guiará en cada misión con su propio estilo de enseñanza 🎓",
+    currentCompanion: "✓ Compañero actual",
+    cancel: "Cancelar",
+  },
+};
+
+const CHAR_LABELS: Record<string, Record<JuniorLang, { desc: string; personality: string; tone: string }>> = {
+  panda: {
+    en: { desc: "Patient and gentle", tone: "gentle", personality: "Panda takes learning step by step with warmth and care. Perfect for children who love calm, patient guidance through every new idea." },
+    bg: { desc: "Търпелива и нежна", tone: "нежен", personality: "AYA Panda учи стъпка по стъпка с топлота и грижа. Перфектна за деца, обичащи спокойно и търпеливо ръководство при всяка нова идея." },
+    es: { desc: "Paciente y suave", tone: "suave", personality: "AYA Panda aprende paso a paso con calidez y cuidado. Perfecta para niños que aman la guía tranquila y paciente ante cada nueva idea." },
+  },
+  robot: {
+    en: { desc: "Logical and precise", tone: "encouraging", personality: "Robot celebrates every correct answer and keeps learning clear and organized. Great for children who love structure and being cheered on." },
+    bg: { desc: "Логичен и точен", tone: "насърчаващ", personality: "AYA Robot отбелязва всеки верен отговор и прави ученето ясно и организирано. Страхотна за деца, обичащи структура и насърчение." },
+    es: { desc: "Lógico y preciso", tone: "motivador", personality: "AYA Robot celebra cada respuesta correcta y mantiene el aprendizaje claro y organizado. Ideal para niños que aman la estructura y el apoyo." },
+  },
+  fox: {
+    en: { desc: "Creative and playful", tone: "playful", personality: "Fox turns every lesson into an adventure with games, stories, and surprises. Ideal for curious, energetic explorers who love discovering new things." },
+    bg: { desc: "Творческа и игрива", tone: "игрив", personality: "AYA Лисицата превръща всеки урок в приключение с игри, истории и изненади. Идеална за любопитни и пълни с енергия изследователи." },
+    es: { desc: "Creativa y lúdica", tone: "lúdico", personality: "AYA Zorro convierte cada lección en una aventura con juegos, historias y sorpresas. Ideal para exploradores curiosos y llenos de energía." },
+  },
+  owl: {
+    en: { desc: "Wise and thoughtful", tone: "calm", personality: "Owl guides deep thinking without rushing, encouraging reflection and curiosity. Best for children who love asking \"why?\" and thinking things through." },
+    bg: { desc: "Мъдра и вдумчива", tone: "спокоен", personality: "AYA Бухалът насочва дълбокото мислене без бързане, насърчавайки размисъл и любопитство. Най-добра за деца, обичащи да питат \"защо?\"." },
+    es: { desc: "Sabia y reflexiva", tone: "tranquilo", personality: "AYA Búho guía el pensamiento profundo sin apresurarse, fomentando la reflexión y la curiosidad. Ideal para niños que aman preguntar \"¿por qué?\"." },
+  },
+};
+
 const ZONES = [
   { id: "Math Island", emoji: "🏝️", color: "text-orange-600", bgColor: "bg-gradient-to-br from-orange-100 to-yellow-50", borderColor: "border-orange-300", xpRequired: 0, desc: "Numbers & counting" },
   { id: "Reading Forest", emoji: "🌲", color: "text-green-600", bgColor: "bg-gradient-to-br from-green-100 to-emerald-50", borderColor: "border-green-300", xpRequired: 30, desc: "Words & stories" },
@@ -148,31 +274,34 @@ function getGradeLabel(grade: number, country: string): string {
 type JuniorView = "welcome" | "map" | "subjects" | "chat";
 
 function CharacterPicker({ child, onSelect, onClose }: { child: Child; onSelect: (char: UpdateChildBodyAiCharacter) => void; onClose: () => void }) {
+  const lang = getLang(child.language);
+  const lbl = JUNIOR_LABELS[lang];
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
         className="bg-white rounded-[2rem] p-8 max-w-2xl w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-2xl font-display font-bold mb-1 text-center">Choose Your Learning Companion!</h2>
-        <p className="text-muted-foreground text-center mb-6 text-sm">Your companion will guide you through every mission with their own special teaching style 🎓</p>
+        <h2 className="text-2xl font-display font-bold mb-1 text-center">{lbl.pickerTitle}</h2>
+        <p className="text-muted-foreground text-center mb-6 text-sm">{lbl.pickerSubtitle}</p>
         <div className="grid grid-cols-2 gap-4">
           {CHARACTERS.map(char => {
             const isSelected = child.aiCharacter === char.id;
+            const charLbl = CHAR_LABELS[char.id]?.[lang];
             return (
               <button key={char.id} onClick={() => onSelect(char.id as UpdateChildBodyAiCharacter)}
                 className={`p-5 rounded-2xl border-2 transition-all hover:scale-105 hover:shadow-lg text-left ${isSelected ? 'border-junior shadow-lg ring-2 ring-junior/50' : 'border-transparent hover:border-junior/50'} ${char.color}`}>
                 <div className="text-5xl mb-3">{char.emoji}</div>
                 <div className="font-bold text-base mb-0.5">{char.name}</div>
-                <div className={`text-xs font-semibold uppercase tracking-wider mb-2 ${char.accentColor}`}>{char.tone} tone</div>
-                <div className="text-xs text-muted-foreground leading-relaxed">{char.personality}</div>
+                <div className={`text-xs font-semibold uppercase tracking-wider mb-2 ${char.accentColor}`}>{charLbl?.tone ?? char.tone}</div>
+                <div className="text-xs text-muted-foreground leading-relaxed">{charLbl?.personality ?? char.personality}</div>
                 {isSelected && (
-                  <div className="mt-3 text-xs font-bold text-junior-foreground bg-junior px-2 py-1 rounded-full inline-block">✓ Current companion</div>
+                  <div className="mt-3 text-xs font-bold text-junior-foreground bg-junior px-2 py-1 rounded-full inline-block">{lbl.currentCompanion}</div>
                 )}
               </button>
             );
           })}
         </div>
-        <button onClick={onClose} className="mt-6 w-full py-2 text-muted-foreground hover:text-foreground font-medium transition-colors">Cancel</button>
+        <button onClick={onClose} className="mt-6 w-full py-2 text-muted-foreground hover:text-foreground font-medium transition-colors">{lbl.cancel}</button>
       </motion.div>
     </motion.div>
   );
@@ -185,14 +314,20 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onChangeCompani
   onChat: () => void;
   onChangeCompanion: () => void;
 }) {
+  const lang = getLang(child.language);
+  const lbl = JUNIOR_LABELS[lang];
+  const charLbl = character ? (CHAR_LABELS[character.id]?.[lang] ?? null) : null;
+
   const level = getLevel(child.xp ?? 0);
   const levelProgress = getLevelProgress(child.xp ?? 0);
   const gradeLabel = getGradeLabel(child.grade, child.country ?? "");
   const badges = (child.badgesEarned ?? []) as Badge[];
 
   const welcomeMsg = character
-    ? `${character.name} is ready for today's learning adventure! Let's discover something amazing together.`
-    : "AYA is ready for today's learning adventure!";
+    ? lbl.readyAdventure(character.name)
+    : lbl.readyAdventureNoChar;
+
+  const charFirstName = character?.name?.split(" ")[1] ?? "AYA";
 
   return (
     <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">
@@ -203,7 +338,7 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onChangeCompani
             {character?.emoji ?? "🌟"}
           </motion.div>
           <h1 className="text-3xl font-display font-bold text-junior-foreground mb-1">
-            Welcome back, {child.name}!
+            {lbl.welcomeBack} {child.name}!
           </h1>
           <p className="text-junior-foreground/80 font-medium text-base">{welcomeMsg}</p>
         </div>
@@ -214,23 +349,27 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onChangeCompani
               <div className="text-4xl">{character.emoji}</div>
               <div>
                 <div className="font-bold text-base">{character.name}</div>
-                <div className={`text-xs font-semibold uppercase tracking-wider mb-1 ${character.accentColor}`}>{character.tone} learning style</div>
-                <div className="text-xs text-muted-foreground leading-relaxed max-w-xs">{character.personality}</div>
+                <div className={`text-xs font-semibold uppercase tracking-wider mb-1 ${character.accentColor}`}>
+                  {lbl.toneBadge[character.tone] ?? lbl.toneLabel(charLbl?.tone ?? character.tone)}
+                </div>
+                <div className="text-xs text-muted-foreground leading-relaxed max-w-xs">
+                  {charLbl?.personality ?? character.personality}
+                </div>
               </div>
             </div>
           )}
 
           <div className="grid grid-cols-3 gap-3">
             <div className="bg-white rounded-2xl p-3 text-center border border-border/30 shadow-sm">
-              <div className="text-xs text-muted-foreground mb-1">Class</div>
+              <div className="text-xs text-muted-foreground mb-1">{lbl.classLabel}</div>
               <div className="font-bold text-sm">{gradeLabel}</div>
             </div>
             <div className="bg-white rounded-2xl p-3 text-center border border-border/30 shadow-sm">
-              <div className="text-xs text-muted-foreground mb-1">Country</div>
+              <div className="text-xs text-muted-foreground mb-1">{lbl.countryLabel}</div>
               <div className="font-bold text-sm">{child.country ?? "—"}</div>
             </div>
             <div className="bg-white rounded-2xl p-3 text-center border border-border/30 shadow-sm">
-              <div className="text-xs text-muted-foreground mb-1">Language</div>
+              <div className="text-xs text-muted-foreground mb-1">{lbl.languageLabel}</div>
               <div className="font-bold text-sm">{child.language ?? "—"}</div>
             </div>
           </div>
@@ -244,9 +383,9 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onChangeCompani
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                  {child.stars ?? 0} stars
+                  {child.stars ?? 0} {lbl.starsLabel}
                 </span>
-                <span>{child.xp ?? 0} XP total</span>
+                <span>{child.xp ?? 0} {lbl.xpTotalLabel}</span>
               </div>
             </div>
             <div className="w-full h-3 bg-yellow-100 rounded-full overflow-hidden">
@@ -254,7 +393,7 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onChangeCompani
                 className="h-full bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full" />
             </div>
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
-              <span>{levelProgress}/100 XP to next level</span>
+              <span>{lbl.xpToNextLevel(levelProgress)}</span>
               {badges.length > 0 && (
                 <span className="flex gap-0.5">{badges.slice(0, 4).map(b => <span key={b.id}>{b.icon}</span>)}{badges.length > 4 && `+${badges.length - 4}`}</span>
               )}
@@ -267,7 +406,7 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onChangeCompani
               onClick={onEnterWorld}
               className="w-full py-4 bg-junior text-junior-foreground rounded-2xl font-bold text-lg shadow-lg border-b-4 border-yellow-600 hover:border-b-2 hover:translate-y-0.5 transition-all flex items-center justify-center gap-3">
               <Map className="w-6 h-6" />
-              Enter Learning World
+              {lbl.enterWorld}
               <ChevronRight className="w-5 h-5" />
             </motion.button>
 
@@ -277,7 +416,7 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onChangeCompani
                 onClick={onChat}
                 className="py-3 bg-white border-2 border-junior/40 text-junior-foreground rounded-2xl font-bold text-sm shadow-md hover:bg-junior/5 transition-all flex items-center justify-center gap-2">
                 <MessageCircle className="w-5 h-5" />
-                Chat with {character?.name?.split(" ")[1] ?? "AYA"}
+                {lbl.chatWith(charFirstName)}
               </motion.button>
 
               <motion.button
@@ -285,14 +424,14 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onChangeCompani
                 onClick={onChangeCompanion}
                 className="py-3 bg-white border-2 border-purple-200 text-purple-700 rounded-2xl font-bold text-sm shadow-md hover:bg-purple-50 transition-all flex items-center justify-center gap-2">
                 <Sparkles className="w-5 h-5" />
-                Change Companion
+                {lbl.changeCompanion}
               </motion.button>
             </div>
           </div>
 
           <div className="text-center">
             <p className="text-xs text-muted-foreground italic">
-              AYA uses a Montessori-inspired learning style — guiding discovery, not just giving answers ✨
+              {lbl.montessoriNote}
             </p>
           </div>
         </div>
@@ -389,11 +528,34 @@ export function Junior() {
     ? { subjectLabel: selectedSubject.label[childLang], topicLabel: selectedTopic?.label[childLang] ?? null }
     : null;
 
+  const juniorLang = getLang(activeChild?.language);
+  const GREETING_LABELS: Record<JuniorLang, {
+    subjectGreeting: (name: string, subject: string, topic: string | null) => string;
+    mainGreeting: (name: string, charName: string) => string;
+    fallback: string;
+  }> = {
+    en: {
+      subjectGreeting: (name, subject, topic) => `${currentChar?.emoji ?? "🌟"} Hi ${name}! Let's explore ${subject}${topic ? ` — ${topic}` : ""}. What would you like to know? 🚀`,
+      mainGreeting: (name, charName) => `${currentChar?.emoji ?? "🌟"} Hi ${name}! I'm your ${charName} — using a Montessori teaching style to guide your learning adventure! What would you like to explore today? 🚀`,
+      fallback: "Hello! I'm AYA. Let's learn something wonderful together! 🌟",
+    },
+    bg: {
+      subjectGreeting: (name, subject, topic) => `${currentChar?.emoji ?? "🌟"} Здравей, ${name}! Да изследваме ${subject}${topic ? ` — ${topic}` : ""}. Какво искаш да научиш? 🚀`,
+      mainGreeting: (name, charName) => `${currentChar?.emoji ?? "🌟"} Здравей, ${name}! Аз съм твоят ${charName} — водя те в учебното приключение с Монтесори стил! Какво искаш да изследваме днес? 🚀`,
+      fallback: "Здравей! Аз съм AYA. Нека научим нещо чудесно заедно! 🌟",
+    },
+    es: {
+      subjectGreeting: (name, subject, topic) => `${currentChar?.emoji ?? "🌟"} ¡Hola, ${name}! Exploremos ${subject}${topic ? ` — ${topic}` : ""}. ¿Qué quieres aprender? 🚀`,
+      mainGreeting: (name, charName) => `${currentChar?.emoji ?? "🌟"} ¡Hola, ${name}! Soy tu ${charName} — guiando tu aventura de aprendizaje con el estilo Montessori! ¿Qué quieres explorar hoy? 🚀`,
+      fallback: "¡Hola! Soy AYA. ¡Aprendamos algo maravilloso juntos! 🌟",
+    },
+  };
+  const greetingLbl = GREETING_LABELS[juniorLang];
   const greeting = activeChild
     ? selectedSubject
-      ? `${currentChar?.emoji ?? "🌟"} Hi ${activeChild.name}! Let's explore ${selectedSubject.label[childLang]}${selectedTopic ? ` — ${selectedTopic.label[childLang]}` : ""}. What would you like to know? 🚀`
-      : `${currentChar?.emoji ?? "🌟"} Hi ${activeChild.name}! I'm your ${currentChar?.name ?? "AYA"} — using a Montessori teaching style to guide your learning adventure! What would you like to explore today? 🚀`
-    : "Hello! I'm AYA. Let's learn something wonderful together! 🌟";
+      ? greetingLbl.subjectGreeting(activeChild.name, selectedSubject.label[childLang], selectedTopic?.label[childLang] ?? null)
+      : greetingLbl.mainGreeting(activeChild.name, currentChar?.name ?? "AYA")
+    : greetingLbl.fallback;
 
   return (
     <Layout isJunior>

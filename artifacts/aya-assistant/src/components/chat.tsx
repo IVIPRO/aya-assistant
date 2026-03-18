@@ -7,12 +7,18 @@ import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "./layout";
 import { useToast } from "@/hooks/use-toast";
 
+interface SubjectContext {
+  subjectLabel: string;
+  topicLabel?: string | null;
+}
+
 interface ChatProps {
   module: ListChatMessagesModule;
   themeColor: "primary" | "junior" | "student" | "psychology";
   greeting?: string;
   character?: string | null;
   suggestedPrompts?: string[];
+  subjectContext?: SubjectContext | null;
 }
 
 const CHARACTER_EMOJIS: Record<string, string> = {
@@ -42,6 +48,7 @@ export function Chat({
   greeting = "Hello! I'm AYA. How can I help you today?",
   character,
   suggestedPrompts,
+  subjectContext,
 }: ChatProps) {
   const { activeChildId } = useAuth();
   const { t } = useI18n();
@@ -66,8 +73,11 @@ export function Chat({
 
   const doSend = (content: string, onError?: () => void) => {
     if (!content.trim() || sendMutation.isPending) return;
+    const fullContent = subjectContext
+      ? `Subject: ${subjectContext.subjectLabel}${subjectContext.topicLabel ? ` | Topic: ${subjectContext.topicLabel}` : ""}\n${content}`
+      : content;
     sendMutation.mutate(
-      { data: { module, content, childId: activeChildId } },
+      { data: { module, content: fullContent, childId: activeChildId } },
       {
         onSuccess: () => {
           refetch().catch(() => {});
@@ -142,6 +152,18 @@ export function Chat({
           <p className="text-xs text-muted-foreground truncate">
             {character ? "Your personal learning companion · guides discovery, not just answers" : "Always here to help"}
           </p>
+          {subjectContext && (
+            <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+              <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${bubbleColor} opacity-90`}>
+                {subjectContext.subjectLabel}
+              </span>
+              {subjectContext.topicLabel && (
+                <span className="text-[10px] font-semibold text-muted-foreground px-2 py-0.5 rounded-full border border-border/40 bg-muted/30">
+                  {subjectContext.topicLabel}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

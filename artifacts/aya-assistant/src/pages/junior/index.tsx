@@ -1,5 +1,6 @@
 import { Layout } from "@/components/layout";
 import { Chat } from "@/components/chat";
+import { SubjectPanel } from "./subjects";
 import { Link } from "wouter";
 import { Star, Trophy, Sparkles, Map, MessageCircle, Lock, CheckCircle2, Mic, Volume2, Video, ChevronRight, ArrowLeft, BookOpen } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -8,6 +9,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import type { Badge, Child, Mission, UpdateChildBodyAiCharacter } from "@workspace/api-client-react";
+import type { Subject, Topic } from "@/lib/curriculum";
+import { resolveLang } from "@/lib/i18n";
 
 const CHARACTERS = [
   {
@@ -138,7 +141,7 @@ function getGradeLabel(grade: number, country: string): string {
   return `Grade ${grade}`;
 }
 
-type JuniorView = "welcome" | "map" | "chat";
+type JuniorView = "welcome" | "map" | "subjects" | "chat";
 
 function CharacterPicker({ child, onSelect, onClose }: { child: Child; onSelect: (char: UpdateChildBodyAiCharacter) => void; onClose: () => void }) {
   return (
@@ -330,6 +333,8 @@ export function Junior() {
   const { toast } = useToast();
   const [showCharPicker, setShowCharPicker] = useState(false);
   const [view, setView] = useState<JuniorView>("welcome");
+  const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
+  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
 
   const { data: children = [], refetch } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
   const updateChild = useUpdateChild();
@@ -362,8 +367,15 @@ export function Junior() {
     }
   };
 
+  const childLang = resolveLang(activeChild?.language);
+  const subjectContext = selectedSubject
+    ? { subjectLabel: selectedSubject.label[childLang], topicLabel: selectedTopic?.label[childLang] ?? null }
+    : null;
+
   const greeting = activeChild
-    ? `${currentChar?.emoji ?? "🌟"} Hi ${activeChild.name}! I'm your ${currentChar?.name ?? "AYA"} — using a Montessori teaching style to guide your learning adventure! What would you like to explore today? 🚀`
+    ? selectedSubject
+      ? `${currentChar?.emoji ?? "🌟"} Hi ${activeChild.name}! Let's explore ${selectedSubject.label[childLang]}${selectedTopic ? ` — ${selectedTopic.label[childLang]}` : ""}. What would you like to know? 🚀`
+      : `${currentChar?.emoji ?? "🌟"} Hi ${activeChild.name}! I'm your ${currentChar?.name ?? "AYA"} — using a Montessori teaching style to guide your learning adventure! What would you like to explore today? 🚀`
     : "Hello! I'm AYA. Let's learn something wonderful together! 🌟";
 
   return (
@@ -392,7 +404,7 @@ export function Junior() {
               child={activeChild}
               character={currentChar}
               onEnterWorld={() => setView("map")}
-              onChat={() => setView("chat")}
+              onChat={() => { setSelectedSubject(null); setSelectedTopic(null); setView("subjects"); }}
               onChangeCompanion={() => setShowCharPicker(true)}
             />
           </motion.div>
@@ -402,6 +414,18 @@ export function Junior() {
             <p className="text-lg font-medium">No child profile found.</p>
             <p className="text-sm">Ask a parent to set up your learning profile in the Parent area.</p>
           </motion.div>
+        ) : view === "subjects" ? (
+          <SubjectPanel
+            lang={childLang}
+            childName={activeChild?.name ?? ""}
+            characterEmoji={currentChar?.emoji ?? "🌟"}
+            onStart={(subject, topic) => {
+              setSelectedSubject(subject);
+              setSelectedTopic(topic);
+              setView("chat");
+            }}
+            onBack={() => setView("welcome")}
+          />
         ) : view === "map" ? (
           <motion.div key="map" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             <div className="flex items-center justify-between mb-6">
@@ -482,7 +506,7 @@ export function Junior() {
         ) : (
           <motion.div key="chat" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             <div className="flex items-center justify-between mb-6">
-              <button onClick={() => setView("welcome")}
+              <button onClick={() => setView("subjects")}
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors">
                 <ArrowLeft className="w-4 h-4" /> Back
               </button>
@@ -503,6 +527,7 @@ export function Junior() {
               character={character}
               greeting={greeting}
               suggestedPrompts={getJuniorPrompts(activeChild?.language)}
+              subjectContext={subjectContext}
             />
 
             <VoiceReadySection />

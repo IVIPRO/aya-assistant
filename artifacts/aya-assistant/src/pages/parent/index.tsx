@@ -170,7 +170,7 @@ export function ParentDashboard() {
   const [companionPickerChild, setCompanionPickerChild] = useState<Child | null>(null);
   const [companionPickerOpen, setCompanionPickerOpen] = useState(false);
   const { toast } = useToast();
-  const { refreshUser } = useAuth();
+  const { refreshUser, activeChildId, setActiveChildId } = useAuth();
   const { t } = useI18n();
 
   const { data: family, refetch: refetchFamily } = useGetFamily({ query: { queryKey: getGetFamilyQueryKey(), retry: false } });
@@ -239,10 +239,15 @@ export function ParentDashboard() {
 
   const onChildSubmit = async (data: ChildFormData) => {
     try {
-      await createChild.mutateAsync({ data });
+      const newChild = await createChild.mutateAsync({ data });
       toast({ title: "Child added successfully" });
-      refetchChildren();
+      const updated = await refetchChildren();
       childForm.reset();
+      if (!activeChildId && newChild?.id) {
+        setActiveChildId(newChild.id);
+      } else if (!activeChildId && updated.data?.[0]?.id) {
+        setActiveChildId(updated.data[0].id);
+      }
     } catch {
       toast({ title: "Error adding child", variant: "destructive" });
     }
@@ -265,8 +270,12 @@ export function ParentDashboard() {
     if (!confirm("Remove this child profile?")) return;
     try {
       await deleteChild.mutateAsync({ id });
-      refetchChildren();
+      const updated = await refetchChildren();
       toast({ title: "Child profile removed" });
+      if (activeChildId === id) {
+        const remaining = updated.data ?? [];
+        setActiveChildId(remaining.length > 0 ? remaining[0].id : null);
+      }
     } catch {
       toast({ title: "Error removing child", variant: "destructive" });
     }

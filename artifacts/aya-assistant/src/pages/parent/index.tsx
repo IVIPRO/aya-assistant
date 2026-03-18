@@ -42,12 +42,28 @@ const ZONE_EMOJIS: Record<string, string> = {
   "Science Planet": "🌍",
 };
 
+const GRADE_OPTIONS = [
+  { value: 1, label: "Grade 1" },
+  { value: 2, label: "Grade 2" },
+  { value: 3, label: "Grade 3" },
+  { value: 4, label: "Grade 4" },
+];
+
+const LANGUAGE_OPTIONS = ["English", "Bulgarian", "Spanish"];
+
 const childSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  grade: z.coerce.number().min(1).max(12),
+  grade: z.coerce.number().min(1).max(4),
   language: z.string().min(1, "Language is required"),
   country: z.string().min(1, "Country is required"),
 });
+
+function getGradeDisplay(grade: number, language?: string | null): string {
+  const l = (language ?? "").toLowerCase();
+  if (l.includes("bulgar") || l === "bg") return `${grade} клас`;
+  if (l.includes("spanish") || l.includes("español") || l === "es") return `${grade} grado`;
+  return `Grade ${grade}`;
+}
 
 const familySchema = z.object({
   name: z.string().min(1, "Family name is required"),
@@ -344,18 +360,32 @@ export function ParentDashboard() {
                   <DialogHeader><DialogTitle>Add New Profile</DialogTitle></DialogHeader>
                   <form onSubmit={childForm.handleSubmit(onChildSubmit)} className="space-y-4 pt-4">
                     <div>
+                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Name</label>
                       <input {...childForm.register("name")} placeholder="Child's name" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
                       {childForm.formState.errors.name && <p className="text-destructive text-xs mt-1">{childForm.formState.errors.name.message}</p>}
                     </div>
                     <div>
-                      <input type="number" {...childForm.register("grade")} placeholder="Grade (1-4 for Junior)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
-                      {childForm.formState.errors.grade && <p className="text-destructive text-xs mt-1">{childForm.formState.errors.grade.message}</p>}
+                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">School Grade</label>
+                      <select {...childForm.register("grade")} className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white">
+                        <option value="">Select grade…</option>
+                        {GRADE_OPTIONS.map(g => (
+                          <option key={g.value} value={g.value}>{g.label}</option>
+                        ))}
+                      </select>
+                      {childForm.formState.errors.grade && <p className="text-destructive text-xs mt-1">Please select a grade</p>}
                     </div>
                     <div>
-                      <input {...childForm.register("language")} placeholder="Language (e.g. English, Bulgarian)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Language</label>
+                      <select {...childForm.register("language")} className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white">
+                        <option value="">Select language…</option>
+                        {LANGUAGE_OPTIONS.map(l => (
+                          <option key={l} value={l}>{l}</option>
+                        ))}
+                      </select>
                     </div>
                     <div>
-                      <input {...childForm.register("country")} placeholder="Country (e.g. USA, BG, DE, ES, GB)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+                      <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Country</label>
+                      <input {...childForm.register("country")} placeholder="e.g. USA, BG, DE, ES, GB" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
                       <p className="text-xs text-muted-foreground mt-1">Used to set the right curriculum for your child</p>
                     </div>
                     <button type="submit" disabled={createChild.isPending} className="w-full bg-primary text-white p-3 rounded-xl font-bold hover:bg-primary/90">
@@ -391,7 +421,7 @@ export function ParentDashboard() {
                     {child.avatar || "👦"}
                   </div>
                   <h3 className="text-xl font-bold">{child.name}</h3>
-                  <p className="text-muted-foreground mb-2">Grade {child.grade} · {child.country}</p>
+                  <p className="text-muted-foreground mb-2">{getGradeDisplay(child.grade, child.language)} · {child.country}</p>
                   {child.aiCharacter && COMPANION_DATA[child.aiCharacter] ? (
                     <div className={`flex items-center gap-2 mb-3 px-3 py-2 rounded-xl border ${COMPANION_DATA[child.aiCharacter].color}`}>
                       <span className="text-2xl">{COMPANION_DATA[child.aiCharacter].emoji}</span>
@@ -754,15 +784,31 @@ export function ParentDashboard() {
           <DialogHeader><DialogTitle>Edit Child Profile</DialogTitle></DialogHeader>
           <form onSubmit={editForm.handleSubmit(onEditSubmit)} className="space-y-4 pt-4">
             <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Name</label>
               <input {...editForm.register("name")} placeholder="Child's name" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
               {editForm.formState.errors.name && <p className="text-destructive text-xs mt-1">{editForm.formState.errors.name.message}</p>}
             </div>
             <div>
-              <input type="number" {...editForm.register("grade")} placeholder="Grade (1-12)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
-              {editForm.formState.errors.grade && <p className="text-destructive text-xs mt-1">{editForm.formState.errors.grade.message}</p>}
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">School Grade</label>
+              <select {...editForm.register("grade")} className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white">
+                {GRADE_OPTIONS.map(g => (
+                  <option key={g.value} value={g.value}>{g.label}</option>
+                ))}
+              </select>
+              {editForm.formState.errors.grade && <p className="text-destructive text-xs mt-1">Please select a grade</p>}
             </div>
-            <input {...editForm.register("language")} placeholder="Language (e.g. English)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
-            <input {...editForm.register("country")} placeholder="Country (e.g. USA, BG, DE, ES, GB)" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Language</label>
+              <select {...editForm.register("language")} className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white">
+                {LANGUAGE_OPTIONS.map(l => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wide">Country</label>
+              <input {...editForm.register("country")} placeholder="e.g. USA, BG, DE, ES, GB" className="w-full p-3 rounded-xl border focus:ring-2 focus:ring-primary/20 focus:border-primary" />
+            </div>
             <button type="submit" disabled={updateChild.isPending} className="w-full bg-primary text-white p-3 rounded-xl font-bold hover:bg-primary/90">
               {updateChild.isPending ? "Saving..." : "Save Changes"}
             </button>

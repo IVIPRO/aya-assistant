@@ -98,6 +98,9 @@ const JUNIOR_LABELS: Record<JuniorLang, {
   back: string;
   openWorldMap: string;
   toneStyle: (tone: string) => string;
+  activeChild: string;
+  subjectPrefix: string;
+  topicPrefix: string;
   missionsCount: (done: number, total: number) => string;
   noMissions: string;
   allDone: string;
@@ -132,6 +135,9 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     back: "Back",
     openWorldMap: "Open Full World Map",
     toneStyle: (tone) => `· ${tone} style`,
+    activeChild: "Active child",
+    subjectPrefix: "Subject",
+    topicPrefix: "Topic",
     missionsCount: (done, total) => `${done}/${total} missions`,
     noMissions: "No missions yet",
     allDone: "✅ All done!",
@@ -166,6 +172,9 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     back: "Назад",
     openWorldMap: "Отвори пълната карта на света",
     toneStyle: (tone) => `· ${tone} стил`,
+    activeChild: "Активно дете",
+    subjectPrefix: "Предмет",
+    topicPrefix: "Тема",
     missionsCount: (done, total) => `${done}/${total} мисии`,
     noMissions: "Все още няма мисии",
     allDone: "✅ Всичко готово!",
@@ -200,6 +209,9 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     back: "Atrás",
     openWorldMap: "Abrir el mapa completo",
     toneStyle: (tone) => `· estilo ${tone}`,
+    activeChild: "Niño activo",
+    subjectPrefix: "Asignatura",
+    topicPrefix: "Tema",
     missionsCount: (done, total) => `${done}/${total} misiones`,
     noMissions: "Aún sin misiones",
     allDone: "✅ ¡Todo listo!",
@@ -618,7 +630,7 @@ export function Junior() {
       {children.length === 1 && activeChild && (
         <div className="mb-4 flex items-center gap-2">
           <span className="text-xs font-semibold text-muted-foreground bg-white/60 px-3 py-1.5 rounded-full border border-white/50 shadow-sm">
-            👤 {activeChild.language === "bg" ? "Активно дете" : activeChild.language === "es" ? "Niño activo" : "Active child"}:
+            👤 {lbl.activeChild}:
             <span className="ml-1 text-junior-foreground font-bold">{activeChild.name}</span>
           </span>
         </div>
@@ -761,7 +773,7 @@ export function Junior() {
               <div className="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-xl border border-white/50">
                 <span className="text-lg">{currentChar?.emoji ?? "🌟"}</span>
                 <span className="font-bold text-sm text-junior-foreground">{currentChar?.name ?? "AYA"}</span>
-                {currentChar && <span className="text-xs text-muted-foreground">{lbl.toneStyle(currentChar.tone)}</span>}
+                {currentChar && <span className="text-xs text-muted-foreground">{lbl.toneStyle(CHAR_LABELS[currentChar.id]?.[juniorLang]?.tone ?? currentChar.tone)}</span>}
               </div>
               <button onClick={() => setView("map")}
                 className="flex items-center gap-1.5 px-3 py-2 bg-white/60 rounded-xl border border-white/50 hover:bg-yellow-50 transition-colors text-sm font-bold text-junior-foreground">

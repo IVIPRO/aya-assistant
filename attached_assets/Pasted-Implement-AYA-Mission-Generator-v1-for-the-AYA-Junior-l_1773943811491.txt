@@ -1,0 +1,185 @@
+Implement AYA Mission Generator v1 for the Начален етап (AYA Junior) learning world.
+
+This feature must add a dynamic math mission system inside the existing Остров на математиката learning world.
+
+IMPORTANT:
+Do not redesign the UI.
+Do not change navigation.
+Only implement the mission generator logic and answer checking.
+
+--------------------------------
+
+FEATURE OVERVIEW
+
+Children should complete missions by solving dynamically generated math tasks.
+
+Each mission contains:
+• generated tasks
+• answer checking
+• XP rewards
+• mission progress
+
+Tasks must be generated locally in code (NOT using AI).
+
+--------------------------------
+
+MISSIONS TO IMPLEMENT
+
+Mission 1
+Title: Събиране до 10
+Goal: solve 5 correct tasks
+
+Rules:
+number1 = random 0–10  
+number2 = random 0–10  
+(number1 + number2) ≤ 10  
+
+Example tasks:
+3 + 4  
+5 + 2  
+1 + 6
+
+--------------------------------
+
+Mission 2
+Title: Изваждане до 10
+Goal: solve 5 correct tasks
+
+Rules:
+number1 = random 1–10  
+number2 = random 0–number1  
+result ≥ 0
+
+Example tasks:
+9 - 4  
+7 - 2  
+6 - 1
+
+--------------------------------
+
+Mission 3
+Title: Събиране до 20
+Goal: solve 6 correct tasks
+
+Rules:
+number1 = random 0–20  
+number2 = random 0–20  
+(number1 + number2) ≤ 20
+
+--------------------------------
+
+TASK GENERATION SYSTEM
+
+Create a mathTaskGenerator module.
+
+Requirements:
+• generate tasks dynamically
+• prevent repeating last 5 tasks
+• return task object
+
+Example structure:
+
+{
+ id,
+ expression: "3 + 4",
+ answer: 7,
+ type: "addition",
+ difficulty: "easy"
+}
+
+--------------------------------
+
+ANSWER CHECKING
+
+When child enters answer:
+
+if correct:
++5 XP
+
+AYA response:
+
+"Браво!
+3 + 4 = 7 ⭐"
+
+If incorrect:
+
+"Опитай отново.
+Помисли още малко."
+
+--------------------------------
+
+MISSION COMPLETION
+
+After required number of correct answers:
+
+Show message:
+
+"🎉 Мисията е изпълнена!
+
+Получаваш:
+⭐ +30 XP"
+
+Update progress.
+
+--------------------------------
+
+MISSION PROGRESS
+
+Show progress like:
+
+Събиране до 10  
+3 / 5 задачи решени
+
+Update instantly after each correct answer.
+
+--------------------------------
+
+CHAT BEHAVIOR (AYA Panda style)
+
+AYA should present tasks like a teacher:
+
+Example:
+
+"Нека решим задача.
+
+3 + 4
+
+Какъв според теб е отговорът?"
+
+--------------------------------
+
+PERFORMANCE REQUIREMENTS
+
+• Tasks generated locally
+• No AI usage
+• No external API
+• Instant chat updates
+• Lightweight logic
+
+--------------------------------
+
+TEST CASE
+
+Start mission "Събиране до 10".
+
+Generated tasks example:
+
+2 + 3  
+5 + 1  
+4 + 4  
+1 + 6  
+3 + 5  
+
+After 5 correct answers:
+
+Mission complete message appears and XP is awarded.
+
+--------------------------------
+
+SCOPE LIMITATION
+
+Apply this system only for:
+
+Начален етап → Остров на математиката
+
+Other worlds (reading, logic) will be implemented later.

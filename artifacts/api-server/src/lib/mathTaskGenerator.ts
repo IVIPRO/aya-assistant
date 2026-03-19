@@ -326,7 +326,11 @@ export function generateNextTask(missionId: string): MathTask {
  * Check if answer is correct
  */
 export function checkAnswer(task: MathTask, userAnswer: number): boolean {
-  return userAnswer === task.answer;
+  // Normalize both values to ensure proper numeric comparison
+  const normalizedExpected = Number(task.answer);
+  const normalizedSubmitted = Number(userAnswer);
+  const isCorrect = normalizedSubmitted === normalizedExpected;
+  return isCorrect;
 }
 
 /**

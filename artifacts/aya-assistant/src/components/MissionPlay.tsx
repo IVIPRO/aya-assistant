@@ -190,6 +190,10 @@ export function MissionPlay({
         return;
       }
 
+      // Debug word problem answer submission
+      console.log(`[WORD_PROBLEM] text: "${mission.currentTask.expression}"`);
+      console.log(`[WORD_PROBLEM] submittedAnswer: ${answer} (type: ${typeof answer})`);
+      console.log(`[WORD_PROBLEM] expectedAnswer: ${mission.currentTask.answer} (type: ${typeof mission.currentTask.answer})`);
       console.log(`[ANSWER_CHECK] taskId=${mission.currentTask.id}, userAnswer=${answer}, expectedAnswer=${mission.currentTask.answer}`);
 
       const res = await fetch(`/api/missions/tasks/${mission.currentTask.id}/answer`, {
@@ -201,7 +205,11 @@ export function MissionPlay({
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to submit answer");
+      if (!res.ok) {
+        const errorBody = await res.text();
+        console.error(`[ANSWER_ERROR_RESPONSE] status=${res.status}, body=${errorBody}`);
+        throw new Error(`Failed to submit answer: ${res.status} ${errorBody}`);
+      }
 
       const data = await res.json();
       console.log(`[ANSWER_RESULT] correct=${data.correct}, missionComplete=${data.isMissionComplete}`);

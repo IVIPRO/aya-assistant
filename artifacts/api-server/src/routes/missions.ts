@@ -314,113 +314,125 @@ router.post("/missions/tasks/:taskId/answer", requireAuth, async (req, res): Pro
     return;
   }
 
-  // Check answer
-  const isCorrect = checkAnswer({ answer: task.answer } as MathTask, userAnswer);
-  const lang = (childLang?.toLowerCase() === "bg" ? "bg" : childLang?.toLowerCase() === "es" ? "es" : "en") as "bg" | "es" | "en";
+  try {
+    // Check answer
+    const isCorrect = checkAnswer({ answer: task.answer } as MathTask, userAnswer);
+    const lang = (childLang?.toLowerCase() === "bg" ? "bg" : childLang?.toLowerCase() === "es" ? "es" : "en") as "bg" | "es" | "en";
 
-  // Get response message
-  let responseMessage = "";
-  if (isCorrect) {
-    if (lang === "bg") responseMessage = getCorrectAnswerResponseBg({ expression: task.expression, answer: task.answer } as MathTask);
-    else if (lang === "es") responseMessage = getCorrectAnswerResponseEs({ expression: task.expression, answer: task.answer } as MathTask);
-    else responseMessage = getCorrectAnswerResponseEn({ expression: task.expression, answer: task.answer } as MathTask);
-  } else {
-    if (lang === "bg") responseMessage = getIncorrectAnswerResponseBg();
-    else if (lang === "es") responseMessage = getIncorrectAnswerResponseEs();
-    else responseMessage = getIncorrectAnswerResponseEn();
-  }
+    // Debug logging for word problems
+    console.log(`[WORD_PROBLEM] text: "${task.expression}"`);
+    console.log(`[WORD_PROBLEM] expectedAnswer: ${task.answer} (type: ${typeof task.answer})`);
+    console.log(`[WORD_PROBLEM] submittedAnswer: ${userAnswer} (type: ${typeof userAnswer})`);
+    console.log(`[WORD_PROBLEM] normalizedExpected: ${Number(task.answer)}`);
+    console.log(`[WORD_PROBLEM] normalizedSubmitted: ${Number(userAnswer)}`);
+    console.log(`[WORD_PROBLEM] isCorrect: ${isCorrect}`);
 
-  // Update task with answer
-  await db.update(missionTasksTable)
-    .set({
-      answered: true,
-      correct: isCorrect,
-      userAnswer,
-      answeredAt: new Date(),
-    })
-    .where(eq(missionTasksTable.id, task.id));
-
-  // Award XP for correct answer
-  if (isCorrect) {
-    const newXp = (child.xp || 0) + 5;
-    await db.update(childrenTable)
-      .set({ xp: newXp })
-      .where(eq(childrenTable.id, child.id));
-  }
-
-  // Check if mission is complete
-  const completedTasks = await db.select().from(missionTasksTable)
-    .where(and(
-      eq(missionTasksTable.missionId, mission.id),
-      eq(missionTasksTable.correct, true)
-    ));
-
-  let isMissionComplete = false;
-  let nextTask = null;
-
-  if (isCorrect) {
-    if (completedTasks.length >= MISSIONS["m1"]?.taskCount || 
-        completedTasks.length >= MISSIONS["m2"]?.taskCount ||
-        completedTasks.length >= MISSIONS["m3"]?.taskCount ||
-        completedTasks.length >= MISSIONS["m4"]?.taskCount) {
-      
-      isMissionComplete = true;
-      
-      // Mark mission as complete
-      await db.update(missionsTable)
-        .set({ completed: true, completedAt: new Date() })
-        .where(eq(missionsTable.id, mission.id));
-
-      // Award final XP and stars (mission xpReward was set during mission start)
-      const bonusXp = mission.xpReward || 30;
-      const finalXp = (child.xp || 0) + bonusXp;
-      const finalStars = (child.stars || 0) + 1;
-      await db.update(childrenTable)
-        .set({ xp: finalXp, stars: finalStars })
-        .where(eq(childrenTable.id, child.id));
-
-      // Get completion message
-      let completionMessage = "";
-      if (lang === "bg") completionMessage = getMissionCompleteMessageBg(mission.title);
-      else if (lang === "es") completionMessage = getMissionCompleteMessageEs(mission.title);
-      else completionMessage = getMissionCompleteMessageEn(mission.title);
-
-      responseMessage += `\n\n${completionMessage}`;
+    // Get response message
+    let responseMessage = "";
+    if (isCorrect) {
+      if (lang === "bg") responseMessage = getCorrectAnswerResponseBg({ expression: task.expression, answer: task.answer } as MathTask);
+      else if (lang === "es") responseMessage = getCorrectAnswerResponseEs({ expression: task.expression, answer: task.answer } as MathTask);
+      else responseMessage = getCorrectAnswerResponseEn({ expression: task.expression, answer: task.answer } as MathTask);
     } else {
-      // Generate next task
-      const missionDef = MISSIONS[mission.zone === "math_island" ? "m1" : "m2"] || MISSIONS["m1"];
-      const generatedTask = missionDef.generate();
+      if (lang === "bg") responseMessage = getIncorrectAnswerResponseBg();
+      else if (lang === "es") responseMessage = getIncorrectAnswerResponseEs();
+      else responseMessage = getIncorrectAnswerResponseEn();
+    }
+
+    // Update task with answer
+    await db.update(missionTasksTable)
+      .set({
+        answered: true,
+        correct: isCorrect,
+        userAnswer,
+        answeredAt: new Date(),
+      })
+      .where(eq(missionTasksTable.id, task.id));
+
+    // Award XP for correct answer
+    if (isCorrect) {
+      const newXp = (child.xp || 0) + 5;
+      await db.update(childrenTable)
+        .set({ xp: newXp })
+        .where(eq(childrenTable.id, child.id));
+    }
+
+    // Check if mission is complete
+    const completedTasks = await db.select().from(missionTasksTable)
+      .where(and(
+        eq(missionTasksTable.missionId, mission.id),
+        eq(missionTasksTable.correct, true)
+      ));
+
+    let isMissionComplete = false;
+    let nextTask = null;
+
+    if (isCorrect) {
+      // Get the task count for this mission from MISSIONS
+      const missionDef = MISSIONS[mission.missionId] || MISSIONS["m1"];
+      const requiredTaskCount = missionDef?.taskCount || 5;
       
-      const [insertedTask] = await db.insert(missionTasksTable)
-        .values({
-          missionId: mission.id,
-          taskId: generatedTask.id,
+      if (completedTasks.length >= requiredTaskCount) {
+        isMissionComplete = true;
+        
+        // Mark mission as complete
+        await db.update(missionsTable)
+          .set({ completed: true, completedAt: new Date() })
+          .where(eq(missionsTable.id, mission.id));
+
+        // Award final XP and stars (mission xpReward was set during mission start)
+        const bonusXp = mission.xpReward || 30;
+        const finalXp = (child.xp || 0) + bonusXp;
+        const finalStars = (child.stars || 0) + 1;
+        await db.update(childrenTable)
+          .set({ xp: finalXp, stars: finalStars })
+          .where(eq(childrenTable.id, child.id));
+
+        // Get completion message
+        let completionMessage = "";
+        if (lang === "bg") completionMessage = getMissionCompleteMessageBg(mission.title);
+        else if (lang === "es") completionMessage = getMissionCompleteMessageEs(mission.title);
+        else completionMessage = getMissionCompleteMessageEn(mission.title);
+
+        responseMessage += `\n\n${completionMessage}`;
+      } else {
+        // Generate next task using the same mission definition
+        const generatedTask = missionDef.generate();
+        
+        const [insertedTask] = await db.insert(missionTasksTable)
+          .values({
+            missionId: mission.id,
+            taskId: generatedTask.id,
+            expression: generatedTask.expression,
+            answer: generatedTask.answer,
+            type: generatedTask.type as any,
+            difficulty: generatedTask.difficulty,
+            number1: generatedTask.number1,
+            number2: generatedTask.number2,
+            operator: generatedTask.operator,
+          })
+          .returning();
+
+        nextTask = {
+          id: insertedTask.id,
           expression: generatedTask.expression,
           answer: generatedTask.answer,
-          type: generatedTask.type as any,
-          difficulty: generatedTask.difficulty,
-          number1: generatedTask.number1,
-          number2: generatedTask.number2,
-          operator: generatedTask.operator,
-        })
-        .returning();
-
-      nextTask = {
-        id: insertedTask.id,
-        expression: generatedTask.expression,
-        answer: generatedTask.answer,
-      };
+        };
+      }
     }
-  }
 
-  res.json({
-    correct: isCorrect,
-    responseMessage,
-    isMissionComplete,
-    completedCount: completedTasks.length,
-    nextTask,
-    updatedXp: (child.xp || 0) + (isCorrect ? 5 : 0),
-  });
+    res.json({
+      correct: isCorrect,
+      responseMessage,
+      isMissionComplete,
+      completedCount: completedTasks.length,
+      nextTask,
+      updatedXp: (child.xp || 0) + (isCorrect ? 5 : 0),
+    });
+  } catch (error) {
+    console.error(`[ANSWER_ERROR] Error processing answer:`, error);
+    res.status(500).json({ error: "Failed to process answer", details: String(error) });
+  }
 });
 
 export default router;

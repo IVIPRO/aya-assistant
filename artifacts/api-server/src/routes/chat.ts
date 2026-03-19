@@ -113,6 +113,10 @@ function getLang(language?: string): "bg" | "es" | "en" {
 
 router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
   const { userId } = getUser(req);
+  
+  // Generate unique request ID for complete trace through this request
+  const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  
   const parsed = SendChatMessageBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -161,23 +165,28 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
   if (hasImage && module === "junior" && imageBase64) {
     try {
       console.log("[AYA_HOMEWORK] ===== HOMEWORK IMAGE FLOW =====");
+      console.log(`[AYA_HOMEWORK] REQUEST_ID: ${requestId}`);
+      console.log(`[AYA_HOMEWORK] IMAGE_ID: ${imageId}`);
+      console.log(`[AYA_HOMEWORK] IMAGE_SIZE_BYTES: ${imageBase64.length}`);
+      console.log(`[AYA_HOMEWORK] MIME_TYPE: ${imageMimeType}`);
       console.log("[AYA_HOMEWORK] child:", context.childName, "grade:", context.grade, "language:", context.language);
       
       const resolvedLang = getLang(context.language);
       const openai = getOpenAIClient();
 
       // Stage 1: Try to extract and solve simple arithmetic locally
-      console.log("[AYA_HOMEWORK] attempting Stage 1 simple math solver...");
-      const simpleMathResult = await trySimpleMathSolve(imageBase64, imageMimeType, resolvedLang, openai);
+      console.log(`[AYA_HOMEWORK] ${requestId} attempting Stage 1 simple math solver...`);
+      const simpleMathResult = await trySimpleMathSolve(imageBase64, imageMimeType, resolvedLang, openai, requestId);
 
       if (simpleMathResult) {
         // Simple math was detected and solved
-        console.log("[AYA_HOMEWORK] Stage 1 returned result, using simple math response");
+        console.log(`[AYA_HOMEWORK] ${requestId} STAGE_1_SUCCESS`);
+        console.log(`[AYA_HOMEWORK] ${requestId} RESPONSE: ${simpleMathResult}`);
         aiContent = simpleMathResult;
       } else {
         // Not simple math - use full vision analysis with step-by-step tutoring
-        console.log("[AYA_HOMEWORK] Stage 1 returned null, falling back to Stage 2 full vision analysis");
-        console.log("[AYA_HOMEWORK] ===== STAGE 2: Full Vision Analysis =====");
+        console.log(`[AYA_HOMEWORK] ${requestId} Stage 1 returned null, falling back to Stage 2 full vision analysis`);
+        console.log(`[AYA_HOMEWORK] ${requestId} ===== STAGE 2: Full Vision Analysis =====`);
         const resolvedGrade = context.grade ?? 2;
         const childName = context.childName ?? "the student";
         const charKey = context.aiCharacter ?? "owl";

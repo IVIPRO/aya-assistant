@@ -378,12 +378,21 @@ export function Chat({
           // Generate unique image ID
           const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
           
+          // Debug logging for image upload flow
+          console.log("[AYA_HOMEWORK] ===== FRONTEND IMAGE SEND FLOW =====");
+          console.log(`[AYA_HOMEWORK] image id: ${imageId}`);
+          console.log(`[AYA_HOMEWORK] file name: ${homeworkFile.name}`);
+          console.log(`[AYA_HOMEWORK] file size: ${homeworkFile.size} bytes`);
+          console.log(`[AYA_HOMEWORK] mime type: ${mimeType}`);
+          console.log(`[AYA_HOMEWORK] base64 size: ${base64Data.length}`);
+          
           // Store the preview URL for display
           setImagePreviewsMap(prev => ({ ...prev, [imageId]: homeworkPreview }));
 
           // Send message with image data as base64 (backend will analyze it with vision API)
           // Format: [IMAGE_DATA:base64Data:mimeType:imageId]\nCaption
           const imageDataMarker = `[IMAGE_DATA:${base64Data}:${mimeType}:${imageId}]`;
+          console.log(`[AYA_HOMEWORK] sending homework image request...`);
           sendMutation.mutate(
             { data: { module, content: `${imageDataMarker}\n${hwLabels.uploadedImageCaption}`, childId: activeChildId } }
           );
@@ -393,14 +402,17 @@ export function Chat({
           setHomeworkFile(null);
           if (fileInputRef.current) fileInputRef.current.value = "";
         } catch (error) {
+          console.log("[AYA_HOMEWORK] send error:", error);
           toast({ title: hwLabels.sendError, variant: "destructive" });
         }
       };
       reader.onerror = () => {
+        console.log("[AYA_HOMEWORK] file read error");
         toast({ title: hwLabels.sendError, variant: "destructive" });
       };
       reader.readAsDataURL(homeworkFile);
     } catch (error) {
+      console.log("[AYA_HOMEWORK] homework send exception:", error);
       toast({ title: hwLabels.sendError, variant: "destructive" });
     }
   }, [homeworkFile, homeworkPreview, module, activeChildId, sendMutation, hwLabels, toast]);

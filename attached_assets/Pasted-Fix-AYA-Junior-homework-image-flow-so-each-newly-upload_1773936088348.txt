@@ -1,0 +1,71 @@
+Fix AYA Junior homework image flow so each newly uploaded image is analyzed independently and does not reuse the previous math result.
+
+Current problem:
+After uploading one image like "5 + 7 =", AYA correctly shows:
+- "На снимката виждам: 5 + 7"
+- "Отговорът е: 12"
+
+But when uploading a different second image, AYA still shows the previous result, as if it is reusing old extracted content instead of analyzing the new image.
+
+Goal:
+Ensure every uploaded image is processed as a fresh, independent homework analysis.
+
+Required fixes:
+
+1. Clear previous Stage 1 homework analysis state before processing a new image:
+- previous extracted text
+- previous solved result
+- previous response text
+- previous image markers / payload references
+
+2. Ensure each uploaded image gets a unique identity:
+- unique image id
+- unique message id
+- unique local preview/object URL handling
+- no stale reference reuse
+
+3. Verify frontend send flow:
+When a new image is selected and sent:
+- the new file must be the one actually passed to the homework analysis request
+- not the previous file or previous cached extracted text
+
+4. Verify backend request flow:
+- do not reuse old extracted math text from previous request
+- do not reuse prior stage1 result
+- each request must start from the new uploaded image input
+
+5. Add explicit debug logs for every upload:
+Log:
+- upload request id
+- image id / message id
+- whether previous state was cleared
+- extracted text for current image
+- solver result for current image
+
+Example:
+- [AYA_HOMEWORK] request id: abc123
+- [AYA_HOMEWORK] cleared previous state: true
+- [AYA_HOMEWORK] current image id: img_002
+- [AYA_HOMEWORK] extracted text: "23 + 14 ="
+- [AYA_HOMEWORK] solved result: 37
+
+6. Add hard guarantee:
+If the extracted text of the current image differs from the previous one,
+the response shown in chat must also differ and reflect the current image only.
+
+7. Preserve current correct behavior:
+- clear simple math image -> direct solved response
+- blurry image -> ask for clearer photo
+
+8. Do not redesign the UI.
+9. Do not remove the current Stage 1 solver.
+10. Do not use autonomous agent mode.
+
+11. Test explicitly with this sequence:
+- upload image 1: "5 + 7 =" -> must show 12
+- upload image 2: "23 + 14 =" -> must show 37
+- upload image 3: "9 - 4 =" -> must show 5
+
+Important:
+This is a stale-state / reuse bug fix.
+The system must analyze each image independently and never reuse the previous result.

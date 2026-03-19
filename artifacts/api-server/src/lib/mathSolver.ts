@@ -414,12 +414,13 @@ async function trySimpleMathSolve(
   
   try {
     // Use vision API just to extract visible text (lightweight usage)
+    // Ask for ALL math expressions separated by newlines
     const extractionPrompt =
       lang === "bg"
-        ? "Извлечи само видимия математически израз или числа от снимката. Отговори с израза точно както е написан (например: '5 + 7' или '23+14'). Ако вижда текст, който не е математика, отговори със една дума 'НЕЯСНО'."
+        ? "Извлечи ВСИЧКИ видими математически изрази или числа от снимката. Ако има повече от един израз, напиши всеки на нов ред. Отговори с израза точно както е написан (например: '5 + 7' или '23+14'). Ако вижда текст, който не е математика, отговори със една дума 'НЕЯСНО'."
         : lang === "es"
-        ? "Extrae solo la expresión matemática visible o números de la foto. Responde con la expresión exactamente como está escrita (por ejemplo: '5 + 7' o '23+14'). Si ves texto que no es matemáticas, responde con una palabra 'POCO CLARO'."
-        : "Extract only the visible math expression or numbers from the image. Respond with the expression exactly as written (for example: '5 + 7' or '23+14'). If you see text that is not math, respond with one word 'UNCLEAR'.";
+        ? "Extrae TODAS las expresiones matemáticas visibles o números de la foto. Si hay más de una expresión, escribe cada una en una nueva línea. Responde con la expresión exactamente como está escrita (por ejemplo: '5 + 7' o '23+14'). Si ves texto que no es matemáticas, responde con una palabra 'POCO CLARO'."
+        : "Extract ALL visible math expressions or numbers from the image. If there are multiple expressions, write each one on a separate line. Respond with each expression exactly as written (for example: '5 + 7' or '23+14'). If you see text that is not math, respond with one word 'UNCLEAR'.";
 
     const validMime = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(imageMimeType)
       ? (imageMimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp")

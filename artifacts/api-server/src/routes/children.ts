@@ -134,6 +134,59 @@ router.patch("/children/:id", requireAuth, async (req, res): Promise<void> => {
   res.json(child);
 });
 
+// SURGICAL DEBUG: Reload missions from curriculum for a child
+router.post("/children/:id/reload-missions", requireAuth, async (req, res): Promise<void> => {
+  const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const childId = parseInt(rawId, 10);
+  
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+  
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(
+      and(
+        eq(childrenTable.id, childId),
+        eq(childrenTable.familyId, familyId ?? -1)
+      )
+    );
+
+  if (!child) {
+    res.status(404).json({ error: "Child not found" });
+    return;
+  }
+
+  // Delete old missions
+  await db.delete(missionsTable).where(eq(missionsTable.childId, childId));
+  console.log(`[DEBUG] Deleted old missions for child ${childId}`);
+  
+  // Reload from curriculum
+  const curriculumMissions = getMissionsForChild(child.country, child.grade);
+  console.log(`[DEBUG] Loaded ${curriculumMissions.length} missions from curriculum for country=${child.country}, grade=${child.grade}`);
+  const mathIslandMissions = curriculumMissions.filter(m => m.zone === 'Math Island').map(m => m.title);
+  console.log(`[DEBUG] Math Island missions: ${mathIslandMissions.join(", ")}`);
+  
+  // Insert new missions
+  await db.insert(missionsTable).values(
+    curriculumMissions.map(m => ({
+      childId: child.id,
+      title: m.title,
+      description: m.description,
+      subject: m.subject,
+      zone: m.zone,
+      difficulty: m.difficulty,
+      xpReward: m.xpReward,
+      starReward: m.starReward,
+      completed: false,
+    }))
+  );
+  
+  console.log(`[MATH_ISLAND_FINAL_BG_G2] mission titles for child ${childId}: ${mathIslandMissions.join(", ")}`);
+  
+  res.json({ message: "Missions reloaded", totalMissions: curriculumMissions.length, mathIslandMissions });
+});
+
 router.delete("/children/:id", requireAuth, async (req, res): Promise<void> => {
   const rawId = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = DeleteChildParams.safeParse({ id: parseInt(rawId, 10) });

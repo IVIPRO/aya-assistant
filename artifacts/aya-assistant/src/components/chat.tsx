@@ -110,6 +110,7 @@ const HOMEWORK_LABELS = {
     fileTooLarge: "The image is too large.",
     uploadedImageCaption: "Uploaded image",
     assistantFollowUp: "I received the image. I'm ready to review it.",
+    sendError: "There was a problem sending the image.",
   },
   bg: {
     cameraBtn: "Снимай домашното",
@@ -125,6 +126,7 @@ const HOMEWORK_LABELS = {
     fileTooLarge: "Снимката е твърде голяма.",
     uploadedImageCaption: "Качена снимка",
     assistantFollowUp: "Получих снимката. Готова съм да я прегледам.",
+    sendError: "Възникна проблем при изпращането на снимката.",
   },
   es: {
     cameraBtn: "Tomar foto de tarea",
@@ -140,6 +142,7 @@ const HOMEWORK_LABELS = {
     fileTooLarge: "La imagen es demasiado grande.",
     uploadedImageCaption: "Imagen cargada",
     assistantFollowUp: "Recibí la imagen. Estoy lista para revisarla.",
+    sendError: "Hubo un problema al enviar la imagen.",
   },
 };
 
@@ -363,29 +366,40 @@ export function Chat({
   const sendHomework = useCallback(() => {
     if (!homeworkFile || !homeworkPreview) return;
 
-    // Generate unique image ID
-    const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Store the preview URL
-    setImagePreviewsMap(prev => ({ ...prev, [imageId]: homeworkPreview }));
+    try {
+      // Generate unique image ID
+      const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Store the preview URL
+      setImagePreviewsMap(prev => ({ ...prev, [imageId]: homeworkPreview }));
 
-    // Send user message with image ID marker
-    sendMutation.mutate({
-      data: { module, content: `[IMAGE:${imageId}]\n${hwLabels.uploadedImageCaption}`, childId: activeChildId }
-    }, {
-      onSuccess: () => {
-        // Send assistant follow-up message
-        sendMutation.mutate({
-          data: { module, content: hwLabels.assistantFollowUp, childId: activeChildId }
-        });
-      }
-    });
+      // Send user message with image ID marker
+      // Note: Callbacks are optional in mutation and must be guarded to prevent crashes
+      // We send image message first, then follow-up separately
+      sendMutation.mutate(
+        { data: { module, content: `[IMAGE:${imageId}]\n${hwLabels.uploadedImageCaption}`, childId: activeChildId } }
+      );
 
-    // Clear temporary preview and file
-    setHomeworkPreview(null);
-    setHomeworkFile(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [homeworkFile, homeworkPreview, module, activeChildId, sendMutation, hwLabels]);
+      // Send assistant follow-up message after a brief delay to ensure first message is processed
+      // This avoids complex callback chaining that can cause React Query callback errors
+      setTimeout(() => {
+        try {
+          sendMutation.mutate(
+            { data: { module, content: hwLabels.assistantFollowUp, childId: activeChildId } }
+          );
+        } catch {
+          // If follow-up fails silently, the image message was already sent successfully
+        }
+      }, 500);
+
+      // Clear temporary preview and file
+      setHomeworkPreview(null);
+      setHomeworkFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    } catch (error) {
+      toast({ title: hwLabels.sendError, variant: "destructive" });
+    }
+  }, [homeworkFile, homeworkPreview, module, activeChildId, sendMutation, hwLabels, toast]);
 
   const colorMap = {
     primary: "bg-primary text-primary-foreground",

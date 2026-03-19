@@ -1,0 +1,70 @@
+Fix AYA Chat behavior in the Junior / Начален етап module.
+
+Current problem:
+When the child taps "Chat with AYA", the app does not open the chat directly anymore.
+Instead, it forces the child to first select a subject from the subject grid.
+
+This is not the desired UX.
+
+Required behavior:
+
+1. Restore direct chat opening.
+When the child taps "Chat with AYA", open the AYA chat immediately, even if no subject has been selected yet.
+
+2. Support two chat modes:
+
+A) General Chat Mode
+If no subject/topic is selected:
+- open the chat normally
+- AYA should greet the child in the current app language
+- AYA can ask what they want help with
+- no subject is required
+
+B) Subject Chat Mode
+If a subject/topic has already been selected:
+- open the chat with subject context
+- show the selected subject/topic badges
+- use the subject-aware tutoring logic
+
+3. Do not force subject selection before chat.
+The subject grid should remain available for lesson navigation, but it must not block access to chat.
+
+4. Add fallback localized greeting in General Chat Mode.
+
+Bulgarian:
+- "Здравей! Аз съм AYA. С какво искаш да ти помогна днес?"
+- "Можем да учим математика, четене, логика или просто да поговорим."
+
+English:
+- "Hi! I'm AYA. What would you like help with today?"
+- "We can do math, reading, logic, or just chat."
+
+Spanish:
+- "¡Hola! Soy AYA. ¿Con qué te gustaría que te ayudara hoy?"
+- "Podemos estudiar matemáticas, lectura, lógica o simplemente hablar."
+
+5. Preserve subject-aware mode.
+If the child comes into chat from:
+- Mathematics
+- Bulgarian language
+- Reading
+- Logic
+- Environmental studies
+- English
+then keep the current subject/topic context.
+
+6. Add a visible indicator in chat header:
+
+If no subject selected:
+Bulgarian: "Свободен разговор"
+English: "Free chat"
+Spanish: "Chat libre"
+
+If subject selected:
+show the current localized subject/topic as now.
+
+7. Do not change layout significantly.
+Do not redesign the app.
+Only fix the routing / entry logic for Chat with AYA and add fallback general chat mode.
+
+8. Make sure the "Chat with AYA" button from the Junior dashboard and welcome card always opens chat directly.

@@ -71,6 +71,9 @@ const CURRICULA: Record<string, GradeCurriculum> = {
       { title: "Времето около нас", description: "Опиши времето навън - слънчево, облачно, дъждовно, снежно?", subject: "Човекът и природата", zone: "Science Planet", difficulty: "easy", xpReward: 25, starReward: 1 },
     ],
     grade2: [
+      { title: "Събиране до 10", description: "Реши задачи за събиране с числа до 10: 3+5=?, 7+2=?, 4+6=?", subject: "Математика", zone: "Math Island", difficulty: "easy", xpReward: 35, starReward: 1 },
+      { title: "Изваждане до 10", description: "Реши задачи за изваждане с числа до 10: 9-3=?, 8-5=?, 10-4=?", subject: "Математика", zone: "Math Island", difficulty: "easy", xpReward: 35, starReward: 1 },
+      { title: "Събиране до 20", description: "Реши задачи за събиране с числа до 20: 12+5=?, 8+7=?, 14+3=?", subject: "Математика", zone: "Math Island", difficulty: "easy", xpReward: 40, starReward: 1 },
       { title: "Умножение на 2 и 3", description: "Научи таблицата за умножение на 2 и 3", subject: "Математика", zone: "Math Island", difficulty: "easy", xpReward: 40, starReward: 1 },
       { title: "Задача с думи", description: "Мария има 15 ябълки и дава 6 на приятел. Колко остават?", subject: "Математика", zone: "Math Island", difficulty: "easy", xpReward: 40, starReward: 1 },
       { title: "Кратък преразказ", description: "Прочети абзац и напиши 2 изречения за основната мисъл", subject: "Четене", zone: "Reading Forest", difficulty: "easy", xpReward: 45, starReward: 1 },

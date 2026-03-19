@@ -1,0 +1,273 @@
+Implement **AYA Mission Generator v1** for the **AYA Начален етап (1–4 клас)** module.
+
+Goal:
+Add a working dynamic mission system to the **Остров на математиката** so children can play and learn through generated math tasks.
+
+Important constraints:
+- Do NOT redesign the UI
+- Do NOT change routes
+- Do NOT use autonomous agent mode
+- Do NOT use AI for simple task generation
+- Keep current localization system
+- Integrate into the existing Math Island / mission card structure
+
+====================================
+1. Scope
+Apply this only to:
+
+AYA Начален етап (1–4 клас)
+→ Остров на математиката
+
+Do not change Reading Forest / Logic Mountain / English City yet.
+
+====================================
+2. Mission Types to Implement
+
+Implement these first 3 missions:
+
+Mission 1:
+Събиране до 10
+
+Mission 2:
+Изваждане до 10
+
+Mission 3:
+Събиране до 20
+
+These missions must appear in the existing Math Island mission flow.
+
+====================================
+3. Dynamic Task Generation Rules
+
+Create a local math task generator.
+
+A task object should include:
+- id
+- expression
+- answer
+- missionType
+- difficulty
+- createdAt
+
+Example:
+{
+  id: "task_001",
+  expression: "3 + 4",
+  answer: 7,
+  missionType: "addition_to_10",
+  difficulty: "easy"
+}
+
+Mission 1: Събиране до 10
+Rules:
+- a = random integer 0..10
+- b = random integer 0..10
+- a + b <= 10
+
+Mission 2: Изваждане до 10
+Rules:
+- a = random integer 1..10
+- b = random integer 0..a
+- result >= 0
+
+Mission 3: Събиране до 20
+Rules:
+- a = random integer 0..20
+- b = random integer 0..20
+- a + b <= 20
+
+Prevent repeating the last 5 generated tasks within the same mission session.
+
+====================================
+4. Mission Flow
+
+When a child starts a mission:
+
+1. Generate the first task
+2. Show it in the mission/chat area
+3. Let the child enter an answer
+4. Check correctness
+5. If correct:
+   - mark task solved
+   - award +5 XP
+   - generate next task
+6. When mission target is reached:
+   - show mission complete message
+   - award bonus XP
+
+Mission targets:
+- Събиране до 10 -> 5 correct tasks
+- Изваждане до 10 -> 5 correct tasks
+- Събиране до 20 -> 6 correct tasks
+
+====================================
+5. Teacher Style Responses
+
+AYA Panda should present tasks in a child-friendly teacher tone.
+
+Bulgarian examples:
+
+Start task:
+"Хайде да решим задача."
+"3 + 4"
+"Какъв според теб е отговорът?"
+
+Correct:
+"Браво! 3 + 4 = 7 ⭐"
+
+Incorrect:
+"Опитай отново."
+"Помисли още малко."
+
+Mission complete:
+"🎉 Мисията е изпълнена!"
+"Получаваш +30 XP"
+
+English and Spanish must preserve structure using the existing translation system.
+
+====================================
+6. XP and Rewards
+
+Task correct:
++5 XP
+
+Mission completion bonus:
+- Събиране до 10 -> +30 XP
+- Изваждане до 10 -> +30 XP
+- Събиране до 20 -> +40 XP
+
+Update visible XP immediately.
+
+====================================
+7. Progress Tracking
+
+Track mission progress live.
+
+Display examples:
+
+Събиране до 10
+3 / 5 задачи решени
+
+Изваждане до 10
+2 / 5 задачи решени
+
+Събиране до 20
+1 / 6 задачи решени
+
+Mission card should update as tasks are solved.
+
+====================================
+8. UI Integration
+
+Use the current mission card / learning world structure.
+
+Requirements:
+- Existing Math Island card should open the mission list
+- Mission list should show the 3 missions above
+- Each mission should have:
+  - title
+  - progress
+  - start button
+  - completed state if finished
+
+Do not redesign layout.
+Only connect working mission logic to the current UI.
+
+====================================
+9. Data / State Handling
+
+Keep this lightweight.
+
+It is acceptable to store initial progress in local app state or current child progress model if already present.
+
+Need to track:
+- current mission
+- current generated task
+- solved count
+- XP earned
+- completed missions
+
+If a child leaves and returns within the same session, keep current mission state if practical.
+
+====================================
+10. Localization
+
+All text must use the existing localization system.
+
+Bulgarian:
+- Започни мисия
+- задачи решени
+- Браво!
+- Опитай отново
+- Мисията е изпълнена
+
+English:
+- Start mission
+- tasks solved
+- Great job!
+- Try again
+- Mission completed
+
+Spanish:
+- Empezar misión
+- tareas resueltas
+- ¡Muy bien!
+- Inténtalo de nuevo
+- Misión completada
+
+====================================
+11. Performance Rules
+
+- No AI generation for simple math tasks
+- No backend-heavy architecture
+- No autonomous mode
+- Keep it instant and lightweight
+- Preserve current working chat and homework photo features
+
+====================================
+12. Verification
+
+After implementation, verify:
+
+Mission: Събиране до 10
+Generated examples like:
+2 + 3
+5 + 1
+4 + 4
+1 + 6
+3 + 5
+
+After 5 correct answers:
+- mission complete message appears
+- +30 XP is awarded
+
+Mission: Изваждане до 10
+Examples:
+9 - 4
+7 - 2
+6 - 1
+
+Mission: Събиране до 20
+Examples:
+12 + 5
+7 + 8
+9 + 10
+
+====================================
+13. Important Scope Limit
+
+This task is ONLY for:
+- dynamic mission generator
+- answer checking
+- XP updates
+- mission progress
+
+Do NOT add:
+- streak system
+- badges
+- reading missions
+- logic missions
+- AI explanations
+- full backend redesign
+
+Only make Math Island missions actually playable.

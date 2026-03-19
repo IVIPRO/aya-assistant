@@ -1,0 +1,92 @@
+Implement AYA Teacher Mode for simple math homework responses in AYA Junior.
+
+Goal:
+When AYA detects and solves a simple arithmetic problem from an uploaded image, it should no longer return only the final answer.
+It should explain the solution like a gentle teacher for a child in Grade 1-4.
+
+Important:
+This stage must stay lightweight and low-cost.
+Do NOT use full AI reasoning for simple arithmetic.
+Use local rule-based explanation templates.
+
+Current behavior:
+AYA says things like:
+- "На снимката виждам: 9 - 4"
+- "Отговорът е: 5"
+
+Desired behavior:
+AYA should explain step by step in a warm teacher style.
+
+Examples in Bulgarian:
+
+For 5 + 7:
+"На снимката виждам задачата: 5 + 7."
+"Нека съберем числата."
+"5 + 7 = 12."
+"Отговорът е 12. Браво!"
+
+For 23 + 14:
+"На снимката виждам задачата: 23 + 14."
+"Първо събираме единиците: 3 + 4 = 7."
+"После събираме десетиците: 20 + 10 = 30."
+"Накрая: 30 + 7 = 37."
+"Отговорът е 37. Браво!"
+
+For 9 - 4:
+"На снимката виждам задачата: 9 - 4."
+"Това означава да махнем 4 от 9."
+"9 - 4 = 5."
+"Отговорът е 5."
+
+Requirements:
+
+1. Apply Teacher Mode only for simple arithmetic tasks already solved locally:
+- addition
+- subtraction
+- multiplication
+- division
+
+2. Use rule-based localized explanation templates.
+Do not call AI for these simple explanation cases.
+
+3. Adapt wording for Grade 1-4:
+- short sentences
+- warm tone
+- clear steps
+- child-friendly language
+
+4. Bulgarian must be fully supported first.
+Also preserve English and Spanish template support.
+
+5. If the task is:
+- single-digit addition/subtraction:
+  use very simple explanation
+- two-digit addition:
+  explain tens and ones
+- multiplication:
+  explain as repeated groups if simple
+- division:
+  explain as sharing equally if simple
+
+6. Keep final answer explicit.
+
+7. Preserve current working flow:
+- image upload
+- extracted text
+- local solver
+- immediate chat update
+
+8. Do not redesign UI.
+9. Do not change image binding logic.
+10. Do not use autonomous agent mode.
+
+11. Add a small marker internally so this response type is known as:
+- teacher_explained_local_math
+
+12. Verify these test outputs:
+- 5 + 7 = -> includes answer 12 and short explanation
+- 23 + 14 = -> includes answer 37 and tens/ones explanation
+- 9 - 4 = -> includes answer 5 and subtraction explanation
+
+Important:
+This is a low-cost local teaching explanation layer, not a full AI tutor step.

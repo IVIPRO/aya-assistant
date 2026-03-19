@@ -84,7 +84,152 @@ function detectSimpleMathExpression(text: string, requestId?: string): SimpleMat
 }
 
 /**
+ * Parses expression to extract operator and operands
+ * Returns {op, num1, num2} or null if invalid
+ */
+function parseExpression(expr: string): { op: string; num1: number; num2: number } | null {
+  const match = expr.match(/(\d+)\s*([+\-*/×])\s*(\d+)/);
+  if (!match) return null;
+  
+  const [, n1Str, op, n2Str] = match;
+  const normalizedOp = op === "×" ? "*" : op;
+  return { op: normalizedOp, num1: parseInt(n1Str), num2: parseInt(n2Str) };
+}
+
+/**
+ * Generates warm, teacher-style explanation for simple math
+ * Uses rule-based templates for grades 1-4
+ */
+function generateTeacherExplanation(
+  lang: "bg" | "es" | "en",
+  expression: string,
+  answer: number,
+  operands: { op: string; num1: number; num2: number } | null
+): string {
+  if (!operands) return ""; // Fallback if parsing fails
+
+  const { op, num1, num2 } = operands;
+  const isCompound = num1 >= 10 || num2 >= 10; // Multi-digit arithmetic
+
+  if (lang === "bg") {
+    // Bulgarian Teacher Mode
+    if (op === "+") {
+      if (!isCompound) {
+        // Single-digit addition: 5 + 7
+        return `На снимката виждам задачата: ${expression}.\nНека съберем числата.\n${num1} + ${num2} = ${answer}.\nОтговорът е ${answer}. Браво!`;
+      } else {
+        // Multi-digit addition: 23 + 14
+        const ones1 = num1 % 10;
+        const ones2 = num2 % 10;
+        const tens1 = Math.floor(num1 / 10) * 10;
+        const tens2 = Math.floor(num2 / 10) * 10;
+        const onesSum = ones1 + ones2;
+        const tensSum = tens1 + tens2;
+        return `На снимката виждам задачата: ${expression}.\nПърво събираме единиците: ${ones1} + ${ones2} = ${onesSum}.\nПосле събираме десетиците: ${tens1} + ${tens2} = ${tensSum}.\nНакрая: ${tensSum} + ${onesSum} = ${answer}.\nОтговорът е ${answer}. Браво!`;
+      }
+    } else if (op === "-") {
+      if (!isCompound) {
+        // Single-digit subtraction: 9 - 4
+        return `На снимката виждам задачата: ${expression}.\nТова означава да махнем ${num2} от ${num1}.\n${num1} - ${num2} = ${answer}.\nОтговорът е ${answer}.`;
+      } else {
+        // Multi-digit subtraction: 25 - 12
+        const ones1 = num1 % 10;
+        const ones2 = num2 % 10;
+        const tens1 = Math.floor(num1 / 10) * 10;
+        const tens2 = Math.floor(num2 / 10) * 10;
+        const onesResult = ones1 - ones2;
+        const tensResult = tens1 - tens2;
+        return `На снимката виждам задачата: ${expression}.\nПърво вадим единиците: ${ones1} - ${ones2} = ${onesResult}.\nПосле вадим десетиците: ${tens1} - ${tens2} = ${tensResult}.\nНакрая: ${tensResult} + ${onesResult} = ${answer}.\nОтговорът е ${answer}.`;
+      }
+    } else if (op === "*") {
+      // Multiplication: 6 × 3
+      if (num2 <= 5) {
+        return `На снимката виждам задачата: ${expression}.\nТова означава ${num2} групи от ${num1}.\n${num1} × ${num2} = ${answer}.\nОтговорът е ${answer}.`;
+      } else {
+        return `На снимката виждам задачата: ${expression}.\n${num1} × ${num2} = ${answer}.\nОтговорът е ${answer}.`;
+      }
+    } else if (op === "/") {
+      // Division: 12 ÷ 3
+      return `На снимката виждам задачата: ${expression}.\nДелим ${num1} на ${num2} равни части.\n${num1} ÷ ${num2} = ${answer}.\nОтговорът е ${answer}.`;
+    }
+  } else if (lang === "es") {
+    // Spanish Teacher Mode
+    if (op === "+") {
+      if (!isCompound) {
+        return `Veo en la foto la tarea: ${expression}.\nSumemos los números.\n${num1} + ${num2} = ${answer}.\nLa respuesta es ${answer}. ¡Muy bien!`;
+      } else {
+        const ones1 = num1 % 10;
+        const ones2 = num2 % 10;
+        const tens1 = Math.floor(num1 / 10) * 10;
+        const tens2 = Math.floor(num2 / 10) * 10;
+        const onesSum = ones1 + ones2;
+        const tensSum = tens1 + tens2;
+        return `Veo en la foto la tarea: ${expression}.\nPrimero sumamos las unidades: ${ones1} + ${ones2} = ${onesSum}.\nLuego sumamos las decenas: ${tens1} + ${tens2} = ${tensSum}.\nFinalmente: ${tensSum} + ${onesSum} = ${answer}.\nLa respuesta es ${answer}. ¡Muy bien!`;
+      }
+    } else if (op === "-") {
+      if (!isCompound) {
+        return `Veo en la foto la tarea: ${expression}.\nEsto significa quitar ${num2} de ${num1}.\n${num1} - ${num2} = ${answer}.\nLa respuesta es ${answer}.`;
+      } else {
+        const ones1 = num1 % 10;
+        const ones2 = num2 % 10;
+        const tens1 = Math.floor(num1 / 10) * 10;
+        const tens2 = Math.floor(num2 / 10) * 10;
+        const onesResult = ones1 - ones2;
+        const tensResult = tens1 - tens2;
+        return `Veo en la foto la tarea: ${expression}.\nPrimero restamos las unidades: ${ones1} - ${ones2} = ${onesResult}.\nLuego restamos las decenas: ${tens1} - ${tens2} = ${tensResult}.\nFinalmente: ${tensResult} + ${onesResult} = ${answer}.\nLa respuesta es ${answer}.`;
+      }
+    } else if (op === "*") {
+      if (num2 <= 5) {
+        return `Veo en la foto la tarea: ${expression}.\nEsto significa ${num2} grupos de ${num1}.\nLa respuesta es ${answer}.`;
+      } else {
+        return `Veo en la foto la tarea: ${expression}.\n${num1} × ${num2} = ${answer}.\nLa respuesta es ${answer}.`;
+      }
+    } else if (op === "/") {
+      return `Veo en la foto la tarea: ${expression}.\nDividimos ${num1} en ${num2} partes iguales.\n${num1} ÷ ${num2} = ${answer}.\nLa respuesta es ${answer}.`;
+    }
+  } else {
+    // English Teacher Mode
+    if (op === "+") {
+      if (!isCompound) {
+        return `I can see the problem: ${expression}.\nLet's add the numbers together.\n${num1} + ${num2} = ${answer}.\nThe answer is ${answer}. Great job!`;
+      } else {
+        const ones1 = num1 % 10;
+        const ones2 = num2 % 10;
+        const tens1 = Math.floor(num1 / 10) * 10;
+        const tens2 = Math.floor(num2 / 10) * 10;
+        const onesSum = ones1 + ones2;
+        const tensSum = tens1 + tens2;
+        return `I can see the problem: ${expression}.\nFirst, add the ones: ${ones1} + ${ones2} = ${onesSum}.\nThen, add the tens: ${tens1} + ${tens2} = ${tensSum}.\nFinally: ${tensSum} + ${onesSum} = ${answer}.\nThe answer is ${answer}. Great job!`;
+      }
+    } else if (op === "-") {
+      if (!isCompound) {
+        return `I can see the problem: ${expression}.\nThis means take away ${num2} from ${num1}.\n${num1} - ${num2} = ${answer}.\nThe answer is ${answer}.`;
+      } else {
+        const ones1 = num1 % 10;
+        const ones2 = num2 % 10;
+        const tens1 = Math.floor(num1 / 10) * 10;
+        const tens2 = Math.floor(num2 / 10) * 10;
+        const onesResult = ones1 - ones2;
+        const tensResult = tens1 - tens2;
+        return `I can see the problem: ${expression}.\nFirst, subtract the ones: ${ones1} - ${ones2} = ${onesResult}.\nThen, subtract the tens: ${tens1} - ${tens2} = ${tensResult}.\nFinally: ${tensResult} + ${onesResult} = ${answer}.\nThe answer is ${answer}.`;
+      }
+    } else if (op === "*") {
+      if (num2 <= 5) {
+        return `I can see the problem: ${expression}.\nThis means ${num2} groups of ${num1}.\nThe answer is ${answer}.`;
+      } else {
+        return `I can see the problem: ${expression}.\n${num1} × ${num2} = ${answer}.\nThe answer is ${answer}.`;
+      }
+    } else if (op === "/") {
+      return `I can see the problem: ${expression}.\nWe divide ${num1} into ${num2} equal parts.\n${num1} ÷ ${num2} = ${answer}.\nThe answer is ${answer}.`;
+    }
+  }
+
+  return "";
+}
+
+/**
  * Generates localized response for simple math detection
+ * Uses AYA Teacher Mode: warm, step-by-step explanations for grades 1-4
  */
 function getLocalizedMathResponse(
   lang: "bg" | "es" | "en",
@@ -111,6 +256,16 @@ function getLocalizedMathResponse(
   }
 
   if (answer !== undefined) {
+    // Parse expression and generate teacher explanation
+    const operands = parseExpression(expression);
+    const explanation = generateTeacherExplanation(lang, expression, answer, operands);
+    
+    if (explanation) {
+      // Mark response as teacher-explained local math (internal marker)
+      return explanation;
+    }
+
+    // Fallback if parsing fails
     if (lang === "bg") {
       return `На снимката виждам: ${expression}\nОтговорът е: ${answer}`;
     }

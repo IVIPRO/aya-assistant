@@ -4,6 +4,8 @@ interface JuniorContext {
   aiCharacter?: string;
   childName?: string;
   language?: string;
+  lastMissionTopic?: string;
+  lastInteractionTime?: Date;
 }
 
 const CHARACTER_NAMES: Record<string, Record<string, string>> = {
@@ -118,38 +120,74 @@ function detectGreetingIntent(msg: string, lang: "bg" | "es" | "en"): boolean {
 
 /**
  * Generate a friendly chat response for greetings and casual conversation
+ * Uses memory to personalize greetings with child name and previous topics
  */
 function getFriendlyChatResponse(context: JuniorContext): string {
   const charKey = context.aiCharacter ?? "panda";
   const charEmoji = CHARACTER_EMOJIS[charKey] ?? "🐼";
   const childName = context.childName ?? "friend";
   const lang = getLang(context.language);
+  const lastTopic = context.lastMissionTopic;
 
+  // Memory-aware greeting options
   if (lang === "bg") {
-    return [
+    const options = [
+      // Basic greetings
       `${charEmoji} Здравей, ${childName}! Радвам се да те чуя! 😊 Как мога да ти помогна днес?`,
       `${charEmoji} Привет! Всичко ли е добре? Щом нещо те интересува, просто ми кажи! 🌟`,
       `${charEmoji} Здравей, ${childName}! Аз съм тук и готов да те помогна с което и да е — задачи, въпроси, все едно! ✨`,
       `${charEmoji} Здравo! Как дела днес? Кажи ми какво те занима! 🎉`,
-    ][Math.floor(Math.random() * 4)];
+    ];
+    
+    // If we have memory of last topic, add context-aware greeting
+    if (lastTopic) {
+      options.push(
+        `${charEmoji} Здравей отново, ${childName}! Последно работихме с ${lastTopic}. Искаш ли да продължим или предпочиташ нещо ново? 🚀`,
+        `${charEmoji} Здравей, ${childName}! Помниш ли ${lastTopic}? Можем да преговорим или да открием нещо ново! 🌟`
+      );
+    }
+    
+    return options[Math.floor(Math.random() * options.length)];
   }
   
   if (lang === "es") {
-    return [
+    const options = [
+      // Basic greetings
       `${charEmoji} ¡Hola, ${childName}! ¡Me alegra verte! 😊 ¿Cómo puedo ayudarte hoy?`,
       `${charEmoji} ¡Hola! ¿Qué tal el día? Si hay algo que necesites, ¡dímelo! 🌟`,
       `${charEmoji} ¡Hola, ${childName}! Estoy aquí para ayudarte con tareas, preguntas, ¡lo que sea! ✨`,
       `${charEmoji} ¡Hola! ¿Cómo estás? ¡Cuéntame qué te interesa! 🎉`,
-    ][Math.floor(Math.random() * 4)];
+    ];
+    
+    // If we have memory of last topic, add context-aware greeting
+    if (lastTopic) {
+      options.push(
+        `${charEmoji} ¡Hola, ${childName}! Último trabajamos con ${lastTopic}. ¿Quieres continuar o prefieres algo nuevo? 🚀`,
+        `${charEmoji} ¡Hola, ${childName}! ¿Recuerdas ${lastTopic}? ¡Podemos repasar o explorar algo nuevo! 🌟`
+      );
+    }
+    
+    return options[Math.floor(Math.random() * options.length)];
   }
   
   // English
-  return [
+  const options = [
+    // Basic greetings
     `${charEmoji} Hi, ${childName}! I'm so glad to see you! 😊 How can I help you today?`,
     `${charEmoji} Hello! How's your day going? If you need anything, just let me know! 🌟`,
     `${charEmoji} Hi, ${childName}! I'm here to help with homework, questions, anything! ✨`,
     `${charEmoji} Hello! How are you? Tell me what's on your mind! 🎉`,
-  ][Math.floor(Math.random() * 4)];
+  ];
+  
+  // If we have memory of last topic, add context-aware greeting
+  if (lastTopic) {
+    options.push(
+      `${charEmoji} Welcome back, ${childName}! We worked on ${lastTopic} last time. Want to continue or try something new? 🚀`,
+      `${charEmoji} Hi, ${childName}! Remember ${lastTopic}? We can review it or explore something new! 🌟`
+    );
+  }
+  
+  return options[Math.floor(Math.random() * options.length)];
 }
 
 function getMontessoriGuidingResponse(userMessage: string, context: JuniorContext): string {

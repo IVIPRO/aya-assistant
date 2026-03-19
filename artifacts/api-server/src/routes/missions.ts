@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db, missionsTable, childrenTable, progressTable, missionTasksTable, type BadgeRecord } from "@workspace/db";
+import { db, missionsTable, childrenTable, progressTable, missionTasksTable, memoriesTable, type BadgeRecord } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
 import { CompleteMissionParams, CompleteMissionBody } from "@workspace/api-zod";
 import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
@@ -109,6 +109,15 @@ router.post("/missions/:id/complete", requireAuth, async (req, res): Promise<voi
     .update(childrenTable)
     .set({ xp: newXp, stars: newStars })
     .where(eq(childrenTable.id, mission.childId));
+  
+  // ── AYA Child Memory: Store mission completion for personalized future interactions ──
+  await db.insert(memoriesTable).values({
+    userId,
+    childId: mission.childId,
+    type: "mission_complete",
+    content: `Completed: ${mission.title} (${mission.difficulty ?? "easy"} difficulty)`,
+    module: "junior",
+  });
 
   const completionMeta = CompleteMissionBody.safeParse(req.body ?? {});
   const meta = completionMeta.success ? completionMeta.data : {};

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db, chatMessagesTable, memoriesTable, childrenTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { SendChatMessageBody } from "@workspace/api-zod";
 import { requireAuth, getUser } from "../lib/auth";
 import { getAIResponse } from "../lib/aiResponses";
@@ -138,7 +138,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
     .values({ userId, childId: childId ?? null, module, role: "user", content: cleanContent })
     .returning();
 
-  let context: { grade?: number; country?: string; aiCharacter?: string; childName?: string; language?: string } = {};
+  let context: { grade?: number; country?: string; aiCharacter?: string; childName?: string; language?: string; lastMissionTopic?: string; lastInteractionTime?: Date } = {};
   if (module === "junior" && childId) {
     const { getFamilyIdFromDb } = await import("../lib/auth");
     const familyId = await getFamilyIdFromDb(userId);
@@ -148,12 +148,30 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
         .from(childrenTable)
         .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId)));
       if (childRecord) {
+        // Fetch latest memory for this child to include topic and interaction context
+        const [latestMemory] = await db
+          .select()
+          .from(memoriesTable)
+          .where(and(eq(memoriesTable.childId, childId), eq(memoriesTable.type, "mission_complete")))
+          .orderBy(desc(memoriesTable.createdAt))
+          .limit(1);
+        
+        // Parse mission topic from memory if available
+        let lastMissionTopic: string | undefined;
+        if (latestMemory && latestMemory.content) {
+          // Memory format: "Completed: {topic_name} ..."
+          const match = latestMemory.content.match(/Completed:\s*([^(]+)/);
+          lastMissionTopic = match ? match[1].trim() : undefined;
+        }
+        
         context = {
           grade: childRecord.grade,
           country: childRecord.country,
           aiCharacter: childRecord.aiCharacter ?? undefined,
           childName: childRecord.name,
           language: childRecord.language ?? undefined,
+          lastMissionTopic,
+          lastInteractionTime: latestMemory?.createdAt,
         };
       }
     }
@@ -243,6 +261,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
     .values({ userId, childId: childId ?? null, module, role: "assistant", content: aiContent })
     .returning();
 
+  // Store conversation memory with type "conversation_summary" for tracking interactions
   await db.insert(memoriesTable).values({
     userId,
     childId: childId ?? null,

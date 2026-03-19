@@ -36,10 +36,9 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
     utterance.pitch = options?.pitch ?? 1;
     utterance.volume = options?.volume ?? 1;
 
-    // Set language if provided
-    if (options?.lang) {
-      utterance.lang = options.lang;
-    }
+    // Set language - enforce it to ensure correct voice is used
+    // Default to en-US if not provided
+    utterance.lang = options?.lang ?? "en-US";
 
     utterance.onstart = () => {
       setIsSpeaking(true);

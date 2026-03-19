@@ -367,32 +367,42 @@ export function Chat({
     if (!homeworkFile || !homeworkPreview) return;
 
     try {
+      // CRITICAL: Capture file and preview NOW to prevent stale closure
+      const fileToSend = homeworkFile;
+      const previewToUse = homeworkPreview;
+      
+      // Generate unique image ID
+      const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Log before reading to confirm which file is being sent
+      console.log("[AYA_HOMEWORK] ===== FRONTEND IMAGE SEND FLOW =====");
+      console.log(`[AYA_HOMEWORK] image id: ${imageId}`);
+      console.log(`[AYA_HOMEWORK] file name: ${fileToSend.name}`);
+      console.log(`[AYA_HOMEWORK] file size: ${fileToSend.size} bytes`);
+      console.log(`[AYA_HOMEWORK] mime type: ${fileToSend.type || "image/jpeg"}`);
+      
       // Convert file to base64 for transmission to backend
       const reader = new FileReader();
       reader.onload = async () => {
         try {
           const base64Result = reader.result as string;
           const base64Data = base64Result.split(",")[1] ?? "";
-          const mimeType = homeworkFile.type || "image/jpeg";
+          const mimeType = fileToSend.type || "image/jpeg";
           
-          // Generate unique image ID
-          const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          // Generate file fingerprint from base64 content
+          // Use first 50 chars of base64 + total length as lightweight fingerprint
+          const fingerprint = base64Data.substring(0, 50).substring(0, 10) + "_" + base64Data.length;
           
-          // Debug logging for image upload flow
-          console.log("[AYA_HOMEWORK] ===== FRONTEND IMAGE SEND FLOW =====");
-          console.log(`[AYA_HOMEWORK] image id: ${imageId}`);
-          console.log(`[AYA_HOMEWORK] file name: ${homeworkFile.name}`);
-          console.log(`[AYA_HOMEWORK] file size: ${homeworkFile.size} bytes`);
-          console.log(`[AYA_HOMEWORK] mime type: ${mimeType}`);
           console.log(`[AYA_HOMEWORK] base64 size: ${base64Data.length}`);
+          console.log(`[AYA_HOMEWORK] file fingerprint: ${fingerprint}`);
           
           // Store the preview URL for display
-          setImagePreviewsMap(prev => ({ ...prev, [imageId]: homeworkPreview }));
+          setImagePreviewsMap(prev => ({ ...prev, [imageId]: previewToUse }));
 
           // Send message with image data as base64 (backend will analyze it with vision API)
           // Format: [IMAGE_DATA:base64Data:mimeType:imageId]\nCaption
           const imageDataMarker = `[IMAGE_DATA:${base64Data}:${mimeType}:${imageId}]`;
-          console.log(`[AYA_HOMEWORK] sending homework image request...`);
+          console.log(`[AYA_HOMEWORK] ${imageId} sending homework image request...`);
           sendMutation.mutate(
             { data: { module, content: `${imageDataMarker}\n${hwLabels.uploadedImageCaption}`, childId: activeChildId } }
           );
@@ -410,7 +420,7 @@ export function Chat({
         console.log("[AYA_HOMEWORK] file read error");
         toast({ title: hwLabels.sendError, variant: "destructive" });
       };
-      reader.readAsDataURL(homeworkFile);
+      reader.readAsDataURL(fileToSend);
     } catch (error) {
       console.log("[AYA_HOMEWORK] homework send exception:", error);
       toast({ title: hwLabels.sendError, variant: "destructive" });

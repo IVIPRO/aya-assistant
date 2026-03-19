@@ -181,7 +181,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
       if (simpleMathResult) {
         // Simple math was detected and solved
         console.log(`[AYA_HOMEWORK] ${requestId} STAGE_1_SUCCESS`);
-        console.log(`[AYA_HOMEWORK] ${requestId} RESPONSE: ${simpleMathResult}`);
+        console.log(`[AYA_HOMEWORK] ${requestId} RESPONSE: ${simpleMathResult.substring(0, 100)}...`);
         aiContent = simpleMathResult;
       } else {
         // Not simple math - use full vision analysis with step-by-step tutoring

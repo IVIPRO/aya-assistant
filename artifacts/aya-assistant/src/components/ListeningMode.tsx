@@ -12,23 +12,33 @@ interface ListeningModeProps {
 }
 
 /**
- * Remove emojis and special characters from text for clean speech synthesis.
- * Keeps the actual text but removes all emoji characters.
+ * Remove emojis, labels, and special characters from text for clean speech synthesis.
+ * Extracts only the actual educational message text, not UI labels.
  */
 function cleanTextForSpeech(text: string): string {
   if (!text) return "";
   
+  let cleaned = text;
+  
+  // Remove common UI labels/markers that shouldn't be spoken
+  cleaned = cleaned
+    .replace(/\bAYA\s+\d+\b/gi, "") // Remove "AYA 2", "AYA 3", etc.
+    .replace(/\bAYA\s+(Panda|Robot|Fox|Owl)\b/gi, "") // Remove "AYA Panda", etc.
+    .replace(/^\s*\[.*?\]\s*/g, "") // Remove labels like [LABEL]
+    .replace(/^(read|listen|say|speak):\s*/gi, ""); // Remove "read:", "listen:", etc.
+  
   // Remove emojis and other non-text characters
-  // This regex matches emoji ranges and special characters
-  return text
+  cleaned = cleaned
     .replace(/[\u{1F300}-\u{1F9FF}]/gu, "") // Emoji ranges
     .replace(/[\u{2600}-\u{27BF}]/gu, "") // Miscellaneous symbols
     .replace(/[\u{1F900}-\u{1F9FF}]/gu, "") // Supplemental symbols and pictographs
     .replace(/[\u{2300}-\u{23FF}]/gu, "") // Miscellaneous technical
-    .replace(/[\u{2000}-\u{206F}]/gu, "") // General punctuation
+    .replace(/[\u{2000}-\u{206F}]/gu, "") // General punctuation (but keep some)
     .replace(/[^\p{L}\p{N}\s.,!?;:—–-]/gu, "") // Keep only letters, numbers, and basic punctuation
     .replace(/\s+/g, " ") // Collapse multiple spaces
     .trim();
+  
+  return cleaned;
 }
 
 const LISTENING_LABELS: Record<"en" | "bg" | "es", {
@@ -115,6 +125,9 @@ export function ListeningMode({
       console.warn("[LISTENING_MODE] Text cleaned to empty, check input");
       return;
     }
+    
+    // Debug: Log the final text that will be spoken
+    console.log("[LISTENING_TEXT_FINAL] " + cleanedText);
     
     speak(cleanedText, {
       lang: LANG_MAP[lang],

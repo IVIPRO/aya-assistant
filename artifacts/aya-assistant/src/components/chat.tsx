@@ -287,7 +287,16 @@ export function Chat({
     // Find the last AYA (assistant) message
     for (let i = messages.length - 1; i >= 0; i--) {
       if (messages[i].role === "assistant") {
-        onAyaMessageReceived(messages[i].content);
+        const rawContent = messages[i].content;
+        
+        // Extract clean text: remove image markers and clean up
+        const cleanedContent = rawContent
+          .replace(/\[IMAGE:[^\]]+\]\n?/g, "") // Remove image markers
+          .trim();
+        
+        if (cleanedContent) {
+          onAyaMessageReceived(cleanedContent);
+        }
         break;
       }
     }

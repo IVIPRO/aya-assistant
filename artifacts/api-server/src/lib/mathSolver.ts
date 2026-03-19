@@ -11,6 +11,18 @@ interface SimpleMathResult {
   error?: string;
 }
 
+interface SimpleMathProblem {
+  lineNumber: number;
+  expression: string;
+  answer?: number;
+  error?: string;
+}
+
+interface SimpleMathMultiResult {
+  mode: "single" | "multi" | "none";
+  problems?: SimpleMathProblem[];
+}
+
 /**
  * Detects simple arithmetic patterns (e.g., "5 + 7", "23+14", "9 - 4")
  */
@@ -279,6 +291,112 @@ function getLocalizedMathResponse(
 }
 
 /**
+ * Detects and solves multiple math expressions from extracted text
+ * Returns structured list of problems with answers
+ */
+function detectMultipleSimpleMathProblems(extractedText: string): SimpleMathMultiResult {
+  const lines = extractedText.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+  
+  // Try to detect math on each line
+  const problems: SimpleMathProblem[] = [];
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const mathResult = detectSimpleMathExpression(line);
+    
+    if (mathResult.detected && mathResult.expression && mathResult.answer !== undefined) {
+      problems.push({
+        lineNumber: i + 1,
+        expression: mathResult.expression,
+        answer: mathResult.answer,
+        error: mathResult.error,
+      });
+    }
+  }
+  
+  // Determine mode based on number of problems detected
+  if (problems.length === 0) {
+    return { mode: "none" };
+  } else if (problems.length === 1) {
+    return { mode: "single", problems };
+  } else {
+    return { mode: "multi", problems };
+  }
+}
+
+/**
+ * Generates multi-problem teacher response
+ * Lists all problems and encourages thinking first
+ */
+function generateMultiProblemResponse(
+  lang: "bg" | "es" | "en",
+  problems: SimpleMathProblem[]
+): string {
+  if (problems.length === 0) return "";
+
+  const labels = {
+    bg: {
+      intro: "На снимката виждам няколко задачи:",
+      think: "Хайде да помислим заедно.",
+      question: "Как мислиш, колко е?",
+      answers: "Ето и отговорите:",
+    },
+    es: {
+      intro: "Veo varios ejercicios en la imagen:",
+      think: "Vamos a pensarlo juntos.",
+      question: "¿Cuál crees que es la respuesta?",
+      answers: "Aquí están las respuestas:",
+    },
+    en: {
+      intro: "I can see several problems in the image:",
+      think: "Let's think together.",
+      question: "What do you think the answer is?",
+      answers: "Here are the answers:",
+    },
+  };
+
+  const lbl = labels[lang];
+  
+  // Part 1: List all problems and encourage thinking
+  let response = lbl.intro + "\n\n";
+  
+  for (let i = 0; i < problems.length; i++) {
+    const problem = problems[i];
+    response += `${i + 1}. ${problem.expression}\n`;
+  }
+  
+  response += "\n" + lbl.think + "\n\n";
+  
+  for (let i = 0; i < problems.length; i++) {
+    const problem = problems[i];
+    response += `${i + 1}) ${problem.expression}\n`;
+    response += lbl.question + "\n\n";
+  }
+  
+  // Part 2: Provide answers
+  response += lbl.answers + "\n\n";
+  
+  for (let i = 0; i < problems.length; i++) {
+    const problem = problems[i];
+    response += `${i + 1}) ${problem.expression} = ${problem.answer}\n`;
+  }
+  
+  return response;
+}
+
+/**
+ * Generates localized "no clear problems" message
+ */
+function getNoClearProblemsMessage(lang: "bg" | "es" | "en"): string {
+  const msgs = {
+    bg: "Не успях да открия ясни математически задачи на снимката.",
+    es: "No pude detectar ejercicios matemáticos claros en la imagen.",
+    en: "I couldn't detect clear math problems in the image.",
+  };
+  return msgs[lang];
+}
+
+/**
  * Generates localized "unclear image" message
  */
 function getUnclearImageMessage(lang: "bg" | "es" | "en"): string {
@@ -351,20 +469,37 @@ async function trySimpleMathSolve(
       return unclearMsg;
     }
 
-    // Try to detect and solve simple math
-    const mathResult = detectSimpleMathExpression(extractedText, reqId);
+    // Try to detect multiple math problems from the extracted text
+    console.log(`[AYA_HOMEWORK] ${reqId} attempting multi-problem detection...`);
+    const multiResult = detectMultipleSimpleMathProblems(extractedText);
+    
+    console.log(`[AYA_HOMEWORK] ${reqId} detection mode: ${multiResult.mode}`);
+    console.log(`[AYA_HOMEWORK] ${reqId} problems found: ${multiResult.problems?.length ?? 0}`);
 
-    if (mathResult.detected && mathResult.expression) {
-      const response = getLocalizedMathResponse(lang, mathResult.expression, mathResult.answer, mathResult.error);
-      if (response) {
-        console.log(`[AYA_HOMEWORK] ${reqId} STAGE_1_SUCCESS`);
-        console.log(`[AYA_HOMEWORK] ${reqId} solver result: ${mathResult.answer}`);
-        return response;
-      }
+    if (multiResult.mode === "none") {
+      // No valid math problems detected - return null to use full vision analysis
+      console.log(`[AYA_HOMEWORK] ${reqId} no simple math detected - falling back to full vision analysis`);
+      return null;
+    } else if (multiResult.mode === "single" && multiResult.problems && multiResult.problems.length === 1) {
+      // Single problem detected - use single-problem teacher mode
+      const problem = multiResult.problems[0];
+      console.log(`[AYA_HOMEWORK] ${reqId} STAGE_1_SUCCESS (single problem)`);
+      console.log(`[AYA_HOMEWORK] ${reqId} expression: ${problem.expression}, answer: ${problem.answer}`);
+      const response = getLocalizedMathResponse(lang, problem.expression, problem.answer, problem.error);
+      return response;
+    } else if (multiResult.mode === "multi" && multiResult.problems && multiResult.problems.length > 1) {
+      // Multiple problems detected - use multi-problem teacher mode
+      console.log(`[AYA_HOMEWORK] ${reqId} STAGE_1_SUCCESS (multi-problem mode)`);
+      console.log(`[AYA_HOMEWORK] ${reqId} total problems: ${multiResult.problems.length}`);
+      multiResult.problems.forEach((p, i) => {
+        console.log(`[AYA_HOMEWORK] ${reqId} problem ${i + 1}: ${p.expression} = ${p.answer}`);
+      });
+      const response = generateMultiProblemResponse(lang, multiResult.problems);
+      return response;
     }
 
-    // Not simple math detected - return null to use full vision analysis
-    console.log(`[AYA_HOMEWORK] ${reqId} not simple math - falling back to full vision analysis`);
+    // Fallback - should not reach here
+    console.log(`[AYA_HOMEWORK] ${reqId} unexpected state in multi-problem detection`);
     return null;
   } catch (error) {
     // If extraction fails, return null to fall back to full vision analysis
@@ -374,5 +509,13 @@ async function trySimpleMathSolve(
   }
 }
 
-export type { SimpleMathResult };
-export { detectSimpleMathExpression, getLocalizedMathResponse, getUnclearImageMessage, trySimpleMathSolve };
+export type { SimpleMathResult, SimpleMathProblem, SimpleMathMultiResult };
+export { 
+  detectSimpleMathExpression, 
+  getLocalizedMathResponse, 
+  getUnclearImageMessage,
+  getNoClearProblemsMessage,
+  detectMultipleSimpleMathProblems,
+  generateMultiProblemResponse,
+  trySimpleMathSolve 
+};

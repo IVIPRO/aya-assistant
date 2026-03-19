@@ -1,0 +1,148 @@
+Implement AYA Homework Multi-Solver for the Junior / Начален етап chat.
+
+Goal:
+If a child uploads one photo containing multiple simple math problems, AYA should detect all visible problems and handle them one by one in the same response.
+
+Important product behavior:
+AYA should behave like a teacher, not just a calculator.
+For each detected problem:
+1. identify it
+2. ask the child to think first
+3. then provide the answer / hint in a child-friendly way
+
+This is still the lightweight version.
+Do NOT use full AI reasoning for simple arithmetic.
+Use local extraction + local math solving.
+
+Supported simple task types:
+- addition
+- subtraction
+- multiplication
+- division
+
+Examples of image contents:
+5 + 7 =
+9 - 4 =
+3 x 6 =
+
+Desired behavior in Bulgarian:
+"На снимката виждам няколко задачи:
+1. 5 + 7
+2. 9 - 4
+3. 3 × 6
+
+Хайде да помислим заедно.
+
+1) 5 + 7
+Как мислиш, колко е?
+
+2) 9 - 4
+Какъв според теб е отговорът?
+
+3) 3 × 6
+Искаш ли първо да опиташ сама?"
+
+Optional follow-up if direct answer mode is needed:
+"Ето и отговорите:
+1) 5 + 7 = 12
+2) 9 - 4 = 5
+3) 3 × 6 = 18"
+
+Requirements:
+
+1. Detect multiple math lines from one uploaded image.
+- support one problem per line
+- support OCR variants with spaces or no spaces
+- ignore empty lines
+- ignore duplicate extracted fragments
+
+2. Parse all valid simple arithmetic expressions from the extracted text.
+
+Examples to support:
+- 5 + 7 =
+- 9-4
+- 3 x 6
+- 12 / 4
+
+3. Solve each valid expression locally in code.
+Do not use unsafe eval.
+
+4. Return a structured result list.
+For each detected problem include:
+- expression text
+- answer
+- position/order in image
+
+5. Chat response behavior:
+If more than one problem is detected:
+- clearly say there are multiple tasks
+- list them in order
+- use child-friendly teacher style
+- encourage the child to think first
+
+6. Localization:
+Support Bulgarian first, while preserving English and Spanish structure.
+
+Bulgarian labels:
+- "На снимката виждам няколко задачи:"
+- "Хайде да помислим заедно."
+- "Как мислиш, колко е?"
+- "Ето и отговорите:"
+- "Не успях да открия задача на този ред."
+
+English labels:
+- "I can see several problems in the image:"
+- "Let's think together."
+- "What do you think the answer is?"
+- "Here are the answers:"
+- "I could not detect a problem on this line."
+
+Spanish labels:
+- "Veo varios ejercicios en la imagen:"
+- "Vamos a pensarlo juntos."
+- "¿Cuál crees que es la respuesta?"
+- "Aquí están las respuestas:"
+- "No pude detectar un ejercicio en esta línea."
+
+7. UI / chat:
+- preserve current uploaded image bubble
+- append one assistant response covering all detected tasks
+- update immediately in the open chat
+- no page reload required
+
+8. Error handling:
+If no valid math expressions are found:
+Bulgarian:
+- "Не успях да открия ясни математически задачи на снимката."
+English:
+- "I couldn't detect clear math problems in the image."
+Spanish:
+- "No pude detectar ejercicios matemáticos claros en la imagen."
+
+9. Keep current working features:
+- single-problem image solving
+- live chat update
+- per-image independent processing
+- no backend storage
+- no autonomous agent mode
+
+10. Internal mode:
+Mark this response type as:
+- homework_multi_solver_local
+
+11. Verification cases:
+Test with one image containing:
+- 5 + 7 =
+- 9 - 4 =
+- 3 x 6 =
+
+Expected answers:
+- 12
+- 5
+- 18
+
+Important:
+This is still the low-cost local math layer.
+Do NOT add full AI explanation for each problem yet.
+Do NOT redesign the app.
+Do NOT change routing.

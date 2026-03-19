@@ -14,6 +14,8 @@ interface SubjectContext {
   topicLabel?: string | null;
 }
 
+type TeacherStateSignal = "idle" | "talking" | "happy" | "thinking" | "encouraging";
+
 interface ChatProps {
   module: ListChatMessagesModule;
   themeColor: "primary" | "junior" | "student" | "psychology";
@@ -21,6 +23,7 @@ interface ChatProps {
   character?: string | null;
   suggestedPrompts?: string[];
   subjectContext?: SubjectContext | null;
+  onTeacherStateChange?: (state: TeacherStateSignal, message?: string) => void;
 }
 
 const CHARACTER_EMOJIS: Record<string, string> = {
@@ -156,6 +159,9 @@ function fileToBase64(file: File): Promise<string> {
   });
 }
 
+/* Praise keywords used to detect a happy response */
+const PRAISE_RX = /\b(great|well done|correct|perfect|excellent|amazing|brilliant|fantastic|wonderful|superb|bravo|congratul|you got it|exactly right|absolutely right)\b|браво|отлично|перфектно|точно|вярно|правилно|страхотно|чудесно|поздравя|много добре|¡(muy bien|excelente|perfecto|correcto|fantástico|brillante|bravo)/i;
+
 export function Chat({
   module,
   themeColor,
@@ -163,6 +169,7 @@ export function Chat({
   character,
   suggestedPrompts,
   subjectContext,
+  onTeacherStateChange,
 }: ChatProps) {
   const { activeChildId } = useAuth();
   const { t, lang } = useI18n();
@@ -215,6 +222,47 @@ export function Chat({
   useEffect(() => {
     scrollToBottom();
   }, [messages, sendMutation.isPending, analyzingHomework]);
+
+  /* ── Teacher state signals ─────────────────────────────────────────── */
+  const prevPendingRef = useRef(false);
+
+  useEffect(() => {
+    if (!onTeacherStateChange) return;
+    if (sendMutation.isPending) {
+      onTeacherStateChange("talking");
+    } else if (prevPendingRef.current && !sendMutation.isPending) {
+      // AI just finished responding — inspect last message
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg?.role === "assistant") {
+        const isPraise = PRAISE_RX.test(lastMsg.content);
+        onTeacherStateChange(isPraise ? "happy" : "encouraging");
+      } else {
+        onTeacherStateChange("idle");
+      }
+    }
+    prevPendingRef.current = sendMutation.isPending;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sendMutation.isPending]);
+
+  useEffect(() => {
+    if (!onTeacherStateChange) return;
+    if (analyzingHomework) onTeacherStateChange("thinking");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [analyzingHomework]);
+
+  // When waiting with empty input → thinking after a pause
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!onTeacherStateChange || sendMutation.isPending) return;
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    if (input === "") {
+      idleTimerRef.current = setTimeout(() => {
+        onTeacherStateChange("thinking");
+      }, 12000);
+    }
+    return () => { if (idleTimerRef.current) clearTimeout(idleTimerRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [input, sendMutation.isPending]);
 
   const doSend = (content: string, onError?: () => void) => {
     if (!content.trim() || sendMutation.isPending) return;

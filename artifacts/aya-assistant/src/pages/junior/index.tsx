@@ -120,6 +120,8 @@ const JUNIOR_LABELS: Record<JuniorLang, {
   voiceListenDesc: string;
   voiceVideoTitle: string;
   voiceVideoDesc: string;
+  lessons: string;
+  freeChatLabel: string;
 }> = {
   en: {
     welcomeBack: "Welcome back,",
@@ -168,6 +170,8 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     voiceListenDesc: "AYA reads lessons, stories, and missions aloud for you.",
     voiceVideoTitle: "Video Teacher",
     voiceVideoDesc: "Meet AYA's animated video teacher for interactive face-to-face lessons.",
+    lessons: "Lessons",
+    freeChatLabel: "Free chat",
   },
   bg: {
     welcomeBack: "Добре дошла,",
@@ -216,6 +220,8 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     voiceListenDesc: "AYA чете уроци, истории и мисии на глас за теб.",
     voiceVideoTitle: "Видео учител",
     voiceVideoDesc: "Запознай се с анимирания видео учител на AYA за интерактивни уроци лице в лице.",
+    lessons: "Уроци",
+    freeChatLabel: "Свободен разговор",
   },
   es: {
     welcomeBack: "Bienvenida,",
@@ -264,6 +270,8 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     voiceListenDesc: "AYA lee lecciones, historias y misiones en voz alta para ti.",
     voiceVideoTitle: "Maestro en video",
     voiceVideoDesc: "Conoce al maestro de video animado de AYA para lecciones interactivas cara a cara.",
+    lessons: "Lecciones",
+    freeChatLabel: "Chat libre",
   },
 };
 
@@ -390,11 +398,12 @@ function CharacterPicker({ child, onSelect, onClose }: { child: Child; onSelect:
   );
 }
 
-function WelcomeScreen({ child, character, onEnterWorld, onChat, onChangeCompanion }: {
+function WelcomeScreen({ child, character, onEnterWorld, onChat, onLessons, onChangeCompanion }: {
   child: Child;
   character: typeof CHARACTERS[0] | undefined;
   onEnterWorld: () => void;
   onChat: () => void;
+  onLessons: () => void;
   onChangeCompanion: () => void;
 }) {
   const lang = getLang(child.language);
@@ -493,13 +502,21 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onChangeCompani
               <ChevronRight className="w-5 h-5" />
             </motion.button>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <motion.button
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                 onClick={onChat}
                 className="py-3 bg-white border-2 border-junior/40 text-junior-foreground rounded-2xl font-bold text-sm shadow-md hover:bg-junior/5 transition-all flex items-center justify-center gap-2">
                 <MessageCircle className="w-5 h-5" />
                 {lbl.chatWith(charFirstName)}
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                onClick={onLessons}
+                className="py-3 bg-white border-2 border-yellow-200 text-yellow-700 rounded-2xl font-bold text-sm shadow-md hover:bg-yellow-50 transition-all flex items-center justify-center gap-2">
+                <BookOpen className="w-5 h-5" />
+                {lbl.lessons}
               </motion.button>
 
               <motion.button
@@ -755,7 +772,8 @@ export function Junior() {
               child={activeChild}
               character={currentChar}
               onEnterWorld={() => setView("map")}
-              onChat={() => { setSelectedSubject(null); setSelectedTopic(null); setView("subjects"); }}
+              onChat={() => { setSelectedSubject(null); setSelectedTopic(null); setView("chat"); }}
+              onLessons={() => setView("subjects")}
               onChangeCompanion={() => setShowCharPicker(true)}
             />
             <div className="max-w-2xl mx-auto">
@@ -878,14 +896,15 @@ export function Junior() {
         ) : (
           <motion.div key="chat" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             <div className="flex items-center justify-between mb-6">
-              <button onClick={() => setView("subjects")}
+              <button onClick={() => setView("welcome")}
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors">
                 <ArrowLeft className="w-4 h-4" /> {lbl.back}
               </button>
               <div className="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-xl border border-white/50">
                 <span className="text-lg">{currentChar?.emoji ?? "🌟"}</span>
                 <span className="font-bold text-sm text-junior-foreground">{currentChar?.name ?? "AYA"}</span>
-                {currentChar && <span className="text-xs text-muted-foreground">{lbl.toneStyle(CHAR_LABELS[currentChar.id]?.[juniorLang]?.tone ?? currentChar.tone)}</span>}
+                {!selectedSubject && <span className="text-xs text-muted-foreground">{lbl.freeChatLabel}</span>}
+                {selectedSubject && currentChar && <span className="text-xs text-muted-foreground">{lbl.toneStyle(CHAR_LABELS[currentChar.id]?.[juniorLang]?.tone ?? currentChar.tone)}</span>}
               </div>
               <button onClick={() => setView("map")}
                 className="flex items-center gap-1.5 px-3 py-2 bg-white/60 rounded-xl border border-white/50 hover:bg-yellow-50 transition-colors text-sm font-bold text-junior-foreground">

@@ -7,7 +7,7 @@ import { Link } from "wouter";
 import { Star, Trophy, Sparkles, Map, MessageCircle, Lock, CheckCircle2, Mic, Volume2, Video, ChevronRight, ArrowLeft, BookOpen } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useListChildren, useUpdateChild, useListMissions, getListChildrenQueryKey, getListMissionsQueryKey } from "@workspace/api-client-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -584,8 +584,34 @@ export function Junior() {
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
 
+  /* ── Teacher state machine ─────────────────────────────────────────── */
+  const [teacherState, setTeacherState]   = useState<TeacherState>("idle");
+  const [teacherMsg,   setTeacherMsg]     = useState<string | undefined>(undefined);
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleTeacherStateChange = useCallback((state: TeacherState, message?: string) => {
+    setTeacherState(state);
+    setTeacherMsg(message);
+    // Auto-return to idle after happy/encouraging/thinking
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    if (state === "happy" || state === "encouraging") {
+      resetTimerRef.current = setTimeout(() => {
+        setTeacherState("idle");
+        setTeacherMsg(undefined);
+      }, 6000);
+    }
+  }, []);
+
   const { data: children = [], isLoading: childrenLoading, refetch } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
   const updateChild = useUpdateChild();
+
+  /* ── Sync view changes to teacher state ─────────────────────────── */
+  useEffect(() => {
+    if (view === "welcome")  handleTeacherStateChange("idle");
+    if (view === "subjects") handleTeacherStateChange("thinking");
+    if (view === "map")      handleTeacherStateChange("encouraging");
+    if (view === "chat")     handleTeacherStateChange("talking");
+  }, [view, handleTeacherStateChange]);
 
   /* ── Auto-select first child when no active child is set ────────── */
   useEffect(() => {
@@ -833,6 +859,7 @@ export function Junior() {
               greeting={greeting}
               suggestedPrompts={getJuniorPrompts(activeChild?.language)}
               subjectContext={subjectContext}
+              onTeacherStateChange={handleTeacherStateChange}
             />
 
             <VoiceReadySection lbl={lbl} />
@@ -843,14 +870,10 @@ export function Junior() {
       {activeChild && (
         <AnimatedTeacher
           characterEmoji={currentChar?.emoji ?? "🐼"}
-          characterName={currentChar?.name ?? "AYA"}
+          characterName={currentChar?.name ?? "AYA Panda"}
           lang={juniorLang}
-          state={
-            (view === "chat"       ? "talking"     :
-             view === "subjects"   ? "thinking"    :
-             view === "map"        ? "encouraging" :
-             "idle") as TeacherState
-          }
+          state={teacherState}
+          message={teacherMsg}
         />
       )}
     </Layout>

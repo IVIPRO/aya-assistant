@@ -1,0 +1,118 @@
+Implement an animated teacher for the Junior / Начален етап module.
+
+Feature name:
+AYA Panda Animated Teacher
+
+Goal:
+Add a friendly animated teaching companion that appears across the Junior learning experience and reacts to learning events.
+
+Create:
+- a reusable AnimatedTeacher component
+- localized speech bubble messages
+- simple animation states
+- floating helper UI without breaking existing layout
+
+Technical requirements:
+
+1. Create component:
+src/components/AnimatedTeacher.tsx
+
+2. Use lightweight animation only:
+- CSS animations and/or Framer Motion
+- must work well on desktop and mobile
+- keep performance light
+
+3. Supported animation states:
+- idle
+- talking
+- happy
+- thinking
+- encouraging
+
+Behavior:
+- idle: gentle breathing + blinking
+- talking: slight bounce while speech bubble is visible
+- happy: tiny jump + sparkle effect
+- thinking: subtle tilt / thinking pose
+- encouraging: gentle nod
+
+4. Character:
+Use AYA Panda as the default animated teacher for Junior / Начален етап.
+
+5. Placement:
+Show AnimatedTeacher in:
+- Junior dashboard / welcome card
+- subject lesson pages
+- mission pages
+- Ask AYA chat screen
+- Homework Vision support area
+
+Default position:
+- bottom right floating assistant
+- should not block main buttons or inputs
+- responsive on mobile and desktop
+
+6. Speech bubble:
+Add a speech bubble above the teacher.
+
+Localized example messages:
+
+Bulgarian:
+- "Хайде да решим задачата заедно!"
+- "Браво! Отлична работа!"
+- "Помисли още малко."
+- "Ти можеш!"
+- "Нека опитаме стъпка по стъпка."
+
+English:
+- "Let's solve this together!"
+- "Great job!"
+- "Think a little more."
+- "You can do it!"
+- "Let's go step by step."
+
+Spanish:
+- "¡Vamos a resolverlo juntos!"
+- "¡Muy bien!"
+- "Piensa un poco más."
+- "¡Tú puedes!"
+- "Vamos paso a paso."
+
+Use the existing localization system / translations dictionary.
+
+7. State triggers:
+AnimatedTeacher state should react to learning events:
+
+- on page load -> idle
+- when a lesson opens -> talking
+- when the child gets a correct answer -> happy
+- when the child gets a wrong answer -> encouraging
+- when waiting for child input -> thinking
+
+8. Add optional props:
+AnimatedTeacher props:
+- mood / state
+- message
+- visible
+- compact
+- language
+
+9. Keep brand names unchanged:
+AYA
+AYA Panda
+Montessori
+
+10. Do NOT redesign the existing app.
+Do NOT change routes.
+Do NOT change backend logic.
+Only add the animated teacher helper layer and connect it to current Junior flows.
+
+11. Make the initial integration visible immediately in:
+- Junior welcome screen
+- one lesson / mission page
+- Ask AYA screen
+
+12. After implementation, ensure:
+- Bulgarian child sees Bulgarian bubble text
+- English child sees English bubble text
+- Spanish child sees Spanish bubble text

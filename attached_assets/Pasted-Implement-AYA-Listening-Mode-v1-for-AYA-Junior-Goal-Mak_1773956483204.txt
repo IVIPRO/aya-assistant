@@ -1,0 +1,172 @@
+Implement **AYA Listening Mode v1** for AYA Junior / Начален етап.
+
+Goal:
+Make the existing **Режим на слушане** card functional as a lightweight MVP.
+
+Current status:
+The "Режим на слушане" card is shown as "Очаквайте".
+We now want to make it work.
+
+Important constraints:
+- Do NOT redesign UI
+- Do NOT use Autonomous Agent
+- Do NOT build a heavy audio architecture
+- Keep it lightweight and MVP-only
+- Reuse existing mission/chat content where possible
+- Do NOT break voice input, missions, XP, or chat
+
+====================================
+1. Feature Goal
+
+When the child opens "Режим на слушане":
+- AYA can read aloud short educational content
+- This includes:
+  - mission questions
+  - word problems
+  - short tutor prompts
+  - short lesson/task text already visible on screen
+
+This is text-to-speech output only.
+This is NOT speech-to-text input.
+
+====================================
+2. Scope
+
+Apply only to:
+AYA Junior / Начален етап
+
+Activate only:
+- "Режим на слушане"
+
+Do not implement yet:
+- Видео учител
+
+====================================
+3. Required Behavior
+
+Listening flow:
+1. Child opens "Режим на слушане"
+2. taps a play/listen button
+3. AYA reads the current visible educational text aloud
+4. child can pause / stop
+5. playback state is visible
+
+Examples of content to read:
+- mission prompt
+- math problem
+- word problem
+- short tutor message
+- short lesson instruction
+
+Example Bulgarian:
+"Мария има 5 ябълки и получава още 3. Колко ябълки има сега?"
+
+====================================
+4. Technical Requirements
+
+Use a lightweight browser/device text-to-speech approach if available.
+
+Preferred MVP approach:
+- browser speech synthesis / Web Speech API if supported
+- fallback message if speech synthesis is unavailable
+
+Do NOT add heavy backend audio generation.
+
+====================================
+5. UI Requirements
+
+Reuse the existing card / chat / mission UI.
+Do not redesign layout.
+
+Need:
+- working listen/play action
+- speaking state
+- pause/stop action if practical
+- clear fallback if device does not support speech synthesis
+
+Possible Bulgarian labels:
+- "Слушай"
+- "Спри"
+- "Пауза"
+- "AYA чете..."
+- "Режимът на слушане не се поддържа на това устройство."
+
+English:
+- "Listen"
+- "Stop"
+- "Pause"
+- "AYA is reading..."
+- "Listening mode is not supported on this device."
+
+Spanish:
+- "Escuchar"
+- "Detener"
+- "Pausa"
+- "AYA está leyendo..."
+- "El modo de escucha no es compatible con este dispositivo."
+
+====================================
+6. Content Selection Rules
+
+AYA should read the most relevant visible learning content.
+
+Priority:
+1. active mission question
+2. active word problem
+3. active tutor instruction
+4. current lesson/task text in the visible panel
+
+Do not read the whole page UI.
+Read only the main learning content.
+
+====================================
+7. Error Handling
+
+If speech synthesis is unavailable:
+show a friendly message and do not crash.
+
+If there is no readable content:
+show:
+Bulgarian: "Няма текст за прочитане в момента."
+English: "There is no text to read right now."
+Spanish: "No hay texto para leer ahora mismo."
+
+====================================
+8. Keep Existing Systems Intact
+
+Do not break:
+- homework from image
+- mission generator
+- word problem missions
+- voice input / Говори с AYA
+- chat
+- mission play
+- localization
+- XP system
+
+====================================
+9. Verification
+
+Test 1:
+Open a word problem mission
+Tap listening mode
+AYA reads the displayed problem aloud
+
+Test 2:
+Open a normal tutor/chat educational message
+Tap listening mode
+AYA reads the visible educational content aloud
+
+Expected result:
+The "Режим на слушане" card is no longer passive and works as a text-to-speech feature.
+
+====================================
+10. Scope Limit
+
+This is MVP listening mode only.
+Do NOT implement:
+- speech-to-text
+- animated avatar lipsync
+- video teacher
+- backend audio files
+- saved recordings

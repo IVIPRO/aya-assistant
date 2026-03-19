@@ -3,6 +3,7 @@ import { Chat } from "@/components/chat";
 import { SubjectPanel } from "./subjects";
 import { DailyPlanCard } from "@/components/DailyPlanCard";
 import { AnimatedTeacher } from "@/components/AnimatedTeacher";
+import { ListeningMode } from "@/components/ListeningMode";
 import type { TeacherState } from "@/components/AnimatedTeacher";
 import { Link } from "wouter";
 import { Star, Trophy, Sparkles, Map, MessageCircle, Lock, CheckCircle2, Mic, Volume2, Video, ChevronRight, ArrowLeft, BookOpen } from "lucide-react";
@@ -540,7 +541,13 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onLessons, onCh
   );
 }
 
-function VoiceReadySection({ lbl }: { lbl: typeof JUNIOR_LABELS["en"] }) {
+function VoiceReadySection({
+  lbl,
+  onOpenListening,
+}: {
+  lbl: typeof JUNIOR_LABELS["en"];
+  onOpenListening: () => void;
+}) {
   const voiceFeatures = [
     {
       icon: Mic,
@@ -548,6 +555,7 @@ function VoiceReadySection({ lbl }: { lbl: typeof JUNIOR_LABELS["en"] }) {
       desc: lbl.voiceTalkDesc,
       color: "from-blue-50 to-sky-50 border-blue-200",
       iconColor: "text-blue-500 bg-blue-100",
+      isActive: false,
     },
     {
       icon: Volume2,
@@ -555,6 +563,8 @@ function VoiceReadySection({ lbl }: { lbl: typeof JUNIOR_LABELS["en"] }) {
       desc: lbl.voiceListenDesc,
       color: "from-green-50 to-emerald-50 border-green-200",
       iconColor: "text-green-500 bg-green-100",
+      isActive: true,
+      onClick: onOpenListening,
     },
     {
       icon: Video,
@@ -562,6 +572,7 @@ function VoiceReadySection({ lbl }: { lbl: typeof JUNIOR_LABELS["en"] }) {
       desc: lbl.voiceVideoDesc,
       color: "from-purple-50 to-violet-50 border-purple-200",
       iconColor: "text-purple-500 bg-purple-100",
+      isActive: false,
     },
   ];
   return (
@@ -573,21 +584,35 @@ function VoiceReadySection({ lbl }: { lbl: typeof JUNIOR_LABELS["en"] }) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         {voiceFeatures.map((f) => (
-          <div key={f.title}
-            className={`bg-gradient-to-br ${f.color} border rounded-2xl p-4 flex flex-col gap-3 opacity-80`}>
+          <button
+            key={f.title}
+            onClick={f.isActive ? f.onClick : undefined}
+            disabled={!f.isActive}
+            className={`bg-gradient-to-br ${f.color} border rounded-2xl p-4 flex flex-col gap-3 transition-all ${
+              f.isActive
+                ? "opacity-100 hover:shadow-md hover:scale-105 cursor-pointer"
+                : "opacity-50 cursor-not-allowed"
+            }`}
+          >
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${f.iconColor}`}>
               <f.icon className="w-5 h-5" />
             </div>
-            <div>
+            <div className="text-left">
               <div className="font-bold text-sm">{f.title}</div>
               <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{f.desc}</div>
             </div>
             <div className="mt-auto">
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-white/60 text-muted-foreground px-2 py-1 rounded-full border border-border/30">
-                {lbl.comingSoon}
-              </span>
+              {f.isActive ? (
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2 py-1 rounded-full border border-green-200">
+                  ✨ Active
+                </span>
+              ) : (
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-white/60 text-muted-foreground px-2 py-1 rounded-full border border-border/30">
+                  {lbl.comingSoon}
+                </span>
+              )}
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>
@@ -601,6 +626,8 @@ export function Junior() {
   const [view, setView] = useState<JuniorView>("welcome");
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+  const [showListeningMode, setShowListeningMode] = useState(false);
+  const [listeningContent, setListeningContent] = useState("");
 
   /* ── Plan teacher messages ─────────────────────────────────────────── */
   const PLAN_TEACHER_MESSAGES: Record<string, string[]> = {
@@ -922,7 +949,38 @@ export function Junior() {
               onTeacherStateChange={handleTeacherStateChange}
             />
 
-            <VoiceReadySection lbl={lbl} />
+            <VoiceReadySection
+              lbl={lbl}
+              onOpenListening={() => {
+                // Prepare content to read from current context
+                let contentToRead = "";
+                
+                // If in chat view, try to get recent message
+                if (view === "chat" && greeting) {
+                  contentToRead = greeting;
+                }
+                
+                // If in mission view, try to get task text
+                if (view === "subjects" && selectedTopic) {
+                  contentToRead = selectedTopic.name || "Let's learn together!";
+                }
+                
+                // If no specific content, use default
+                if (!contentToRead.trim()) {
+                  const langKey = getLang(activeChild?.language);
+                  if (langKey === "bg") {
+                    contentToRead = "AYA е готова да ти помогне с ученето. Отвори урок или мисия за да начнеш!";
+                  } else if (langKey === "es") {
+                    contentToRead = "AYA está lista para ayudarte a aprender. ¡Abre una lección o misión para comenzar!";
+                  } else {
+                    contentToRead = "AYA is ready to help you learn. Open a lesson or mission to get started!";
+                  }
+                }
+                
+                setListeningContent(contentToRead);
+                setShowListeningMode(true);
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -936,6 +994,15 @@ export function Junior() {
           message={teacherMsg}
         />
       )}
+
+      {/* ── Listening Mode Modal ──────────────────────────── */}
+      <ListeningMode
+        isOpen={showListeningMode}
+        onClose={() => setShowListeningMode(false)}
+        contentToRead={listeningContent}
+        lang={getLang(activeChild?.language)}
+        characterEmoji={currentChar?.emoji ?? "🐼"}
+      />
     </Layout>
   );
 }

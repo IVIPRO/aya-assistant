@@ -1,0 +1,111 @@
+Implement AYA Homework Brain V1 in two lightweight stages.
+
+This is Stage 1 only:
+Extract text from uploaded homework images and solve simple math locally without using AI explanation yet.
+
+Goal:
+When a child uploads a clear image of a simple math problem, AYA should:
+1. extract the visible text
+2. detect whether it is a simple arithmetic task
+3. solve it locally in code
+4. show the final answer in chat
+5. avoid using full AI reasoning for simple cases
+
+Current problem:
+AYA receives the image but responds too generically instead of extracting and solving the visible math expression.
+
+Scope for Stage 1:
+- image text extraction
+- simple math detection
+- local solving
+- lightweight chat response
+- no advanced AI explanation yet
+
+Requirements:
+
+1. Extract visible text from uploaded image
+After image upload, attempt to read the visible homework content from the image.
+
+2. Detect simple math expressions
+Recognize simple arithmetic like:
+- 5 + 7 =
+- 23 + 14 =
+- 9 - 4 =
+- 6 x 3 =
+- 12 / 4 =
+
+Also support variants without spaces:
+- 5+7
+- 23+14
+- 9-4
+
+3. Local solver
+If a simple arithmetic expression is detected:
+- solve it locally in code
+- do not use generic tutor fallback
+- do not require advanced AI response
+
+4. Localized response
+Return a short localized response in the child language.
+
+Bulgarian examples:
+- "На снимката виждам: 5 + 7"
+- "Отговорът е 12."
+- "Виждам задача по математика: 23 + 14"
+- "Отговорът е 37."
+
+English examples:
+- "I can see: 5 + 7"
+- "The answer is 12."
+
+Spanish examples:
+- "Veo: 5 + 7"
+- "La respuesta es 12."
+
+5. If the image is unclear
+Return a localized retry message instead of hallucinating.
+
+Bulgarian:
+- "Не мога да разчета задачата достатъчно ясно. Моля, снимай по-отблизо."
+
+English:
+- "I can't read the task clearly enough. Please take a closer photo."
+
+Spanish:
+- "No puedo leer la tarea con suficiente claridad. Por favor, toma una foto más cercana."
+
+6. Add simple math parser/solver in code
+Support:
+- addition
+- subtraction
+- multiplication
+- division
+
+Use safe parsing.
+Do not use unsafe eval.
+
+7. Chat integration
+After image send:
+- if simple math is detected, append:
+  - extracted task text
+  - final answer
+- keep existing uploaded image bubble
+- keep existing UI layout
+
+8. Keep it lightweight
+- do not add backend storage
+- do not redesign the app
+- do not use autonomous agent mode
+- do not implement full AI explanation yet
+
+9. Testing targets
+Verify these cases:
+- image with "5 + 7 =" -> answer 12
+- image with "23 + 14 =" -> answer 37
+- blurry image -> ask for clearer photo
+
+10. Important
+This is Stage 1 only.
+Do not implement step-by-step tutoring yet.
+Only:
+extract -> detect -> solve -> answer.

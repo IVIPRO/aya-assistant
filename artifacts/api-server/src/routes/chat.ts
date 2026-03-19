@@ -4,6 +4,7 @@ import { eq, and } from "drizzle-orm";
 import { SendChatMessageBody } from "@workspace/api-zod";
 import { requireAuth, getUser } from "../lib/auth";
 import { getAIResponse } from "../lib/aiResponses";
+import { trySimpleMathSolve } from "../lib/mathSolver";
 import OpenAI from "openai";
 
 const router: IRouter = Router();
@@ -156,45 +157,55 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
 
   let aiContent = "";
 
-  // If message contains an image, analyze it with vision API
+  // If message contains an image, try simple math solving first (Stage 1 of Homework Brain)
   if (hasImage && module === "junior" && imageBase64) {
     try {
       const resolvedLang = getLang(context.language);
-      const resolvedGrade = context.grade ?? 2;
-      const childName = context.childName ?? "the student";
-      const charKey = context.aiCharacter ?? "owl";
-
-      const systemPrompt = buildHomeworkAnalysisPrompt(resolvedLang, resolvedGrade, childName, charKey);
-      
-      // Build user prompt in the child's language
-      const userPrompt =
-        resolvedLang === "bg"
-          ? "Погледни снимката и обясни задачата стъпка по стъпка, ако е достатъчно ясна."
-          : resolvedLang === "es"
-          ? "Mira la foto y explica la tarea paso a paso si es lo suficientemente clara."
-          : "Look at the photo and explain the task step by step if it is clear enough.";
-
-      const validMime = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(imageMimeType)
-        ? (imageMimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp")
-        : "image/jpeg";
-
       const openai = getOpenAIClient();
-      const completion = await openai.chat.completions.create({
-        model: "gpt-5.2",
-        max_completion_tokens: 1024,
-        messages: [
-          { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content: [
-              { type: "text", text: userPrompt },
-              { type: "image_url", image_url: { url: `data:${validMime};base64,${imageBase64}`, detail: "high" } },
-            ],
-          },
-        ],
-      });
 
-      aiContent = completion.choices[0]?.message?.content ?? "";
+      // Stage 1: Try to extract and solve simple arithmetic locally
+      const simpleMathResult = await trySimpleMathSolve(imageBase64, imageMimeType, resolvedLang, openai);
+
+      if (simpleMathResult) {
+        // Simple math was detected and solved
+        aiContent = simpleMathResult;
+      } else {
+        // Not simple math - use full vision analysis with step-by-step tutoring
+        const resolvedGrade = context.grade ?? 2;
+        const childName = context.childName ?? "the student";
+        const charKey = context.aiCharacter ?? "owl";
+
+        const systemPrompt = buildHomeworkAnalysisPrompt(resolvedLang, resolvedGrade, childName, charKey);
+        
+        // Build user prompt in the child's language
+        const userPrompt =
+          resolvedLang === "bg"
+            ? "Погледни снимката и обясни задачата стъпка по стъпка, ако е достатъчно ясна."
+            : resolvedLang === "es"
+            ? "Mira la foto y explica la tarea paso a paso si es lo suficientemente clara."
+            : "Look at the photo and explain the task step by step if it is clear enough.";
+
+        const validMime = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(imageMimeType)
+          ? (imageMimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp")
+          : "image/jpeg";
+
+        const completion = await openai.chat.completions.create({
+          model: "gpt-5.2",
+          max_completion_tokens: 1024,
+          messages: [
+            { role: "system", content: systemPrompt },
+            {
+              role: "user",
+              content: [
+                { type: "text", text: userPrompt },
+                { type: "image_url", image_url: { url: `data:${validMime};base64,${imageBase64}`, detail: "high" } },
+              ],
+            },
+          ],
+        });
+
+        aiContent = completion.choices[0]?.message?.content ?? "";
+      }
     } catch (error) {
       // Fallback if vision API fails
       const lang = getLang(context.language);

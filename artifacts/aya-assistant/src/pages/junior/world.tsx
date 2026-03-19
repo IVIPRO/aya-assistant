@@ -382,6 +382,15 @@ export function WorldMap() {
     { query: { queryKey: getListMissionsQueryKey({ childId: activeChildId || 0 }), enabled: !!activeChildId } }
   );
 
+  // DEBUG: Log rendered missions for verification
+  useEffect(() => {
+    if (missions.length > 0) {
+      const mathIslandMissions = missions.filter(m => getMissionZone(m) === "Math Island");
+      console.log(`[MATH_ISLAND_RENDERED] Child ${activeChildId}: ${mathIslandMissions.map(m => m.title).join(", ")}`);
+      console.log(`[MISSIONS_FETCHED] Total: ${missions.length}, Math Island: ${mathIslandMissions.length}`);
+    }
+  }, [missions, activeChildId]);
+
   const completeMutation = useCompleteMission();
   const activeChild = children.find(c => c.id === activeChildId);
   const childXp = activeChild?.xp ?? 0;
@@ -390,27 +399,42 @@ export function WorldMap() {
   const lbl = WORLD_LABELS[lang];
 
   const handleStartMission = (mission: Mission) => {
-    // Map mission titles to mission IDs
+    // Map mission titles to mission IDs (supports BG foundational + all languages)
     const titleToId: Record<string, { id: string; tasks: number }> = {
+      // Bulgarian foundational missions
       "Събиране до 10": { id: "m1", tasks: 5 },
-      "Addition up to 10": { id: "m1", tasks: 5 },
-      "Suma hasta 10": { id: "m1", tasks: 5 },
-      "Addition up to 20": { id: "m3", tasks: 6 },
-      "Събиране до 20": { id: "m3", tasks: 6 },
-      "Suma hasta 20": { id: "m3", tasks: 6 },
-      "Subtraction up to 10": { id: "m2", tasks: 5 },
       "Изваждане до 10": { id: "m2", tasks: 5 },
-      "Resta hasta 10": { id: "m2", tasks: 5 },
+      "Събиране до 20": { id: "m3", tasks: 6 },
+      "Умножение на 2 и 3": { id: "m4", tasks: 5 },
+      "Задача с думи": { id: "m5", tasks: 5 },
+      
+      // English variants
+      "Addition up to 10": { id: "m1", tasks: 5 },
+      "Subtraction up to 10": { id: "m2", tasks: 5 },
+      "Addition up to 20": { id: "m3", tasks: 6 },
+      "Addition & Subtraction": { id: "m3", tasks: 6 },
       "Multiplication Table": { id: "m4", tasks: 5 },
-      "Умножение в таблицата": { id: "m4", tasks: 5 },
+      "Multiplication by 2 and 3": { id: "m4", tasks: 5 },
+      "Word Problems": { id: "m5", tasks: 5 },
+      
+      // Spanish variants
+      "Suma hasta 10": { id: "m1", tasks: 5 },
+      "Resta hasta 10": { id: "m2", tasks: 5 },
+      "Suma hasta 20": { id: "m3", tasks: 6 },
       "Tabla de multiplicación": { id: "m4", tasks: 5 },
+      "Problemas de palabras": { id: "m5", tasks: 5 },
     };
 
     const config = titleToId[mission.title];
+    console.log(`[START_MISSION_CLICKED] mission_id=${mission.id}, title="${mission.title}", config=${JSON.stringify(config)}`);
+    
     if (config && activeChildId) {
+      console.log(`[START_MISSION_SUCCESS] Activating mission: ${config.id} (${mission.title})`);
       setActiveMissionId(config.id);
       setActiveMissionTitle(mission.title);
       setActiveMissionTasks(config.tasks);
+    } else {
+      console.warn(`[START_MISSION_FAILED] No config found for title: "${mission.title}"`);
     }
   };
 

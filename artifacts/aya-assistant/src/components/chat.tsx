@@ -102,6 +102,12 @@ const HOMEWORK_LABELS = {
     analyzing: "AYA is analyzing your homework…",
     userMsg: "📷 Homework photo",
     error: "Could not analyze the image. Please try again.",
+    selectedImage: "Selected image",
+    send: "Send",
+    cancel: "Cancel",
+    successMsg: "Image uploaded successfully.",
+    invalidFile: "Please choose an image.",
+    fileTooLarge: "The image is too large.",
   },
   bg: {
     cameraBtn: "Снимай домашното",
@@ -109,6 +115,12 @@ const HOMEWORK_LABELS = {
     analyzing: "AYA анализира домашното…",
     userMsg: "📷 Снимка на домашното",
     error: "Неуспешен анализ на снимката. Опитай пак.",
+    selectedImage: "Избрана снимка",
+    send: "Изпрати",
+    cancel: "Отказ",
+    successMsg: "Снимката е качена успешно.",
+    invalidFile: "Моля, избери снимка.",
+    fileTooLarge: "Снимката е твърде голяма.",
   },
   es: {
     cameraBtn: "Tomar foto de tarea",
@@ -116,6 +128,12 @@ const HOMEWORK_LABELS = {
     analyzing: "AYA está analizando tu tarea…",
     userMsg: "📷 Foto de tarea",
     error: "No se pudo analizar la imagen. Inténtalo de nuevo.",
+    selectedImage: "Imagen seleccionada",
+    send: "Enviar",
+    cancel: "Cancelar",
+    successMsg: "La imagen se cargó correctamente.",
+    invalidFile: "Por favor, selecciona una imagen.",
+    fileTooLarge: "La imagen es demasiado grande.",
   },
 };
 
@@ -304,16 +322,26 @@ export function Chat({
   };
 
   /* ── Homework vision flow ──────────────────────────────────────── */
-  const handleFileSelect = useCallback(async (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast({ title: "Please select an image file", variant: "destructive" });
+  const handleFileSelect = useCallback((file: File) => {
+    // Validate file type
+    const validImageTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!validImageTypes.includes(file.type)) {
+      toast({ title: hwLabels.invalidFile, variant: "destructive" });
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSizeMB = 10;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      toast({ title: hwLabels.fileTooLarge, variant: "destructive" });
       return;
     }
 
     const previewUrl = URL.createObjectURL(file);
     setHomeworkPreview(previewUrl);
     setHomeworkFile(file);
-  }, [toast]);
+  }, [hwLabels, toast]);
 
   const handleCameraClick = () => {
     fileInputRef.current?.click();
@@ -325,56 +353,19 @@ export function Chat({
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const sendHomework = useCallback(async () => {
-    if (!homeworkFile || analyzingHomework) return;
+  const sendHomework = useCallback(() => {
+    if (!homeworkFile) return;
 
-    setAnalyzingHomework(true);
-    const userLabel = hwLabels.userMsg;
+    // Send success message to chat
+    sendMutation.mutate({
+      data: { module, content: hwLabels.successMsg, childId: activeChildId }
+    });
 
-    try {
-      const base64 = await fileToBase64(homeworkFile);
-      const mimeType = homeworkFile.type || "image/jpeg";
-
-      sendMutation.mutate({
-        data: { module, content: userLabel, childId: activeChildId }
-      });
-
-      const token = localStorage.getItem("aya_token");
-      const response = await fetch("/api/vision/homework", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          childId: activeChildId,
-          image: base64,
-          mimeType,
-          lang: hwLang,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Vision API error");
-
-      const { explanation } = await response.json() as { explanation: string; problemText: string };
-
-      await new Promise<void>((resolve) => {
-        sendMutation.mutate(
-          { data: { module, content: explanation, childId: activeChildId } },
-          { onSettled: () => resolve() }
-        );
-      });
-
-      await refetch();
-    } catch {
-      toast({ title: hwLabels.error, variant: "destructive" });
-    } finally {
-      setAnalyzingHomework(false);
-      setHomeworkPreview(null);
-      setHomeworkFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
-    }
-  }, [homeworkFile, analyzingHomework, hwLang, hwLabels, module, activeChildId, sendMutation, refetch, toast]);
+    // Clear preview and file
+    setHomeworkPreview(null);
+    setHomeworkFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }, [homeworkFile, module, activeChildId, sendMutation, hwLabels]);
 
   const colorMap = {
     primary: "bg-primary text-primary-foreground",
@@ -594,24 +585,25 @@ export function Chat({
                 <div className="flex items-center gap-2 mb-1">
                   <Camera className="w-4 h-4 text-amber-600" />
                   <span className="text-sm font-semibold text-amber-800">
-                    {hwLang === "bg" ? "Домашно задание" : hwLang === "es" ? "Tarea" : "Homework"}
+                    {hwLabels.selectedImage}
                   </span>
                 </div>
-                <p className="text-xs text-amber-700 mb-2">
-                  {hwLang === "bg" ? "Готов? AYA ще обясни задачата стъпка по стъпка." : hwLang === "es" ? "¿Listo? AYA explicará el problema paso a paso." : "Ready? AYA will explain the problem step by step."}
-                </p>
-                <button
-                  onClick={sendHomework}
-                  disabled={analyzingHomework}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-sm transition-all disabled:opacity-60 shadow-sm"
-                >
-                  {analyzingHomework ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Sparkles className="w-4 h-4" />
-                  )}
-                  {hwLang === "bg" ? "Анализирай" : hwLang === "es" ? "Analizar" : "Analyze"}
-                </button>
+                <div className="flex items-center gap-2 mt-3">
+                  <button
+                    onClick={sendHomework}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500 hover:bg-green-600 text-white font-bold text-sm transition-all shadow-sm"
+                  >
+                    <Send className="w-4 h-4" />
+                    {hwLabels.send}
+                  </button>
+                  <button
+                    onClick={cancelHomework}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold text-sm transition-all shadow-sm"
+                  >
+                    <X className="w-4 h-4" />
+                    {hwLabels.cancel}
+                  </button>
+                </div>
               </div>
             </div>
           </motion.div>

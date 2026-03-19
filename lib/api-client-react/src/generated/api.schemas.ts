@@ -426,6 +426,45 @@ export interface Progress {
   createdAt: string;
 }
 
+export type DailyPlanTaskStatus =
+  (typeof DailyPlanTaskStatus)[keyof typeof DailyPlanTaskStatus];
+
+export const DailyPlanTaskStatus = {
+  not_started: "not_started",
+  in_progress: "in_progress",
+  completed: "completed",
+} as const;
+
+export type DailyPlanTaskTaskType =
+  (typeof DailyPlanTaskTaskType)[keyof typeof DailyPlanTaskTaskType];
+
+export const DailyPlanTaskTaskType = {
+  lesson: "lesson",
+  practice: "practice",
+} as const;
+
+export interface DailyPlanTask {
+  id: string;
+  subjectId: string;
+  topicId: string;
+  taskType: DailyPlanTaskTaskType;
+  xpReward: number;
+  status: DailyPlanTaskStatus;
+}
+
+export interface DailyPlan {
+  id: number;
+  childId: number;
+  planDate: string;
+  tasks: DailyPlanTask[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UpdateDailyPlanTaskBody {
+  status: DailyPlanTaskStatus;
+}
+
 export type ListChatMessagesParams = {
   module: ListChatMessagesModule;
   /**
@@ -456,5 +495,9 @@ export type ListMissionsParams = {
 };
 
 export type ListProgressParams = {
+  childId: number;
+};
+
+export type GetDailyPlanParams = {
   childId: number;
 };

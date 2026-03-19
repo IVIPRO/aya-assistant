@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout";
 import { Chat } from "@/components/chat";
 import { SubjectPanel } from "./subjects";
+import { DailyPlanCard } from "@/components/DailyPlanCard";
 import { AnimatedTeacher } from "@/components/AnimatedTeacher";
 import type { TeacherState } from "@/components/AnimatedTeacher";
 import { Link } from "wouter";
@@ -584,6 +585,26 @@ export function Junior() {
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
 
+  /* ── Plan teacher messages ─────────────────────────────────────────── */
+  const PLAN_TEACHER_MESSAGES: Record<string, string[]> = {
+    en: [
+      "Here is your plan for today!",
+      "Let's learn step by step.",
+      "Ready for your first task?",
+    ],
+    bg: [
+      "Ето твоя план за днес!",
+      "Нека учим стъпка по стъпка.",
+      "Готова ли си за първата задача?",
+    ],
+    es: [
+      "¡Aquí está tu plan de hoy!",
+      "Vamos paso a paso.",
+      "¿Lista para tu primera tarea?",
+    ],
+  };
+  const planMsgShownRef = useRef(false);
+
   /* ── Teacher state machine ─────────────────────────────────────────── */
   const [teacherState, setTeacherState]   = useState<TeacherState>("idle");
   const [teacherMsg,   setTeacherMsg]     = useState<string | undefined>(undefined);
@@ -661,6 +682,14 @@ export function Junior() {
 
   const juniorLang = getLang(activeChild?.language);
   const lbl = JUNIOR_LABELS[juniorLang];
+
+  const handlePlanLoaded = useCallback(() => {
+    if (planMsgShownRef.current) return;
+    planMsgShownRef.current = true;
+    const msgs = PLAN_TEACHER_MESSAGES[juniorLang] ?? PLAN_TEACHER_MESSAGES.en;
+    const msg = msgs[Math.floor(Math.random() * msgs.length)];
+    setTimeout(() => handleTeacherStateChange("encouraging", msg), 800);
+  }, [juniorLang, handleTeacherStateChange]);
   const GREETING_LABELS: Record<JuniorLang, {
     subjectGreeting: (name: string, subject: string, topic: string | null) => string;
     mainGreeting: (name: string, charName: string) => string;
@@ -721,7 +750,7 @@ export function Junior() {
 
       <AnimatePresence mode="wait">
         {view === "welcome" && activeChild ? (
-          <motion.div key="welcome" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <motion.div key="welcome" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
             <WelcomeScreen
               child={activeChild}
               character={currentChar}
@@ -729,6 +758,18 @@ export function Junior() {
               onChat={() => { setSelectedSubject(null); setSelectedTopic(null); setView("subjects"); }}
               onChangeCompanion={() => setShowCharPicker(true)}
             />
+            <div className="max-w-2xl mx-auto">
+              <DailyPlanCard
+                childId={activeChild.id}
+                lang={juniorLang}
+                onStartTask={(subject, topic) => {
+                  setSelectedSubject(subject);
+                  setSelectedTopic(topic);
+                  setView("chat");
+                }}
+                onPlanLoaded={handlePlanLoaded}
+              />
+            </div>
           </motion.div>
         ) : view === "welcome" && childrenLoading ? (
           <motion.div key="loading" className="text-center py-20 text-muted-foreground">

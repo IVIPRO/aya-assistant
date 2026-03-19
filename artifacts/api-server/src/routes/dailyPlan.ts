@@ -1,0 +1,232 @@
+import { Router, type IRouter } from "express";
+import { db, childrenTable, dailyPlansTable, childTopicProgressTable, progressTable } from "@workspace/db";
+import type { DailyPlanTask, DailyPlanTaskStatus } from "@workspace/db";
+import { eq, and, desc, avg } from "drizzle-orm";
+import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
+
+const router: IRouter = Router();
+
+/* ─────────────────────────────────────────────────────────────────
+   Curriculum catalogue used for plan generation
+   Each entry: subjectId (frontend), topicId, minGrade, xpReward
+───────────────────────────────────────────────────────────────── */
+const TASK_POOL: Array<{
+  subjectId: string;
+  topicId: string;
+  minGrade: number;
+  maxGrade: number;
+  baseXp: number;
+}> = [
+  { subjectId: "mathematics",        topicId: "addition",       minGrade: 1, maxGrade: 2, baseXp: 30 },
+  { subjectId: "mathematics",        topicId: "subtraction",    minGrade: 1, maxGrade: 2, baseXp: 30 },
+  { subjectId: "mathematics",        topicId: "multiplication", minGrade: 2, maxGrade: 4, baseXp: 40 },
+  { subjectId: "mathematics",        topicId: "division",       minGrade: 3, maxGrade: 4, baseXp: 45 },
+  { subjectId: "mathematics",        topicId: "word-problems",  minGrade: 2, maxGrade: 4, baseXp: 40 },
+  { subjectId: "bulgarian-language", topicId: "alphabet",       minGrade: 1, maxGrade: 1, baseXp: 25 },
+  { subjectId: "bulgarian-language", topicId: "reading",        minGrade: 1, maxGrade: 3, baseXp: 35 },
+  { subjectId: "bulgarian-language", topicId: "writing",        minGrade: 2, maxGrade: 4, baseXp: 35 },
+  { subjectId: "bulgarian-language", topicId: "grammar",        minGrade: 3, maxGrade: 4, baseXp: 40 },
+  { subjectId: "reading-literature", topicId: "stories",        minGrade: 1, maxGrade: 4, baseXp: 35 },
+  { subjectId: "reading-literature", topicId: "comprehension",  minGrade: 2, maxGrade: 4, baseXp: 40 },
+  { subjectId: "logic-thinking",     topicId: "patterns",       minGrade: 1, maxGrade: 3, baseXp: 25 },
+  { subjectId: "logic-thinking",     topicId: "puzzles",        minGrade: 2, maxGrade: 4, baseXp: 35 },
+  { subjectId: "nature-science",     topicId: "plants",         minGrade: 1, maxGrade: 3, baseXp: 30 },
+  { subjectId: "nature-science",     topicId: "animals",        minGrade: 1, maxGrade: 2, baseXp: 30 },
+  { subjectId: "nature-science",     topicId: "weather",        minGrade: 2, maxGrade: 4, baseXp: 30 },
+];
+
+function todayDate(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+async function generatePlan(childId: number, grade: number, xp: number): Promise<DailyPlanTask[]> {
+  const gradeNum = Math.max(1, Math.min(4, grade));
+
+  const eligible = TASK_POOL.filter(t => gradeNum >= t.minGrade && gradeNum <= t.maxGrade);
+
+  const topicProgressRows = await db
+    .select()
+    .from(childTopicProgressTable)
+    .where(eq(childTopicProgressTable.childId, childId));
+
+  const doneKeys = new Set(
+    topicProgressRows
+      .filter(r => r.lessonDone && r.practiceDone)
+      .map(r => `${r.subjectId}:${r.topicId}`)
+  );
+  const startedKeys = new Set(
+    topicProgressRows
+      .filter(r => r.lessonDone || r.practiceDone)
+      .map(r => `${r.subjectId}:${r.topicId}`)
+  );
+
+  const recentProgress = await db
+    .select()
+    .from(progressTable)
+    .where(eq(progressTable.childId, childId))
+    .orderBy(desc(progressTable.createdAt))
+    .limit(30);
+
+  const subjectScores: Record<string, number[]> = {};
+  for (const row of recentProgress) {
+    const sid = row.subject.toLowerCase();
+    if (!subjectScores[sid]) subjectScores[sid] = [];
+    subjectScores[sid].push(row.score);
+  }
+  const avgBySubject: Record<string, number> = {};
+  for (const [sid, scores] of Object.entries(subjectScores)) {
+    avgBySubject[sid] = scores.reduce((s, v) => s + v, 0) / scores.length;
+  }
+
+  function subjectWeakness(subjectId: string): number {
+    const lower = subjectId.replace(/-/g, "").replace("language", "").replace("literature", "").replace("thinking", "").replace("science", "nature");
+    for (const [key, avg] of Object.entries(avgBySubject)) {
+      if (subjectId.includes(key) || key.includes(subjectId.split("-")[0])) {
+        return 100 - avg;
+      }
+    }
+    return 30;
+  }
+
+  const scored = eligible.map(t => {
+    const key = `${t.subjectId}:${t.topicId}`;
+    const done = doneKeys.has(key);
+    const started = startedKeys.has(key);
+    const weakness = subjectWeakness(t.subjectId);
+    let score = weakness;
+    if (!started) score += 20;
+    if (done) score -= 100;
+    return { ...t, score, done, started };
+  });
+
+  const notDone = scored.filter(t => !t.done).sort((a, b) => b.score - a.score);
+
+  const picked: typeof notDone = [];
+  const usedSubjects = new Set<string>();
+
+  for (const t of notDone) {
+    if (picked.length >= 3) break;
+    if (usedSubjects.has(t.subjectId)) continue;
+    picked.push(t);
+    usedSubjects.add(t.subjectId);
+  }
+
+  if (picked.length < 3) {
+    for (const t of notDone) {
+      if (picked.length >= 3) break;
+      if (!picked.find(p => p.subjectId === t.subjectId && p.topicId === t.topicId)) {
+        picked.push(t);
+      }
+    }
+  }
+
+  const xpMultiplier = xp >= 300 ? 1.3 : xp >= 100 ? 1.1 : 1.0;
+  const taskType: "lesson" | "practice" = xp >= 50 ? "practice" : "lesson";
+
+  return picked.slice(0, 3).map((t, i) => ({
+    id: `task_${i}`,
+    subjectId: t.subjectId,
+    topicId: t.topicId,
+    taskType,
+    xpReward: Math.round(t.baseXp * xpMultiplier),
+    status: "not_started" as DailyPlanTaskStatus,
+  }));
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   GET /daily-plan?childId=:childId
+   Return today's plan (generate if not yet created).
+───────────────────────────────────────────────────────────────── */
+router.get("/daily-plan", requireAuth, async (req, res): Promise<void> => {
+  const childIdStr = req.query.childId as string;
+  if (!childIdStr) {
+    res.status(400).json({ error: "childId is required" });
+    return;
+  }
+  const childId = parseInt(childIdStr, 10);
+  if (isNaN(childId)) {
+    res.status(400).json({ error: "Invalid childId" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const today = todayDate();
+  const [existing] = await db
+    .select()
+    .from(dailyPlansTable)
+    .where(and(eq(dailyPlansTable.childId, childId), eq(dailyPlansTable.planDate, today)));
+
+  if (existing) {
+    res.json(existing);
+    return;
+  }
+
+  const tasks = await generatePlan(childId, child.grade, child.xp ?? 0);
+
+  const [inserted] = await db
+    .insert(dailyPlansTable)
+    .values({ childId, planDate: today, tasks })
+    .returning();
+
+  res.json(inserted);
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   PATCH /daily-plan/:planId/task/:taskId
+   Update the status of a single task.
+───────────────────────────────────────────────────────────────── */
+router.patch("/daily-plan/:planId/task/:taskId", requireAuth, async (req, res): Promise<void> => {
+  const planId = parseInt(req.params.planId as string, 10);
+  const taskId = req.params.taskId as string;
+  const { status } = req.body as { status: DailyPlanTaskStatus };
+
+  if (!status || !["not_started", "in_progress", "completed"].includes(status)) {
+    res.status(400).json({ error: "Invalid status" });
+    return;
+  }
+
+  const [plan] = await db
+    .select()
+    .from(dailyPlansTable)
+    .where(eq(dailyPlansTable.id, planId));
+
+  if (!plan) {
+    res.status(404).json({ error: "Plan not found" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, plan.childId), eq(childrenTable.familyId, familyId ?? -1)));
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const updatedTasks = (plan.tasks as DailyPlanTask[]).map(t =>
+    t.id === taskId ? { ...t, status } : t
+  );
+
+  const [updated] = await db
+    .update(dailyPlansTable)
+    .set({ tasks: updatedTasks, updatedAt: new Date() })
+    .where(eq(dailyPlansTable.id, planId))
+    .returning();
+
+  res.json(updated);
+});
+
+export default router;

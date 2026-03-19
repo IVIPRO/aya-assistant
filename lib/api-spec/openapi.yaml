@@ -556,6 +556,74 @@ paths:
               schema:
                 $ref: "#/components/schemas/Progress"
 
+  # ─── Daily Plan ────────────────────────────────────────────────────────────
+  /daily-plan:
+    get:
+      operationId: getDailyPlan
+      tags: [daily-plan]
+      summary: Get or generate today's daily learning plan for a child
+      parameters:
+        - name: childId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Daily plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyPlan"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /daily-plan/{planId}/task/{taskId}:
+    patch:
+      operationId: updateDailyPlanTask
+      tags: [daily-plan]
+      summary: Update a task status in a daily plan
+      parameters:
+        - name: planId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDailyPlanTaskBody"
+      responses:
+        "200":
+          description: Updated plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyPlan"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     # ─── Shared ──────────────────────────────────────────────────────────────
@@ -1069,3 +1137,54 @@ components:
           type: string
           format: date-time
       required: [id, childId, module, subject, score, notes, createdAt]
+
+    # ─── Daily Plan ──────────────────────────────────────────────────────────
+    DailyPlanTaskStatus:
+      type: string
+      enum: [not_started, in_progress, completed]
+
+    DailyPlanTask:
+      type: object
+      properties:
+        id:
+          type: string
+        subjectId:
+          type: string
+        topicId:
+          type: string
+        taskType:
+          type: string
+          enum: [lesson, practice]
+        xpReward:
+          type: integer
+        status:
+          $ref: "#/components/schemas/DailyPlanTaskStatus"
+      required: [id, subjectId, topicId, taskType, xpReward, status]
+
+    DailyPlan:
+      type: object
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        planDate:
+          type: string
+        tasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/DailyPlanTask"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, childId, planDate, tasks, createdAt, updatedAt]
+
+    UpdateDailyPlanTaskBody:
+      type: object
+      properties:
+        status:
+          $ref: "#/components/schemas/DailyPlanTaskStatus"
+      required: [status]

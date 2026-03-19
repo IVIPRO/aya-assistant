@@ -13,6 +13,7 @@ import lessonsRouter from "./lessons";
 import learningRouter from "./learning";
 import visionRouter from "./vision";
 import voiceRouter from "./voice";
+import dailyPlanRouter from "./dailyPlan";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(lessonsRouter);
 router.use(learningRouter);
 router.use(visionRouter);
 router.use(voiceRouter);
+router.use(dailyPlanRouter);
 
 export default router;

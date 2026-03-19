@@ -435,6 +435,31 @@ export const DailyPlanTaskStatus = {
   completed: "completed",
 } as const;
 
+export type WeaknessLabel = (typeof WeaknessLabel)[keyof typeof WeaknessLabel];
+
+export const WeaknessLabel = {
+  needs_more_practice: "needs_more_practice",
+  weak_topic: "weak_topic",
+  recommended_review: "recommended_review",
+} as const;
+
+export interface WeakTopic {
+  subjectId: string;
+  topicId: string;
+  attempts: number;
+  correctAnswers: number;
+  wrongAnswers: number;
+  successRate: number;
+  retryCount: number;
+  quizPassed: boolean;
+  label: WeaknessLabel;
+}
+
+export interface WeaknessResponse {
+  childId: number;
+  weakTopics: WeakTopic[];
+}
+
 export type DailyPlanTaskTaskType =
   (typeof DailyPlanTaskTaskType)[keyof typeof DailyPlanTaskTaskType];
 
@@ -450,6 +475,7 @@ export interface DailyPlanTask {
   taskType: DailyPlanTaskTaskType;
   xpReward: number;
   status: DailyPlanTaskStatus;
+  isWeakTopic?: boolean;
 }
 
 export interface DailyPlan {
@@ -495,6 +521,10 @@ export type ListMissionsParams = {
 };
 
 export type ListProgressParams = {
+  childId: number;
+};
+
+export type GetLearningWeaknessesParams = {
   childId: number;
 };
 

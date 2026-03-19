@@ -11,7 +11,7 @@ import type { LangCode } from "@/lib/i18n";
 import { elementarySubjects } from "@/lib/curriculum";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2, Circle, Clock, Sparkles, PlayCircle, BookOpen, ChevronRight, Loader2 } from "lucide-react";
+import { CheckCircle2, Circle, Clock, Sparkles, PlayCircle, BookOpen, ChevronRight, Loader2, AlertTriangle } from "lucide-react";
 
 /* ─────────────────────────────────────────────────────────────────
    Localization
@@ -28,6 +28,8 @@ const PLAN_I18N: Record<LangCode, {
   taskTypeLabels: Record<"lesson" | "practice", string>;
   loading: string;
   empty: string;
+  weakBadge: string;
+  weakMessage: string;
 }> = {
   en: {
     title: "Daily Learning Plan",
@@ -45,6 +47,8 @@ const PLAN_I18N: Record<LangCode, {
     taskTypeLabels: { lesson: "Lesson", practice: "Practice" },
     loading: "Preparing your plan…",
     empty: "No tasks yet",
+    weakBadge: "Needs practice",
+    weakMessage: "Let's practice this a little more. You can do it — let's try together.",
   },
   bg: {
     title: "Дневен учебен план",
@@ -62,6 +66,8 @@ const PLAN_I18N: Record<LangCode, {
     taskTypeLabels: { lesson: "Урок", practice: "Упражнение" },
     loading: "Подготвяме плана…",
     empty: "Няма задачи",
+    weakBadge: "Нуждае се от практика",
+    weakMessage: "Нека упражним това още малко. Ще се справиш — да опитаме заедно.",
   },
   es: {
     title: "Plan diario de aprendizaje",
@@ -79,6 +85,8 @@ const PLAN_I18N: Record<LangCode, {
     taskTypeLabels: { lesson: "Lección", practice: "Práctica" },
     loading: "Preparando tu plan…",
     empty: "Sin tareas",
+    weakBadge: "Necesita práctica",
+    weakMessage: "Vamos a practicar esto un poco más. Tú puedes — vamos a intentarlo juntos.",
   },
 };
 
@@ -157,6 +165,7 @@ function TaskRow({
   const isDone = task.status === "completed";
   const isInProgress = task.status === "in_progress";
   const isPending = patchMutation.isPending;
+  const isWeak = !!(task as DailyPlanTask & { isWeakTopic?: boolean }).isWeakTopic;
 
   function handleStart() {
     if (isDone) return;
@@ -176,6 +185,8 @@ function TaskRow({
           ? "bg-green-50 border-green-200"
           : isInProgress
           ? "bg-yellow-50 border-yellow-200"
+          : isWeak
+          ? "bg-amber-50 border-amber-200"
           : "bg-white border-gray-200"
       }`}
     >
@@ -186,6 +197,12 @@ function TaskRow({
           <span className="text-xs font-semibold text-gray-700">{subjectLabel}</span>
           <span className="text-xs text-gray-400">·</span>
           <span className="text-xs text-gray-500">{topicLabel}</span>
+          {isWeak && !isDone && (
+            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+              <AlertTriangle className="w-2.5 h-2.5" />
+              {i18n.weakBadge}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2 mt-0.5 flex-wrap">
           <StatusPill status={task.status} label={i18n.statusLabels[task.status]} />
@@ -205,6 +222,8 @@ function TaskRow({
         className={`flex-shrink-0 flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
           isDone
             ? "bg-green-100 text-green-700 cursor-default"
+            : isWeak
+            ? "bg-amber-500 hover:bg-amber-600 text-white"
             : "bg-violet-600 hover:bg-violet-700 text-white"
         }`}
       >
@@ -282,6 +301,7 @@ export function DailyPlanCard({ childId, lang, onStartTask, onPlanLoaded }: Dail
   const doneTasks = tasks.filter(t => t.status === "completed");
   const doneCount = doneTasks.length;
   const totalCount = tasks.length;
+  const hasWeakTopic = tasks.some(t => !!(t as DailyPlanTask & { isWeakTopic?: boolean }).isWeakTopic);
 
   return (
     <div className="rounded-2xl border border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50 shadow-sm overflow-hidden">
@@ -307,6 +327,14 @@ export function DailyPlanCard({ childId, lang, onStartTask, onPlanLoaded }: Dail
           </div>
         )}
       </div>
+
+      {/* AYA Panda supportive message for weak topics */}
+      {!isLoading && hasWeakTopic && (
+        <div className="mx-3 mt-3 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+          <span className="text-lg flex-shrink-0">🐼</span>
+          <p className="text-xs text-amber-800 leading-relaxed font-medium">{i18n.weakMessage}</p>
+        </div>
+      )}
 
       <div className="p-3 space-y-2">
         {isLoading ? (

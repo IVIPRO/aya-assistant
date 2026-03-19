@@ -542,6 +542,34 @@ export const CreateProgressBody = zod.object({
 });
 
 /**
+ * @summary Get weak topics detected from a child's performance data
+ */
+export const GetLearningWeaknessesQueryParams = zod.object({
+  childId: zod.coerce.number(),
+});
+
+export const GetLearningWeaknessesResponse = zod.object({
+  childId: zod.number(),
+  weakTopics: zod.array(
+    zod.object({
+      subjectId: zod.string(),
+      topicId: zod.string(),
+      attempts: zod.number(),
+      correctAnswers: zod.number(),
+      wrongAnswers: zod.number(),
+      successRate: zod.number(),
+      retryCount: zod.number(),
+      quizPassed: zod.boolean(),
+      label: zod.enum([
+        "needs_more_practice",
+        "weak_topic",
+        "recommended_review",
+      ]),
+    }),
+  ),
+});
+
+/**
  * @summary Get or generate today's daily learning plan for a child
  */
 export const GetDailyPlanQueryParams = zod.object({
@@ -560,6 +588,7 @@ export const GetDailyPlanResponse = zod.object({
       taskType: zod.enum(["lesson", "practice"]),
       xpReward: zod.number(),
       status: zod.enum(["not_started", "in_progress", "completed"]),
+      isWeakTopic: zod.boolean().optional(),
     }),
   ),
   createdAt: zod.date(),
@@ -590,6 +619,7 @@ export const UpdateDailyPlanTaskResponse = zod.object({
       taskType: zod.enum(["lesson", "practice"]),
       xpReward: zod.number(),
       status: zod.enum(["not_started", "in_progress", "completed"]),
+      isWeakTopic: zod.boolean().optional(),
     }),
   ),
   createdAt: zod.date(),

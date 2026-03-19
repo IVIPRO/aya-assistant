@@ -11,6 +11,7 @@ export interface DailyPlanTask {
   taskType: "lesson" | "practice";
   xpReward: number;
   status: DailyPlanTaskStatus;
+  isWeakTopic?: boolean;
 }
 
 export const dailyPlansTable = pgTable("daily_plans", {

@@ -1,8 +1,9 @@
 import { Router, type IRouter } from "express";
 import { db, childrenTable, dailyPlansTable, childTopicProgressTable, progressTable } from "@workspace/db";
 import type { DailyPlanTask, DailyPlanTaskStatus } from "@workspace/db";
-import { eq, and, desc, avg } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
+import { detectWeakTopics } from "../lib/weaknessDetection";
 
 const router: IRouter = Router();
 
@@ -60,6 +61,11 @@ async function generatePlan(childId: number, grade: number, xp: number): Promise
       .map(r => `${r.subjectId}:${r.topicId}`)
   );
 
+  /* ── Topic-level weakness detection ──────────────────────────── */
+  const weakTopics = detectWeakTopics(topicProgressRows);
+  const weakTopicKeys = new Set(weakTopics.map(w => `${w.subjectId}:${w.topicId}`));
+
+  /* ── Subject-level weakness from progress table ───────────────── */
   const recentProgress = await db
     .select()
     .from(progressTable)
@@ -79,7 +85,6 @@ async function generatePlan(childId: number, grade: number, xp: number): Promise
   }
 
   function subjectWeakness(subjectId: string): number {
-    const lower = subjectId.replace(/-/g, "").replace("language", "").replace("literature", "").replace("thinking", "").replace("science", "nature");
     for (const [key, avg] of Object.entries(avgBySubject)) {
       if (subjectId.includes(key) || key.includes(subjectId.split("-")[0])) {
         return 100 - avg;
@@ -88,23 +93,37 @@ async function generatePlan(childId: number, grade: number, xp: number): Promise
     return 30;
   }
 
+  const xpMultiplier = xp >= 300 ? 1.3 : xp >= 100 ? 1.1 : 1.0;
+
   const scored = eligible.map(t => {
     const key = `${t.subjectId}:${t.topicId}`;
     const done = doneKeys.has(key);
     const started = startedKeys.has(key);
+    const isWeak = weakTopicKeys.has(key);
     const weakness = subjectWeakness(t.subjectId);
+
     let score = weakness;
     if (!started) score += 20;
-    if (done) score -= 100;
-    return { ...t, score, done, started };
+    if (done && !isWeak) score -= 100;
+    /* Weak topics get a strong priority boost even if previously completed */
+    if (isWeak) score += 80;
+
+    /* Determine task type: weak topics always start with a lesson review */
+    const weakEntry = isWeak ? weakTopics.find(w => w.subjectId === t.subjectId && w.topicId === t.topicId) : null;
+    let taskType: "lesson" | "practice" = xp >= 50 ? "practice" : "lesson";
+    if (weakEntry) {
+      taskType = weakEntry.successRate < 50 ? "lesson" : "practice";
+    }
+
+    return { ...t, score, done, started, isWeak, taskType };
   });
 
-  const notDone = scored.filter(t => !t.done).sort((a, b) => b.score - a.score);
+  const notFullyDone = scored.filter(t => !t.done || t.isWeak).sort((a, b) => b.score - a.score);
 
-  const picked: typeof notDone = [];
+  const picked: typeof notFullyDone = [];
   const usedSubjects = new Set<string>();
 
-  for (const t of notDone) {
+  for (const t of notFullyDone) {
     if (picked.length >= 3) break;
     if (usedSubjects.has(t.subjectId)) continue;
     picked.push(t);
@@ -112,7 +131,7 @@ async function generatePlan(childId: number, grade: number, xp: number): Promise
   }
 
   if (picked.length < 3) {
-    for (const t of notDone) {
+    for (const t of notFullyDone) {
       if (picked.length >= 3) break;
       if (!picked.find(p => p.subjectId === t.subjectId && p.topicId === t.topicId)) {
         picked.push(t);
@@ -120,16 +139,14 @@ async function generatePlan(childId: number, grade: number, xp: number): Promise
     }
   }
 
-  const xpMultiplier = xp >= 300 ? 1.3 : xp >= 100 ? 1.1 : 1.0;
-  const taskType: "lesson" | "practice" = xp >= 50 ? "practice" : "lesson";
-
   return picked.slice(0, 3).map((t, i) => ({
     id: `task_${i}`,
     subjectId: t.subjectId,
     topicId: t.topicId,
-    taskType,
+    taskType: t.taskType,
     xpReward: Math.round(t.baseXp * xpMultiplier),
     status: "not_started" as DailyPlanTaskStatus,
+    isWeakTopic: t.isWeak,
   }));
 }
 

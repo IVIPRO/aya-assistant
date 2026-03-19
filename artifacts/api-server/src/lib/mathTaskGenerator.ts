@@ -8,7 +8,7 @@ export interface MathTask {
   id: string;
   expression: string;
   answer: number;
-  type: "addition" | "subtraction" | "multiplication";
+  type: "addition" | "subtraction" | "multiplication" | "word-problem";
   difficulty: "easy" | "medium" | "hard";
   number1: number;
   number2: number;
@@ -176,6 +176,79 @@ function generateMultiplication5(): MathTask {
 }
 
 /**
+ * Mission 5: Задача с думи (Word Problems)
+ * Simple addition/subtraction word problems for Grade 2
+ */
+function generateWordProblem(): MathTask {
+  const missionId = "m5";
+  
+  // Word problem templates in Bulgarian
+  const templates = [
+    // Addition problems
+    { name: "Maria has X apples, gets Y more", genFunc: () => {
+      const x = randomInt(5, 15);
+      const y = randomInt(1, 10);
+      return {
+        expression: `Мария има ${x} ябълки и получава още ${y}. Колко ябълки има сега?`,
+        answer: x + y,
+        op: "+"
+      };
+    }},
+    { name: "X books, Y more books", genFunc: () => {
+      const x = randomInt(3, 12);
+      const y = randomInt(1, 8);
+      return {
+        expression: `Има ${x} книги и ${y} още книги. Колко книги са всичко?`,
+        answer: x + y,
+        op: "+"
+      };
+    }},
+    // Subtraction problems
+    { name: "X apples, give away Y", genFunc: () => {
+      const x = randomInt(10, 20);
+      const y = randomInt(1, x - 3);
+      return {
+        expression: `Мария има ${x} ябълки и дава ${y} на приятел. Колко остават?`,
+        answer: x - y,
+        op: "-"
+      };
+    }},
+    { name: "X items, Y are taken away", genFunc: () => {
+      const x = randomInt(8, 18);
+      const y = randomInt(1, x - 2);
+      return {
+        expression: `На масата има ${x} играчки. Зафиксирани са ${y} от тях. Колко остават?`,
+        answer: x - y,
+        op: "-"
+      };
+    }},
+  ];
+  
+  // Pick random template
+  const template = templates[Math.floor(Math.random() * templates.length)];
+  const problem = template.genFunc();
+  
+  const hash = getTaskHash(problem.answer, 0, problem.op);
+  if (wasRecentlyGenerated(missionId, hash)) {
+    // If recently generated, try again
+    return generateWordProblem();
+  }
+  
+  addToHistory(missionId, problem.answer.toString());
+  
+  return {
+    id: `task_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+    expression: problem.expression,
+    answer: problem.answer,
+    type: "word-problem",
+    difficulty: "easy",
+    number1: 0,
+    number2: 0,
+    operator: problem.op as "+"|"-"|"*",
+  };
+}
+
+/**
  * Available missions
  */
 export const MISSIONS: Record<string, MissionDefinition> = {
@@ -210,6 +283,14 @@ export const MISSIONS: Record<string, MissionDefinition> = {
     titleEs: "Tabla de multiplicación",
     taskCount: 5,
     generate: generateMultiplication5,
+  },
+  m5: {
+    id: "m5",
+    titleBg: "Задача с думи",
+    titleEn: "Word Problems",
+    titleEs: "Problemas de palabras",
+    taskCount: 5,
+    generate: generateWordProblem,
   },
 };
 

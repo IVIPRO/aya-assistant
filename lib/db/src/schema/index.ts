@@ -4,6 +4,7 @@ export * from "./children";
 export * from "./chatMessages";
 export * from "./memories";
 export * from "./missions";
+export * from "./missionTasks";
 export * from "./calendarEvents";
 export * from "./familyTasks";
 export * from "./progress";

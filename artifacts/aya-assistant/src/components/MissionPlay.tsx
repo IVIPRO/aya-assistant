@@ -130,6 +130,8 @@ export function MissionPlay({
   useEffect(() => {
     const startMission = async () => {
       try {
+        console.log(`[MISSION_START] missionId=${missionId}, missionTitle=${missionTitle}`);
+        
         const res = await fetch("/api/missions/start", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -139,6 +141,13 @@ export function MissionPlay({
         if (!res.ok) throw new Error("Failed to start mission");
 
         const data = await res.json();
+        console.log(`[MISSION_PAYLOAD] task received:`, {
+          taskId: data.currentTask?.id,
+          taskType: data.currentTask?.type,
+          taskExpression: data.currentTask?.expression,
+          taskAnswer: data.currentTask?.answer,
+        });
+        
         setMission({
           missionId: data.mission.id,
           title: missionTitle,
@@ -150,6 +159,7 @@ export function MissionPlay({
           xpEarned: 0,
         });
       } catch (err) {
+        console.error(`[MISSION_ERROR] Failed to start mission:`, err);
         setMission({
           missionId: 0,
           title: missionTitle,
@@ -173,11 +183,14 @@ export function MissionPlay({
     try {
       const answer = parseInt(userAnswer, 10);
       if (isNaN(answer)) {
+        console.log(`[ANSWER_INVALID] userAnswer="${userAnswer}" is not a valid number`);
         setFeedback({ text: msg.incorrectMsg, isCorrect: false });
         setUserAnswer("");
         setIsSubmitting(false);
         return;
       }
+
+      console.log(`[ANSWER_CHECK] taskId=${mission.currentTask.id}, userAnswer=${answer}, expectedAnswer=${mission.currentTask.answer}`);
 
       const res = await fetch(`/api/missions/tasks/${mission.currentTask.id}/answer`, {
         method: "POST",
@@ -191,6 +204,8 @@ export function MissionPlay({
       if (!res.ok) throw new Error("Failed to submit answer");
 
       const data = await res.json();
+      console.log(`[ANSWER_RESULT] correct=${data.correct}, missionComplete=${data.isMissionComplete}`);
+      
       const feedbackText = data.responseMessage || msg.incorrectMsg;
       setFeedback({ text: feedbackText, isCorrect: data.correct });
       setSubmitted(true);
@@ -207,6 +222,7 @@ export function MissionPlay({
           }, 2000);
         } else if (data.nextTask) {
           setTimeout(() => {
+            console.log(`[NEXT_TASK] nextTaskId=${data.nextTask.id}, expression=${data.nextTask.expression}`);
             setMission(prev => prev ? { ...prev, currentTask: data.nextTask } : null);
             setUserAnswer("");
             setFeedback(null);
@@ -214,7 +230,8 @@ export function MissionPlay({
           }, 2000);
         }
       }
-    } catch {
+    } catch (err) {
+      console.error(`[ANSWER_ERROR] Error submitting answer:`, err);
       setFeedback({ text: msg.error, isCorrect: false });
     } finally {
       setIsSubmitting(false);

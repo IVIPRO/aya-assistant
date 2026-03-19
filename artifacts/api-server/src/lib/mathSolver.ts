@@ -14,7 +14,8 @@ interface SimpleMathResult {
 /**
  * Detects simple arithmetic patterns (e.g., "5 + 7", "23+14", "9 - 4")
  */
-function detectSimpleMathExpression(text: string): SimpleMathResult {
+function detectSimpleMathExpression(text: string, requestId?: string): SimpleMathResult {
+  const reqId = requestId || "unknown";
   // Clean text: trim, remove equals sign at end, normalize spaces
   let cleaned = text.trim();
   // Remove trailing "=" and any surrounding spaces
@@ -22,8 +23,8 @@ function detectSimpleMathExpression(text: string): SimpleMathResult {
   // Normalize internal spaces to single spaces
   cleaned = cleaned.replace(/\s+/g, " ");
 
-  console.log("[AYA_HOMEWORK] detectSimpleMathExpression input:", text);
-  console.log("[AYA_HOMEWORK] cleaned text:", cleaned);
+  console.log(`[AYA_HOMEWORK] ${reqId} detectSimpleMathExpression input: "${text}"`);
+  console.log(`[AYA_HOMEWORK] ${reqId} cleaned text: "${cleaned}"`);
 
   // Pattern: number operator number
   // Supports: +, -, *, /, x (for multiplication)
@@ -58,7 +59,7 @@ function detectSimpleMathExpression(text: string): SimpleMathResult {
         else if (op === "*") result = num1 * num2;
         else if (op === "/") {
           if (num2 === 0) {
-            console.log("[AYA_HOMEWORK] division by zero detected");
+            console.log(`[AYA_HOMEWORK] ${reqId} division by zero detected`);
             return { detected: true, expression: `${num1} ${displayOp} ${num2}`, error: "division_by_zero" };
           }
           result = num1 / num2;
@@ -69,16 +70,16 @@ function detectSimpleMathExpression(text: string): SimpleMathResult {
         // Format expression for display
         const expression = `${num1} ${displayOp} ${num2}`;
 
-        console.log("[AYA_HOMEWORK] math detected: expression =", expression, "answer =", result);
+        console.log(`[AYA_HOMEWORK] ${reqId} math detected: expression = ${expression}, answer = ${result}`);
         return { detected: true, expression, answer: result };
       } catch {
-        console.log("[AYA_HOMEWORK] calculation error");
+        console.log(`[AYA_HOMEWORK] ${reqId} calculation error`);
         return { detected: true, expression: `${num1} ${displayOp} ${num2}`, error: "calculation_error" };
       }
     }
   }
 
-  console.log("[AYA_HOMEWORK] no simple math detected in:", cleaned);
+  console.log(`[AYA_HOMEWORK] ${reqId} no simple math detected in: "${cleaned}"`);
   return { detected: false };
 }
 
@@ -143,9 +144,12 @@ async function trySimpleMathSolve(
   imageMimeType: string,
   lang: "bg" | "es" | "en",
   openaiClient: any,
+  requestId?: string,
 ): Promise<string | null> {
-  console.log("[AYA_HOMEWORK] ===== STAGE 1: Simple Math Solver =====");
-  console.log("[AYA_HOMEWORK] language:", lang);
+  const reqId = requestId || "unknown";
+  console.log(`[AYA_HOMEWORK] ${reqId} ===== STAGE 1: Simple Math Solver =====`);
+  console.log(`[AYA_HOMEWORK] ${reqId} language: ${lang}`);
+  console.log(`[AYA_HOMEWORK] ${reqId} cleared previous state: true`);
   
   try {
     // Use vision API just to extract visible text (lightweight usage)
@@ -160,7 +164,7 @@ async function trySimpleMathSolve(
       ? (imageMimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp")
       : "image/jpeg";
 
-    console.log("[AYA_HOMEWORK] sending extraction request to vision API...");
+    console.log(`[AYA_HOMEWORK] ${reqId} sending extraction request to vision API...`);
     const completion = await openaiClient.chat.completions.create({
       model: "gpt-5.2",
       max_completion_tokens: 100, // Very limited for text extraction
@@ -176,34 +180,35 @@ async function trySimpleMathSolve(
     });
 
     const extractedText = completion.choices[0]?.message?.content?.trim() ?? "";
-    console.log("[AYA_HOMEWORK] extracted text from image:", extractedText);
+    console.log(`[AYA_HOMEWORK] ${reqId} extracted text: "${extractedText}"`);
 
     // Check if image was unclear
     if (extractedText.toUpperCase().includes("UNCLEAR") || extractedText.toUpperCase().includes("POCO CLARO") || extractedText.toUpperCase().includes("НЕЯСНО")) {
-      console.log("[AYA_HOMEWORK] image unclear detected");
+      console.log(`[AYA_HOMEWORK] ${reqId} image unclear detected`);
       const unclearMsg = getUnclearImageMessage(lang);
-      console.log("[AYA_HOMEWORK] returning unclear message:", unclearMsg);
+      console.log(`[AYA_HOMEWORK] ${reqId} returning unclear message`);
       return unclearMsg;
     }
 
     // Try to detect and solve simple math
-    const mathResult = detectSimpleMathExpression(extractedText);
+    const mathResult = detectSimpleMathExpression(extractedText, reqId);
 
     if (mathResult.detected && mathResult.expression) {
       const response = getLocalizedMathResponse(lang, mathResult.expression, mathResult.answer, mathResult.error);
       if (response) {
-        console.log("[AYA_HOMEWORK] STAGE 1 SUCCESS - returning math response:", response);
+        console.log(`[AYA_HOMEWORK] ${reqId} STAGE_1_SUCCESS`);
+        console.log(`[AYA_HOMEWORK] ${reqId} solver result: ${mathResult.answer}`);
         return response;
       }
     }
 
     // Not simple math detected - return null to use full vision analysis
-    console.log("[AYA_HOMEWORK] not simple math - falling back to full vision analysis");
+    console.log(`[AYA_HOMEWORK] ${reqId} not simple math - falling back to full vision analysis`);
     return null;
   } catch (error) {
     // If extraction fails, return null to fall back to full vision analysis
-    console.log("[AYA_HOMEWORK] extraction error:", error);
-    console.log("[AYA_HOMEWORK] falling back to full vision analysis");
+    console.log(`[AYA_HOMEWORK] ${reqId} extraction error:`, error);
+    console.log(`[AYA_HOMEWORK] ${reqId} falling back to full vision analysis`);
     return null;
   }
 }

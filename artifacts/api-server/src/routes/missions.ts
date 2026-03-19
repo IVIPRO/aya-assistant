@@ -231,6 +231,7 @@ router.post("/missions/start", requireAuth, async (req, res): Promise<void> => {
     m2: 30, // Изваждане до 10
     m3: 40, // Събиране до 20
     m4: 30, // Умножение в таблицата
+    m5: 35, // Задача с думи
   };
   const xpReward = xpRewardMap[missionId] || 30;
 
@@ -249,9 +250,10 @@ router.post("/missions/start", requireAuth, async (req, res): Promise<void> => {
     .returning();
 
   // Insert first task
+  let currentTaskResponse = null;
   if (tasks.length > 0) {
     const firstTask = tasks[0];
-    await db.insert(missionTasksTable).values({
+    const [insertedTask] = await db.insert(missionTasksTable).values({
       missionId: dbMission.id,
       taskId: firstTask.id,
       expression: firstTask.expression,
@@ -261,12 +263,20 @@ router.post("/missions/start", requireAuth, async (req, res): Promise<void> => {
       number1: firstTask.number1,
       number2: firstTask.number2,
       operator: firstTask.operator,
-    });
+    }).returning();
+
+    // Return the inserted task with the database ID, not the generator ID
+    currentTaskResponse = {
+      id: insertedTask.id,  // Database ID (numeric)
+      expression: insertedTask.expression,
+      answer: insertedTask.answer,
+      type: insertedTask.type,
+    };
   }
 
   res.json({
     mission: dbMission,
-    currentTask: tasks[0] || null,
+    currentTask: currentTaskResponse,
     completedCount: 0,
     requiredCount: mission.taskCount,
   });
@@ -319,10 +329,12 @@ router.post("/missions/tasks/:taskId/answer", requireAuth, async (req, res): Pro
     const isCorrect = checkAnswer({ answer: task.answer } as MathTask, userAnswer);
     const lang = (childLang?.toLowerCase() === "bg" ? "bg" : childLang?.toLowerCase() === "es" ? "es" : "en") as "bg" | "es" | "en";
 
-    // Debug logging for word problems
+    // Debug logging for word problems - detailed trace
+    console.log(`[WORD_PROBLEM] mission=${mission.missionId}, type=${task.type}`);
     console.log(`[WORD_PROBLEM] text: "${task.expression}"`);
-    console.log(`[WORD_PROBLEM] expectedAnswer: ${task.answer} (type: ${typeof task.answer})`);
-    console.log(`[WORD_PROBLEM] submittedAnswer: ${userAnswer} (type: ${typeof userAnswer})`);
+    console.log(`[WORD_PROBLEM] taskId=${task.id} (database), taskIdStr=${task.taskId} (generator)`);
+    console.log(`[WORD_PROBLEM] expectedAnswer: ${task.answer} (raw, type: ${typeof task.answer})`);
+    console.log(`[WORD_PROBLEM] submittedAnswer: ${userAnswer} (raw, type: ${typeof userAnswer})`);
     console.log(`[WORD_PROBLEM] normalizedExpected: ${Number(task.answer)}`);
     console.log(`[WORD_PROBLEM] normalizedSubmitted: ${Number(userAnswer)}`);
     console.log(`[WORD_PROBLEM] isCorrect: ${isCorrect}`);

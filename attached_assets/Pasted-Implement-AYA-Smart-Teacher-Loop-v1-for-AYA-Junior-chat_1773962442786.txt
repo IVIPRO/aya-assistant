@@ -1,0 +1,149 @@
+Implement AYA Smart Teacher Loop v1 for AYA Junior chat.
+
+Goal:
+AYA should guide a child through a mini learning loop instead of giving only one-off responses.
+
+Important constraints:
+- Do NOT redesign UI
+- Do NOT use Autonomous Agent
+- Keep it lightweight MVP
+- Do NOT break missions, chat, voice input, XP, memory, or curriculum system
+
+--------------------------------
+1. Core behavior
+
+When a child asks for help with a topic, for example:
+- "Помогни ми със събиране"
+- "Искам да уча математика"
+- "Дай ми задача"
+
+AYA should start a mini-teaching loop.
+
+--------------------------------
+2. Teacher Loop Flow
+
+Step 1:
+AYA gives one short task.
+
+Example:
+"Хайде да опитаме заедно:
+3 + 4 = ?"
+
+Step 2:
+AYA waits for the child's answer.
+
+Step 3:
+If the answer is correct:
+- praise the child
+- briefly confirm the answer
+- offer the next task
+
+Example:
+"Браво, Магдалена! 3 + 4 = 7 ⭐
+Искаш ли още една?"
+
+Step 4:
+If the answer is incorrect:
+- do NOT shame
+- do NOT immediately reveal the answer
+- give one hint
+
+Example:
+"Добър опит!
+Нека помислим: ако имаме 3 и добавим още 4, колко стават общо?"
+
+--------------------------------
+3. Supported first topic
+
+For v1 support only:
+- addition to 10
+
+Do not add other subjects yet.
+
+--------------------------------
+4. Task generation
+
+Generate short local tasks:
+- a and b from 0..10
+- a + b <= 10
+
+Examples:
+1 + 2
+3 + 5
+4 + 4
+
+Prevent immediate repetition.
+
+--------------------------------
+5. Session memory
+
+During the active chat session keep:
+- currentTopic
+- currentQuestion
+- currentAnswer
+- correctCount
+
+--------------------------------
+6. Child-aware tone
+
+Use:
+- childName if known
+- gentle Montessori tone
+- age-appropriate language
+
+If childName exists:
+"Браво, Магдалена!"
+
+--------------------------------
+7. XP connection
+
+If practical, award small XP for correct answers in teacher loop:
++3 XP per correct loop answer
+
+If XP integration is too invasive for v1:
+keep the loop working first, XP optional.
+
+--------------------------------
+8. Localization
+
+Support:
+- Bulgarian
+- English
+- Spanish
+
+--------------------------------
+9. Do not break
+
+Do not break:
+- missions
+- word problems
+- voice input
+- listening mode
+- memory
+- curriculum system
+- existing chat
+
+--------------------------------
+10. Expected result
+
+Example flow:
+
+Child:
+"Помогни ми със събиране"
+
+AYA:
+"Хайде да опитаме заедно:
+2 + 5 = ?"
+
+Child:
+"7"
+
+AYA:
+"Браво, Магдалена! 2 + 5 = 7 ⭐
+Искаш ли още една?"
+
+--------------------------------
+At the end confirm:
+- files changed
+- loop state structure
+- example teacher loop flow

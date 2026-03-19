@@ -31,7 +31,7 @@ function getGradeLabel(grade: number, country?: string): string {
   return `Grade ${grade}`;
 }
 
-function getLang(language?: string): "bg" | "es" | "en" {
+export function getLang(language?: string): "bg" | "es" | "en" {
   const l = (language ?? "").toLowerCase();
   if (l.includes("bulgar") || l === "bg") return "bg";
   if (l.includes("spanish") || l.includes("español") || l === "es") return "es";
@@ -394,6 +394,169 @@ function getMontessoriGuidingResponse(userMessage: string, context: JuniorContex
   ];
 
   return defaultResponses[Math.floor(Math.random() * defaultResponses.length)];
+}
+
+/**
+ * Detect if user wants to start a learning/teaching loop (v1: addition to 10)
+ */
+export function detectTeachingIntent(userMessage: string, lang: "bg" | "es" | "en"): boolean {
+  const msg = userMessage.toLowerCase().trim();
+  
+  if (lang === "bg") {
+    const triggers = [
+      "помогни ми със събиране", "събиране", "събирам", "научи ме събиране",
+      "искам да уча събиране", "задай ми събиране", "упражнение събиране",
+      "дай ми задача събиране", "тренирай ме събиране"
+    ];
+    return triggers.some(t => msg.includes(t));
+  }
+  
+  if (lang === "es") {
+    const triggers = [
+      "ayúdame con suma", "suma", "quiero practicar suma", "enséñame suma",
+      "dame una tarea de suma", "practiquemos suma", "entrena me suma"
+    ];
+    return triggers.some(t => msg.includes(t));
+  }
+  
+  // English
+  const triggers = [
+    "help with addition", "addition", "teach me addition", "practice addition",
+    "give me an addition task", "let's practice addition", "addition practice"
+  ];
+  return triggers.some(t => msg.includes(t));
+}
+
+/**
+ * Generate a simple addition task: a + b where a, b <= 10 and a+b <= 10
+ */
+export function generateAdditionTask(previousTasks: string[] = []): { a: number; b: number; task: string } {
+  let a, b;
+  let attempts = 0;
+  
+  do {
+    a = Math.floor(Math.random() * 11);  // 0..10
+    b = Math.floor(Math.random() * 11);  // 0..10
+    attempts++;
+  } while ((a + b > 10 || (a === 0 && b === 0)) && attempts < 20);  // Avoid 0+0, sum > 10
+  
+  const task = `${a} + ${b}`;
+  
+  // Prevent immediate repetition
+  if (previousTasks.includes(task)) {
+    return generateAdditionTask(previousTasks);
+  }
+  
+  return { a, b, task };
+}
+
+/**
+ * Evaluate if a given answer is correct for an addition problem
+ */
+export function evaluateAdditionAnswer(a: number, b: number, userAnswer: string): { correct: boolean; expected: number } {
+  const expected = a + b;
+  const cleaned = userAnswer.toLowerCase().trim().replace(/[^0-9]/g, "");
+  const answered = parseInt(cleaned, 10);
+  
+  return {
+    correct: !isNaN(answered) && answered === expected,
+    expected
+  };
+}
+
+/**
+ * Generate feedback for an addition answer (correct or hint)
+ */
+export function getAdditionFeedback(
+  a: number,
+  b: number,
+  userAnswer: string,
+  childName: string,
+  lang: "bg" | "es" | "en",
+  isCorrect: boolean
+): string {
+  const charEmoji = "🐼";
+  const expected = a + b;
+  
+  if (isCorrect) {
+    // Correct answer feedback
+    if (lang === "bg") {
+      return [
+        `${charEmoji} Браво, ${childName}! ${a} + ${b} = ${expected} ⭐\nИскаш ли още една задача?`,
+        `${charEmoji} Точно! ${a} + ${b} = ${expected}! Прекрасна работа, ${childName}! 🌟\nПродължаваме ли?`,
+        `${charEmoji} Чудесно! ${expected} е верния отговор! Ты си чудесен математик, ${childName}! 🎉\nОще ли една?`
+      ][Math.floor(Math.random() * 3)];
+    }
+    
+    if (lang === "es") {
+      return [
+        `${charEmoji} ¡Bravo, ${childName}! ${a} + ${b} = ${expected} ⭐\n¿Quieres otro?`,
+        `${charEmoji} ¡Correcto! ${a} + ${b} = ${expected}. ¡Excelente trabajo, ${childName}! 🌟\n¿Continuamos?`,
+        `${charEmoji} ¡Perfecto! ¡${expected} es la respuesta correcta! ¡Eres un matemático brillante, ${childName}! 🎉\n¿Una más?`
+      ][Math.floor(Math.random() * 3)];
+    }
+    
+    // English
+    return [
+      `${charEmoji} Excellent, ${childName}! ${a} + ${b} = ${expected} ⭐\nWant another one?`,
+      `${charEmoji} That's right! ${a} + ${b} = ${expected}. Great work, ${childName}! 🌟\nShall we continue?`,
+      `${charEmoji} Perfect! ${expected} is correct! You're such a wonderful mathematician, ${childName}! 🎉\nOne more?`
+    ][Math.floor(Math.random() * 3)];
+  }
+  
+  // Incorrect - give a hint, don't shame
+  if (lang === "bg") {
+    return [
+      `${charEmoji} Добър опит! Нека помислим: ако имаме ${a} и добавим още ${b}, колко стават общо?`,
+      `${charEmoji} Интересно мислене! Помисли отново: ${a} и ${b} заедно колко ще бъдат?`,
+      `${charEmoji} Хубав опит, ${childName}! Брой: начни с ${a}, после добави ${b} повече. Колко общо?`
+    ][Math.floor(Math.random() * 3)];
+  }
+  
+  if (lang === "es") {
+    return [
+      `${charEmoji} ¡Buen intento! Pensemos: si tenemos ${a} y le sumamos ${b} más, ¿cuál es el total?`,
+      `${charEmoji} ¡Interesante! Intenta de nuevo: ${a} y ${b} juntos, ¿cuántos son?`,
+      `${charEmoji} ¡Buen esfuerzo, ${childName}! Cuenta: empieza con ${a}, luego suma ${b} más. ¿Cuántos en total?`
+    ][Math.floor(Math.random() * 3)];
+  }
+  
+  // English
+  return [
+    `${charEmoji} Good try! Let's think: if we have ${a} and add ${b} more, how many do we get altogether?`,
+    `${charEmoji} Interesting thinking! Try again: ${a} and ${b} together, how many is that?`,
+    `${charEmoji} Nice effort, ${childName}! Count: start with ${a}, then add ${b} more. How many in total?`
+  ][Math.floor(Math.random() * 3)];
+}
+
+/**
+ * Generate the initial prompt for starting an addition teaching loop
+ */
+export function getAdditionTaskPrompt(a: number, b: number, childName: string, lang: "bg" | "es" | "en"): string {
+  const charEmoji = "🐼";
+  
+  if (lang === "bg") {
+    return [
+      `${charEmoji} Хайде да опитаме заедно, ${childName}:\n${a} + ${b} = ?`,
+      `${charEmoji} Начало на математическо приключение, ${childName}!\nКолко е ${a} + ${b}?`,
+      `${charEmoji} Готови ли сте за задачата, ${childName}?\n${a} + ${b} = ?`
+    ][Math.floor(Math.random() * 3)];
+  }
+  
+  if (lang === "es") {
+    return [
+      `${charEmoji} Vamos a intentar juntos, ${childName}:\n${a} + ${b} = ?`,
+      `${charEmoji} ¡El comienzo de una aventura matemática, ${childName}!\n¿Cuánto es ${a} + ${b}?`,
+      `${charEmoji} ¿Listos para la tarea, ${childName}?\n${a} + ${b} = ?`
+    ][Math.floor(Math.random() * 3)];
+  }
+  
+  // English
+  return [
+    `${charEmoji} Let's try together, ${childName}:\n${a} + ${b} = ?`,
+    `${charEmoji} Here's an addition challenge, ${childName}:\nWhat is ${a} + ${b}?`,
+    `${charEmoji} Ready for an addition task, ${childName}?\n${a} + ${b} = ?`
+  ][Math.floor(Math.random() * 3)];
 }
 
 export function getAIResponse(module: string, userMessage: string, context?: JuniorContext): string {

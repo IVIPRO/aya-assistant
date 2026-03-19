@@ -1,0 +1,81 @@
+Debug and fix AYA Junior Homework Brain Stage 1 wiring.
+
+Current problem:
+The code claims that local math solving was added, but runtime behavior shows AYA still returns the old generic tutoring reply instead of solving clear simple math from the uploaded image.
+
+Observed bad behavior:
+For a clear image like "5 + 7 =", AYA still replies with generic tutoring such as:
+- "Преди да отговоря — какво мислиш ти?"
+instead of giving:
+- detected task
+- final answer
+
+Goal:
+Make sure Stage 1 local math solving is actually executed and takes priority over the generic tutor response.
+
+Required fix:
+
+1. Verify the real runtime flow for uploaded image homework:
+- image upload
+- extraction step
+- simple math solve step
+- final response selection
+
+2. Add explicit priority:
+If a simple arithmetic task is successfully extracted and solved,
+AYA must immediately return the solved response and must NOT fall through to the generic tutoring response.
+
+3. Add hard branch logic:
+Pseudo-flow:
+- extracted = extractHomeworkText(...)
+- solved = trySimpleMathSolve(extracted)
+- if solved exists:
+    return solvedResponse
+- else:
+    continue to generic vision/tutor fallback
+
+4. Prevent generic override:
+If Stage 1 returns a solved result, do not append or replace it with any of these generic reflective messages:
+- "Какво мислиш ти?"
+- "Нека помислим заедно"
+- similar fallback tutor intros
+
+5. Add lightweight runtime debug logs on the server side for this flow:
+Log:
+- extracted text
+- whether simple math was detected
+- whether solver returned a result
+- whether fallback branch was used
+
+Example debug log messages:
+- [AYA_HOMEWORK] extracted text: "5 + 7 ="
+- [AYA_HOMEWORK] simple math detected: true
+- [AYA_HOMEWORK] solved result: 12
+- [AYA_HOMEWORK] using stage1 solver response
+or
+- [AYA_HOMEWORK] fallback to generic tutor
+
+6. Make the solved response format explicit in Bulgarian:
+If solved:
+- "На снимката виждам: 5 + 7"
+- "Отговорът е 12."
+
+Do the same for English and Spanish localized variants.
+
+7. Ensure extracted equation cleanup handles:
+- "=" at the end
+- extra spaces
+- OCR variants like "5+7", "23 +14", "23+ 14 ="
+
+8. Do not redesign UI.
+9. Do not change upload flow.
+10. Do not use autonomous agent mode.
+
+11. After the fix, verify with these exact cases:
+- image "5 + 7 =" -> response must contain "12"
+- image "23 + 14 =" -> response must contain "37"
+- if stage1 fails, only then use fallback
+
+Important:
+This is a wiring/debug fix, not a new feature.
+The local solver already exists — make sure it is actually used first.

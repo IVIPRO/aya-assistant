@@ -160,17 +160,24 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
   // If message contains an image, try simple math solving first (Stage 1 of Homework Brain)
   if (hasImage && module === "junior" && imageBase64) {
     try {
+      console.log("[AYA_HOMEWORK] ===== HOMEWORK IMAGE FLOW =====");
+      console.log("[AYA_HOMEWORK] child:", context.childName, "grade:", context.grade, "language:", context.language);
+      
       const resolvedLang = getLang(context.language);
       const openai = getOpenAIClient();
 
       // Stage 1: Try to extract and solve simple arithmetic locally
+      console.log("[AYA_HOMEWORK] attempting Stage 1 simple math solver...");
       const simpleMathResult = await trySimpleMathSolve(imageBase64, imageMimeType, resolvedLang, openai);
 
       if (simpleMathResult) {
         // Simple math was detected and solved
+        console.log("[AYA_HOMEWORK] Stage 1 returned result, using simple math response");
         aiContent = simpleMathResult;
       } else {
         // Not simple math - use full vision analysis with step-by-step tutoring
+        console.log("[AYA_HOMEWORK] Stage 1 returned null, falling back to Stage 2 full vision analysis");
+        console.log("[AYA_HOMEWORK] ===== STAGE 2: Full Vision Analysis =====");
         const resolvedGrade = context.grade ?? 2;
         const childName = context.childName ?? "the student";
         const charKey = context.aiCharacter ?? "owl";

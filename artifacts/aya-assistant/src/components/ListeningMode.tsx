@@ -11,6 +11,26 @@ interface ListeningModeProps {
   characterEmoji?: string;
 }
 
+/**
+ * Remove emojis and special characters from text for clean speech synthesis.
+ * Keeps the actual text but removes all emoji characters.
+ */
+function cleanTextForSpeech(text: string): string {
+  if (!text) return "";
+  
+  // Remove emojis and other non-text characters
+  // This regex matches emoji ranges and special characters
+  return text
+    .replace(/[\u{1F300}-\u{1F9FF}]/gu, "") // Emoji ranges
+    .replace(/[\u{2600}-\u{27BF}]/gu, "") // Miscellaneous symbols
+    .replace(/[\u{1F900}-\u{1F9FF}]/gu, "") // Supplemental symbols and pictographs
+    .replace(/[\u{2300}-\u{23FF}]/gu, "") // Miscellaneous technical
+    .replace(/[\u{2000}-\u{206F}]/gu, "") // General punctuation
+    .replace(/[^\p{L}\p{N}\s.,!?;:—–-]/gu, "") // Keep only letters, numbers, and basic punctuation
+    .replace(/\s+/g, " ") // Collapse multiple spaces
+    .trim();
+}
+
 const LISTENING_LABELS: Record<"en" | "bg" | "es", {
   title: string;
   listenButton: string;
@@ -86,7 +106,17 @@ export function ListeningMode({
 
   const handleListen = () => {
     if (!contentToRead.trim()) return;
-    speak(contentToRead, {
+    
+    // Clean the text to remove emojis and special characters
+    const cleanedText = cleanTextForSpeech(contentToRead);
+    
+    if (!cleanedText.trim()) {
+      // If cleaned text is empty, show fallback
+      console.warn("[LISTENING_MODE] Text cleaned to empty, check input");
+      return;
+    }
+    
+    speak(cleanedText, {
       lang: LANG_MAP[lang],
       rate: 0.9,
       pitch: 1,

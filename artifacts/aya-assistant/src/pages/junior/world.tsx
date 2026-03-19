@@ -5,9 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useListMissions, useCompleteMission, useListChildren, getListMissionsQueryKey, getListChildrenQueryKey } from "@workspace/api-client-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { MissionPlay } from "@/components/MissionPlay";
 import { useState, useRef, useEffect } from "react";
 import { useLocation } from "wouter";
 import type { Mission } from "@workspace/api-client-react";
+import { resolveLang } from "@/lib/i18n";
 
 type WorldLang = "en" | "bg" | "es";
 
@@ -344,6 +346,9 @@ export function WorldMap() {
   const [location] = useLocation();
   const zoneFromUrl = typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("zone") : null;
   const [selectedZone, setSelectedZone] = useState<string | null>(zoneFromUrl);
+  const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
+  const [activeMissionTitle, setActiveMissionTitle] = useState<string>("");
+  const [activeMissionTasks, setActiveMissionTasks] = useState<number>(5);
   const zoneOpenedAtRef = useRef<number | null>(zoneFromUrl ? Date.now() : null);
 
   const handleSetZone = (zoneId: string | null) => {
@@ -368,7 +373,39 @@ export function WorldMap() {
   const activeChild = children.find(c => c.id === activeChildId);
   const childXp = activeChild?.xp ?? 0;
   const lang = getLang(activeChild?.language);
+  const fullLang = resolveLang(activeChild?.language);
   const lbl = WORLD_LABELS[lang];
+
+  const handleStartMission = (mission: Mission) => {
+    // Map mission titles to mission IDs
+    const titleToId: Record<string, { id: string; tasks: number }> = {
+      "Събиране до 10": { id: "m1", tasks: 5 },
+      "Addition up to 10": { id: "m1", tasks: 5 },
+      "Suma hasta 10": { id: "m1", tasks: 5 },
+      "Addition up to 20": { id: "m3", tasks: 6 },
+      "Събиране до 20": { id: "m3", tasks: 6 },
+      "Suma hasta 20": { id: "m3", tasks: 6 },
+      "Subtraction up to 10": { id: "m2", tasks: 5 },
+      "Изваждане до 10": { id: "m2", tasks: 5 },
+      "Resta hasta 10": { id: "m2", tasks: 5 },
+      "Multiplication Table": { id: "m4", tasks: 5 },
+      "Умножение в таблицата": { id: "m4", tasks: 5 },
+      "Tabla de multiplicación": { id: "m4", tasks: 5 },
+    };
+
+    const config = titleToId[mission.title];
+    if (config && activeChildId) {
+      setActiveMissionId(config.id);
+      setActiveMissionTitle(mission.title);
+      setActiveMissionTasks(config.tasks);
+    }
+  };
+
+  const handleMissionComplete = () => {
+    setActiveMissionId(null);
+    refetch();
+    toast({ title: "Mission Completed! 🎉", description: "You earned XP and Stars!" });
+  };
 
   const handleComplete = async (id: number) => {
     const responseTimeMs = zoneOpenedAtRef.current ? Date.now() - zoneOpenedAtRef.current : undefined;
@@ -388,6 +425,32 @@ export function WorldMap() {
 
   const activeZone = selectedZone ? ZONES.find(z => z.id === selectedZone) : null;
   const activeMissions = selectedZone ? missions.filter(m => getMissionZone(m) === selectedZone) : [];
+
+  // If a mission is active, show the mission play interface
+  if (activeMissionId && activeChildId) {
+    return (
+      <Layout isJunior>
+        <div className="mb-6">
+          <button
+            onClick={() => setActiveMissionId(null)}
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold mb-4 bg-white/50 px-4 py-2 rounded-xl"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Missions
+          </button>
+        </div>
+        <MissionPlay
+          childId={activeChildId}
+          missionId={activeMissionId}
+          missionTitle={activeMissionTitle}
+          requiredTasks={activeMissionTasks}
+          lang={fullLang}
+          onBack={() => setActiveMissionId(null)}
+          onComplete={handleMissionComplete}
+        />
+      </Layout>
+    );
+  }
 
   return (
     <Layout isJunior>
@@ -497,11 +560,11 @@ export function WorldMap() {
 
                     {!mission.completed ? (
                       <button
-                        onClick={() => handleComplete(mission.id)}
+                        onClick={() => handleStartMission(mission)}
                         disabled={completeMutation.isPending}
                         className="w-full py-2.5 font-bold rounded-xl border-b-4 border-yellow-600 hover:border-b-0 hover:translate-y-1 transition-all text-sm bg-junior text-junior-foreground"
                       >
-                        {lbl.completeMission}
+                        Start Mission
                       </button>
                     ) : (
                       <button disabled className="w-full py-2.5 bg-green-100 text-green-700 font-bold rounded-xl flex justify-center items-center gap-2 text-sm">

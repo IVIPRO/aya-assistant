@@ -209,16 +209,25 @@ router.post("/missions/start", requireAuth, async (req, res): Promise<void> => {
   // Generate initial tasks for the mission
   const tasks = generateMissionTasks(missionId, mission.taskCount);
 
+  // Set correct XP reward based on mission type
+  const xpRewardMap: Record<string, number> = {
+    m1: 30, // Събиране до 10
+    m2: 30, // Изваждане до 10
+    m3: 40, // Събиране до 20
+    m4: 30, // Умножение в таблицата
+  };
+  const xpReward = xpRewardMap[missionId] || 30;
+
   // Insert mission into database
   const [dbMission] = await db.insert(missionsTable)
     .values({
       childId,
       title: mission.titleBg, // Default to Bulgarian
-      description: `Complete ${mission.taskCount} tasks to earn 30 XP`,
+      description: `Complete ${mission.taskCount} tasks to earn ${xpReward} XP`,
       subject: "math",
       zone: "math_island",
       difficulty: "easy",
-      xpReward: 30,
+      xpReward,
       starReward: 1,
     })
     .returning();
@@ -346,8 +355,9 @@ router.post("/missions/tasks/:taskId/answer", requireAuth, async (req, res): Pro
         .set({ completed: true, completedAt: new Date() })
         .where(eq(missionsTable.id, mission.id));
 
-      // Award final XP and stars
-      const finalXp = (child.xp || 0) + 30;
+      // Award final XP and stars (mission xpReward was set during mission start)
+      const bonusXp = mission.xpReward || 30;
+      const finalXp = (child.xp || 0) + bonusXp;
       const finalStars = (child.stars || 0) + 1;
       await db.update(childrenTable)
         .set({ xp: finalXp, stars: finalStars })

@@ -3,7 +3,7 @@ import { db, chatMessagesTable, memoriesTable, childrenTable } from "@workspace/
 import { eq, and, desc } from "drizzle-orm";
 import { SendChatMessageBody } from "@workspace/api-zod";
 import { requireAuth, getUser } from "../lib/auth";
-import { getAIResponse } from "../lib/aiResponses";
+import { getAIResponse, detectTeachingIntent, generateAdditionTask, evaluateAdditionAnswer, getAdditionFeedback, getAdditionTaskPrompt, getLang } from "../lib/aiResponses";
 import { trySimpleMathSolve } from "../lib/mathSolver";
 import OpenAI from "openai";
 
@@ -138,7 +138,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
     .values({ userId, childId: childId ?? null, module, role: "user", content: cleanContent })
     .returning();
 
-  let context: { grade?: number; country?: string; aiCharacter?: string; childName?: string; language?: string; lastMissionTopic?: string; lastInteractionTime?: Date } = {};
+  let context: { grade?: number; country?: string; aiCharacter?: string; childName?: string; language?: string; lastMissionTopic?: string; lastInteractionTime?: Date; childXp?: number } = {};
   if (module === "junior" && childId) {
     const { getFamilyIdFromDb } = await import("../lib/auth");
     const familyId = await getFamilyIdFromDb(userId);
@@ -172,6 +172,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
           language: childRecord.language ?? undefined,
           lastMissionTopic,
           lastInteractionTime: latestMemory?.createdAt,
+          childXp: childRecord.xp ?? 0,
         };
       }
     }
@@ -252,8 +253,57 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
       aiContent = fallbackMsgs[lang];
     }
   } else {
-    // Regular chat without image - use default response logic
-    aiContent = getAIResponse(module, cleanContent, context);
+    // Check if user wants to start an addition teaching loop (v1)
+    const lang = getLang(context.language);
+    const isTeachingRequest = detectTeachingIntent(cleanContent, lang);
+    
+    if (isTeachingRequest && module === "junior") {
+      // Start a new addition teaching loop
+      const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+      const childName = context.childName ?? fallbackName;
+      const { a, b, task } = generateAdditionTask();
+      aiContent = getAdditionTaskPrompt(a, b, childName, lang);
+    } else {
+      // Check if this might be an answer to a recent addition task
+      const recentMessages = messages.slice(-2); // Check last 2 messages
+      let isAnswerToTask = false;
+      let taskA = 0, taskB = 0;
+      
+      for (const msg of recentMessages) {
+        if (msg.role === "assistant") {
+          // Look for pattern like "X + Y = ?" in recent messages
+          const match = msg.content.match(/(\d+)\s*\+\s*(\d+)\s*=\s*\?/);
+          if (match) {
+            taskA = parseInt(match[1], 10);
+            taskB = parseInt(match[2], 10);
+            isAnswerToTask = true;
+            break;
+          }
+        }
+      }
+      
+      if (isAnswerToTask) {
+        // Evaluate the answer
+        const { correct, expected } = evaluateAdditionAnswer(taskA, taskB, cleanContent);
+        const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+        const childName = context.childName ?? fallbackName;
+        
+        aiContent = getAdditionFeedback(taskA, taskB, cleanContent, childName, lang, correct);
+        
+        // Award small XP for correct answer in teaching loop
+        if (correct && childId) {
+          const xpReward = 3;
+          await db
+            .update(childrenTable)
+            .set({ xp: (context.childXp ?? 0) + xpReward })
+            .where(eq(childrenTable.id, childId))
+            .catch(() => {}); // Silent fail if update doesn't work
+        }
+      } else {
+        // Regular chat without image - use default response logic
+        aiContent = getAIResponse(module, cleanContent, context);
+      }
+    }
   }
 
   const [assistantMsg] = await db

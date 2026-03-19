@@ -1,0 +1,80 @@
+Implement real homework image understanding in AYA Junior chat.
+
+Current behavior:
+When a child uploads a homework image, AYA responds with a generic tutoring message, but does not actually analyze the image contents.
+
+Goal:
+Make AYA actually inspect the uploaded image and respond specifically to what is shown in the homework photo.
+
+Requirements:
+
+1. When the child sends an image in Junior chat:
+- include the uploaded image in the AI request
+- do not use only generic fallback text
+- make the assistant examine the image contents
+
+2. AYA should detect from the image if possible:
+- subject (math, Bulgarian, reading, logic, English, environmental studies)
+- visible text
+- numbers / equation / word problem
+- whether the image contains homework instructions
+- whether the image is unclear
+
+3. If the image is clear and readable:
+AYA should answer specifically based on the actual image.
+
+Examples in Bulgarian:
+- if it is a math equation, explain the solution step by step
+- if it is a word problem, restate the problem simply and solve it
+- if it is Bulgarian language homework, explain the text / letters / grammar task
+- if it is unreadable, ask for a clearer photo
+
+4. Add localized fallback messages.
+
+Bulgarian:
+- "Прегледах снимката."
+- "Мисля, че това е задача по математика."
+- "Снимката не е достатъчно ясна. Можеш ли да я снимаш по-отблизо?"
+
+English:
+- "I reviewed the image."
+- "I think this is a math task."
+- "The image is not clear enough. Can you take a closer photo?"
+
+Spanish:
+- "Revisé la imagen."
+- "Creo que es una tarea de matemáticas."
+- "La imagen no es lo bastante clara. ¿Puedes tomar una foto más cercana?"
+
+5. Keep the AYA teaching style:
+- gentle
+- child-friendly
+- step by step
+- appropriate for the child’s grade
+- localized to the child’s language
+
+6. Important:
+The prompt sent to the AI must include:
+- child name
+- grade
+- language
+- active subject/topic if available
+- the uploaded image itself
+- instruction to analyze the actual image before responding
+
+7. If the image contains a math task:
+- first identify the task
+- then explain it simply
+- do not jump directly to a cold final answer
+- respond like a teacher for Grade 1-4
+
+8. If no useful content is detected:
+show a helpful retry message instead of hallucinating.
+
+9. Keep current upload UI and chat layout.
+10. Do not use Replit autonomous agent mode.
+11. Keep the implementation lightweight and safe.
+12. After implementation, test with:
+- one math photo
+- one text photo
+- one unclear photo

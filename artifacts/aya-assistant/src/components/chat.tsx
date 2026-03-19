@@ -367,35 +367,39 @@ export function Chat({
     if (!homeworkFile || !homeworkPreview) return;
 
     try {
-      // Generate unique image ID
-      const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      // Store the preview URL
-      setImagePreviewsMap(prev => ({ ...prev, [imageId]: homeworkPreview }));
-
-      // Send user message with image ID marker
-      // Note: Callbacks are optional in mutation and must be guarded to prevent crashes
-      // We send image message first, then follow-up separately
-      sendMutation.mutate(
-        { data: { module, content: `[IMAGE:${imageId}]\n${hwLabels.uploadedImageCaption}`, childId: activeChildId } }
-      );
-
-      // Send assistant follow-up message after a brief delay to ensure first message is processed
-      // This avoids complex callback chaining that can cause React Query callback errors
-      setTimeout(() => {
+      // Convert file to base64 for transmission to backend
+      const reader = new FileReader();
+      reader.onload = async () => {
         try {
-          sendMutation.mutate(
-            { data: { module, content: hwLabels.assistantFollowUp, childId: activeChildId } }
-          );
-        } catch {
-          // If follow-up fails silently, the image message was already sent successfully
-        }
-      }, 500);
+          const base64Result = reader.result as string;
+          const base64Data = base64Result.split(",")[1] ?? "";
+          const mimeType = homeworkFile.type || "image/jpeg";
+          
+          // Generate unique image ID
+          const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+          
+          // Store the preview URL for display
+          setImagePreviewsMap(prev => ({ ...prev, [imageId]: homeworkPreview }));
 
-      // Clear temporary preview and file
-      setHomeworkPreview(null);
-      setHomeworkFile(null);
-      if (fileInputRef.current) fileInputRef.current.value = "";
+          // Send message with image data as base64 (backend will analyze it with vision API)
+          // Format: [IMAGE_DATA:base64Data:mimeType:imageId]\nCaption
+          const imageDataMarker = `[IMAGE_DATA:${base64Data}:${mimeType}:${imageId}]`;
+          sendMutation.mutate(
+            { data: { module, content: `${imageDataMarker}\n${hwLabels.uploadedImageCaption}`, childId: activeChildId } }
+          );
+
+          // Clear temporary preview and file after sending
+          setHomeworkPreview(null);
+          setHomeworkFile(null);
+          if (fileInputRef.current) fileInputRef.current.value = "";
+        } catch (error) {
+          toast({ title: hwLabels.sendError, variant: "destructive" });
+        }
+      };
+      reader.onerror = () => {
+        toast({ title: hwLabels.sendError, variant: "destructive" });
+      };
+      reader.readAsDataURL(homeworkFile);
     } catch (error) {
       toast({ title: hwLabels.sendError, variant: "destructive" });
     }

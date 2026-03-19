@@ -540,3 +540,58 @@ export const CreateProgressBody = zod.object({
     .max(createProgressBodyScoreMax),
   notes: zod.string().nullish(),
 });
+
+/**
+ * @summary Get or generate today's daily learning plan for a child
+ */
+export const GetDailyPlanQueryParams = zod.object({
+  childId: zod.coerce.number(),
+});
+
+export const GetDailyPlanResponse = zod.object({
+  id: zod.number(),
+  childId: zod.number(),
+  planDate: zod.string(),
+  tasks: zod.array(
+    zod.object({
+      id: zod.string(),
+      subjectId: zod.string(),
+      topicId: zod.string(),
+      taskType: zod.enum(["lesson", "practice"]),
+      xpReward: zod.number(),
+      status: zod.enum(["not_started", "in_progress", "completed"]),
+    }),
+  ),
+  createdAt: zod.date(),
+  updatedAt: zod.date(),
+});
+
+/**
+ * @summary Update a task status in a daily plan
+ */
+export const UpdateDailyPlanTaskParams = zod.object({
+  planId: zod.coerce.number(),
+  taskId: zod.coerce.string(),
+});
+
+export const UpdateDailyPlanTaskBody = zod.object({
+  status: zod.enum(["not_started", "in_progress", "completed"]),
+});
+
+export const UpdateDailyPlanTaskResponse = zod.object({
+  id: zod.number(),
+  childId: zod.number(),
+  planDate: zod.string(),
+  tasks: zod.array(
+    zod.object({
+      id: zod.string(),
+      subjectId: zod.string(),
+      topicId: zod.string(),
+      taskType: zod.enum(["lesson", "practice"]),
+      xpReward: zod.number(),
+      status: zod.enum(["not_started", "in_progress", "completed"]),
+    }),
+  ),
+  createdAt: zod.date(),
+  updatedAt: zod.date(),
+});

@@ -1,0 +1,149 @@
+Implement AYA Daily Learning Plan for the Junior / Начален етап module.
+
+Goal:
+Create a personalized daily study plan for each child based on:
+- grade
+- completed lessons
+- XP / level
+- subject progress
+- active learning stage
+
+Feature name:
+Daily Learning Plan
+
+Requirements:
+
+1. Add a new card/section in Junior dashboard:
+- Bulgarian: Дневен учебен план
+- English: Daily Learning Plan
+- Spanish: Plan diario de aprendizaje
+
+2. The plan must generate 3 daily tasks for the active child.
+
+For example for Grade 2:
+- Mathematics: complete 1 addition task
+- Bulgarian language: read 1 short word/sentence task
+- Logic: solve 1 short puzzle
+
+3. The plan should be personalized based on progress:
+- if the child is weak in Mathematics -> prioritize math
+- if Reading is not started -> include reading
+- if a topic is already completed -> rotate to another unfinished topic
+- if the child has low XP -> assign simpler tasks
+- if the child has higher XP -> assign slightly harder tasks
+
+4. Each daily task should include:
+- subject
+- topic
+- task type
+- reward (XP)
+- status (not started / in progress / completed)
+
+5. Localized statuses:
+
+Bulgarian:
+- Не е започнато
+- В процес
+- Завършено
+
+English:
+- Not started
+- In progress
+- Completed
+
+Spanish:
+- No iniciado
+- En progreso
+- Completado
+
+6. Localized task labels:
+
+Bulgarian:
+- Дневен учебен план
+- Днешни задачи
+- Награда
+- Започни
+- Завършено
+- XP точки
+
+English:
+- Daily Learning Plan
+- Today's tasks
+- Reward
+- Start
+- Completed
+- XP points
+
+Spanish:
+- Plan diario de aprendizaje
+- Tareas de hoy
+- Recompensa
+- Empezar
+- Completado
+- Puntos XP
+
+7. Add a "Start" button for each task.
+When clicked:
+- navigate the child directly to the relevant subject/topic
+- preserve context (child, grade, subject, topic)
+
+8. Add progress summary inside the plan:
+For example:
+- 1/3 tasks completed today
+
+Localized:
+
+Bulgarian:
+- Изпълнени задачи днес: 1/3
+
+English:
+- Tasks completed today: 1/3
+
+Spanish:
+- Tareas completadas hoy: 1/3
+
+9. Reset rule:
+Generate a fresh daily plan once per day.
+If a plan already exists for today, reuse it.
+
+10. Parent visibility:
+In Parent dashboard add a small card:
+- Bulgarian: Днешен учебен план
+- English: Today's Learning Plan
+- Spanish: Plan de aprendizaje de hoy
+
+Show:
+- how many tasks are completed
+- total daily XP earned
+
+11. Animated Teacher integration:
+AYA Panda should show a localized bubble above the daily plan, for example:
+
+Bulgarian:
+- "Ето твоя план за днес!"
+- "Нека учим стъпка по стъпка."
+- "Готова ли си за първата задача?"
+
+English:
+- "Here is your plan for today!"
+- "Let's learn step by step."
+- "Ready for your first task?"
+
+Spanish:
+- "¡Aquí está tu plan de hoy!"
+- "Vamos paso a paso."
+- "¿Lista para tu primera tarea?"
+
+12. Keep brand names unchanged:
+AYA
+AYA Panda
+Montessori
+
+13. Do not redesign the app.
+Do not change backend structure significantly.
+Use existing child profile, progress, curriculum, and XP data.
+Only add daily planning logic and UI integration.
+
+14. Make the feature visible immediately in:
+- Junior dashboard
+- Parent dashboard

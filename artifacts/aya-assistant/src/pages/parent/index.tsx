@@ -10,6 +10,7 @@ import {
   useListMemories,
   useCreateFamily,
   useGetFamily,
+  useGetDailyPlan,
   getGetFamilyQueryKey,
   getListChildrenQueryKey,
   getListProgressQueryKey,
@@ -218,6 +219,9 @@ const PARENT_LABELS: Record<ParentLang, {
   companionPickerCurrent: string;
   companionPickerCancel: string;
   changeCompanionTitle: string;
+  dailyPlanTitle: string;
+  dailyPlanCompleted: (done: number, total: number) => string;
+  dailyPlanXpEarned: string;
 }> = {
   en: {
     tabMemories: "Memory Engine",
@@ -275,6 +279,9 @@ const PARENT_LABELS: Record<ParentLang, {
     companionPickerCurrent: "✓ Current",
     companionPickerCancel: "Cancel",
     changeCompanionTitle: "Change companion",
+    dailyPlanTitle: "Today's Learning Plan",
+    dailyPlanCompleted: (done, total) => `${done}/${total} tasks completed`,
+    dailyPlanXpEarned: "XP earned",
   },
   bg: {
     tabMemories: "Паметта на AYA",
@@ -332,6 +339,9 @@ const PARENT_LABELS: Record<ParentLang, {
     companionPickerCurrent: "✓ Текущ",
     companionPickerCancel: "Отказ",
     changeCompanionTitle: "Смени компаньона",
+    dailyPlanTitle: "Днешен учебен план",
+    dailyPlanCompleted: (done, total) => `${done}/${total} задачи изпълнени`,
+    dailyPlanXpEarned: "XP спечелени",
   },
   es: {
     tabMemories: "Memoria AYA",
@@ -389,6 +399,9 @@ const PARENT_LABELS: Record<ParentLang, {
     companionPickerCurrent: "✓ Actual",
     companionPickerCancel: "Cancelar",
     changeCompanionTitle: "Cambiar compañero",
+    dailyPlanTitle: "Plan de aprendizaje de hoy",
+    dailyPlanCompleted: (done, total) => `${done}/${total} tareas completadas`,
+    dailyPlanXpEarned: "XP ganados",
   },
 };
 
@@ -476,6 +489,11 @@ export function ParentDashboard() {
     staleTime: 60 * 1000,
     refetchInterval: 60 * 1000,
   });
+
+  const { data: dailyPlan } = useGetDailyPlan(
+    { childId: progressChildId },
+    { query: { queryKey: ["daily-plan", progressChildId], enabled: progressChildId > 0, staleTime: 60 * 1000 } },
+  );
 
   const createChild = useCreateChild();
   const deleteChild = useDeleteChild();
@@ -915,6 +933,42 @@ export function ParentDashboard() {
                 <div className="text-3xl font-bold text-violet-500">{voiceStats?.minutesListened ?? 0}</div>
                 <div className="text-xs font-semibold text-violet-700 mt-0.5">{plbl.statMinListened}</div>
                 <div className="text-xs text-muted-foreground">{plbl.statToday}</div>
+              </div>
+            </div>
+          )}
+
+          {dailyPlan && progressChild && (
+            <div className="bg-gradient-to-br from-violet-50 to-purple-50 p-5 rounded-2xl border border-violet-200 shadow-sm">
+              <h3 className="font-bold mb-3 flex items-center gap-2 text-sm text-violet-800">
+                <BookOpen className="w-4 h-4 text-violet-600" />
+                {plbl.dailyPlanTitle}
+              </h3>
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <div className="flex items-center gap-3">
+                  <div className="text-3xl font-bold text-violet-700">
+                    {dailyPlan.tasks.filter(t => t.status === "completed").length}/{dailyPlan.tasks.length}
+                  </div>
+                  <div className="text-sm text-violet-600 font-medium">
+                    {plbl.dailyPlanCompleted(
+                      dailyPlan.tasks.filter(t => t.status === "completed").length,
+                      dailyPlan.tasks.length,
+                    )}
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-amber-600">
+                    {dailyPlan.tasks
+                      .filter(t => t.status === "completed")
+                      .reduce((sum, t) => sum + t.xpReward, 0)}
+                  </div>
+                  <div className="text-xs text-amber-700 font-medium">{plbl.dailyPlanXpEarned}</div>
+                </div>
+              </div>
+              <div className="w-full bg-violet-100 rounded-full h-2 mt-3">
+                <div
+                  className="bg-gradient-to-r from-violet-500 to-purple-500 h-2 rounded-full transition-all"
+                  style={{ width: `${dailyPlan.tasks.length > 0 ? Math.round((dailyPlan.tasks.filter(t => t.status === "completed").length / dailyPlan.tasks.length) * 100) : 0}%` }}
+                />
               </div>
             </div>
           )}

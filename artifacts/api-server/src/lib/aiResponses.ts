@@ -71,6 +71,87 @@ function getGradeLabelByLang(grade: number, lang: "bg" | "es" | "en"): string {
   return `Grade ${grade}`;
 }
 
+/**
+ * Detect if the message is a casual greeting or friendly chat (vs educational content)
+ */
+function detectGreetingIntent(msg: string, lang: "bg" | "es" | "en"): boolean {
+  const msgLower = msg.toLowerCase().trim();
+  
+  // Bulgarian greetings and casual chat
+  if (lang === "bg") {
+    const greetings = [
+      "здравей", "здраво", "привет",
+      "как си", "как е", "как си днес",
+      "какво правиш", "какво правиш ти",
+      "разкажи ми", "разкажи ми нещо", "всичко ли е добре",
+      "добро утро", "добра вечер", "добър ден",
+      "пък ти", "как дела", "как дела днес",
+      "щом е да е", "стави ми загадка"
+    ];
+    return greetings.some(greeting => msgLower.includes(greeting));
+  }
+  
+  // Spanish greetings and casual chat
+  if (lang === "es") {
+    const greetings = [
+      "hola", "¿hola?", "hey",
+      "¿cómo estás", "¿cómo e", "¿cómo está",
+      "¿qué haces", "¿qué tal",
+      "cuéntame", "cuéntame algo", "dime algo",
+      "buenos días", "buenas tardes", "buenas noches",
+      "¿todo bien", "¿qué tal el día", "¿cómo fue el día"
+    ];
+    return greetings.some(greeting => msgLower.includes(greeting));
+  }
+  
+  // English greetings and casual chat
+  const greetings = [
+    "hi", "hello", "hey",
+    "how are you", "how are you doing", "how is it going",
+    "what are you doing", "what's up",
+    "tell me", "tell me something", "tell me a story",
+    "good morning", "good evening", "good afternoon",
+    "how's it going", "how have you been", "everything okay"
+  ];
+  return greetings.some(greeting => msgLower.includes(greeting));
+}
+
+/**
+ * Generate a friendly chat response for greetings and casual conversation
+ */
+function getFriendlyChatResponse(context: JuniorContext): string {
+  const charKey = context.aiCharacter ?? "panda";
+  const charEmoji = CHARACTER_EMOJIS[charKey] ?? "🐼";
+  const childName = context.childName ?? "friend";
+  const lang = getLang(context.language);
+
+  if (lang === "bg") {
+    return [
+      `${charEmoji} Здравей, ${childName}! Радвам се да те чуя! 😊 Как мога да ти помогна днес?`,
+      `${charEmoji} Привет! Всичко ли е добре? Щом нещо те интересува, просто ми кажи! 🌟`,
+      `${charEmoji} Здравей, ${childName}! Аз съм тук и готов да те помогна с което и да е — задачи, въпроси, все едно! ✨`,
+      `${charEmoji} Здравo! Как дела днес? Кажи ми какво те занима! 🎉`,
+    ][Math.floor(Math.random() * 4)];
+  }
+  
+  if (lang === "es") {
+    return [
+      `${charEmoji} ¡Hola, ${childName}! ¡Me alegra verte! 😊 ¿Cómo puedo ayudarte hoy?`,
+      `${charEmoji} ¡Hola! ¿Qué tal el día? Si hay algo que necesites, ¡dímelo! 🌟`,
+      `${charEmoji} ¡Hola, ${childName}! Estoy aquí para ayudarte con tareas, preguntas, ¡lo que sea! ✨`,
+      `${charEmoji} ¡Hola! ¿Cómo estás? ¡Cuéntame qué te interesa! 🎉`,
+    ][Math.floor(Math.random() * 4)];
+  }
+  
+  // English
+  return [
+    `${charEmoji} Hi, ${childName}! I'm so glad to see you! 😊 How can I help you today?`,
+    `${charEmoji} Hello! How's your day going? If you need anything, just let me know! 🌟`,
+    `${charEmoji} Hi, ${childName}! I'm here to help with homework, questions, anything! ✨`,
+    `${charEmoji} Hello! How are you? Tell me what's on your mind! 🎉`,
+  ][Math.floor(Math.random() * 4)];
+}
+
 function getMontessoriGuidingResponse(userMessage: string, context: JuniorContext): string {
   const charKey = context.aiCharacter ?? "panda";
   const charEmoji = CHARACTER_EMOJIS[charKey] ?? "🐼";
@@ -275,6 +356,12 @@ function getMontessoriGuidingResponse(userMessage: string, context: JuniorContex
 
 export function getAIResponse(module: string, userMessage: string, context?: JuniorContext): string {
   if (module === "junior" && context) {
+    // Check if this is a greeting/casual chat first
+    const lang = getLang(context.language);
+    if (detectGreetingIntent(userMessage, lang)) {
+      return getFriendlyChatResponse(context);
+    }
+    // Otherwise, use Montessori tutoring mode
     return getMontessoriGuidingResponse(userMessage, context);
   }
 

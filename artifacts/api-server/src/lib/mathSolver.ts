@@ -326,7 +326,7 @@ function detectMultipleSimpleMathProblems(extractedText: string): SimpleMathMult
 
 /**
  * Generates multi-problem teacher response
- * Lists all problems and encourages thinking first
+ * Lists all problems with answers in simple, clean format
  */
 function generateMultiProblemResponse(
   lang: "bg" | "es" | "en",
@@ -334,52 +334,35 @@ function generateMultiProblemResponse(
 ): string {
   if (problems.length === 0) return "";
 
+  const emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+  
   const labels = {
     bg: {
-      intro: "На снимката виждам няколко задачи:",
-      think: "Хайде да помислим заедно.",
-      question: "Как мислиш, колко е?",
-      answers: "Ето и отговорите:",
+      intro: "На снимката виждам няколко задачи.",
+      closing: "Браво! Решихме ги заедно.",
     },
     es: {
-      intro: "Veo varios ejercicios en la imagen:",
-      think: "Vamos a pensarlo juntos.",
-      question: "¿Cuál crees que es la respuesta?",
-      answers: "Aquí están las respuestas:",
+      intro: "Veo varios ejercicios en la imagen.",
+      closing: "¡Muy bien! Los resolvimos juntos.",
     },
     en: {
-      intro: "I can see several problems in the image:",
-      think: "Let's think together.",
-      question: "What do you think the answer is?",
-      answers: "Here are the answers:",
+      intro: "I can see several problems in the image.",
+      closing: "Great! We solved them together.",
     },
   };
 
   const lbl = labels[lang];
   
-  // Part 1: List all problems and encourage thinking
+  // Build simple, clean response with all problems listed
   let response = lbl.intro + "\n\n";
   
   for (let i = 0; i < problems.length; i++) {
     const problem = problems[i];
-    response += `${i + 1}. ${problem.expression}\n`;
+    const emoji = emojis[i] || `${i + 1}.`;
+    response += `${emoji} ${problem.expression} = ${problem.answer}\n`;
   }
   
-  response += "\n" + lbl.think + "\n\n";
-  
-  for (let i = 0; i < problems.length; i++) {
-    const problem = problems[i];
-    response += `${i + 1}) ${problem.expression}\n`;
-    response += lbl.question + "\n\n";
-  }
-  
-  // Part 2: Provide answers
-  response += lbl.answers + "\n\n";
-  
-  for (let i = 0; i < problems.length; i++) {
-    const problem = problems[i];
-    response += `${i + 1}) ${problem.expression} = ${problem.answer}\n`;
-  }
+  response += "\n" + lbl.closing;
   
   return response;
 }

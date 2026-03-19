@@ -324,7 +324,20 @@ const ZONES: Zone[] = [
 ];
 
 function getMissionZone(mission: Mission): string {
-  if (mission.zone) return mission.zone;
+  // Use zone from curriculum mapping if available
+  if (mission.zone) {
+    // Map curriculum zone names to UI zone IDs
+    const zoneMap: Record<string, string> = {
+      "Math Island": "Math Island",
+      "Reading Forest": "Reading Forest",
+      "Logic Mountain": "Logic Mountain",
+      "English City": "English City",
+      "Science Planet": "Science Planet",
+    };
+    return zoneMap[mission.zone] || mission.zone;
+  }
+  
+  // Fallback: infer from subject keywords
   const subj = mission.subject;
   for (const zone of ZONES) {
     if (zone.subjectKeywords.some(kw => subj.toLowerCase().includes(kw.toLowerCase()))) {

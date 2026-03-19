@@ -1,0 +1,127 @@
+Implement AYA Child Memory v1 for AYA Junior.
+
+Goal:
+AYA should remember basic information about the active child and use it in greetings and tutoring responses.
+
+Important constraints:
+- Do NOT redesign UI
+- Do NOT use Autonomous Agent
+- Keep it lightweight MVP
+- Do NOT break missions, chat, voice input, XP, or curriculum system
+
+--------------------------------
+
+1. Memory fields to store
+
+For the active child profile store:
+
+childName
+childGrade
+preferredLanguage
+lastMissionTopic
+lastInteractionTime
+
+--------------------------------
+
+2. Greeting behavior
+
+When AYA starts a new interaction:
+
+If childName exists:
+Greeting example (Bulgarian):
+
+"Здравей отново, Магдалена! Готова ли си за ново учебно приключение?"
+
+If no name exists:
+Ask once:
+
+"Как се казваш?"
+
+Store the answer as childName.
+
+--------------------------------
+
+3. Context awareness
+
+If lastMissionTopic exists:
+
+AYA may say:
+
+"Последно решавахме задачи за събиране. Искаш ли да продължим?"
+
+--------------------------------
+
+4. Grade awareness
+
+If childGrade exists:
+
+AYA should adapt tone:
+
+Example:
+
+"Нека мислим като ученици във 2 клас."
+
+--------------------------------
+
+5. Storage
+
+Store memory lightweight:
+
+Use existing user/child data storage if available.
+
+If not available:
+Create a simple memory object linked to the child profile.
+
+--------------------------------
+
+6. Update memory
+
+After each mission:
+
+update:
+lastMissionTopic
+lastInteractionTime
+
+--------------------------------
+
+7. Language support
+
+Memory responses must respect UI language:
+
+Bulgarian
+English
+Spanish
+
+--------------------------------
+
+8. Do not break
+
+Listening Mode
+Missions
+Voice input
+Chat
+XP system
+Curriculum mapping
+
+--------------------------------
+
+9. Expected result
+
+AYA should:
+
+remember the child's name
+remember grade
+reference previous learning topics
+
+Example conversation:
+
+AYA:
+"Здравей отново, Магдалена! Вчера решавахме задачи за събиране. Да продължим ли?"
+
+--------------------------------
+
+At the end confirm:
+
+files changed
+memory structure created
+example stored memory object

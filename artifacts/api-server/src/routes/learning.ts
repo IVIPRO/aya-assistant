@@ -10,6 +10,7 @@ import {
   evaluateLessonBadges,
   computeStreak,
 } from "../lib/levelSystem";
+import { detectWeakTopics } from "../lib/weaknessDetection";
 
 const router: IRouter = Router();
 
@@ -18,12 +19,13 @@ const router: IRouter = Router();
    Record a lesson / practice / quiz completion and award XP + stars.
 ───────────────────────────────────────────────────────────────── */
 router.post("/learning/complete", requireAuth, async (req, res): Promise<void> => {
-  const { childId, subjectId, topicId, action, correctCount = 0 } = req.body as {
+  const { childId, subjectId, topicId, action, correctCount = 0, totalCount = 0 } = req.body as {
     childId: number;
     subjectId: string;
     topicId: string;
     action: "lesson" | "practice" | "quiz";
     correctCount?: number;
+    totalCount?: number;
   };
 
   if (!childId || !subjectId || !topicId || !action) {
@@ -63,7 +65,20 @@ router.post("/learning/complete", requireAuth, async (req, res): Promise<void> =
     lessonDone: boolean;
     practiceDone: boolean;
     quizPassed: boolean;
+    attempts: number;
+    correctAnswers: number;
+    wrongAnswers: number;
+    retryCount: number;
+    lastActivityAt: Date;
   }> = {};
+
+  const newAttempts = (existing?.attempts ?? 0) + 1;
+  const wrongCount = Math.max(0, (totalCount || correctCount + 1) - correctCount);
+
+  updateFields.attempts = newAttempts;
+  updateFields.correctAnswers = (existing?.correctAnswers ?? 0) + Math.max(0, correctCount);
+  updateFields.wrongAnswers = (existing?.wrongAnswers ?? 0) + wrongCount;
+  updateFields.lastActivityAt = new Date();
 
   if (action === "lesson") {
     if (!existing?.lessonDone) {
@@ -74,37 +89,43 @@ router.post("/learning/complete", requireAuth, async (req, res): Promise<void> =
     if (!existing?.practiceDone) {
       xpGained += XP_AWARDS.practice;
       updateFields.practiceDone = true;
+    } else {
+      updateFields.retryCount = (existing?.retryCount ?? 0) + 1;
     }
-    // Always reward correct answers
     xpGained += Math.max(0, correctCount) * XP_AWARDS.correctAnswer;
     starsGained += Math.max(0, correctCount);
   } else if (action === "quiz") {
-    const totalQuestions = 3;
+    const totalQuestions = totalCount || 3;
     const passed = correctCount >= Math.ceil(totalQuestions * 0.67);
     if (passed) {
       xpGained += XP_AWARDS.quiz;
       starsGained += 3;
       if (!existing?.quizPassed) updateFields.quizPassed = true;
+    } else {
+      updateFields.retryCount = (existing?.retryCount ?? 0) + 1;
     }
   }
 
   /* ── Upsert topic progress ────────────────────────────────────── */
-  if (Object.keys(updateFields).length > 0) {
-    if (!existing) {
-      await db.insert(childTopicProgressTable).values({
-        childId,
-        subjectId,
-        topicId,
-        lessonDone: updateFields.lessonDone ?? false,
-        practiceDone: updateFields.practiceDone ?? false,
-        quizPassed: updateFields.quizPassed ?? false,
-      });
-    } else {
-      await db
-        .update(childTopicProgressTable)
-        .set(updateFields)
-        .where(eq(childTopicProgressTable.id, existing.id));
-    }
+  if (!existing) {
+    await db.insert(childTopicProgressTable).values({
+      childId,
+      subjectId,
+      topicId,
+      lessonDone: updateFields.lessonDone ?? false,
+      practiceDone: updateFields.practiceDone ?? false,
+      quizPassed: updateFields.quizPassed ?? false,
+      attempts: updateFields.attempts ?? 1,
+      correctAnswers: updateFields.correctAnswers ?? 0,
+      wrongAnswers: updateFields.wrongAnswers ?? 0,
+      retryCount: updateFields.retryCount ?? 0,
+      lastActivityAt: updateFields.lastActivityAt,
+    });
+  } else {
+    await db
+      .update(childTopicProgressTable)
+      .set(updateFields)
+      .where(eq(childTopicProgressTable.id, existing.id));
   }
 
   /* ── Log to progress table (for streak computation) ───────────── */
@@ -131,7 +152,6 @@ router.post("/learning/complete", requireAuth, async (req, res): Promise<void> =
     .from(childTopicProgressTable)
     .where(eq(childTopicProgressTable.childId, childId));
 
-  // Compute streak from progress table
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
@@ -148,7 +168,6 @@ router.post("/learning/complete", requireAuth, async (req, res): Promise<void> =
 
   const mergedBadges: BadgeRecord[] = [...existingBadges, ...newBadges];
 
-  /* ── Persist child update ─────────────────────────────────────── */
   const [updatedChild] = await db
     .update(childrenTable)
     .set({ xp: newXp, stars: newStars, badgesEarned: mergedBadges })
@@ -204,6 +223,40 @@ router.get("/learning/progress", requireAuth, async (req, res): Promise<void> =>
   };
 
   res.json({ topics, summary });
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   GET /api/learning/weaknesses?childId=
+   Return weak topics detected from performance data.
+───────────────────────────────────────────────────────────────── */
+router.get("/learning/weaknesses", requireAuth, async (req, res): Promise<void> => {
+  const childId = parseInt(req.query.childId as string, 10);
+  if (isNaN(childId)) {
+    res.status(400).json({ error: "childId is required" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
+
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const topics = await db
+    .select()
+    .from(childTopicProgressTable)
+    .where(eq(childTopicProgressTable.childId, childId));
+
+  const weakTopics = detectWeakTopics(topics);
+
+  res.json({ weakTopics, childId });
 });
 
 export default router;

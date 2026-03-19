@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, Pencil, Brain, MessageCircle, CheckCircle2, Circle } from "lucide-react";
+import { ArrowLeft, BookOpen, Pencil, Brain, MessageCircle, CheckCircle2, Circle, AlertTriangle } from "lucide-react";
 import { elementarySubjects, SUBJECT_ACTIONS_LABELS, type Subject, type Topic } from "@/lib/curriculum";
 import type { LangCode } from "@/lib/i18n";
 import { cn } from "@/components/layout";
 import { LessonViewer } from "./lesson-viewer";
+import {
+  useGetLearningWeaknesses,
+  getGetLearningWeaknessesQueryKey,
+} from "@workspace/api-client-react";
 
 interface TopicProgressItem {
   subjectId: string;
@@ -33,6 +37,15 @@ interface LessonContext {
   mode: LessonMode;
 }
 
+/* ─────────────────────────────────────────────────────────────────
+   Weakness badge chip labels
+───────────────────────────────────────────────────────────────── */
+const WEAK_CHIP: Record<LangCode, string> = {
+  en: "Review",
+  bg: "Преговор",
+  es: "Repaso",
+};
+
 export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, onStart, onBack }: SubjectPanelProps) {
   const [selected, setSelected] = useState<Subject | null>(null);
   const [lessonCtx, setLessonCtx] = useState<LessonContext | null>(null);
@@ -51,10 +64,21 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
     staleTime: 30 * 1000,
   });
 
+  /* Fetch weakness data for this child */
+  const { data: weaknessData } = useGetLearningWeaknesses(
+    { childId },
+    { query: { queryKey: getGetLearningWeaknessesQueryKey({ childId }), enabled: childId > 0, staleTime: 60 * 1000 } },
+  );
+  const weakTopics = weaknessData?.weakTopics ?? [];
+
   const topicProgress = progressData?.topics ?? [];
 
   function getTopicDone(subjectId: string, topicId: string) {
     return topicProgress.find(p => p.subjectId === subjectId && p.topicId === topicId);
+  }
+
+  function isTopicWeak(subjectId: string, topicId: string): boolean {
+    return weakTopics.some(w => w.subjectId === subjectId && w.topicId === topicId);
   }
 
   // ── Lesson viewer mode ──────────────────────────────────────────
@@ -121,6 +145,7 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
                 const doneLessons = subjectTopics.filter(t => getTopicDone(subject.id, t.id)?.lessonDone).length;
                 const totalTopics = subjectTopics.length;
                 const allDone = doneLessons === totalTopics && totalTopics > 0;
+                const hasWeakness = subjectTopics.some(t => isTopicWeak(subject.id, t.id));
                 return (
                   <motion.button
                     key={subject.id}
@@ -131,11 +156,17 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
                     whileTap={{ scale: 0.97 }}
                     onClick={() => setSelected(subject)}
                     className={cn(
-                      "flex flex-col items-center gap-3 p-5 rounded-3xl border-2 shadow-sm hover:shadow-md transition-all text-left",
+                      "relative flex flex-col items-center gap-3 p-5 rounded-3xl border-2 shadow-sm hover:shadow-md transition-all text-left",
                       subject.bgClass,
                       subject.borderClass,
                     )}
                   >
+                    {hasWeakness && (
+                      <span className="absolute top-2 right-2 flex items-center gap-0.5 text-[8px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                        <AlertTriangle className="w-2 h-2" />
+                        {WEAK_CHIP[lang]}
+                      </span>
+                    )}
                     <span className="text-4xl">{subject.emoji}</span>
                     <span className={cn("font-bold text-sm text-center leading-tight", subject.colorClass)}>
                       {subject.label[lang]}
@@ -171,18 +202,30 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
                 {selected.topics.map((topic, idx) => {
                   const done = getTopicDone(selected.id, topic.id);
+                  const isWeak = isTopicWeak(selected.id, topic.id);
                   return (
                     <motion.div
                       key={topic.id}
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: idx * 0.04 }}
-                      className="bg-white/80 rounded-2xl border border-white shadow-sm overflow-hidden"
+                      className={cn(
+                        "rounded-2xl border shadow-sm overflow-hidden",
+                        isWeak ? "bg-amber-50/90 border-amber-200" : "bg-white/80 border-white",
+                      )}
                     >
                       <div className="px-4 py-3 flex items-center justify-between">
-                        <p className="font-semibold text-sm text-foreground">{topic.label[lang]}</p>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <p className="font-semibold text-sm text-foreground">{topic.label[lang]}</p>
+                          {isWeak && (
+                            <span className="inline-flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200 flex-shrink-0">
+                              <AlertTriangle className="w-2.5 h-2.5" />
+                              {WEAK_CHIP[lang]}
+                            </span>
+                          )}
+                        </div>
                         {done && (
-                          <div className="flex gap-1.5 items-center">
+                          <div className="flex gap-1.5 items-center flex-shrink-0">
                             {done.lessonDone && <span title="Lesson done" className="text-green-500"><BookOpen className="w-3 h-3" /></span>}
                             {done.practiceDone && <span title="Practice done" className="text-blue-500"><Pencil className="w-3 h-3" /></span>}
                             {done.quizPassed && <span title="Quiz passed" className="text-purple-500"><Brain className="w-3 h-3" /></span>}

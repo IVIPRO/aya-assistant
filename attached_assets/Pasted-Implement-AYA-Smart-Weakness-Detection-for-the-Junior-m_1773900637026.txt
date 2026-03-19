@@ -1,0 +1,172 @@
+Implement AYA Smart Weakness Detection for the Junior / Начален етап module.
+
+Goal:
+Detect weak learning areas for each child automatically and adapt future tasks, recommendations, and daily plans based on performance.
+
+Feature name:
+Smart Weakness Detection
+
+Use existing data if available:
+- quiz results
+- practice results
+- lesson completion
+- correct / incorrect answers
+- time spent per topic
+- retries
+- XP progress
+- daily plan completion
+
+Requirements:
+
+1. Track topic performance per child.
+
+For each topic, store:
+- attempts count
+- correct answers count
+- wrong answers count
+- success rate
+- average completion time
+- retry count
+- last activity date
+
+Example:
+Subject: Mathematics
+Topic: Addition
+Correct: 6
+Wrong: 4
+Success rate: 60%
+Retries: 3
+
+2. Detect weak topics automatically.
+
+Mark a topic as weak if one or more are true:
+- success rate < 70%
+- wrong answers >= 3
+- retry count >= 2
+- quiz failed
+- unusually long completion time compared to other topics
+
+3. Add weak topic labels in UI.
+
+Bulgarian:
+- Нуждае се от още практика
+- Слаба тема
+- Препоръчано за преговор
+
+English:
+- Needs more practice
+- Weak topic
+- Recommended for review
+
+Spanish:
+- Necesita más práctica
+- Tema débil
+- Recomendado para repaso
+
+4. Daily Learning Plan integration.
+
+If a weak topic exists:
+- prioritize it in the next daily plan
+- insert a review task automatically
+- lower difficulty if needed
+- offer extra guided practice
+
+Example:
+If Magdalena struggles with Addition,
+tomorrow's plan should include:
+- Mathematics → Addition review
+- short guided exercise
+- easier warm-up before quiz
+
+5. AYA companion integration.
+
+AYA Panda should react to weak areas with supportive, localized messages.
+
+Bulgarian examples:
+- "Нека упражним това още малко."
+- "Тази тема има нужда от още практика."
+- "Ще се справиш — да опитаме заедно."
+
+English:
+- "Let's practice this a little more."
+- "This topic needs a bit more work."
+- "You can do it — let's try together."
+
+Spanish:
+- "Vamos a practicar esto un poco más."
+- "Este tema necesita un poco más de trabajo."
+- "Tú puedes — vamos a intentarlo juntos."
+
+6. Parent dashboard integration.
+
+Add a new card in Parent dashboard:
+
+Bulgarian:
+- Зони за подобрение
+
+English:
+- Improvement Areas
+
+Spanish:
+- Áreas de mejora
+
+Show:
+- subject
+- topic
+- current success rate
+- recommendation
+
+Example:
+Математика → Събиране → 60% → Препоръчано за преговор
+
+7. Topic cards integration.
+
+If a topic is weak, show a visible marker:
+- small warning chip
+- or colored review badge
+
+Bulgarian:
+- Преговор
+- Още практика
+
+English:
+- Review
+- More practice
+
+Spanish:
+- Repaso
+- Más práctica
+
+8. Adaptive difficulty.
+
+When weakness is detected:
+- generate easier practice tasks first
+- then medium tasks
+- only then quiz again
+
+9. Do not punish the child.
+
+Important rule:
+Weakness detection must be encouraging, never negative.
+Never show discouraging wording.
+Use supportive and motivating language only.
+
+10. Localization.
+
+All labels, recommendations, helper messages, and dashboard cards must use the existing localization system.
+
+11. Keep brand names unchanged:
+AYA
+AYA Panda
+Montessori
+
+12. Do not redesign the app.
+Do not change routes.
+Do not rebuild backend architecture.
+Only extend performance tracking, adaptive recommendations, and UI indicators.
+
+13. Make the feature visible immediately in:
+- Parent dashboard
+- topic cards
+- daily learning plan logic
+- AYA Panda helper messages

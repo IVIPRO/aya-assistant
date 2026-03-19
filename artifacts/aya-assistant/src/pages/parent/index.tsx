@@ -11,11 +11,14 @@ import {
   useCreateFamily,
   useGetFamily,
   useGetDailyPlan,
+  useGetLearningWeaknesses,
   getGetFamilyQueryKey,
   getListChildrenQueryKey,
   getListProgressQueryKey,
   getListMissionsQueryKey,
+  getGetLearningWeaknessesQueryKey,
 } from "@workspace/api-client-react";
+import type { WeakTopic } from "@workspace/api-client-react";
 import type { Child, Badge } from "@workspace/api-client-react";
 import { Activity, BrainCircuit, Users, LineChart, Plus, Trash2, Pencil, Home, Clock, Award, TrendingUp, TrendingDown, Sparkles } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -222,6 +225,10 @@ const PARENT_LABELS: Record<ParentLang, {
   dailyPlanTitle: string;
   dailyPlanCompleted: (done: number, total: number) => string;
   dailyPlanXpEarned: string;
+  improvementAreasTitle: string;
+  improvementAreasEmpty: string;
+  weakLabelMap: Record<string, string>;
+  weakRecommendationMap: Record<string, string>;
 }> = {
   en: {
     tabMemories: "Memory Engine",
@@ -282,6 +289,18 @@ const PARENT_LABELS: Record<ParentLang, {
     dailyPlanTitle: "Today's Learning Plan",
     dailyPlanCompleted: (done, total) => `${done}/${total} tasks completed`,
     dailyPlanXpEarned: "XP earned",
+    improvementAreasTitle: "Improvement Areas",
+    improvementAreasEmpty: "No weak areas detected yet — keep learning!",
+    weakLabelMap: {
+      needs_more_practice: "Needs more practice",
+      weak_topic: "Weak topic",
+      recommended_review: "Recommended for review",
+    },
+    weakRecommendationMap: {
+      needs_more_practice: "Recommended for review",
+      weak_topic: "Recommended for review",
+      recommended_review: "Recommended for review",
+    },
   },
   bg: {
     tabMemories: "Паметта на AYA",
@@ -342,6 +361,18 @@ const PARENT_LABELS: Record<ParentLang, {
     dailyPlanTitle: "Днешен учебен план",
     dailyPlanCompleted: (done, total) => `${done}/${total} задачи изпълнени`,
     dailyPlanXpEarned: "XP спечелени",
+    improvementAreasTitle: "Зони за подобрение",
+    improvementAreasEmpty: "Все още няма открити слаби области — продължавай да учиш!",
+    weakLabelMap: {
+      needs_more_practice: "Нуждае се от още практика",
+      weak_topic: "Слаба тема",
+      recommended_review: "Препоръчано за преговор",
+    },
+    weakRecommendationMap: {
+      needs_more_practice: "Препоръчано за преговор",
+      weak_topic: "Препоръчано за преговор",
+      recommended_review: "Препоръчано за преговор",
+    },
   },
   es: {
     tabMemories: "Memoria AYA",
@@ -402,8 +433,117 @@ const PARENT_LABELS: Record<ParentLang, {
     dailyPlanTitle: "Plan de aprendizaje de hoy",
     dailyPlanCompleted: (done, total) => `${done}/${total} tareas completadas`,
     dailyPlanXpEarned: "XP ganados",
+    improvementAreasTitle: "Áreas de mejora",
+    improvementAreasEmpty: "Aún no se detectaron áreas débiles — ¡sigue aprendiendo!",
+    weakLabelMap: {
+      needs_more_practice: "Necesita más práctica",
+      weak_topic: "Tema débil",
+      recommended_review: "Recomendado para repaso",
+    },
+    weakRecommendationMap: {
+      needs_more_practice: "Recomendado para repaso",
+      weak_topic: "Recomendado para repaso",
+      recommended_review: "Recomendado para repaso",
+    },
   },
 };
+
+/* ─────────────────────────────────────────────────────────────────
+   Improvement Areas Card (Smart Weakness Detection)
+───────────────────────────────────────────────────────────────── */
+function ImprovementAreasCard({
+  weakTopics,
+  lang,
+  plbl,
+}: {
+  weakTopics: WeakTopic[];
+  lang: LangCode;
+  plbl: { improvementAreasTitle: string; improvementAreasEmpty: string; weakLabelMap: Record<string, string>; weakRecommendationMap: Record<string, string> };
+}) {
+  const subjectEmoji: Record<string, string> = {
+    "mathematics": "🔢",
+    "bulgarian-language": "📝",
+    "reading-literature": "📚",
+    "logic-thinking": "🧩",
+    "nature-science": "🌿",
+    "english-language": "🇬🇧",
+  };
+
+  const subjectLabel: Record<string, Record<LangCode, string>> = {
+    "mathematics":        { en: "Mathematics", bg: "Математика", es: "Matemáticas" },
+    "bulgarian-language": { en: "Bulgarian Language", bg: "Български език", es: "Lengua" },
+    "reading-literature": { en: "Reading", bg: "Четене", es: "Lectura" },
+    "logic-thinking":     { en: "Logic", bg: "Логика", es: "Lógica" },
+    "nature-science":     { en: "Nature", bg: "Околен свят", es: "Ciencias" },
+    "english-language":   { en: "English", bg: "Английски", es: "Inglés" },
+  };
+
+  const topicLabel: Record<string, Record<LangCode, string>> = {
+    "addition":        { en: "Addition",        bg: "Събиране",           es: "Suma" },
+    "subtraction":     { en: "Subtraction",      bg: "Изваждане",          es: "Resta" },
+    "multiplication":  { en: "Multiplication",   bg: "Умножение",          es: "Multiplicación" },
+    "division":        { en: "Division",         bg: "Деление",            es: "División" },
+    "word-problems":   { en: "Word problems",    bg: "Текстови задачи",    es: "Problemas" },
+    "alphabet":        { en: "Alphabet",         bg: "Азбука",             es: "Alfabeto" },
+    "reading":         { en: "Reading",          bg: "Четене",             es: "Lectura" },
+    "writing":         { en: "Writing",          bg: "Писане",             es: "Escritura" },
+    "grammar":         { en: "Grammar",          bg: "Граматика",          es: "Gramática" },
+    "stories":         { en: "Stories",          bg: "Разкази",            es: "Cuentos" },
+    "comprehension":   { en: "Comprehension",    bg: "Разбиране",          es: "Comprensión" },
+    "patterns":        { en: "Patterns",         bg: "Закономерности",     es: "Patrones" },
+    "puzzles":         { en: "Puzzles",          bg: "Пъзели",             es: "Puzles" },
+    "plants":          { en: "Plants",           bg: "Растения",           es: "Plantas" },
+    "animals":         { en: "Animals",          bg: "Животни",            es: "Animales" },
+    "weather":         { en: "Weather",          bg: "Времето",            es: "El tiempo" },
+    "vocabulary":      { en: "Vocabulary",       bg: "Речник",             es: "Vocabulario" },
+    "simple-sentences":{ en: "Simple sentences", bg: "Прости изречения",   es: "Oraciones" },
+  };
+
+  return (
+    <div className="bg-amber-50 p-5 rounded-2xl border border-amber-200 shadow-sm">
+      <h3 className="font-bold mb-3 flex items-center gap-2 text-amber-800">
+        <TrendingDown className="w-4 h-4 text-amber-600" />
+        {plbl.improvementAreasTitle}
+      </h3>
+      {weakTopics.length === 0 ? (
+        <p className="text-sm text-amber-600 italic">{plbl.improvementAreasEmpty}</p>
+      ) : (
+        <div className="space-y-2">
+          {weakTopics.map(w => (
+            <div
+              key={`${w.subjectId}:${w.topicId}`}
+              className="flex items-center justify-between gap-3 bg-white/80 rounded-xl px-3 py-2.5 border border-amber-100"
+            >
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-lg flex-shrink-0">{subjectEmoji[w.subjectId] ?? "📖"}</span>
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-gray-700 truncate">
+                    {subjectLabel[w.subjectId]?.[lang] ?? w.subjectId}
+                    {" → "}
+                    {topicLabel[w.topicId]?.[lang] ?? w.topicId}
+                  </p>
+                  <p className="text-[10px] text-amber-600 font-medium mt-0.5">
+                    {plbl.weakLabelMap[w.label] ?? w.label}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                  w.successRate < 50 ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"
+                }`}>
+                  {w.successRate}%
+                </span>
+                <span className="hidden sm:block text-[10px] text-amber-600 font-medium bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-lg">
+                  {plbl.weakRecommendationMap[w.label] ?? "Review"}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 function getCurrentZone(xp: number): { name: string; emoji: string } {
   if (xp >= 250) return { name: "Science Planet", emoji: "🌍" };
@@ -494,6 +634,12 @@ export function ParentDashboard() {
     { childId: progressChildId },
     { query: { queryKey: ["daily-plan", progressChildId], enabled: progressChildId > 0, staleTime: 60 * 1000 } },
   );
+
+  const { data: weaknessData } = useGetLearningWeaknesses(
+    { childId: progressChildId },
+    { query: { queryKey: getGetLearningWeaknessesQueryKey({ childId: progressChildId }), enabled: progressChildId > 0, staleTime: 60 * 1000 } },
+  );
+  const weakTopics: WeakTopic[] = weaknessData?.weakTopics ?? [];
 
   const createChild = useCreateChild();
   const deleteChild = useDeleteChild();
@@ -1066,6 +1212,15 @@ export function ParentDashboard() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* ── Improvement Areas (Smart Weakness Detection) ─────── */}
+          {progressChild && (
+            <ImprovementAreasCard
+              weakTopics={weakTopics}
+              lang={lang}
+              plbl={plbl}
+            />
           )}
 
           <div className="bg-card p-6 rounded-2xl border shadow-sm">

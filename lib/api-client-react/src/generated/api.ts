@@ -35,6 +35,7 @@ import type {
   Family,
   FamilyTask,
   GetDailyPlanParams,
+  GetLearningWeaknessesParams,
   HealthStatus,
   ListChatMessagesParams,
   ListMemoriesParams,
@@ -51,6 +52,7 @@ import type {
   UpdateDailyPlanTaskBody,
   UpdateFamilyTaskBody,
   User,
+  WeaknessResponse,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -2319,6 +2321,106 @@ export const useCreateProgress = <
 > => {
   return useMutation(getCreateProgressMutationOptions(options));
 };
+
+/**
+ * @summary Get weak topics detected from a child's performance data
+ */
+export const getGetLearningWeaknessesUrl = (
+  params: GetLearningWeaknessesParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/learning/weaknesses?${stringifiedParams}`
+    : `/api/learning/weaknesses`;
+};
+
+export const getLearningWeaknesses = async (
+  params: GetLearningWeaknessesParams,
+  options?: RequestInit,
+): Promise<WeaknessResponse> => {
+  return customFetch<WeaknessResponse>(getGetLearningWeaknessesUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetLearningWeaknessesQueryKey = (
+  params?: GetLearningWeaknessesParams,
+) => {
+  return [`/api/learning/weaknesses`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetLearningWeaknessesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLearningWeaknesses>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetLearningWeaknessesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLearningWeaknesses>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetLearningWeaknessesQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getLearningWeaknesses>>
+  > = ({ signal }) =>
+    getLearningWeaknesses(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getLearningWeaknesses>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetLearningWeaknessesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getLearningWeaknesses>>
+>;
+export type GetLearningWeaknessesQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get weak topics detected from a child's performance data
+ */
+
+export function useGetLearningWeaknesses<
+  TData = Awaited<ReturnType<typeof getLearningWeaknesses>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetLearningWeaknessesParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLearningWeaknesses>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetLearningWeaknessesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Get or generate today's daily learning plan for a child

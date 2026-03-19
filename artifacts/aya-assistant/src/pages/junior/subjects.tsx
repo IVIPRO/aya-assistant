@@ -44,6 +44,8 @@ const WEAK_CHIP: Record<LangCode, string> = {
   en: "Review",
   bg: "Преговор",
   es: "Repaso",
+  de: "Wiederholung",
+  fr: "Révision",
 };
 
 export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, onStart, onBack }: SubjectPanelProps) {

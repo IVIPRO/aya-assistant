@@ -34,6 +34,8 @@ const TAB_LABELS: Record<LangCode, { lesson: string; practice: string; quiz: str
   en: { lesson: "Lesson", practice: "Practice", quiz: "Quiz" },
   bg: { lesson: "Урок", practice: "Упражнения", quiz: "Тест" },
   es: { lesson: "Lección", practice: "Práctica", quiz: "Test" },
+  de: { lesson: "Lektion", practice: "Übung", quiz: "Quiz" },
+  fr: { lesson: "Leçon", practice: "Pratique", quiz: "Quiz" },
 };
 
 const UI: Record<LangCode, {
@@ -58,6 +60,18 @@ const UI: Record<LangCode, {
     retry: "Intentar de nuevo", score: (n, t) => `¡Acertaste ${n} de ${t}!`,
     loading: "Cargando lección...", back: "← Atrás", showHint: "Mostrar pista",
     placeholder: "Escribe tu respuesta…",
+  },
+  de: {
+    check: "Überprüfen", correct: "Richtig! ✅", wrong: "Nicht ganz ❌", next: "Nächste →",
+    retry: "Noch mal versuchen", score: (n, t) => `Du hast ${n} von ${t} richtig!`,
+    loading: "Lade Lektion...", back: "← Zurück", showHint: "Hinweis anzeigen",
+    placeholder: "Gib deine Antwort ein…",
+  },
+  fr: {
+    check: "Vérifier", correct: "Correct! ✅", wrong: "Pas tout à fait ❌", next: "Suivant →",
+    retry: "Réessayer", score: (n, t) => `Tu as eu ${n} sur ${t} correct!`,
+    loading: "Chargement de la leçon...", back: "← Retour", showHint: "Afficher l'indice",
+    placeholder: "Tape ta réponse…",
   },
 };
 

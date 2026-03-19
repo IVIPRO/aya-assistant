@@ -21,6 +21,8 @@ const labels: Record<LangCode, { xp: string; stars: string; levelUp: (n: number)
   en: { xp: "XP",      stars: "Stars",    levelUp: (n) => `Level ${n} Reached! 🎉` },
   bg: { xp: "Точки",   stars: "Звезди",   levelUp: (n) => `Ниво ${n} достигнато! 🎉` },
   es: { xp: "Puntos",  stars: "Estrellas", levelUp: (n) => `¡Nivel ${n} alcanzado! 🎉` },
+  de: { xp: "XP",      stars: "Sterne",   levelUp: (n) => `Stufe ${n} erreicht! 🎉` },
+  fr: { xp: "XP",      stars: "Étoiles",  levelUp: (n) => `Niveau ${n} atteint! 🎉` },
 };
 
 export function XpToast({ reward, lang = "en", onDismiss }: XpToastProps) {

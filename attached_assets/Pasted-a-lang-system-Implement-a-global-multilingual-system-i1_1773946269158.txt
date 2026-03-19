@@ -1,0 +1,129 @@
+a_lang_system"}
+Implement a global multilingual system (i18n) for the AYA platform.
+
+Goal:
+Allow the AYA interface to support multiple languages without changing the main application code.
+
+IMPORTANT:
+Do not redesign the UI.
+Only add language support infrastructure.
+
+--------------------------------
+
+SUPPORTED LANGUAGES
+
+Initial languages:
+
+Bulgarian (default)
+English
+Spanish
+German
+French
+
+--------------------------------
+
+FILE STRUCTURE
+
+Create a new folder:
+
+/locales
+
+Add files:
+
+bg.json
+en.json
+es.json
+de.json
+fr.json
+
+--------------------------------
+
+TRANSLATION SYSTEM
+
+Implement a simple translation helper function.
+
+Example:
+
+t("math_island")
+
+This should return the translated text depending on the active language.
+
+--------------------------------
+
+LANGUAGE DETECTION
+
+Detect user language automatically.
+
+Priority order:
+
+1. user profile language
+2. browser language (navigator.language)
+3. default = Bulgarian
+
+--------------------------------
+
+EXAMPLE KEYS
+
+math_island
+reading_forest
+logic_mountain
+english_city
+mission_complete
+correct_answer
+start_mission
+daily_streak
+xp_points
+
+--------------------------------
+
+EXAMPLE BG TRANSLATION
+
+{
+ "math_island": "Остров на математиката",
+ "reading_forest": "Гора на четенето",
+ "logic_mountain": "Логическа планина",
+ "english_city": "Английски град",
+ "mission_complete": "Мисията е изпълнена!",
+ "correct_answer": "Браво!",
+ "start_mission": "Започни мисия",
+ "daily_streak": "Дни подред учене",
+ "xp_points": "XP точки"
+}
+
+--------------------------------
+
+UI INTEGRATION
+
+Replace hardcoded text in the interface with translation keys.
+
+Example:
+
+Before:
+"Остров на математиката"
+
+After:
+t("math_island")
+
+--------------------------------
+
+PERFORMANCE
+
+Translations should load once at application start.
+
+No API calls.
+No AI usage.
+
+--------------------------------
+
+TEST
+
+Switch language to English and confirm:
+
+Math Island
+Mission completed!
+Great job!
+
+Switch back to Bulgarian and confirm:
+
+Остров на математиката
+Мисията е изпълнена

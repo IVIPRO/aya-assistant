@@ -115,21 +115,42 @@ export function ListeningMode({
   }, [contentToRead]);
 
   const handleListen = () => {
-    if (!contentToRead.trim()) return;
+    // ═══════════════════════════════════════════════════════════════════════
+    // STRICT RUNTIME DEBUG: Trace exact source and transformation of speech text
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    console.log("[LISTENING_DEBUG_1_RAW_INPUT] contentToRead = '" + contentToRead + "'");
+    console.log("[LISTENING_DEBUG_1_RAW_LENGTH] " + contentToRead.length + " chars");
+    
+    if (!contentToRead.trim()) {
+      console.warn("[LISTENING_INVALID_NO_CONTENT]");
+      return;
+    }
     
     // Clean the text to remove emojis and special characters
     const cleanedText = cleanTextForSpeech(contentToRead);
     
+    console.log("[LISTENING_DEBUG_2_CLEANED] '" + cleanedText + "'");
+    console.log("[LISTENING_DEBUG_2_CLEANED_LENGTH] " + cleanedText.length + " chars");
+    
     if (!cleanedText.trim()) {
-      // If cleaned text is empty, show fallback
       console.warn("[LISTENING_MODE] Text cleaned to empty, check input");
       return;
     }
     
-    // Debug: Log the final text that will be spoken
-    console.log("[LISTENING_TEXT_FINAL] " + cleanedText);
+    // STRICT VALIDATION: Block speech if text is too short (likely a label/header)
+    if (cleanedText.length < 10) {
+      console.error("[LISTENING_INVALID_TEXT_BLOCKED] Text too short (" + cleanedText.length + " chars): '" + cleanedText + "' — NOT speaking");
+      return;
+    }
     
-    speak(cleanedText, {
+    // Final utterance text - this is what will be spoken
+    const finalUtteranceText = cleanedText;
+    console.log("[LISTENING_UTTERANCE_FINAL] '" + finalUtteranceText + "'");
+    console.log("[LISTENING_UTTERANCE_LENGTH] " + finalUtteranceText.length + " chars");
+    console.log("[LISTENING_UTTERANCE_LANG] " + LANG_MAP[lang]);
+    
+    speak(finalUtteranceText, {
       lang: LANG_MAP[lang],
       rate: 0.9,
       pitch: 1,

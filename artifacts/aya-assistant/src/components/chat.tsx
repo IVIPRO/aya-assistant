@@ -24,6 +24,7 @@ interface ChatProps {
   suggestedPrompts?: string[];
   subjectContext?: SubjectContext | null;
   onTeacherStateChange?: (state: TeacherStateSignal, message?: string) => void;
+  onAyaMessageReceived?: (message: string) => void;
 }
 
 const CHARACTER_EMOJIS: Record<string, string> = {
@@ -197,6 +198,7 @@ export function Chat({
   suggestedPrompts,
   subjectContext,
   onTeacherStateChange,
+  onAyaMessageReceived,
 }: ChatProps) {
   const { activeChildId } = useAuth();
   const { t, lang } = useI18n();
@@ -277,6 +279,20 @@ export function Chat({
     if (analyzingHomework) onTeacherStateChange("thinking");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analyzingHomework]);
+
+  // ── Capture last AYA message for Listening Mode ──────────────────────
+  useEffect(() => {
+    if (!onAyaMessageReceived || messages.length === 0) return;
+    
+    // Find the last AYA (assistant) message
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === "assistant") {
+        onAyaMessageReceived(messages[i].content);
+        break;
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages]);
 
   // When waiting with empty input → thinking after a pause
   const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

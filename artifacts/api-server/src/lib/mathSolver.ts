@@ -147,8 +147,13 @@ async function trySimpleMathSolve(
   requestId?: string,
 ): Promise<string | null> {
   const reqId = requestId || "unknown";
+  
+  // Calculate file fingerprint from base64 content
+  const fingerprint = imageBase64.substring(0, 10) + "_" + imageBase64.length;
+  
   console.log(`[AYA_HOMEWORK] ${reqId} ===== STAGE 1: Simple Math Solver =====`);
   console.log(`[AYA_HOMEWORK] ${reqId} language: ${lang}`);
+  console.log(`[AYA_HOMEWORK] ${reqId} file fingerprint: ${fingerprint}`);
   console.log(`[AYA_HOMEWORK] ${reqId} cleared previous state: true`);
   
   try {
@@ -181,6 +186,7 @@ async function trySimpleMathSolve(
 
     const extractedText = completion.choices[0]?.message?.content?.trim() ?? "";
     console.log(`[AYA_HOMEWORK] ${reqId} extracted text: "${extractedText}"`);
+    console.log(`[AYA_HOMEWORK] ${reqId} file fingerprint: ${fingerprint}`);
 
     // Check if image was unclear
     if (extractedText.toUpperCase().includes("UNCLEAR") || extractedText.toUpperCase().includes("POCO CLARO") || extractedText.toUpperCase().includes("НЕЯСНО")) {

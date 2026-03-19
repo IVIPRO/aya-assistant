@@ -1,0 +1,90 @@
+Fix the real uploaded-image binding bug in AYA Junior homework image analysis.
+
+Current problem:
+AYA now shows the same extracted result for two different uploaded images.
+Example:
+- first image and second image both return:
+  "На снимката виждам: 23 + 14"
+  "Отговорът е: 37"
+
+This means the system is still reusing the wrong image input for analysis, even though request tracing and logging were added.
+
+Important:
+This is not a math solver bug.
+This is not a response rendering bug.
+This is an image/file binding bug between frontend upload and backend analysis.
+
+Goal:
+Guarantee that each newly selected image file is the exact file sent for analysis and that the backend processes that exact file only.
+
+Required fixes:
+
+1. Frontend file handling
+Inspect the image upload flow in chat.tsx and related upload logic.
+Ensure that:
+- selecting a new file fully replaces the previous selected file
+- the current file object is stored correctly
+- no stale closure captures the previous file
+- no previous blob/object URL is reused as the analysis source
+
+2. Send flow
+When user presses "Изпрати":
+- send the currently selected file only
+- verify the file object being passed is the newest one
+- ensure FormData or request payload is rebuilt fresh every time
+- never reuse previous request body or previous image data
+
+3. Backend request validation
+At the backend entrypoint:
+- log request id
+- log file size
+- log mime type
+- log a short unique fingerprint/hash of the received file bytes
+This is to prove whether image A and image B are actually different on the server.
+
+4. Add file fingerprinting
+Generate a lightweight per-upload fingerprint/hash for the uploaded image content.
+Example log:
+- [AYA_HOMEWORK] request id: req_002
+- [AYA_HOMEWORK] file fingerprint: abc12345
+- [AYA_HOMEWORK] mime: image/jpeg
+- [AYA_HOMEWORK] size: 48213
+
+If two different uploaded images produce the same fingerprint unexpectedly, the bug is in frontend sending.
+If fingerprints differ but extracted text remains the same, the bug is in extraction.
+
+5. Clear all previous selection state after send
+After each successful send:
+- clear selected file object
+- clear preview URL
+- clear selected image id
+- clear temporary upload draft state
+
+6. Ensure new selection always replaces prior selection
+If child selects a second image immediately after the first one:
+- the UI preview must correspond to the new file
+- the backend payload must correspond to the new file
+- the analysis result must correspond to the new file
+
+7. Preserve current correct behavior:
+- if image contains "5 + 7 =" -> answer 12
+- if image contains "23 + 14 =" -> answer 37
+- if image contains "9 - 4 =" -> answer 5
+
+8. Do not redesign UI.
+9. Do not remove current solver.
+10. Do not use autonomous agent mode.
+
+11. Add one temporary debug line in the frontend before send:
+- currently selected file name
+- size
+- generated local image id
+
+12. Add one temporary debug line in backend response:
+- extracted text
+- fingerprint
+- request id
+
+Important:
+This is a true file-binding / payload freshness fix.
+The system must prove that different uploaded images are actually different files end-to-end.

@@ -193,8 +193,12 @@ function getFriendlyChatResponse(context: JuniorContext): string {
 function getMontessoriGuidingResponse(userMessage: string, context: JuniorContext): string {
   const charKey = context.aiCharacter ?? "panda";
   const charEmoji = CHARACTER_EMOJIS[charKey] ?? "🐼";
-  const childName = context.childName ?? "explorer";
   const lang = getLang(context.language);
+  
+  // Use language-specific fallback if child name is missing
+  const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+  const childName = context.childName ?? fallbackName;
+  
   const gradeLabel = context.grade ? getGradeLabelByLang(context.grade, lang) : null;
   const charName = getCharName(charKey, lang);
   const grade = context.grade ?? 1;
@@ -266,13 +270,13 @@ function getMontessoriGuidingResponse(userMessage: string, context: JuniorContex
     if (isLogic) {
       return [
         `${charEmoji} ${childName}, какво хубаво логическо мислене! Нека играем открива каловерност. Какво виждаш най-първо? 🧩`,
-        `${charEmoji} Обичам твоята любознателност, ${childName}! {{charName}} е с теб. Какво ще се повтори на следващ етап? Нека открием заедно! 🔍`,
+        `${charEmoji} Обичам твоята любознателност, ${childName}! ${charName} е с теб. Какво ще се повтори на следващ етап? Нека открием заедно! 🔍`,
       ][Math.floor(Math.random() * 2)];
     }
     if (isStuck) {
       return [
-        `${charEmoji} ${childName}, чудесно! Значи си готов за ново учене — точно там расте ума. {{charName}} е до теб. Кажи ми — кой малък след első знаеш? Нека тръгнем оттам! 💪`,
-        `${charEmoji} Да попиташ за помощ е силно решение! {{charName}} е горд с теб. Какво лесна частбих мог да ви научим първо? Нека тръгнем поравачко. 🌱`,
+        `${charEmoji} ${childName}, чудесно! Значи си готов за ново учене — точно там расте ума. ${charName} е до теб. Кажи ми — кой малък след első знаеш? Нека тръгнем оттам! 💪`,
+        `${charEmoji} Да попиташ за помощ е силно решение! ${charName} е горд с теб. Какво лесна частбих мог да ви научим първо? Нека тръгнем поравачко. 🌱`,
       ][Math.floor(Math.random() * 2)];
     }
     if (isEnglishPractice) {
@@ -282,9 +286,9 @@ function getMontessoriGuidingResponse(userMessage: string, context: JuniorContex
       ][Math.floor(Math.random() * 2)];
     }
     const defaults = [
-      `${charEmoji} ${childName}, какво чудесен въпрос! {{charName}} обича любознателните умове. Какво мислиш ти? Твоите идеи са началото! 🌟`,
-      `${charEmoji} Страхотно, че попита, ${childName}! {{charName}} е развълнуван. Какво знаеш вече? Нека тръгнем от твоите знания! 🔍`,
-      `${charEmoji} {{childName}}, задаването на въпроси е знак за ученик, готов да учи! Какво вече видя или чу по тази тема? 🚀`,
+      `${charEmoji} ${childName}, какво чудесен въпрос! ${charName} обича любознателните умове. Какво мислиш ти? Твоите идеи са началото! 🌟`,
+      `${charEmoji} Страхотно, че попита, ${childName}! ${charName} е развълнуван. Какво знаеш вече? Нека тръгнем от твоите знания! 🔍`,
+      `${charEmoji} ${childName}, задаването на въпроси е знак за ученик, готов да учи! Какво вече видя или чу по тази тема? 🚀`,
     ];
     return defaults[Math.floor(Math.random() * defaults.length)];
   }

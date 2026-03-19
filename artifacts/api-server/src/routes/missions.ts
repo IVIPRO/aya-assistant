@@ -49,10 +49,20 @@ router.get("/missions", requireAuth, async (req, res): Promise<void> => {
     .where(eq(missionsTable.childId, childId))
     .orderBy(missionsTable.createdAt);
 
-  // Debug: Log missions for Math Island
+  // SURGICAL DEBUG: Trace actual missions returned for BG Grade 2
+  console.log(`[TRACE] Fetching missions for childId=${childId}`);
+  console.log(`[TRACE] Child profile: country=${child.country}, grade=${child.grade}`);
+  console.log(`[TRACE] Total missions in database: ${missions.length}`);
+  
+  const mathIslandMissions = missions.filter(m => m.zone === "Math Island");
+  console.log(`[TRACE] Math Island missions (all): ${mathIslandMissions.map(m => m.title).join(", ")}`);
+  
+  const bgG2MathMissions = missions.filter(m => m.zone === "Math Island" && m.subject === "Математика");
+  console.log(`[TRACE] BG Grade 2 Math Island (subject=Математика): ${bgG2MathMissions.map(m => m.title).join(", ")}`);
+  
+  // Final output for verification
   if (child.country === "BG" && child.grade === 2) {
-    const mathIslandMissions = missions.filter(m => m.zone === "Math Island" && m.subject === "Математика");
-    console.log(`[DEBUG] BG Grade 2 Math Island missions: ${mathIslandMissions.map(m => m.title).join(", ")}`);
+    console.log(`[MATH_ISLAND_FINAL_BG_G2] mission titles: ${bgG2MathMissions.map(m => m.title).join(", ")}`);
   }
 
   res.json(missions);

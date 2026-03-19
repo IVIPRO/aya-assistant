@@ -34,17 +34,7 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
     // Cancel any ongoing speech
     synth.cancel();
 
-    // ═══════════════════════════════════════════════════════════════════════
-    // STRICT RUNTIME DEBUG: Log exact utterance creation
-    // ═══════════════════════════════════════════════════════════════════════
-    console.log("[TTS_SPEAK_INPUT] text = '" + text + "'");
-    console.log("[TTS_SPEAK_TEXT_LENGTH] " + text.length + " chars");
-
     const utterance = new SpeechSynthesisUtterance(text);
-    
-    // DEBUG: Verify utterance text immediately after creation
-    console.log("[TTS_UTTERANCE_TEXT] '" + utterance.text + "'");
-    console.log("[TTS_UTTERANCE_TEXT_LENGTH] " + utterance.text.length + " chars");
     
     utterance.rate = options?.rate ?? 0.95;
     utterance.pitch = options?.pitch ?? 1;
@@ -52,18 +42,14 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 
     // Set language - enforce it to ensure correct voice is used
     // Default to en-US if not provided
-    const finalLang = options?.lang ?? "en-US";
-    utterance.lang = finalLang;
-    console.log("[TTS_UTTERANCE_LANG] " + finalLang);
+    utterance.lang = options?.lang ?? "en-US";
 
     utterance.onstart = () => {
-      console.log("[TTS_ONSTART] Speaking: '" + utterance.text + "'");
       setIsSpeaking(true);
       setIsPaused(false);
     };
 
     utterance.onend = () => {
-      console.log("[TTS_ONEND] Finished speaking");
       setIsSpeaking(false);
       setIsPaused(false);
     };
@@ -75,9 +61,6 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
     };
 
     utteranceRef.current = utterance;
-    
-    // Final confirmation before speak
-    console.log("[TTS_SPEAK_FINAL] Speaking utterance.text = '" + utterance.text + "'");
     synth.speak(utterance);
   }, [synth]);
 

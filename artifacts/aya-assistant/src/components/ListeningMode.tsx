@@ -116,41 +116,41 @@ export function ListeningMode({
 
   const handleListen = () => {
     // ═══════════════════════════════════════════════════════════════════════
-    // STRICT RUNTIME DEBUG: Trace exact source and transformation of speech text
+    // EXPLICIT SPEECH TEXT: Build from actual message data source, not DOM
     // ═══════════════════════════════════════════════════════════════════════
     
-    console.log("[LISTENING_DEBUG_1_RAW_INPUT] contentToRead = '" + contentToRead + "'");
-    console.log("[LISTENING_DEBUG_1_RAW_LENGTH] " + contentToRead.length + " chars");
+    // Step 1: Use explicit speechText from the message data prop (contentToRead)
+    // This is the source of truth - NOT from DOM, NOT from aria-labels, NOT from headers
+    let speechText = "";
     
-    if (!contentToRead.trim()) {
-      console.warn("[LISTENING_INVALID_NO_CONTENT]");
+    if (contentToRead && contentToRead.trim().length > 0) {
+      // Clean the text to remove emojis and special characters
+      speechText = cleanTextForSpeech(contentToRead);
+    }
+    
+    console.log("[SPEECH_TEXT_RAW] '" + contentToRead + "'");
+    console.log("[SPEECH_TEXT_RAW_LENGTH] " + contentToRead.length + " chars");
+    console.log("[SPEECH_TEXT_CLEANED] '" + speechText + "'");
+    console.log("[SPEECH_TEXT_CLEANED_LENGTH] " + speechText.length + " chars");
+    
+    // Step 2: Validate - do not speak if text is too short or empty
+    if (!speechText || speechText.trim().length === 0) {
+      console.warn("[SPEECH_TEXT_INVALID] No valid text to speak");
       return;
     }
     
-    // Clean the text to remove emojis and special characters
-    const cleanedText = cleanTextForSpeech(contentToRead);
-    
-    console.log("[LISTENING_DEBUG_2_CLEANED] '" + cleanedText + "'");
-    console.log("[LISTENING_DEBUG_2_CLEANED_LENGTH] " + cleanedText.length + " chars");
-    
-    if (!cleanedText.trim()) {
-      console.warn("[LISTENING_MODE] Text cleaned to empty, check input");
+    // Step 3: Block speech if text is suspiciously short (likely a label like "AYA 2")
+    if (speechText.length < 10) {
+      console.error("[LISTENING_INVALID_TEXT_BLOCKED] Text too short (" + speechText.length + " chars): '" + speechText + "' — NOT speaking");
       return;
     }
     
-    // STRICT VALIDATION: Block speech if text is too short (likely a label/header)
-    if (cleanedText.length < 10) {
-      console.error("[LISTENING_INVALID_TEXT_BLOCKED] Text too short (" + cleanedText.length + " chars): '" + cleanedText + "' — NOT speaking");
-      return;
-    }
+    // Step 4: Final explicit speech text - ONLY from the message data
+    console.log("[SPEECH_TEXT_EXPLICIT] '" + speechText + "'");
+    console.log("[SPEECH_TEXT_LANG] " + LANG_MAP[lang]);
     
-    // Final utterance text - this is what will be spoken
-    const finalUtteranceText = cleanedText;
-    console.log("[LISTENING_UTTERANCE_FINAL] '" + finalUtteranceText + "'");
-    console.log("[LISTENING_UTTERANCE_LENGTH] " + finalUtteranceText.length + " chars");
-    console.log("[LISTENING_UTTERANCE_LANG] " + LANG_MAP[lang]);
-    
-    speak(finalUtteranceText, {
+    // Step 5: Speak ONLY this explicit text with forced Bulgarian language if needed
+    speak(speechText, {
       lang: LANG_MAP[lang],
       rate: 0.9,
       pitch: 1,

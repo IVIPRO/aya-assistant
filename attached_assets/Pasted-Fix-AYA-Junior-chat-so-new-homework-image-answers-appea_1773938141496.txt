@@ -1,0 +1,60 @@
+Fix AYA Junior chat so new homework image answers appear immediately in the open chat without needing to leave and re-enter the module.
+
+Current behavior:
+When a homework image is uploaded, the backend computes and stores the correct answer.
+If the user leaves the chat (goes to Dashboard / Табло) and then re-enters Junior chat, the correct latest answer appears.
+But while staying inside the open chat, the new answer does not immediately show.
+
+Conclusion:
+This is a frontend live state refresh / message update issue.
+
+Goal:
+Make the current open chat update immediately after each uploaded homework image response is returned.
+
+Required fixes:
+
+1. After image send completes and backend returns the final assistant response:
+- append/update the assistant message in the current visible chat immediately
+- do not require navigation away and back
+- do not require manual reload
+
+2. Inspect chat state management in the frontend:
+- message list state
+- optimistic upload message
+- assistant response replacement/update
+- query invalidation / refetch if React Query is used
+
+3. If optimistic UI is used:
+- keep temporary upload state
+- replace it with the final resolved assistant response once returned
+- do not leave stale previous chat content visible
+
+4. If query caching is used:
+- invalidate the correct chat query after successful upload response
+- or manually inject the new assistant message into the live message list state
+
+5. Ensure the newest response always appears at once in the currently open chat.
+
+6. Add temporary frontend debug logging:
+- upload completed
+- final assistant text received
+- chat state updated
+- query invalidated/refetched if used
+
+7. Preserve current working behavior:
+- correct per-image solving
+- correct answers for 5+7, 23+14, 9-4
+- no redesign
+- no backend solver changes
+
+8. Do not use autonomous agent mode.
+
+9. Verify with this exact sequence in the same open chat session:
+- upload "5 + 7 =" -> immediately show answer 12
+- without leaving chat, upload "23 + 14 =" -> immediately show answer 37
+- without leaving chat, upload "9 - 4 =" -> immediately show answer 5
+
+Important:
+This is not a solver fix.
+This is not a backend fix.
+This is a live chat UI refresh/state synchronization fix.

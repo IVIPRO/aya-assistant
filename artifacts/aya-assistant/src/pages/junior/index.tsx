@@ -628,6 +628,7 @@ export function Junior() {
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [showListeningMode, setShowListeningMode] = useState(false);
   const [listeningContent, setListeningContent] = useState("");
+  const [lastAyaMessage, setLastAyaMessage] = useState("");
 
   /* ── Plan teacher messages ─────────────────────────────────────────── */
   const PLAN_TEACHER_MESSAGES: Record<string, string[]> = {
@@ -947,6 +948,7 @@ export function Junior() {
               suggestedPrompts={getJuniorPrompts(activeChild?.language)}
               subjectContext={subjectContext}
               onTeacherStateChange={handleTeacherStateChange}
+              onAyaMessageReceived={setLastAyaMessage}
             />
 
             <VoiceReadySection
@@ -955,9 +957,14 @@ export function Junior() {
                 // Prepare content to read from current context
                 let contentToRead = "";
                 
-                // If in chat view, try to get recent message
-                if (view === "chat" && greeting) {
-                  contentToRead = greeting;
+                // If in chat view, prioritize actual last AYA message
+                if (view === "chat") {
+                  if (lastAyaMessage && lastAyaMessage.trim()) {
+                    contentToRead = lastAyaMessage;
+                  } else if (greeting) {
+                    // Fallback to greeting if no message yet
+                    contentToRead = greeting;
+                  }
                 }
                 
                 // If in mission view, try to get task text
@@ -965,7 +972,7 @@ export function Junior() {
                   contentToRead = selectedTopic.name || "Let's learn together!";
                 }
                 
-                // If no specific content, use default
+                // If no specific content, use default fallback
                 if (!contentToRead.trim()) {
                   const langKey = getLang(activeChild?.language);
                   if (langKey === "bg") {

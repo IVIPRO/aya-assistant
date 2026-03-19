@@ -108,6 +108,8 @@ const HOMEWORK_LABELS = {
     successMsg: "Image uploaded successfully.",
     invalidFile: "Please choose an image.",
     fileTooLarge: "The image is too large.",
+    uploadedImageCaption: "Uploaded image",
+    assistantFollowUp: "I received the image. I'm ready to review it.",
   },
   bg: {
     cameraBtn: "Снимай домашното",
@@ -121,6 +123,8 @@ const HOMEWORK_LABELS = {
     successMsg: "Снимката е качена успешно.",
     invalidFile: "Моля, избери снимка.",
     fileTooLarge: "Снимката е твърде голяма.",
+    uploadedImageCaption: "Качена снимка",
+    assistantFollowUp: "Получих снимката. Готова съм да я прегледам.",
   },
   es: {
     cameraBtn: "Tomar foto de tarea",
@@ -134,6 +138,8 @@ const HOMEWORK_LABELS = {
     successMsg: "La imagen se cargó correctamente.",
     invalidFile: "Por favor, selecciona una imagen.",
     fileTooLarge: "La imagen es demasiado grande.",
+    uploadedImageCaption: "Imagen cargada",
+    assistantFollowUp: "Recibí la imagen. Estoy lista para revisarla.",
   },
 };
 
@@ -196,6 +202,7 @@ export function Chat({
   const [homeworkPreview, setHomeworkPreview] = useState<string | null>(null);
   const [homeworkFile, setHomeworkFile] = useState<File | null>(null);
   const [analyzingHomework, setAnalyzingHomework] = useState(false);
+  const [imagePreviewsMap, setImagePreviewsMap] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -354,18 +361,31 @@ export function Chat({
   };
 
   const sendHomework = useCallback(() => {
-    if (!homeworkFile) return;
+    if (!homeworkFile || !homeworkPreview) return;
 
-    // Send success message to chat
+    // Generate unique image ID
+    const imageId = `img_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    // Store the preview URL
+    setImagePreviewsMap(prev => ({ ...prev, [imageId]: homeworkPreview }));
+
+    // Send user message with image ID marker
     sendMutation.mutate({
-      data: { module, content: hwLabels.successMsg, childId: activeChildId }
+      data: { module, content: `[IMAGE:${imageId}]\n${hwLabels.uploadedImageCaption}`, childId: activeChildId }
+    }, {
+      onSuccess: () => {
+        // Send assistant follow-up message
+        sendMutation.mutate({
+          data: { module, content: hwLabels.assistantFollowUp, childId: activeChildId }
+        });
+      }
     });
 
-    // Clear preview and file
+    // Clear temporary preview and file
     setHomeworkPreview(null);
     setHomeworkFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
-  }, [homeworkFile, module, activeChildId, sendMutation, hwLabels]);
+  }, [homeworkFile, homeworkPreview, module, activeChildId, sendMutation, hwLabels]);
 
   const colorMap = {
     primary: "bg-primary text-primary-foreground",
@@ -486,13 +506,32 @@ export function Chat({
                       "relative group",
                       msg.role === "user" ? "flex flex-col items-end" : "flex flex-col items-start"
                     )}>
+                      {/* Check for image marker in message */}
+                      {msg.role === "user" && msg.content.includes("[IMAGE:") && (
+                        <div className="mb-2">
+                          {(() => {
+                            const match = msg.content.match(/\[IMAGE:([^\]]+)\]/);
+                            const imageId = match?.[1];
+                            const imageUrl = imageId ? imagePreviewsMap[imageId] : null;
+                            return imageUrl ? (
+                              <img
+                                src={imageUrl}
+                                alt="Uploaded homework"
+                                className="w-32 h-32 object-cover rounded-xl shadow-md border-2 border-orange-200"
+                              />
+                            ) : null;
+                          })()}
+                        </div>
+                      )}
                       <div className={cn(
                         "px-5 py-3 shadow-md",
                         msg.role === "user"
                           ? cn(bubbleColor, "rounded-2xl rounded-tr-none")
                           : "bg-muted/50 text-foreground rounded-2xl rounded-tl-none border border-border/50"
                       )}>
-                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                        <p className="whitespace-pre-wrap leading-relaxed">
+                          {msg.content.replace(/\[IMAGE:[^\]]+\]\n?/, "")}
+                        </p>
                       </div>
                       {msg.role === "assistant" && (
                         <PlayButton

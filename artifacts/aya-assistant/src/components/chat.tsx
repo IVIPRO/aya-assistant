@@ -404,7 +404,20 @@ export function Chat({
           const imageDataMarker = `[IMAGE_DATA:${base64Data}:${mimeType}:${imageId}]`;
           console.log(`[AYA_HOMEWORK] ${imageId} sending homework image request...`);
           sendMutation.mutate(
-            { data: { module, content: `${imageDataMarker}\n${hwLabels.uploadedImageCaption}`, childId: activeChildId } }
+            { data: { module, content: `${imageDataMarker}\n${hwLabels.uploadedImageCaption}`, childId: activeChildId } },
+            {
+              onSuccess: () => {
+                console.log(`[AYA_HOMEWORK] ${imageId} upload completed`);
+                console.log(`[AYA_HOMEWORK] ${imageId} refetching message list`);
+                refetch().catch(() => {
+                  console.log(`[AYA_HOMEWORK] ${imageId} refetch error`);
+                });
+              },
+              onError: (error) => {
+                console.log(`[AYA_HOMEWORK] ${imageId} send failed:`, error);
+                toast({ title: hwLabels.sendError, variant: "destructive" });
+              },
+            }
           );
 
           // Clear temporary preview and file after sending
@@ -425,7 +438,7 @@ export function Chat({
       console.log("[AYA_HOMEWORK] homework send exception:", error);
       toast({ title: hwLabels.sendError, variant: "destructive" });
     }
-  }, [homeworkFile, homeworkPreview, module, activeChildId, sendMutation, hwLabels, toast]);
+  }, [homeworkFile, homeworkPreview, module, activeChildId, sendMutation, hwLabels, toast, refetch]);
 
   const colorMap = {
     primary: "bg-primary text-primary-foreground",

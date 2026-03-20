@@ -1,0 +1,175 @@
+Implement Adaptive Learning Engine Phase 2A only.
+
+Work in ONE pass.
+Stay in Lite mode.
+Do NOT switch to Autonomous Agent.
+Do NOT redesign UI.
+Do NOT modify unrelated files.
+Do NOT change existing math engine behavior.
+Do NOT change Bulgarian lesson validation behavior.
+Do NOT refactor stable chat flows unless strictly required for read-only summary wiring.
+Do NOT add OpenAI/LLM calls.
+Do NOT add teacher UI.
+Do NOT add parent dashboard UI.
+Do NOT add new DB schema unless absolutely unavoidable.
+Prefer reusing existing memory/profile/progress structures.
+
+GOAL
+Build a deterministic weekly insights layer for parents and a teacher-ready export helper based on the already completed adaptive learning engine.
+
+USE EXISTING COMPLETED PHASES
+- adaptive student profile
+- math adaptive flow
+- Bulgarian adaptive flow
+- weak topic detection
+- topic progression
+- parent summary helper from Phase 1D
+
+IMPLEMENT ONLY
+
+A. Weekly parent insights builder
+Create a helper that generates a weekly summary object for one child.
+
+Return shape like:
+{
+  childId,
+  period: "7d",
+  subjects: {
+    mathematics?: {
+      attempts,
+      successRate,
+      strongestTopics: string[],
+      weakTopics: string[],
+      currentMode: "boost" | "normal" | "review"
+    },
+    bulgarian_language?: {
+      attempts,
+      successRate,
+      strongestTopics: string[],
+      weakTopics: string[],
+      currentMode: "boost" | "normal" | "review"
+    }
+  },
+  weeklyWins: string[],
+  weeklyNeedsSupport: string[],
+  recommendedHomePractice: string[],
+  parentMessageBg: string
+}
+
+B. Deterministic weekly rules
+No AI generation.
+No random wording.
+No LLM.
+Use deterministic rules only.
+
+Rules:
+- weeklyWins = up to 3 specific strong areas from last 7 days
+- weeklyNeedsSupport = up to 3 specific weak areas from last 7 days
+- recommendedHomePractice = short practical activities parent can do at home
+- if no 7-day data, gracefully fall back to recent available data and mark summary as limited internally
+
+C. Home practice recommendation rules
+Generate short actionable items in Bulgarian, for example:
+- "5 минути четене на кратък текст и 2 въпроса по него"
+- "3 лесни задачи по събиране до 10"
+- "Упражнение за правопис на думи с ъ"
+- max 3 recommendations
+- recommendations must map to actual weak topics when possible
+
+D. Parent Bulgarian weekly message
+Generate a short Bulgarian summary for parent:
+- calm
+- concrete
+- child-friendly in tone
+- no blame
+- no medical/psychological claims
+- no exaggeration
+- must mention at least one strength and one next focus if both exist
+
+E. Teacher-ready export helper
+Create a pure helper that returns structured teacher-ready data for a child.
+
+Return shape like:
+{
+  childId,
+  grade,
+  activeSubject,
+  subjectProgress: {
+    mathematics?: {...},
+    bulgarian_language?: {...}
+  },
+  weakTopics: string[],
+  strongTopics: string[],
+  recentSessions: Array<{
+    subject,
+    topic,
+    attempts,
+    successRate
+  }>,
+  interventionFlags: string[],
+  suggestedTeacherFocus: string[]
+}
+
+Teacher export rules:
+- deterministic only
+- no UI
+- no PDF/export file
+- pure data structure only
+- suggestedTeacherFocus = short curriculum-aligned focus areas
+- interventionFlags only when thresholds are met, e.g. repeated weak performance
+
+F. Intervention flag rules
+Examples:
+- repeated_low_success_math
+- repeated_low_success_bulgarian
+- needs_review_before_advancing
+- inconsistent_recent_performance
+
+Do not over-flag.
+Use simple thresholds based on existing progress data.
+
+G. Preserve all existing behavior
+Do NOT break:
+- math generation
+- math validation
+- Bulgarian question flow
+- Bulgarian progression
+- parent summary helper from Phase 1D
+- adaptive mode switching
+- XP / retries / hints
+- current subject routing
+
+H. Internal wiring only if trivial
+If there is already a suitable parent/teacher read helper path, wire the new helpers there.
+If not, keep as internal pure helpers plus tests.
+No UI screens.
+
+TESTS
+Add focused tests only:
+
+1) strong math + weak Bulgarian weekly profile
+2) weak multiplication appears in weeklyNeedsSupport and home practice
+3) strong reading comprehension appears in weeklyWins
+4) teacher export includes recentSessions and suggestedTeacherFocus
+5) intervention flag appears only when threshold reached
+6) no-data / low-data case does not crash
+7) parentMessageBg stays short and readable
+8) deterministic output for same input
+9) existing adaptive flows remain unaffected
+10) existing Phase 1 summaries still work
+
+STOP AFTER
+- weekly insights helper
+- teacher-ready export helper
+- tests
+- clean server
+
+OUTPUT FORMAT
+At the end report only:
+1. files changed
+2. final weekly insights object shape
+3. final teacher export object shape
+4. intervention flag rules
+5. Bulgarian home-practice rules
+6. tests added and total passing count
+7. what remains for Phase 2B

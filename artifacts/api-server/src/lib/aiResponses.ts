@@ -827,10 +827,18 @@ export function evaluateMathAnswer(a: number, b: number, operation: string, user
   }
   
   // Try to parse as numeric first (handles typed digits)
-  const cleaned = userAnswer.toLowerCase().trim().replace(/[^0-9.]/g, "");
-  let answered = parseFloat(cleaned);
+  // Step 1: Trim spaces and remove everything except digits, decimal, and minus sign
+  const trimmed = userAnswer.trim();
+  const cleaned = trimmed.replace(/[^0-9.-]/g, "");
   
-  // If numeric parsing failed, try Bulgarian word normalization (handles voice input)
+  // Step 2: Convert to number explicitly
+  let answered = NaN;
+  if (cleaned && /^-?\d+\.?\d*$/.test(cleaned)) {
+    // Valid numeric pattern, convert to number
+    answered = Number(cleaned);
+  }
+  
+  // Step 3: If numeric parsing failed, try Bulgarian word normalization (handles voice input)
   if (isNaN(answered)) {
     const normalizedAnswer = normalizeSpokenBulgarianAnswer(userAnswer);
     if (normalizedAnswer !== null) {

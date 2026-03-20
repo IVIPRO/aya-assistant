@@ -21,6 +21,11 @@ import {
   getAIResponse,
   getLang,
 } from "./aiResponses";
+import {
+  getBulgarianLessonPrompt,
+  getDefaultBulgarianTopic,
+} from "./bgCurriculum";
+import { updateActiveSubject } from "./academicProfile";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -56,6 +61,7 @@ interface JuniorContext {
   language?: string;
   aiCharacter?: string;
   childXp?: number;
+  country?: string;
 }
 
 // ─── State Reader ────────────────────────────────────────────────────────────
@@ -222,6 +228,75 @@ function isGreeting(m: string, lang: Lang): boolean {
   return patterns[lang].test(m);
 }
 
+// ─── Subject Router ───────────────────────────────────────────────────────────
+//
+// Runs BEFORE intent detection. Returns the requested subject if the child is
+// explicitly asking to learn a particular subject; null otherwise.
+//
+// Priority: bulgarian_language check is tested BEFORE mathematics so that
+// messages containing both words (e.g. "не искам математика, искам български")
+// always route to the correct subject.
+
+export type SubjectRequest = "bulgarian_language" | "mathematics" | null;
+
+export function detectSubjectRequest(msg: string, _lang: Lang): SubjectRequest {
+  const m = msg.toLowerCase().trim();
+
+  // ── Bulgarian language triggers (checked first — higher priority) ──────────
+  const bgTriggers = [
+    "искам български",
+    "да учим български",
+    "нека учим български",
+    "урок по български",
+    "упражнение по български",
+    "искам урок по български",
+    "дай ми упражнение по български",
+    "дай упражнение по български",
+    "нека четем",
+    "нека пишем",
+    "искам четене",
+    "искам писане",
+    "искам граматика",
+    "дай граматика",
+    "да учим граматика",
+    "bulgarian lesson",
+    "bulgarian language",
+    "bulgarian",
+    "български език",
+    "учим езика",
+    "упражнение по езика",
+  ];
+  if (bgTriggers.some(t => m.includes(t))) return "bulgarian_language";
+
+  // ── Mathematics triggers ───────────────────────────────────────────────────
+  const mathTriggers = [
+    "искам математика",
+    "да учим математика",
+    "нека учим математика",
+    "урок по математика",
+    "задача по математика",
+    "дай ми задача по математика",
+    "math lesson",
+    "math task",
+    "let's do math",
+  ];
+  if (mathTriggers.some(t => m.includes(t))) return "mathematics";
+
+  return null;
+}
+
+// ─── Character Emoji Lookup ───────────────────────────────────────────────────
+
+function getCharEmoji(aiCharacter?: string): string {
+  const map: Record<string, string> = {
+    panda: "🐼",
+    robot: "🤖",
+    fox: "🦊",
+    owl: "🦉",
+  };
+  return map[(aiCharacter ?? "").toLowerCase()] ?? "📚";
+}
+
 function looksLikeBulgarianAnswer(m: string): boolean {
   const bgNumbers = [
     "нула","едно","две","три","четири","пет","шест","седем","осем","девет",
@@ -385,6 +460,43 @@ export async function handleJuniorChat(
     postSuccess: !!state.postSuccessId,
     operation: state.activeQuestion?.operation,
   });
+
+  // ── 1b. Subject router (runs before intent detection, highest priority) ───
+  //
+  // If the child explicitly requests a subject ("искам български", "bulgarian
+  // language", "да учим математика"…) we handle it immediately and skip the
+  // math intent pipeline entirely for bulgarian_language requests.
+
+  const requestedSubject = detectSubjectRequest(msg, lang);
+  console.log("[JUNIOR_CHAT] requestedSubject:", requestedSubject);
+
+  if (requestedSubject === "bulgarian_language") {
+    const grade = context.grade ?? 1;
+    const topicId = getDefaultBulgarianTopic(grade);
+    const charEmoji = getCharEmoji(context.aiCharacter);
+
+    // Persist active subject state for teacher report / future reference
+    await updateActiveSubject(
+      userId, childId, module,
+      "bulgarian_language", topicId,
+      grade, "BG",
+    ).catch(() => {});
+
+    console.log("[JUNIOR_CHAT] routing → bulgarian_language", { grade, topicId });
+    return getBulgarianLessonPrompt(grade, topicId, childName, charEmoji);
+  }
+
+  if (requestedSubject === "mathematics") {
+    const grade = context.grade ?? 1;
+    // Update active subject then fall through to math intent detection below
+    await updateActiveSubject(
+      userId, childId, module,
+      "mathematics", null,
+      grade, context.country ?? "BG",
+    ).catch(() => {});
+    console.log("[JUNIOR_CHAT] routing → mathematics (continuing math engine)");
+    // Do NOT return here — fall through to intent detection which handles math
+  }
 
   // ── 2. Classify intent ───────────────────────────────────────────────────
   const intent = detectIntent(msg, state, lang);

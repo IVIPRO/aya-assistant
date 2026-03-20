@@ -1,0 +1,168 @@
+Work only in Lite mode.
+Do not redesign unrelated features.
+Do not modify UI styling.
+Do not touch payment, auth, or unrelated app sections.
+
+Goal:
+Build the academic routing and curriculum foundation for AYA Junior for Bulgaria, grades 1-4, so the chat can respond by subject correctly and later support real teacher accounts and student progress tracking.
+
+Scope for this pass only:
+1) Add Bulgaria curriculum schema for grades 1-4
+2) Add subject routing for:
+   - mathematics
+   - bulgarian_language
+3) Add topic structure per grade and subject
+4) Connect the junior chat so when the child asks for:
+   - math / математика
+   - bulgarian / български / български език
+   it routes to the correct subject instead of defaulting to math
+5) Add a clean progress data structure that can later be used by teacher profiles
+6) Keep current deterministic math engine working unchanged
+7) Do not build teacher UI yet
+8) Do not build country switching UI yet
+
+Implement exactly this:
+
+A. Curriculum models
+Create structured curriculum definitions for Bulgaria grades 1, 2, 3, 4 with:
+- grade
+- subject
+- topic_id
+- topic_title_bg
+- topic_title_en
+- difficulty_level
+- lesson_type
+- skills[]
+
+Subjects for now:
+- mathematics
+- bulgarian_language
+
+Add starter topics for each grade.
+
+Bulgarian language example starter topics:
+Grade 1:
+- letters_and_sounds
+- vowels_and_consonants
+- syllables
+- simple_words
+- simple_sentences
+Grade 2:
+- reading_comprehension_basic
+- nouns_basic
+- verbs_basic
+- sentence_building
+Grade 3:
+- parts_of_speech_intro
+- spelling_rules_basic
+- short_text_comprehension
+Grade 4:
+- sentence_parts_intro
+- grammar_review
+- reading_comprehension_extended
+- short_written_response
+
+Mathematics example starter topics:
+Grade 1:
+- addition_to_10
+- subtraction_to_10
+- addition_to_20
+- subtraction_to_20
+Grade 2:
+- addition_subtraction_to_100
+- multiplication_intro
+- division_intro
+Grade 3:
+- multiplication_tables
+- division_facts
+- word_problems_basic
+Grade 4:
+- larger_numbers
+- multi_step_operations
+- fractions_intro
+- word_problems_extended
+
+B. Student academic profile foundation
+Add or extend student learning profile with:
+- country = "BG"
+- grade_level
+- active_subject
+- active_topic_id
+- progress_by_subject
+- progress_by_topic
+- weak_topics[]
+- strong_topics[]
+- last_activity_at
+
+C. Chat subject router
+In junior chat flow, before generating a response:
+1. detect requested subject from Bulgarian and English phrases
+2. set active_subject correctly
+3. if request is for Bulgarian language, never fall back to math task generation
+4. if request is for math, continue current math engine behavior
+
+Examples that must map to bulgarian_language:
+- "искам български"
+- "да учим български"
+- "искам урок по български език"
+- "дай ми упражнение по български"
+- "нека четем и пишем"
+- "bulgarian lesson"
+- "bulgarian language"
+
+Examples that must map to mathematics:
+- "искам математика"
+- "дай ми задача"
+- "дай ми задача по математика"
+- "math"
+- "math task"
+
+D. Subject-specific response behavior
+If active_subject = bulgarian_language:
+- do not generate arithmetic tasks
+- respond with a Bulgarian-language learning activity, lesson, reading, grammar, spelling, or comprehension prompt appropriate for the student grade
+
+If active_subject = mathematics:
+- continue existing math logic
+
+E. Progress tracking foundation for future teacher accounts
+Create clean backend-compatible structures/functions so future teacher profiles can read:
+- student current grade
+- active subject
+- active topic
+- completion rate by topic
+- recent mistakes
+- weak topics
+- recent sessions
+
+Do not build teacher UI yet.
+Only prepare the data model and helper functions.
+
+F. Safety and constraints
+- Preserve all current working math behavior
+- Preserve typed and voice math flows
+- Do not break current weakness tracking
+- Do not change current screen layout
+- No fake data returned to users if subject is unknown; instead use safe fallback asking which subject they want
+
+G. Tests
+Add tests for:
+1. "да учим български език сега" -> routes to bulgarian_language
+2. "искам математика" -> routes to mathematics
+3. Bulgarian subject request never returns arithmetic task
+4. Math request still returns math task
+5. Student profile stores current subject and topic
+6. Progress structure is written without breaking existing math storage
+
+Stop after:
+- curriculum schema
+- academic profile foundation
+- subject router
+- bulgarian language starter behavior
+- tests
+
+At the end give only:
+- files changed
+- what was implemented
+- what still remains for next pass
+- exact test results

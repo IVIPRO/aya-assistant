@@ -21,6 +21,7 @@ export interface QuestionItem {
   questionIndex: number;
   questionText: string;
   acceptedAnswers: string[];
+  canonicalAnswer?: string; // Primary answer for feedback (shortest/cleanest form)
 }
 
 // ─── Question-Specific Q&A Database ──────────────────────────────────────────
@@ -33,17 +34,20 @@ const readingComprehensionGrade2: QuestionItem[] = [
   {
     questionIndex: 0,
     questionText: "Как се казва котката?",
-    acceptedAnswers: ["Пухче", "пухче", "котката"],
+    acceptedAnswers: ["Пухче", "пухче"],
+    canonicalAnswer: "Пухче",
   },
   {
     questionIndex: 1,
     questionText: "Какво обича да прави Пухче?",
-    acceptedAnswers: ["спи на слънце", "играе с топка", "играя", "сън", "топка"],
+    acceptedAnswers: ["спи на слънце", "играе с топка", "топка", "сън"],
+    canonicalAnswer: "спи на слънце или играе с топка",
   },
   {
     questionIndex: 2,
     questionText: "С какво го храни Мария?",
     acceptedAnswers: ["рибица", "риба", "рибици"],
+    canonicalAnswer: "рибица",
   },
 ];
 
@@ -165,6 +169,41 @@ export function evaluateSentenceCompletion(
 }
 
 /**
+ * Format feedback with clean canonical answer(s)
+ * Deduplicates and shows only the primary/shortest answer form
+ */
+function formatAcceptedAnswersFeedback(acceptableAnswers: string[]): string {
+  if (acceptableAnswers.length === 0) {
+    return "Отговорът не е верен.";
+  }
+
+  // Deduplicate: normalize all answers and keep unique ones
+  const seen = new Set<string>();
+  const uniqueAnswers: string[] = [];
+  
+  for (const ans of acceptableAnswers) {
+    const normalized = normalizeAnswer(ans);
+    if (!seen.has(normalized)) {
+      seen.add(normalized);
+      uniqueAnswers.push(ans);
+    }
+  }
+
+  // Sort by length (shortest first = most direct answer)
+  uniqueAnswers.sort((a, b) => a.length - b.length);
+
+  // Show only the shortest/primary answer, or at most 2 variants
+  const mainAnswer = uniqueAnswers[0] || acceptableAnswers[0];
+  const secondaryAnswer = uniqueAnswers.length > 1 ? uniqueAnswers[1] : null;
+
+  if (secondaryAnswer) {
+    return `Правилният отговор е: ${mainAnswer} или ${secondaryAnswer}.`;
+  } else {
+    return `Правилният отговор е: ${mainAnswer}.`;
+  }
+}
+
+/**
  * Reading comprehension: "Кой е главният герой?"
  * Expected answer: any of acceptableAnswers
  */
@@ -175,7 +214,7 @@ export function evaluateComprehension(studentAnswer: string, acceptableAnswers: 
     correct,
     explanation: correct
       ? `Превъзходно! Разбра си текста правилно.`
-      : `Отговорът на вашия въпрос е един от: ${acceptableAnswers.join(", ")}.`,
+      : formatAcceptedAnswersFeedback(acceptableAnswers),
     feedbackBg: correct ? "Браво!" : "Почти!",
   };
 }

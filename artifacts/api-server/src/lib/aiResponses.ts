@@ -707,8 +707,26 @@ function parseBulgarianCompoundNumber(phrase: string): number | null {
  * Extract final answer from Bulgarian spoken sentence using answer indicators
  * Looks for patterns like "е равно на X", "прави X", "отговорът е X"
  * Handles both simple numbers and compound numbers like "четиридесет и пет" (45)
+ * Special handling for division: "осем делено на две е четири" → extract "четири"
  */
 function extractFinalAnswerFromSentence(text: string): number | null {
+  // Special case for division: "X делено на Y е Z" → extract Z (final answer)
+  // The final answer comes AFTER "е" in division, not immediately after "делено на"
+  if (text.includes("делено на")) {
+    // Look for "е" followed by a number word at the end
+    // Pattern: "е" + space + word (optionally with "и" + word)
+    const divisionMatch = text.match(/е\s+([а-яА-ЯёЁ]+(?:\s+и\s+[а-яА-ЯёЁ]+)?)(?:\s*[.,!?;:]*)$/i);
+    if (divisionMatch && divisionMatch[1]) {
+      const possibleAnswer = divisionMatch[1].trim();
+      const parsedValue = parseBulgarianCompoundNumber(possibleAnswer);
+      if (parsedValue !== null) {
+        console.log("[BULGARIAN_FINAL_SEGMENT]", possibleAnswer);
+        console.log("[BULGARIAN_NUMBER_PARSED]", { segment: possibleAnswer, value: parsedValue, operation: "division" });
+        return parsedValue;
+      }
+    }
+  }
+  
   // Patterns that indicate the final answer follows
   const answerIndicators = [
     "е равно на", "равно е на", "равно на",  // "equals"
@@ -716,7 +734,6 @@ function extractFinalAnswerFromSentence(text: string): number | null {
     "отговорът е",                             // "the answer is"
     "мисля че е",                              // "I think it is"
     "становата е",                             // "the answer is" (alt)
-    "делено на",                               // "divided by" (shows final in division)
   ];
   
   // Try each indicator pattern

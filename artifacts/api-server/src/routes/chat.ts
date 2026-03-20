@@ -350,11 +350,28 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
         
         // Store active question in memory for state persistence
         if (childId) {
+          // Clear any existing active_question to ensure clean state
+          await db
+            .delete(memoriesTable)
+            .where(and(
+              eq(memoriesTable.childId, childId),
+              eq(memoriesTable.type, "active_question"),
+              eq(memoriesTable.module, module)
+            ))
+            .catch(() => {});
+          
+          // Insert fresh question with explicit operation
           await db.insert(memoriesTable).values({
             userId,
             childId,
             type: "active_question",
-            content: JSON.stringify({ a, b, task, operation, createdAt: new Date().toISOString() }),
+            content: JSON.stringify({ 
+              a, 
+              b, 
+              task, 
+              operation: operation || "addition",  // Ensure operation is never null
+              createdAt: new Date().toISOString() 
+            }),
             module,
           }).catch(() => {}); // Silent fail if insert doesn't work
         }
@@ -503,7 +520,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
               console.log("[MATH_OPERATION_REQUESTED]", requestedOp);
               console.log("[MATH_OPERATION_SWITCHED]", { from: taskOperation, to: requestedOp });
               
-              // Delete current question and generate new one with different operation
+              // Delete current question first to ensure clean state
               await db.delete(memoriesTable).where(eq(memoriesTable.id, activeQuestionId)).catch(() => {});
               
               const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
@@ -512,13 +529,30 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
               aiContent = getMathTaskPrompt(a, b, operation, childName, lang);
               console.log("[MATH_NEXT_TASK_GENERATED]", { a, b, task, operation });
               
-              // Store new question
+              // Store new question with guaranteed operation value
               if (childId) {
+                // Clear any lingering old active_question entries
+                await db
+                  .delete(memoriesTable)
+                  .where(and(
+                    eq(memoriesTable.childId, childId),
+                    eq(memoriesTable.type, "active_question"),
+                    eq(memoriesTable.module, module)
+                  ))
+                  .catch(() => {});
+                
+                // Insert fresh question with explicit operation
                 await db.insert(memoriesTable).values({
                   userId,
                   childId,
                   type: "active_question",
-                  content: JSON.stringify({ a, b, task, operation, createdAt: new Date().toISOString() }),
+                  content: JSON.stringify({ 
+                    a, 
+                    b, 
+                    task, 
+                    operation: operation || "addition",  // Ensure operation is never null
+                    createdAt: new Date().toISOString() 
+                  }),
                   module,
                 }).catch(() => {});
               }

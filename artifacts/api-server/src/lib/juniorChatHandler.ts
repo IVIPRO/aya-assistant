@@ -26,6 +26,14 @@ import {
   getDefaultBulgarianTopic,
 } from "./bgCurriculum";
 import { updateActiveSubject } from "./academicProfile";
+import {
+  evaluateBulgarianLessonAnswer,
+  type EvaluationResult,
+} from "./bgLessonEvaluator";
+import {
+  recordTopicAttempt,
+  checkTopicProgression,
+} from "./topicProgression";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -53,6 +61,14 @@ interface ActiveQuestion {
 interface SessionState {
   activeQuestion: ActiveQuestion | null;   // awaiting_answer = !!activeQuestion
   postSuccessId: number | null;            // post_success_waiting = !!postSuccessId
+}
+
+interface BulgarianLessonState {
+  id: number;
+  topicId: string;
+  subject: string; // "bulgarian_language"
+  grade: number;
+  createdAt: string; // ISO timestamp
 }
 
 interface JuniorContext {
@@ -116,6 +132,91 @@ async function readSessionState(
     activeQuestion,
     postSuccessId: ps ? ps.id : null,
   };
+}
+
+// ─── Bulgarian Lesson State ───────────────────────────────────────────────────
+
+async function readBulgarianLessonState(
+  childId: number,
+  module: string,
+): Promise<BulgarianLessonState | null> {
+  const [row] = await db
+    .select()
+    .from(memoriesTable)
+    .where(
+      and(
+        eq(memoriesTable.childId, childId),
+        eq(memoriesTable.type, "bulgarian_lesson_active"),
+        eq(memoriesTable.module, module),
+      ),
+    )
+    .orderBy(desc(memoriesTable.createdAt))
+    .limit(1);
+
+  if (!row) return null;
+  try {
+    const data = JSON.parse(row.content);
+    return {
+      id: row.id,
+      topicId: data.topicId,
+      subject: data.subject ?? "bulgarian_language",
+      grade: data.grade,
+      createdAt: data.createdAt,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function storeBulgarianLesson(
+  userId: number,
+  childId: number,
+  module: string,
+  topicId: string,
+  grade: number,
+): Promise<number> {
+  // Clear existing lesson state
+  await db
+    .delete(memoriesTable)
+    .where(
+      and(
+        eq(memoriesTable.childId, childId),
+        eq(memoriesTable.type, "bulgarian_lesson_active"),
+        eq(memoriesTable.module, module),
+      ),
+    )
+    .catch(() => {});
+
+  const [inserted] = await db
+    .insert(memoriesTable)
+    .values({
+      userId,
+      childId,
+      type: "bulgarian_lesson_active",
+      content: JSON.stringify({
+        topicId,
+        subject: "bulgarian_language",
+        grade,
+        createdAt: new Date().toISOString(),
+      }),
+      module,
+    })
+    .returning();
+
+  return inserted.id;
+}
+
+async function clearBulgarianLesson(childId: number, module: string): Promise<void> {
+  await db
+    .delete(memoriesTable)
+    .where(
+      and(
+        eq(memoriesTable.childId, childId),
+        eq(memoriesTable.type, "bulgarian_lesson_active"),
+        eq(memoriesTable.module, module),
+      ),
+    )
+    .catch(() => {});
 }
 
 // ─── Intent Router ───────────────────────────────────────────────────────────
@@ -482,6 +583,9 @@ export async function handleJuniorChat(
       grade, "BG",
     ).catch(() => {});
 
+    // Store the lesson state so we can evaluate the next answer
+    await storeBulgarianLesson(userId, childId, module, topicId, grade).catch(() => {});
+
     console.log("[JUNIOR_CHAT] routing → bulgarian_language", { grade, topicId });
     return getBulgarianLessonPrompt(grade, topicId, childName, charEmoji);
   }
@@ -560,6 +664,67 @@ export async function handleJuniorChat(
     console.log("[JUNIOR_CHAT] explain_current_task", { a, b, operation });
     // Do NOT mark right or wrong — just give a hint
     return getMathHint(a, b, operation, childName, lang);
+  }
+
+  // ── BULGARIAN_LESSON_ANSWER ────────────────────────────────────────────────
+  // If there's an active Bulgarian lesson and message is not a subject request,
+  // evaluate it as an answer to the lesson prompt.
+  const bgLessonState = await readBulgarianLessonState(childId, module);
+  if (bgLessonState && requestedSubject === null) {
+    const grade = bgLessonState.grade;
+    const topicId = bgLessonState.topicId as any;
+    const evaluation = evaluateBulgarianLessonAnswer(
+      { grade, topicId },
+      msg,
+    );
+
+    console.log("[JUNIOR_CHAT] bulgarian_lesson_answer", {
+      topicId,
+      grade,
+      correct: evaluation.correct,
+    });
+
+    // Record the attempt
+    await recordTopicAttempt(childId, "bulgarian_language", topicId, grade, evaluation.correct);
+
+    // Check for progression
+    const progression = await checkTopicProgression(
+      childId,
+      "bulgarian_language",
+      topicId,
+      grade,
+    );
+
+    console.log("[JUNIOR_CHAT] progression_check", {
+      successRate: progression.successRate,
+      advancedToNext: progression.advancedToNext,
+      markedWeak: progression.markedWeak,
+    });
+
+    // Award XP for correct answer
+    if (evaluation.correct) {
+      await awardXp(childId, context.childXp ?? 0, 2);
+    }
+
+    // Build response: feedback + next prompt if advancing
+    let response = `${evaluation.feedbackBg}\n\n${evaluation.explanation}`;
+
+    if (progression.advancedToNext && progression.nextTopicId) {
+      // Prepare next lesson
+      const charEmoji = getCharEmoji(context.aiCharacter);
+      await storeBulgarianLesson(userId, childId, module, progression.nextTopicId, grade);
+      const nextPrompt = getBulgarianLessonPrompt(grade, progression.nextTopicId, childName, charEmoji);
+      response += `\n\n✨ Браво на теб! Ти напредва! ✨\n\n${nextPrompt}`;
+    }
+
+    // Store the new lesson state if not advancing (stay on same topic)
+    if (!progression.advancedToNext) {
+      await storeBulgarianLesson(userId, childId, module, topicId, grade);
+    }
+
+    await clearBulgarianLesson(childId, module); // Clear after evaluation
+
+    return response;
   }
 
   // ── STOP (inside post_success or free chat) ───────────────────────────────

@@ -59,6 +59,36 @@ describe("Answer evaluation — correct answers", () => {
     const result = evaluateComprehension("Пухче", ["Пухче", "котката"]);
     assert.equal(result.correct, true);
   });
+
+  test("comprehension with numbering: '1.Пухче' → correct", () => {
+    const result = evaluateComprehension("1.Пухче", ["Пухче", "котката"]);
+    assert.equal(result.correct, true);
+  });
+
+  test("comprehension with numbering and space: '1. Пухче' → correct", () => {
+    const result = evaluateComprehension("1. Пухче", ["Пухче", "котката"]);
+    assert.equal(result.correct, true);
+  });
+
+  test("comprehension with trailing punctuation: 'Пухче.' → correct", () => {
+    const result = evaluateComprehension("Пухче.", ["Пухче", "котката"]);
+    assert.equal(result.correct, true);
+  });
+
+  test("comprehension with trailing exclamation: 'Пухче!' → correct", () => {
+    const result = evaluateComprehension("Пухче!", ["Пухче", "котката"]);
+    assert.equal(result.correct, true);
+  });
+
+  test("comprehension with spaces: ' пухче ' → correct (case-insensitive)", () => {
+    const result = evaluateComprehension(" пухче ", ["Пухче", "котката"]);
+    assert.equal(result.correct, true);
+  });
+
+  test("comprehension with multiple punctuation: '1) Пухче...' → correct", () => {
+    const result = evaluateComprehension("1) Пухче...", ["Пухче", "котката"]);
+    assert.equal(result.correct, true);
+  });
 });
 
 // ─── Test 2: Incorrect answer detection ───────────────────────────────────────

@@ -23,7 +23,13 @@ function normalizeAnswer(ans: string): string {
   return ans
     .toLowerCase()
     .trim()
-    .replace(/[^а-яё\s0-9]/gi, ""); // Strip punctuation, keep Cyrillic
+    // Remove leading numbering: "1.", "2.", "1)", "2)", etc.
+    .replace(/^\d+[\.\)]\s*/i, "")
+    // Remove trailing punctuation: ".", ",", "!", "?", ";", ":"
+    .replace(/[\.,!?;:]+$/i, "")
+    // Strip remaining non-Cyrillic/non-digit/non-space characters
+    .replace(/[^а-яё\s0-9]/gi, "")
+    .trim(); // Trim again after replacements
 }
 
 function isSimilar(actual: string, expected: string, tolerance: number = 0.85): boolean {

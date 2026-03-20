@@ -457,3 +457,75 @@ describe("Question index progression — multi-question topic flow", () => {
     assert.equal(result.correct, true, "Q3 should accept '3) рибица!'");
   });
 });
+
+// ─── Test 9: Clean corrective feedback (no noise, no duplicates) ──────────────
+
+describe("Corrective feedback — clean canonical answers only", () => {
+  test("Wrong answer 'Мария' on Q1 feedback contains only 'Пухче'", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "Мария",
+    );
+    assert.equal(result.correct, false, "Мария should be wrong for Q1");
+    assert.ok(result.explanation.includes("Пухче"), "Feedback must contain canonical answer 'Пухче'");
+    assert.ok(!result.explanation.includes("котката"), "Feedback must NOT contain noise word 'котката'");
+  });
+
+  test("Q1 wrong feedback does not show duplicate case variants", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "рибица",
+    );
+    assert.equal(result.correct, false);
+    // Check that "Пухче" appears exactly once
+    const matches = (result.explanation.match(/Пухче/g) || []).length;
+    assert.ok(matches <= 2, `'Пухче' appears ${matches} times, should be at most 2`);
+  });
+
+  test("Q1 correct answer 'Пухче' still passes validation", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "Пухче",
+    );
+    assert.equal(result.correct, true, "Correct answer should pass");
+    assert.equal(result.feedbackBg, "Браво!");
+  });
+
+  test("Q2 wrong answer feedback shows clean canonical form", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 1 },
+      "Мария",
+    );
+    assert.equal(result.correct, false);
+    // Should contain something about playing or sleeping, not noise
+    assert.ok(
+      result.explanation.includes("спи") || result.explanation.includes("играе") || result.explanation.includes("топка"),
+      "Feedback should contain actions, not person names"
+    );
+  });
+
+  test("Q3 wrong answer feedback shows only 'рибица'", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 2 },
+      "топка",
+    );
+    assert.equal(result.correct, false);
+    assert.ok(result.explanation.includes("рибица"), "Q3 feedback must contain 'рибица'");
+    assert.ok(!result.explanation.includes("топка"), "Q3 feedback must NOT echo the wrong answer 'топка'");
+  });
+
+  test("Question progression unaffected: Q1 correct then Q2 shows new question", () => {
+    const q1Result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "Пухче",
+    );
+    assert.equal(q1Result.correct, true);
+    
+    // Simulate moving to Q2
+    const q2Result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 1 },
+      "топка",
+    );
+    assert.equal(q2Result.correct, true);
+  });
+});

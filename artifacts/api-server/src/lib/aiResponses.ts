@@ -649,7 +649,7 @@ export function generateMathTask(operation: "addition" | "subtraction" | "multip
 }
 
 /**
- * Bulgarian number words to numeric values mapping (0-20 + common forms)
+ * Bulgarian number words to numeric values mapping (0-20 + tens + common forms)
  */
 const BULGARIAN_NUMBERS: Record<string, number> = {
   // Base numbers 0-20
@@ -658,9 +658,43 @@ const BULGARIAN_NUMBERS: Record<string, number> = {
   "единадесет": 11, "дванадесет": 12, "тринадесет": 13, "четиринадесет": 14,
   "петнадесет": 15, "шестнадесет": 16, "седемнадесет": 17, "осемнадесет": 18,
   "деветнадесет": 19, "двадесет": 20,
+  // Tens (20-90)
+  "трийсет": 30, "четирийсет": 40, "петдесет": 50, "шейсет": 60,
+  "седемдесет": 70, "осемдесет": 80, "деветдесет": 90,
   // Variations
-  "един": 1, "два": 2, "дванадесет": 12,
+  "един": 1, "два": 2,
 };
+
+/**
+ * Extract final answer from Bulgarian spoken sentence using answer indicators
+ * Looks for patterns like "е равно на X", "прави X", "отговорът е X"
+ */
+function extractFinalAnswerFromSentence(text: string): number | null {
+  // Patterns that indicate the final answer follows
+  const answerIndicators = [
+    "е равно на", "равно е на", "равно на",  // "equals"
+    "прави", "правят",                         // "makes"
+    "отговорът е",                             // "the answer is"
+    "мисля че е",                              // "I think it is"
+    "становата е",                             // "the answer is" (alt)
+    "делено на",                               // "divided by" (shows final in division)
+  ];
+  
+  // Try each indicator pattern
+  for (const indicator of answerIndicators) {
+    const pattern = new RegExp(`${indicator}\\s+([а-яА-ЯёЁ]+)`, "i");
+    const match = text.match(pattern);
+    if (match && match[1]) {
+      const possibleAnswer = match[1].trim();
+      // Check if this is a Bulgarian number word
+      if (BULGARIAN_NUMBERS.hasOwnProperty(possibleAnswer)) {
+        return BULGARIAN_NUMBERS[possibleAnswer];
+      }
+    }
+  }
+  
+  return null;
+}
 
 /**
  * Normalize spoken Bulgarian math answer to numeric value
@@ -675,31 +709,44 @@ function normalizeSpokenBulgarianAnswer(userAnswer: string): number | null {
     return directNumeric;
   }
   
-  // Try exact Bulgarian number word match
+  // Try exact Bulgarian number word match (standalone)
   if (BULGARIAN_NUMBERS.hasOwnProperty(text)) {
     return BULGARIAN_NUMBERS[text];
   }
   
-  // Try extracting Bulgarian number words from longer sentences
+  // For longer sentences, try extracting final answer using indicators
+  if (text.length > 15) {  // Only for longer sentences
+    const extractedAnswer = extractFinalAnswerFromSentence(text);
+    if (extractedAnswer !== null) {
+      return extractedAnswer;
+    }
+  }
+  
+  // Fallback: Try extracting any Bulgarian number word from longer sentences
   // Look for patterns like "е равно на осемнадесет" or "е осемнадесет"
+  // Prefer numbers at the end (most likely the answer)
+  let bestMatch: number | null = null;
+  let bestPosition = -1;
+  
   for (const [word, value] of Object.entries(BULGARIAN_NUMBERS)) {
-    // Check if the word appears at the end or near the end of the sentence
+    // Check if the word appears in the sentence
     if (text.includes(word)) {
-      // Find position of the word
-      const matches = text.match(new RegExp(`\\b${word}\\b`, "g"));
-      if (matches) {
-        // Prefer the last occurrence (most likely the answer)
-        const lastIndex = text.lastIndexOf(word);
-        const afterWord = text.substring(lastIndex + word.length).trim();
-        // Only count if it's at the end or followed by punctuation/spaces
-        if (afterWord === "" || afterWord.match(/^[.,!?;:\s]*$/)) {
-          return value;
+      // Find last occurrence (most likely the answer)
+      const lastIndex = text.lastIndexOf(word);
+      const afterWord = text.substring(lastIndex + word.length).trim();
+      
+      // Only count if it's at the end or followed by punctuation/spaces
+      if (afterWord === "" || afterWord.match(/^[.,!?;:\s]*$/)) {
+        // Prefer later occurrences (right side of equation)
+        if (lastIndex > bestPosition) {
+          bestMatch = value;
+          bestPosition = lastIndex;
         }
       }
     }
   }
   
-  return null;
+  return bestMatch;
 }
 
 /**

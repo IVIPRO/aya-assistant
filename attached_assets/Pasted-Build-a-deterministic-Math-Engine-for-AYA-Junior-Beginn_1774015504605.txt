@@ -1,0 +1,152 @@
+Build a deterministic Math Engine for AYA Junior Beginner Stage.
+
+IMPORTANT:
+Do NOT use free-form AI generation for math questions or answer checking.
+Do NOT reply with vague teaching text unless explicitly needed.
+Use code logic, stored state, and strict validation.
+
+GOAL:
+Replace the current pseudo-math conversation flow with a real structured math task engine.
+
+REQUIREMENTS
+
+1. Create a math task generator for Beginner Stage with operation-aware tasks:
+- addition
+- subtraction
+- multiplication
+- division
+
+2. Every generated task must be stored as structured state, for example:
+{
+  id,
+  operation,
+  difficulty,
+  operandA,
+  operandB,
+  displayText,
+  correctAnswer,
+  status
+}
+
+3. The UI message shown to the child must be generated from stored task data, not improvised AI text.
+Examples:
+- "Колко е 3 + 4?"
+- "Колко е 9 - 2?"
+- "Колко е 3 × 5?"
+- "Колко е 8 ÷ 2?"
+
+4. Answer validation must compare the parsed child answer to the stored correctAnswer.
+Validation must not depend on AI interpretation.
+
+5. Support both:
+- typed numeric answers: 7, 12, 45
+- spoken Bulgarian answers:
+  - simple numbers: "седем", "дванадесет"
+  - compound numbers: "двадесет и едно", "четиридесет и пет"
+  - full sentence answers:
+    - "седем"
+    - "отговорът е седем"
+    - "три по пет е петнадесет"
+    - "осем делено на две е четири"
+Extract the final numeric answer deterministically.
+
+6. Fix operation switching.
+When the child asks:
+- "дай ми задача със събиране"
+- "дай ми задача с изваждане"
+- "дай ми задача с умножение"
+- "дай ми задача с деление"
+the system must generate a NEW task for exactly that operation.
+
+7. Fix follow-up after success.
+If the child answers correctly and then says:
+- "още една"
+- "по-сложна"
+- "още една с умножение"
+- "още една с деление"
+the next task must respect:
+- previous success flow
+- requested operation
+- requested difficulty increase if present
+
+8. Difficulty rules for Beginner Stage:
+- addition: numbers 0–10 initially
+- subtraction: non-negative results initially
+- multiplication: begin with small tables (0–10)
+- division: only exact integer division, no remainder
+Make this easy to expand later.
+
+9. Wrong answer flow:
+- If answer is wrong, keep the same active task
+- Show a short hint
+- Do NOT generate a new task
+- After correct answer, mark task as solved and then allow next task generation
+
+10. Preserve all existing systems that already work:
+- voice routing
+- typed chat
+- child memory
+- missions
+- XP
+- homework from image
+- listening mode
+Do not break working features.
+
+11. Add debug logs for:
+- task generation
+- active operation
+- parsed spoken answer
+- correctAnswer
+- validation result
+- follow-up request parsing
+
+12. After implementation, run and verify these exact Bulgarian test cases:
+
+TEST CASES
+
+A. Addition request
+Child: "дай ми задача със събиране"
+Expected: a real addition task
+
+B. Multiplication request
+Child: "дай ми задача с умножение"
+Expected: a real multiplication task
+
+C. Division request
+Child: "дай ми задача с деление"
+Expected: a real exact division task
+
+D. Spoken multiplication answer
+Task: "Колко е 3 × 10?"
+Child: "три по десет е равно на трийсет"
+Expected: correct
+
+E. Spoken compound answer
+Task: "Колко е 9 × 5?"
+Child: "девет по пет е равно на четиридесет и пет"
+Expected: correct
+
+F. Wrong answer then retry
+Task: "Колко е 2 + 3?"
+Child: "шест"
+Expected: wrong, same task remains active
+Child: "пет"
+Expected: correct
+
+G. Success then harder same operation
+After correct multiplication answer:
+Child: "дай ми още една по-сложна задача с умножение"
+Expected: new multiplication task with higher difficulty
+
+13. At the end, print a concise report:
+- files changed
+- logic added
+- bugs fixed
+- tests passed
+- anything still not fixed
+
+IMPORTANT CONSTRAINTS
+- No fake AI math behavior
+- No loose conversational guessing for answers
+- No regression to generic motivational replies during active math task flow
+- Always use the stored active task as source of truth

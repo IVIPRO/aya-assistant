@@ -559,50 +559,75 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
               isAnswerToTask = false;
             } else {
               // Evaluate the child's message as a potential answer
-              console.log("[TEACHER_LOOP_CHILD_INPUT]", cleanContent);
-              console.log("[MIC_TRANSCRIPT_RAW]", cleanContent);
-              const { correct, expected } = evaluateMathAnswer(taskA, taskB, taskOperation, cleanContent);
-              console.log("[MIC_EXPECTED_ANSWER]", expected);
-              console.log("[MIC_VALIDATION_RESULT]", { correct, userAnswer: cleanContent, expected });
-              console.log("[TEACHER_LOOP_MATCH_RESULT]", { correct, userAnswer: cleanContent, expected });
+              // CRITICAL: Fetch fresh active_question at validation time to avoid stale operation
+              const [freshActiveQuestion] = await db
+                .select()
+                .from(memoriesTable)
+                .where(and(
+                  eq(memoriesTable.childId, childId),
+                  eq(memoriesTable.type, "active_question"),
+                  eq(memoriesTable.module, module)
+                ))
+                .orderBy(desc(memoriesTable.createdAt))
+                .limit(1);
               
-              isAnswerToTask = true;
-              const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
-              const childName = context.childName ?? fallbackName;
-              
-              aiContent = getMathFeedback(taskA, taskB, taskOperation, cleanContent, childName, lang, correct);
-              
-              // If answer is correct, remove the active question and award XP
-              if (correct) {
-                console.log("[TEACHER_LOOP_RESOLVED] Answer was correct");
-                
-                // Instead of deleting, store a post-success follow-up state
-                // This allows the next message to continue the loop
-                if (childId) {
-                  await db
-                    .delete(memoriesTable)
-                    .where(eq(memoriesTable.id, activeQuestionId))
-                    .catch(() => {}); // Delete the active question
+              // Use only the current stored task for validation
+              if (freshActiveQuestion) {
+                try {
+                  const currentQuestion = JSON.parse(freshActiveQuestion.content);
+                  const currentTaskA = currentQuestion.a;
+                  const currentTaskB = currentQuestion.b;
+                  const currentTaskOperation = currentQuestion.operation || "addition";
                   
-                  // Store post-success follow-up state for next message routing
-                  await db.insert(memoriesTable).values({
-                    userId,
-                    childId,
-                    type: "post_success_followup",
-                    content: JSON.stringify({ 
-                      lastDifficulty: "medium", 
-                      createdAt: new Date().toISOString() 
-                    }),
-                    module,
-                  }).catch(() => {}); // Silent fail if insert doesn't work
+                  console.log("[TEACHER_LOOP_CHILD_INPUT]", cleanContent);
+                  console.log("[MIC_TRANSCRIPT_RAW]", cleanContent);
+                  const { correct, expected } = evaluateMathAnswer(currentTaskA, currentTaskB, currentTaskOperation, cleanContent);
+                  console.log("[MIC_EXPECTED_ANSWER]", expected);
+                  console.log("[MIC_VALIDATION_RESULT]", { correct, userAnswer: cleanContent, expected });
+                  console.log("[TEACHER_LOOP_MATCH_RESULT]", { correct, userAnswer: cleanContent, expected });
                   
-                  // Award small XP for correct answer in teaching loop
-                  const xpReward = 3;
-                  await db
-                    .update(childrenTable)
-                    .set({ xp: (context.childXp ?? 0) + xpReward })
-                    .where(eq(childrenTable.id, childId))
-                    .catch(() => {}); // Silent fail if update doesn't work
+                  isAnswerToTask = true;
+                  const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+                  const childName = context.childName ?? fallbackName;
+                  
+                  aiContent = getMathFeedback(currentTaskA, currentTaskB, currentTaskOperation, cleanContent, childName, lang, correct);
+                  
+                  // If answer is correct, remove the active question and award XP
+                  if (correct) {
+                    console.log("[TEACHER_LOOP_RESOLVED] Answer was correct");
+                    
+                    // Instead of deleting, store a post-success follow-up state
+                    // This allows the next message to continue the loop
+                    if (childId) {
+                      await db
+                        .delete(memoriesTable)
+                        .where(eq(memoriesTable.id, freshActiveQuestion.id))
+                        .catch(() => {}); // Delete the active question
+                      
+                      // Store post-success follow-up state for next message routing
+                      await db.insert(memoriesTable).values({
+                        userId,
+                        childId,
+                        type: "post_success_followup",
+                        content: JSON.stringify({ 
+                          lastDifficulty: "medium", 
+                          createdAt: new Date().toISOString() 
+                        }),
+                        module,
+                      }).catch(() => {}); // Silent fail if insert doesn't work
+                      
+                      // Award small XP for correct answer in teaching loop
+                      const xpReward = 3;
+                      await db
+                        .update(childrenTable)
+                        .set({ xp: (context.childXp ?? 0) + xpReward })
+                        .where(eq(childrenTable.id, childId))
+                        .catch(() => {}); // Silent fail if update doesn't work
+                    }
+                  }
+                } catch (error) {
+                  console.log("[TEACHER_LOOP_VALIDATION_ERROR]", error);
+                  isAnswerToTask = false;
                 }
               }
             }

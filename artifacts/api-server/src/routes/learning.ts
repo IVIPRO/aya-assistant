@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { db, childrenTable, childTopicProgressTable, progressTable } from "@workspace/db";
-import type { BadgeRecord } from "@workspace/db";
+import { db, childrenTable, childTopicProgressTable, progressTable, dailyPlansTable } from "@workspace/db";
+import type { BadgeRecord, DailyPlanTask } from "@workspace/db";
 import { eq, and, gte } from "drizzle-orm";
 import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
 import {
@@ -27,13 +27,15 @@ const router: IRouter = Router();
    Record a lesson / practice / quiz completion and award XP + stars.
 ───────────────────────────────────────────────────────────────── */
 router.post("/learning/complete", requireAuth, async (req, res): Promise<void> => {
-  const { childId, subjectId, topicId, action, correctCount = 0, totalCount = 0 } = req.body as {
+  const { childId, subjectId, topicId, action, correctCount = 0, totalCount = 0, dailyPlanTaskId, dailyPlanId } = req.body as {
     childId: number;
     subjectId: string;
     topicId: string;
     action: "lesson" | "practice" | "quiz";
     correctCount?: number;
     totalCount?: number;
+    dailyPlanTaskId?: string;
+    dailyPlanId?: number;
   };
 
   if (!childId || !subjectId || !topicId || !action) {
@@ -193,6 +195,29 @@ router.post("/learning/complete", requireAuth, async (req, res): Promise<void> =
     .set({ xp: newXp, stars: newStars, badgesEarned: mergedBadges })
     .where(eq(childrenTable.id, childId))
     .returning();
+
+  /* ── Daily Plan Task Completion: Mark task as completed if provided ── */
+  if (dailyPlanTaskId && dailyPlanId) {
+    try {
+      const [plan] = await db
+        .select()
+        .from(dailyPlansTable)
+        .where(eq(dailyPlansTable.id, dailyPlanId));
+
+      if (plan && plan.childId === childId) {
+        const updatedTasks = (plan.tasks as DailyPlanTask[]).map(t =>
+          t.id === dailyPlanTaskId ? { ...t, status: "completed" as const } : t
+        );
+        await db
+          .update(dailyPlansTable)
+          .set({ tasks: updatedTasks, updatedAt: new Date() })
+          .where(eq(dailyPlansTable.id, dailyPlanId));
+      }
+    } catch (err) {
+      // Log but don't fail if daily plan update fails
+      console.error("Failed to update daily plan task:", err);
+    }
+  }
 
   res.json({
     xpGained,

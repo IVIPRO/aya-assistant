@@ -1,0 +1,53 @@
+AYA ASSISTANT / AYA Junior
+
+Implement the smallest safe patch for this exact bug only.
+
+BUG:
+The typed chat input does not follow the same working math teacher-loop logic as voice input.
+
+OBSERVED PROBLEM:
+Voice input now correctly handles all 4 operations.
+But typed chat in the same AYA Panda / teacher loop behaves incorrectly:
+- sometimes only part of the typed text is processed (example: only "дай")
+- or the typed message is treated as generic chat instead of teacher-loop input
+- or typed math answers/requests trigger the wrong hint flow
+
+GOAL:
+Make typed chat use the exact same teacher-loop routing and validation logic as the already-working voice flow.
+
+REQUIREMENTS:
+1. Typed full messages must be preserved completely before send/validation.
+2. Typed requests like:
+   - "дай ми задача с деление"
+   - "дай ми задача с умножение"
+   - "дай ми по-сложна задача"
+   must route exactly like voice requests.
+3. Typed Bulgarian full-sentence answers like:
+   - "три делено на едно е равно на три"
+   - "девет по пет е равно на четиридесет и пет"
+   must validate exactly like voice answers.
+4. Typed numeric answers like:
+   - "3"
+   - "18"
+   - "45"
+   must still work.
+5. Do not change the already-working voice flow.
+6. Do not redesign the whole system.
+7. Do not touch UI styling unless strictly needed for this bug.
+
+VERY IMPORTANT:
+Unify typed input and voice input through the same teacher-loop intent detection and answer validation path.
+If there are two separate code paths, make typed chat reuse the working voice/math logic.
+
+ACCEPTANCE TESTS:
+- typing "дай ми задача с деление" generates a division task
+- typing "дай ми задача с умножение" generates a multiplication task
+- typing "три делено на едно е равно на три" validates correctly for 3 ÷ 1
+- typing "девет по пет е равно на четиридесет и пет" validates correctly for 9 × 5
+- typing only "дай" should not corrupt the teacher loop or partially process a longer intended message
+- voice behavior remains unchanged
+
+Reply only with:
+1. files changed
+2. exact logic changed
+3. what I should test now

@@ -529,3 +529,62 @@ describe("Corrective feedback — clean canonical answers only", () => {
     assert.equal(q2Result.correct, true);
   });
 });
+
+// ─── Test 10: Friendly feedback support (for handler-level tests) ────────────
+
+describe("Friendly feedback structure — supports attempt-based responses", () => {
+  test("Correct answer has 'Браво!' feedback type", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "Пухче",
+    );
+    assert.equal(result.correct, true);
+    assert.equal(result.feedbackBg, "Браво!");
+  });
+
+  test("Wrong answer has 'Почти!' feedback type", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "Мария",
+    );
+    assert.equal(result.correct, false);
+    assert.equal(result.feedbackBg, "Почти!");
+  });
+
+  test("Wrong answer explanation contains canonical answer (not noise)", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "неправилен",
+    );
+    assert.equal(result.correct, false);
+    // Explanation should have clean canonical answer "Пухче"
+    assert.ok(result.explanation.includes("Пухче"), "Must show correct answer");
+    assert.ok(!result.explanation.includes("котката"), "Must NOT show noise");
+  });
+
+  test("Q2 action question explanation is relevant to question", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 1 },
+      "неправилен",
+    );
+    assert.equal(result.correct, false);
+    // Should mention actions (playing, sleeping), not person names
+    const text = result.explanation.toLowerCase();
+    assert.ok(
+      text.includes("спи") || text.includes("играе") || text.includes("топка") || text.includes("сън"),
+      "Should mention relevant activities"
+    );
+  });
+
+  test("Explanation supports multiple correct forms when relevant", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 1 },
+      "неправилен",
+    );
+    assert.equal(result.correct, false);
+    // Q2 has multiple valid answers, should show one or two
+    const explanation = result.explanation;
+    assert.ok(explanation.length > 0, "Should have explanation");
+    assert.ok(explanation.length < 100, "Should be concise (not listing all variants)");
+  });
+});

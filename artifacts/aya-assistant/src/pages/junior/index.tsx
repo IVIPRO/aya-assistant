@@ -967,9 +967,10 @@ export function Junior() {
                   }
                 }
                 
-                // If in mission view, try to get task text
-                if (view === "subjects" && selectedTopic) {
-                  contentToRead = selectedTopic.name || "Let's learn together!";
+                // If a topic is selected, use its label
+                if (selectedTopic) {
+                  const langKey = getLang(activeChild?.language);
+                  contentToRead = selectedTopic.label[langKey] || selectedTopic.label["en"] || "Let's learn together!";
                 }
                 
                 // If no specific content, use default fallback

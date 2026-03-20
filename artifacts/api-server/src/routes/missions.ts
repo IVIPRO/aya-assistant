@@ -339,7 +339,7 @@ router.post("/missions/tasks/:taskId/answer", requireAuth, async (req, res): Pro
     const lang = (childLang?.toLowerCase() === "bg" ? "bg" : childLang?.toLowerCase() === "es" ? "es" : "en") as "bg" | "es" | "en";
 
     // Debug logging for word problems - detailed trace
-    console.log(`[WORD_PROBLEM] mission=${mission.missionId}, type=${task.type}`);
+    console.log(`[WORD_PROBLEM] mission=${mission.id}, type=${task.type}`);
     console.log(`[WORD_PROBLEM] text: "${task.expression}"`);
     console.log(`[WORD_PROBLEM] taskId=${task.id} (database), taskIdStr=${task.taskId} (generator)`);
     console.log(`[WORD_PROBLEM] expectedAnswer: ${task.answer} (raw, type: ${typeof task.answer})`);
@@ -389,9 +389,9 @@ router.post("/missions/tasks/:taskId/answer", requireAuth, async (req, res): Pro
     let nextTask = null;
 
     if (isCorrect) {
-      // Get the task count for this mission from MISSIONS
-      const missionDef = MISSIONS[mission.missionId] || MISSIONS["m1"];
-      const requiredTaskCount = missionDef?.taskCount || 5;
+      // Find mission definition by stored title (missionId string not in DB schema)
+      const missionDef = Object.values(MISSIONS).find(m => m.titleBg === mission.title) ?? MISSIONS["m1"];
+      const requiredTaskCount = missionDef?.taskCount ?? 5;
       
       if (completedTasks.length >= requiredTaskCount) {
         isMissionComplete = true;

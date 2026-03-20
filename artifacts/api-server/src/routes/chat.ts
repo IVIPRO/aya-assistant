@@ -280,6 +280,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
           if (requestedOp && requestedOp !== currentOperation) {
             console.log("[MATH_OPERATION_CURRENT]", currentOperation);
             console.log("[MATH_OPERATION_REQUESTED]", requestedOp);
+            console.log("[MATH_OPERATION_SET]", requestedOp);
             console.log("[MATH_OPERATION_SWITCHED]", { from: currentOperation, to: requestedOp });
             
             // Delete current question and generate new one with different operation
@@ -287,9 +288,13 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
             
             const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
             const childName = context.childName ?? fallbackName;
+            console.log("[MATH_OPERATION_BEFORE_GENERATE]", { requestedOp, type: typeof requestedOp });
             const { a, b, task, operation } = generateMathTask(requestedOp);
             aiContent = getMathTaskPrompt(a, b, operation, childName, lang);
             console.log("[MATH_NEXT_TASK_GENERATED]", { a, b, task, operation });
+            if (operation === "division") {
+              console.log("[MATH_DIVISION_TASK_GENERATED]", { a, b, task });
+            }
             
             // Store new question
             await db.insert(memoriesTable).values({
@@ -314,14 +319,34 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
       console.log("[VOICE_INTENT_CLASSIFIED]", { isTeachingRequest, module });
       
       if (isTeachingRequest && module === "junior") {
-        // Start a new teaching loop (defaulting to addition)
+        // Start a new teaching loop
         console.log("[VOICE_TEACHER_LOOP_TRIGGERED] Starting Smart Teacher Loop for:", cleanContent);
+        
+        // Check if child requested a specific operation
+        console.log("[MATH_OPERATION_INPUT]", cleanContent);
+        const requestedOperation = detectMathOperationSwitch(cleanContent, lang);
+        console.log("[MATH_OPERATION_CLASSIFIED]", requestedOperation);
+        
+        // Use requested operation or default to addition
+        const startOperation = requestedOperation || "addition";
+        if (requestedOperation) {
+          console.log("[MATH_OPERATION_REQUESTED]", requestedOperation);
+          console.log("[MATH_OPERATION_SET]", requestedOperation);
+        } else {
+          console.log("[MATH_OPERATION_FALLBACK] No specific operation requested, using default addition");
+        }
+        
         const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
         const childName = context.childName ?? fallbackName;
-        const { a, b, task, operation } = generateMathTask("addition");
+        console.log("[MATH_OPERATION_BEFORE_GENERATE_NEW_LOOP]", { startOperation, type: typeof startOperation });
+        const { a, b, task, operation } = generateMathTask(startOperation as "addition" | "subtraction" | "multiplication" | "division");
         aiContent = getMathTaskPrompt(a, b, operation, childName, lang);
         
-        console.log("[MATH_OPERATION_CURRENT]", "addition");
+        console.log("[MATH_OPERATION_CURRENT]", operation);
+        console.log("[MATH_NEXT_TASK_GENERATED]", { a, b, task, operation });
+        if (operation === "division") {
+          console.log("[MATH_DIVISION_TASK_GENERATED]", { a, b, task });
+        }
         
         // Store active question in memory for state persistence
         if (childId) {
@@ -357,9 +382,14 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
           console.log("[TEACHER_LOOP_FOLLOWUP_INPUT]", cleanContent);
           
           // Check for operation switch request
+          console.log("[MATH_OPERATION_INPUT]", cleanContent);
           const requestedOperation = detectMathOperationSwitch(cleanContent, lang);
+          console.log("[MATH_OPERATION_CLASSIFIED]", requestedOperation);
           if (requestedOperation) {
             console.log("[MATH_OPERATION_REQUESTED]", requestedOperation);
+            console.log("[MATH_OPERATION_SET]", requestedOperation);
+          } else {
+            console.log("[MATH_OPERATION_FALLBACK] No operation requested, will use default");
           }
           
           // Check if child wants to continue or stop
@@ -378,9 +408,13 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
             const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
             const childName = context.childName ?? fallbackName;
             const nextOp = (requestedOperation || "addition") as "addition" | "subtraction" | "multiplication" | "division";
+            console.log("[MATH_OPERATION_BEFORE_GENERATE_FOLLOWUP]", { nextOp, requestedOperation, type: typeof nextOp });
             const { a, b, task, operation } = generateMathTask(nextOp);
             aiContent = getMathTaskPrompt(a, b, operation, childName, lang);
             console.log("[MATH_NEXT_TASK_GENERATED]", { a, b, task, operation });
+            if (operation === "division") {
+              console.log("[MATH_DIVISION_TASK_GENERATED]", { a, b, task });
+            }
             
             // Store the new active question
             if (childId) {

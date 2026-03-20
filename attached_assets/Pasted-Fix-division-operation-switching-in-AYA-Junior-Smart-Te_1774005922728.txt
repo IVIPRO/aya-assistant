@@ -1,0 +1,99 @@
+Fix division operation switching in AYA Junior Smart Teacher Loop.
+
+Current status:
+- Addition works
+- Multiplication works
+- Typed numeric answers work
+- Teacher loop, hints, correct flow, follow-up state all work
+
+Current bug:
+When the child explicitly asks for division, for example:
+- "Дай ми задача с деление"
+- "Искам деление"
+- "Дай ми задача по деление"
+AYA does NOT switch to division.
+Instead it falls back to addition and generates tasks like:
+"7 + 0 = ?"
+
+Important:
+Do NOT rebuild Smart Teacher Loop.
+Do NOT redesign UI.
+Do NOT use Autonomous Agent.
+This is a focused division-intent / operation-mapping fix only.
+
+Goal:
+When the child explicitly requests division, AYA must switch the active math operation to division and generate a correct division task.
+
+Tasks:
+
+1. Inspect current operation-switching logic and intent classification.
+2. Compare how:
+   - addition
+   - subtraction
+   - multiplication
+   - division
+are detected and mapped.
+
+3. Identify why division requests fall back to addition.
+Possible causes:
+   - missing Bulgarian division keyword mapping
+   - wrong enum mapping
+   - default fallback triggered before division classification
+   - operation memory overwriting division with addition
+
+4. Support Bulgarian division phrases:
+   - "деление"
+   - "с деление"
+   - "задача с деление"
+   - "искам деление"
+   - "дай ми задача по деление"
+   - "нека е деление"
+
+5. If division is requested:
+   - set active operation = division
+   - preserve active teacher-loop mode
+   - generate a valid division task
+   - prefer child-friendly exact-integer division problems
+     examples:
+     6 ÷ 2
+     8 ÷ 4
+     10 ÷ 2
+     12 ÷ 3
+
+6. Add temporary logs:
+   [MATH_OPERATION_INPUT]
+   [MATH_OPERATION_CLASSIFIED]
+   [MATH_OPERATION_SET]
+   [MATH_DIVISION_TASK_GENERATED]
+   [MATH_OPERATION_FALLBACK]
+
+7. Verification examples:
+   Example A:
+   Child: "Дай ми задача с деление"
+   Expected: division task
+
+   Example B:
+   Child: "Искам деление"
+   Expected: division task
+
+   Example C:
+   Child: "Да, по-сложна задача с деление"
+   Expected: harder division task, not addition
+
+8. Keep all existing systems intact:
+   - typed numeric answers
+   - wrong answer -> hint -> correct flow
+   - post-success follow-up state
+   - multiplication switching
+   - voice routing
+   - missions
+   - homework from image
+   - memory
+   - listening mode
+   - XP
+   - normal typed chat outside teacher loop
+
+At the end confirm only:
+- exact file(s) changed
+- exact reason division was falling back to addition
+- one working example of a division task now generated correctly

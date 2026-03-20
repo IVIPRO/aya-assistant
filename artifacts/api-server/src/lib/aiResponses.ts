@@ -609,32 +609,46 @@ export function detectMathOperationSwitch(userMessage: string, lang: "bg" | "es"
 /**
  * Generate a math task for any operation
  */
-export function generateMathTask(operation: "addition" | "subtraction" | "multiplication" | "division"): { a: number; b: number; task: string; operation: string } {
+export function generateMathTask(
+  operation: "addition" | "subtraction" | "multiplication" | "division",
+  difficulty: number = 1,
+): { a: number; b: number; task: string; operation: string } {
   let a, b;
   let attempts = 0;
   
+  // Clamp difficulty to 1-5
+  const d = Math.max(1, Math.min(5, difficulty));
+  
+  // Scale number ranges based on difficulty
+  // Difficulty 1-2: single digits (0-10)
+  // Difficulty 3: teens (0-20)
+  // Difficulty 4-5: larger numbers
+  const rangeMultiplier = d <= 2 ? 1 : d === 3 ? 1.5 : d === 4 ? 2 : 3;
+  const maxBase = Math.floor(10 * rangeMultiplier);
+  
   if (operation === "addition") {
     do {
-      a = Math.floor(Math.random() * 11);
-      b = Math.floor(Math.random() * 11);
+      a = Math.floor(Math.random() * (maxBase + 1));
+      b = Math.floor(Math.random() * (maxBase + 1));
       attempts++;
-    } while ((a + b > 10 || (a === 0 && b === 0)) && attempts < 20);
+    } while ((a + b > maxBase + 10 || (a === 0 && b === 0)) && attempts < 20);
     return { a, b, task: `${a} + ${b}`, operation: "addition" };
   }
   
   if (operation === "subtraction") {
     do {
-      a = Math.floor(Math.random() * 11);
-      b = Math.floor(Math.random() * 10);
+      a = Math.floor(Math.random() * (maxBase + 1));
+      b = Math.floor(Math.random() * maxBase) + 1; // Ensure b >= 1
       attempts++;
     } while ((a < b || (a === 0 && b === 0)) && attempts < 20);
     return { a, b, task: `${a} - ${b}`, operation: "subtraction" };
   }
   
   if (operation === "multiplication") {
-    a = Math.floor(Math.random() * 10) + 1;
-    b = Math.floor(Math.random() * 10) + 1;
-    if (a * b > 50) {
+    const mulBase = d <= 2 ? 10 : d === 3 ? 12 : d === 4 ? 15 : 20;
+    a = Math.floor(Math.random() * mulBase) + 1;
+    b = Math.floor(Math.random() * mulBase) + 1;
+    if (a * b > 50 * d) {
       a = Math.floor(a / 2);
       b = Math.floor(b / 2);
     }
@@ -642,9 +656,12 @@ export function generateMathTask(operation: "addition" | "subtraction" | "multip
   }
   
   // division
-  b = Math.floor(Math.random() * 9) + 1;
-  a = b * (Math.floor(Math.random() * 10) + 1);
-  if (a > 50) a = b * (Math.floor(Math.random() * 5) + 1);
+  const divBase = d <= 2 ? 9 : d === 3 ? 12 : d === 4 ? 15 : 20;
+  b = Math.floor(Math.random() * divBase) + 1;
+  const divMultiplier = d <= 2 ? 10 : d === 3 ? 15 : d === 4 ? 20 : 25;
+  a = b * (Math.floor(Math.random() * divMultiplier) + 1);
+  const maxProduct = 50 * d;
+  if (a > maxProduct) a = b * (Math.floor(Math.random() * 5) + 1);
   return { a, b, task: `${a} ÷ ${b}`, operation: "division" };
 }
 

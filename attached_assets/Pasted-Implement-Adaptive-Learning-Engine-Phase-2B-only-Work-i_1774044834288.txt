@@ -1,0 +1,138 @@
+Implement Adaptive Learning Engine Phase 2B only.
+
+Work in ONE pass.
+Stay in Lite mode.
+Do NOT switch to Autonomous Agent.
+Do NOT redesign unrelated UI.
+Do NOT modify chat layout, lesson flow, math engine, Bulgarian validation, or subject routing.
+Do NOT change existing APIs unless strictly needed for read-only data exposure.
+Do NOT add OpenAI/LLM calls.
+Do NOT add heavy refactors.
+Do NOT add authentication changes.
+Do NOT break any existing tests.
+
+GOAL
+Expose the already-built adaptive learning summaries in simple read-only parent/teacher UI surfaces.
+
+IMPORTANT
+Phase 2A is already done:
+- weekly parent insights helper
+- teacher-ready export helper
+- intervention flags
+- home practice recommendations
+
+This phase must ONLY render and expose these existing results cleanly.
+
+IMPLEMENT ONLY
+
+A. Parent Progress card / panel (read-only)
+Add a simple parent-visible progress section for the active child.
+
+Show:
+- active subject
+- current mode per subject if available (boost / normal / review)
+- strongest topics
+- weak topics
+- weekly wins
+- weekly needs support
+- recommended home practice
+- short Bulgarian parent summary message
+
+Requirements:
+- clean, minimal UI
+- reuse existing design system/styles where possible
+- no complex charts
+- no new design language
+- no modal-heavy UX
+- must gracefully handle no-data state
+
+B. Teacher Export View (read-only)
+Add a simple teacher-ready read panel or section that displays the already-built export data.
+
+Show:
+- grade
+- active subject
+- weak topics
+- strong topics
+- recent sessions
+- intervention flags
+- suggested teacher focus
+
+Requirements:
+- strictly read-only
+- no PDF generation
+- no file export
+- no external integrations
+- just render the existing export helper output clearly
+
+C. Data wiring
+Wire both UI sections to existing helpers from Phase 2A.
+Do not duplicate business logic.
+Do not recompute adaptive logic in components.
+Keep logic in helpers/services, UI only reads and displays.
+
+D. No-data / empty states
+Add friendly Bulgarian empty states such as:
+- "Все още няма достатъчно данни за седмичен отчет."
+- "Няма отбелязани нужди от допълнителна подкрепа."
+- "Все още няма данни за учителски отчет."
+
+E. Keep scope tight
+Do NOT build:
+- teacher account system
+- teacher login
+- country switching UI
+- notifications
+- charts dashboard
+- PDF export
+- email sending
+- new database schema unless absolutely unavoidable
+
+F. Parent text formatting rules
+Keep Bulgarian parent summary:
+- short
+- warm
+- concrete
+- readable on mobile
+- max ~4 short lines visually if possible
+
+G. Teacher text formatting rules
+Keep teacher view:
+- compact
+- professional
+- structured
+- easy to scan quickly
+
+H. Reuse existing data
+If there is already a parent dashboard or parent area, place the new read-only progress section there.
+If there is already a teacher-related placeholder or admin/parent report area, place the teacher export view there.
+If neither exists, create the smallest possible read-only section without redesigning navigation.
+
+TESTS
+Add focused tests only:
+
+1. parent progress renders weekly wins
+2. parent progress renders weak topics
+3. parent progress renders home practice recommendations
+4. parent no-data state renders correctly
+5. teacher export view renders intervention flags
+6. teacher export view renders recent sessions
+7. teacher export no-data state renders correctly
+8. existing adaptive helper outputs are reused, not duplicated
+9. math chat still works unchanged
+10. Bulgarian lesson flow still works unchanged
+
+STOP AFTER
+- parent read-only progress UI
+- teacher read-only export UI
+- tests
+- clean server
+
+OUTPUT FORMAT
+At the end report only:
+1. files changed
+2. where the parent progress UI appears
+3. where the teacher export view appears
+4. empty states added
+5. tests added and total passing count
+6. what remains for Phase 2C

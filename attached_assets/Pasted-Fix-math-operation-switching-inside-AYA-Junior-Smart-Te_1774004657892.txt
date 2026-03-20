@@ -1,0 +1,86 @@
+Fix math operation switching inside AYA Junior Smart Teacher Loop.
+
+Current bug:
+AYA Junior can continue math tasks after correct answers, and can increase difficulty.
+But if the child asks for a different operation, for example:
+- "Дай ми задача с изваждане"
+- "Искам умножение"
+- "Дай ми деление"
+AYA often stays in the current addition loop instead of switching the math operation.
+
+Important:
+Do NOT rebuild Smart Teacher Loop.
+Do NOT redesign UI.
+Do NOT use Autonomous Agent.
+This is a focused routing/state fix only.
+
+Goal:
+When the child explicitly requests a different math operation, AYA must switch the active teacher-loop operation and generate the correct next task.
+
+Supported operations:
+- addition / събиране
+- subtraction / изваждане
+- multiplication / умножение
+- division / деление
+
+Tasks:
+
+1. Inspect current teacher-loop state and identify where active math operation is stored.
+2. Ensure the active loop can switch operation when the child explicitly requests a new one.
+3. Add operation-switch detection for both typed and voice inputs.
+4. Recognize Bulgarian phrases such as:
+   - "дай ми задача с изваждане"
+   - "искам изваждане"
+   - "дай ми умножение"
+   - "искам задача по умножение"
+   - "дай ми деление"
+   - "сега искам деление"
+   - "нека е събиране"
+5. If operation switch is detected:
+   - update active loop topic/operation
+   - keep the current educational mode active
+   - generate a new task using the requested operation
+   - respect current difficulty if possible
+6. If the child says:
+   - "по-сложна задача с умножение"
+   then switch both:
+   - operation = multiplication
+   - difficulty = harder
+7. Add temporary logs:
+   [MATH_OPERATION_CURRENT]
+   [MATH_OPERATION_REQUESTED]
+   [MATH_OPERATION_SWITCHED]
+   [MATH_NEXT_TASK_GENERATED]
+8. Verification examples:
+   Example A:
+   Current loop: addition
+   Child: "Дай ми задача с изваждане"
+   Expected: new subtraction task
+
+   Example B:
+   Current loop: addition
+   Child: "Искам умножение"
+   Expected: new multiplication task
+
+   Example C:
+   Current loop: subtraction
+   Child: "Да, но по-сложна задача с деление"
+   Expected: harder division task
+
+9. Keep all existing systems intact:
+   - wrong answer -> hint -> correct flow
+   - post-success follow-up state
+   - voice-to-teacher-loop routing
+   - missions
+   - homework from image
+   - child memory
+   - listening mode
+   - XP
+   - normal greetings when no active loop exists
+
+At the end confirm only:
+- exact file(s) changed
+- exact operation-switch bug fixed
+- one example for subtraction
+- one example for multiplication
+- one example for division

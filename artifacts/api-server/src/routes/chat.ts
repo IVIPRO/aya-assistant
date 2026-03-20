@@ -3,7 +3,7 @@ import { db, chatMessagesTable, memoriesTable, childrenTable } from "@workspace/
 import { eq, and, desc } from "drizzle-orm";
 import { SendChatMessageBody } from "@workspace/api-zod";
 import { requireAuth, getUser } from "../lib/auth";
-import { getAIResponse, detectTeachingIntent, generateAdditionTask, evaluateAdditionAnswer, getAdditionFeedback, getAdditionTaskPrompt, getLang } from "../lib/aiResponses";
+import { getAIResponse, detectTeachingIntent, generateAdditionTask, evaluateAdditionAnswer, getAdditionFeedback, getAdditionTaskPrompt, getLang, detectMathOperationSwitch, generateMathTask, evaluateMathAnswer, getMathFeedback, getMathTaskPrompt } from "../lib/aiResponses";
 import { trySimpleMathSolve } from "../lib/mathSolver";
 import OpenAI from "openai";
 
@@ -253,33 +253,88 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
       aiContent = fallbackMsgs[lang];
     }
   } else {
-    // Check if user wants to start an addition teaching loop (v1)
+    // Get language for all flows
     const lang = getLang(context.language);
     console.log("[VOICE_INTENT_INPUT]", { cleanContent, lang });
-    const isTeachingRequest = detectTeachingIntent(cleanContent, lang);
-    console.log("[VOICE_INTENT_CLASSIFIED]", { isTeachingRequest, module });
     
-    if (isTeachingRequest && module === "junior") {
-      // Start a new addition teaching loop
-      console.log("[VOICE_TEACHER_LOOP_TRIGGERED] Starting Smart Teacher Loop for:", cleanContent);
-      const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
-      const childName = context.childName ?? fallbackName;
-      const { a, b, task } = generateAdditionTask();
-      aiContent = getAdditionTaskPrompt(a, b, childName, lang);
+    // FIRST: Check if there's an active question and if this is an operation switch request
+    let operationSwitchHandled = false;
+    if (childId && module === "junior") {
+      const [activeQuestion] = await db
+        .select()
+        .from(memoriesTable)
+        .where(and(
+          eq(memoriesTable.childId, childId),
+          eq(memoriesTable.type, "active_question"),
+          eq(memoriesTable.module, module)
+        ))
+        .orderBy(desc(memoriesTable.createdAt))
+        .limit(1);
       
-      // Store active question in memory for state persistence
-      if (childId) {
-        await db.insert(memoriesTable).values({
-          userId,
-          childId,
-          type: "active_question",
-          content: JSON.stringify({ a, b, task, createdAt: new Date().toISOString() }),
-          module,
-        }).catch(() => {}); // Silent fail if insert doesn't work
+      if (activeQuestion) {
+        try {
+          const questionData = JSON.parse(activeQuestion.content);
+          const currentOperation = questionData.operation || "addition";
+          const requestedOp = detectMathOperationSwitch(cleanContent, lang);
+          
+          if (requestedOp && requestedOp !== currentOperation) {
+            console.log("[MATH_OPERATION_CURRENT]", currentOperation);
+            console.log("[MATH_OPERATION_REQUESTED]", requestedOp);
+            console.log("[MATH_OPERATION_SWITCHED]", { from: currentOperation, to: requestedOp });
+            
+            // Delete current question and generate new one with different operation
+            await db.delete(memoriesTable).where(eq(memoriesTable.id, activeQuestion.id)).catch(() => {});
+            
+            const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+            const childName = context.childName ?? fallbackName;
+            const { a, b, task, operation } = generateMathTask(requestedOp);
+            aiContent = getMathTaskPrompt(a, b, operation, childName, lang);
+            console.log("[MATH_NEXT_TASK_GENERATED]", { a, b, task, operation });
+            
+            // Store new question
+            await db.insert(memoriesTable).values({
+              userId,
+              childId,
+              type: "active_question",
+              content: JSON.stringify({ a, b, task, operation, createdAt: new Date().toISOString() }),
+              module,
+            }).catch(() => {});
+            
+            operationSwitchHandled = true;
+          }
+        } catch (error) {
+          console.log("[OPERATION_SWITCH_CHECK_ERROR]", error);
+        }
       }
-    } else {
+    }
+    
+    // SECOND: If operation switch not handled, check if user wants to start a new teaching loop
+    if (!operationSwitchHandled) {
+      const isTeachingRequest = detectTeachingIntent(cleanContent, lang);
+      console.log("[VOICE_INTENT_CLASSIFIED]", { isTeachingRequest, module });
+      
+      if (isTeachingRequest && module === "junior") {
+        // Start a new teaching loop (defaulting to addition)
+        console.log("[VOICE_TEACHER_LOOP_TRIGGERED] Starting Smart Teacher Loop for:", cleanContent);
+        const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+        const childName = context.childName ?? fallbackName;
+        const { a, b, task, operation } = generateMathTask("addition");
+        aiContent = getMathTaskPrompt(a, b, operation, childName, lang);
+        
+        console.log("[MATH_OPERATION_CURRENT]", "addition");
+        
+        // Store active question in memory for state persistence
+        if (childId) {
+          await db.insert(memoriesTable).values({
+            userId,
+            childId,
+            type: "active_question",
+            content: JSON.stringify({ a, b, task, operation, createdAt: new Date().toISOString() }),
+            module,
+          }).catch(() => {}); // Silent fail if insert doesn't work
+        }
+      } else {
       // Get language for all non-teaching-request flows
-      const lang = getLang(context.language);
       
       // First, check if there's a post-success follow-up state
       let isPostSuccessFollowup = false;
@@ -308,15 +363,18 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
           
           console.log("[TEACHER_LOOP_FOLLOWUP_CLASSIFIED]", { continueYes, stopNo, message: msg });
           
-          if (continueYes) {
+          if (continueYes || requestedOperation) {
             // Generate a new task and continue the loop
             console.log("[TEACHER_LOOP_NEXT_TASK_TRIGGERED] Continuing with new task");
+            if (requestedOperation) console.log("[MATH_OPERATION_SWITCHED]", { from: "addition", to: requestedOperation });
             postSuccessFollowupId = postSuccess.id;
             
             const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
             const childName = context.childName ?? fallbackName;
-            const { a, b, task } = generateAdditionTask();
-            aiContent = getAdditionTaskPrompt(a, b, childName, lang);
+            const nextOp = (requestedOperation || "addition") as "addition" | "subtraction" | "multiplication" | "division";
+            const { a, b, task, operation } = generateMathTask(nextOp);
+            aiContent = getMathTaskPrompt(a, b, operation, childName, lang);
+            console.log("[MATH_NEXT_TASK_GENERATED]", { a, b, task, operation });
             
             // Store the new active question
             if (childId) {
@@ -324,7 +382,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
                 userId,
                 childId,
                 type: "active_question",
-                content: JSON.stringify({ a, b, task, createdAt: new Date().toISOString() }),
+                content: JSON.stringify({ a, b, task, operation, createdAt: new Date().toISOString() }),
                 module,
               }).catch(() => {});
               
@@ -383,51 +441,81 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
             const questionData = JSON.parse(activeQuestion.content);
             taskA = questionData.a;
             taskB = questionData.b;
+            const taskOperation = questionData.operation || "addition";
             activeQuestionId = activeQuestion.id;
-            console.log("[TEACHER_LOOP_EXPECTED_ANSWER]", { taskA, taskB, expected: taskA + taskB });
+            console.log("[MATH_OPERATION_CURRENT]", taskOperation);
+            console.log("[TEACHER_LOOP_EXPECTED_ANSWER]", { taskA, taskB, operation: taskOperation });
             
-            // Evaluate the child's message as a potential answer
-            console.log("[TEACHER_LOOP_CHILD_INPUT]", cleanContent);
-            const { correct, expected } = evaluateAdditionAnswer(taskA, taskB, cleanContent);
-            console.log("[TEACHER_LOOP_MATCH_RESULT]", { correct, userAnswer: cleanContent, expected });
-            
-            isAnswerToTask = true;
-            const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
-            const childName = context.childName ?? fallbackName;
-            
-            aiContent = getAdditionFeedback(taskA, taskB, cleanContent, childName, lang, correct);
-            
-            // If answer is correct, remove the active question and award XP
-            if (correct) {
-              console.log("[TEACHER_LOOP_RESOLVED] Answer was correct");
+            // Check if child wants to switch operation
+            const requestedOp = detectMathOperationSwitch(cleanContent, lang);
+            if (requestedOp && requestedOp !== taskOperation) {
+              console.log("[MATH_OPERATION_REQUESTED]", requestedOp);
+              console.log("[MATH_OPERATION_SWITCHED]", { from: taskOperation, to: requestedOp });
               
-              // Instead of deleting, store a post-success follow-up state
-              // This allows the next message to continue the loop
+              // Delete current question and generate new one with different operation
+              await db.delete(memoriesTable).where(eq(memoriesTable.id, activeQuestionId)).catch(() => {});
+              
+              const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+              const childName = context.childName ?? fallbackName;
+              const { a, b, task, operation } = generateMathTask(requestedOp);
+              aiContent = getMathTaskPrompt(a, b, operation, childName, lang);
+              console.log("[MATH_NEXT_TASK_GENERATED]", { a, b, task, operation });
+              
+              // Store new question
               if (childId) {
-                await db
-                  .delete(memoriesTable)
-                  .where(eq(memoriesTable.id, activeQuestionId))
-                  .catch(() => {}); // Delete the active question
-                
-                // Store post-success follow-up state for next message routing
                 await db.insert(memoriesTable).values({
                   userId,
                   childId,
-                  type: "post_success_followup",
-                  content: JSON.stringify({ 
-                    lastDifficulty: "medium", 
-                    createdAt: new Date().toISOString() 
-                  }),
+                  type: "active_question",
+                  content: JSON.stringify({ a, b, task, operation, createdAt: new Date().toISOString() }),
                   module,
-                }).catch(() => {}); // Silent fail if insert doesn't work
+                }).catch(() => {});
+              }
+              isAnswerToTask = false;
+            } else {
+              // Evaluate the child's message as a potential answer
+              console.log("[TEACHER_LOOP_CHILD_INPUT]", cleanContent);
+              const { correct, expected } = evaluateMathAnswer(taskA, taskB, taskOperation, cleanContent);
+              console.log("[TEACHER_LOOP_MATCH_RESULT]", { correct, userAnswer: cleanContent, expected });
+              
+              isAnswerToTask = true;
+              const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+              const childName = context.childName ?? fallbackName;
+              
+              aiContent = getMathFeedback(taskA, taskB, taskOperation, cleanContent, childName, lang, correct);
+              
+              // If answer is correct, remove the active question and award XP
+              if (correct) {
+                console.log("[TEACHER_LOOP_RESOLVED] Answer was correct");
                 
-                // Award small XP for correct answer in teaching loop
-                const xpReward = 3;
-                await db
-                  .update(childrenTable)
-                  .set({ xp: (context.childXp ?? 0) + xpReward })
-                  .where(eq(childrenTable.id, childId))
-                  .catch(() => {}); // Silent fail if update doesn't work
+                // Instead of deleting, store a post-success follow-up state
+                // This allows the next message to continue the loop
+                if (childId) {
+                  await db
+                    .delete(memoriesTable)
+                    .where(eq(memoriesTable.id, activeQuestionId))
+                    .catch(() => {}); // Delete the active question
+                  
+                  // Store post-success follow-up state for next message routing
+                  await db.insert(memoriesTable).values({
+                    userId,
+                    childId,
+                    type: "post_success_followup",
+                    content: JSON.stringify({ 
+                      lastDifficulty: "medium", 
+                      createdAt: new Date().toISOString() 
+                    }),
+                    module,
+                  }).catch(() => {}); // Silent fail if insert doesn't work
+                  
+                  // Award small XP for correct answer in teaching loop
+                  const xpReward = 3;
+                  await db
+                    .update(childrenTable)
+                    .set({ xp: (context.childXp ?? 0) + xpReward })
+                    .where(eq(childrenTable.id, childId))
+                    .catch(() => {}); // Silent fail if update doesn't work
+                }
               }
             }
           } catch (error) {
@@ -481,6 +569,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
           aiContent = getAIResponse(module, cleanContent, context);
         }
       }
+    }
     }
   }
 

@@ -907,46 +907,33 @@ export function getMathFeedback(
 
 /**
  * Generate the initial prompt for a math teaching task
+ * Uses deterministic format: "Колко е A operation B?" for Bulgarian, etc.
  */
 export function getMathTaskPrompt(a: number, b: number, operation: string, childName: string, lang: "bg" | "es" | "en"): string {
   const charEmoji = "🐼";
-  let operationName = "addition";
   let operationSymbol = "+";
   
   if (operation === "subtraction") {
-    operationName = "subtraction";
     operationSymbol = "-";
   } else if (operation === "multiplication") {
-    operationName = "multiplication";
     operationSymbol = "×";
   } else if (operation === "division") {
-    operationName = "division";
     operationSymbol = "÷";
   }
   
   const equation = `${a} ${operationSymbol} ${b}`;
   
+  // Deterministic format: simple question without randomness
   if (lang === "bg") {
-    return [
-      `${charEmoji} Хайде да опитаме заедно, ${childName}:\n${equation} = ?`,
-      `${charEmoji} Математическо приключение, ${childName}!\nКолко е ${equation}?`,
-      `${charEmoji} Готови ли сте, ${childName}?\n${equation} = ?`
-    ][Math.floor(Math.random() * 3)];
+    return `${charEmoji} Колко е ${equation}?`;
   }
   
   if (lang === "es") {
-    return [
-      `${charEmoji} Vamos a intentar juntos, ${childName}:\n${equation} = ?`,
-      `${charEmoji} ¡Una aventura matemática, ${childName}!\n¿Cuánto es ${equation}?`,
-      `${charEmoji} ¿Listos, ${childName}?\n${equation} = ?`
-    ][Math.floor(Math.random() * 3)];
+    return `${charEmoji} ¿Cuánto es ${equation}?`;
   }
   
-  return [
-    `${charEmoji} Let's try together, ${childName}:\n${equation} = ?`,
-    `${charEmoji} A math challenge, ${childName}!\nWhat is ${equation}?`,
-    `${charEmoji} Ready, ${childName}?\n${equation} = ?`
-  ][Math.floor(Math.random() * 3)];
+  // English
+  return `${charEmoji} What is ${equation}?`;
 }
 
 export function getAIResponse(module: string, userMessage: string, context?: JuniorContext): string {

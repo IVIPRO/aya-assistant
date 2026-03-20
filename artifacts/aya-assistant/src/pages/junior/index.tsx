@@ -555,7 +555,7 @@ function VoiceReadySection({
       desc: lbl.voiceTalkDesc,
       color: "from-blue-50 to-sky-50 border-blue-200",
       iconColor: "text-blue-500 bg-blue-100",
-      isActive: false,
+      isActive: true,
     },
     {
       icon: Volume2,

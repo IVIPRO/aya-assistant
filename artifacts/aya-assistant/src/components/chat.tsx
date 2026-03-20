@@ -152,25 +152,25 @@ const VOICE_LABELS = {
     mic: "Talk to AYA",
     listen: "Listen to AYA",
     stop: "Stop",
-    record: "Record question",
+    record: "Listening…",
     micDenied: "Microphone access denied",
-    transcribing: "Listening…",
+    transcribing: "Processing…",
   },
   bg: {
     mic: "Говори с AYA",
     listen: "Слушай AYA",
     stop: "Спри",
-    record: "Запиши въпрос",
+    record: "Слушам…",
     micDenied: "Микрофонът е отказан",
-    transcribing: "Слушам…",
+    transcribing: "Обработвам…",
   },
   es: {
     mic: "Habla con AYA",
     listen: "Escucha a AYA",
     stop: "Detener",
-    record: "Grabar pregunta",
+    record: "Escuchando…",
     micDenied: "Acceso al micrófono denegado",
-    transcribing: "Escuchando…",
+    transcribing: "Procesando…",
   },
 };
 
@@ -229,7 +229,8 @@ export function Chat({
     lang: hwLang,
     childId: activeChildId,
     onTranscript: (text) => {
-      setInput(text);
+      // Auto-send recognized voice input as a real message
+      doSend(text);
     },
     onError: (msg) => {
       toast({ title: msg, variant: "destructive" });

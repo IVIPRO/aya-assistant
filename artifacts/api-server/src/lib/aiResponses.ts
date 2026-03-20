@@ -577,6 +577,220 @@ export function getAdditionTaskPrompt(a: number, b: number, childName: string, l
   ][Math.floor(Math.random() * 3)];
 }
 
+/**
+ * Detect if user wants to switch to a different math operation
+ */
+export function detectMathOperationSwitch(userMessage: string, lang: "bg" | "es" | "en"): "addition" | "subtraction" | "multiplication" | "division" | null {
+  const msg = userMessage.toLowerCase().trim();
+  
+  if (lang === "bg") {
+    if (msg.includes("събиране") || msg.includes("събира")) return "addition";
+    if (msg.includes("изваждане") || msg.includes("изважда")) return "subtraction";
+    if (msg.includes("умножение") || msg.includes("умножи")) return "multiplication";
+    if (msg.includes("деление") || msg.includes("дели")) return "division";
+  }
+  
+  if (lang === "es") {
+    if (msg.includes("suma") || msg.includes("adición")) return "addition";
+    if (msg.includes("resta") || msg.includes("sustracción")) return "subtraction";
+    if (msg.includes("multiplicación") || msg.includes("multiplicar")) return "multiplication";
+    if (msg.includes("división") || msg.includes("dividir")) return "division";
+  }
+  
+  // English
+  if (msg.includes("addition") || msg.includes("add")) return "addition";
+  if (msg.includes("subtraction") || msg.includes("subtract")) return "subtraction";
+  if (msg.includes("multiplication") || msg.includes("multiply")) return "multiplication";
+  if (msg.includes("division") || msg.includes("divide")) return "division";
+  
+  return null;
+}
+
+/**
+ * Generate a math task for any operation
+ */
+export function generateMathTask(operation: "addition" | "subtraction" | "multiplication" | "division"): { a: number; b: number; task: string; operation: string } {
+  let a, b;
+  let attempts = 0;
+  
+  if (operation === "addition") {
+    do {
+      a = Math.floor(Math.random() * 11);
+      b = Math.floor(Math.random() * 11);
+      attempts++;
+    } while ((a + b > 10 || (a === 0 && b === 0)) && attempts < 20);
+    return { a, b, task: `${a} + ${b}`, operation: "addition" };
+  }
+  
+  if (operation === "subtraction") {
+    do {
+      a = Math.floor(Math.random() * 11);
+      b = Math.floor(Math.random() * 10);
+      attempts++;
+    } while ((a < b || (a === 0 && b === 0)) && attempts < 20);
+    return { a, b, task: `${a} - ${b}`, operation: "subtraction" };
+  }
+  
+  if (operation === "multiplication") {
+    a = Math.floor(Math.random() * 10) + 1;
+    b = Math.floor(Math.random() * 10) + 1;
+    if (a * b > 50) {
+      a = Math.floor(a / 2);
+      b = Math.floor(b / 2);
+    }
+    return { a, b, task: `${a} × ${b}`, operation: "multiplication" };
+  }
+  
+  // division
+  b = Math.floor(Math.random() * 9) + 1;
+  a = b * (Math.floor(Math.random() * 10) + 1);
+  if (a > 50) a = b * (Math.floor(Math.random() * 5) + 1);
+  return { a, b, task: `${a} ÷ ${b}`, operation: "division" };
+}
+
+/**
+ * Evaluate answer for any math operation
+ */
+export function evaluateMathAnswer(a: number, b: number, operation: string, userAnswer: string): { correct: boolean; expected: number } {
+  let expected = 0;
+  
+  if (operation === "addition") {
+    expected = a + b;
+  } else if (operation === "subtraction") {
+    expected = a - b;
+  } else if (operation === "multiplication") {
+    expected = a * b;
+  } else if (operation === "division") {
+    expected = a / b;
+  }
+  
+  const cleaned = userAnswer.toLowerCase().trim().replace(/[^0-9.]/g, "");
+  let answered = parseFloat(cleaned);
+  
+  if (operation === "division") {
+    expected = Math.round(expected * 100) / 100;
+    answered = Math.round(answered * 100) / 100;
+  } else {
+    expected = Math.round(expected);
+    answered = Math.round(answered);
+  }
+  
+  return {
+    correct: !isNaN(answered) && answered === expected,
+    expected
+  };
+}
+
+/**
+ * Generate feedback for any math operation
+ */
+export function getMathFeedback(
+  a: number,
+  b: number,
+  operation: string,
+  userAnswer: string,
+  childName: string,
+  lang: "bg" | "es" | "en",
+  isCorrect: boolean
+): string {
+  const charEmoji = "🐼";
+  const { expected } = evaluateMathAnswer(a, b, operation, userAnswer);
+  
+  let operationSymbol = "+";
+  if (operation === "subtraction") operationSymbol = "-";
+  else if (operation === "multiplication") operationSymbol = "×";
+  else if (operation === "division") operationSymbol = "÷";
+  
+  const equation = `${a} ${operationSymbol} ${b} = ${expected}`;
+  
+  if (isCorrect) {
+    if (lang === "bg") {
+      return [
+        `${charEmoji} Браво, ${childName}! ${equation} ⭐\nИскаш ли още една задача?`,
+        `${charEmoji} Точно! ${equation}! Прекрасна работа, ${childName}! 🌟\nПродължаваме ли?`,
+        `${charEmoji} Чудесно! ${expected} е верния отговор! Ты си чудесен математик, ${childName}! 🎉\nОще ли една?`
+      ][Math.floor(Math.random() * 3)];
+    }
+    if (lang === "es") {
+      return [
+        `${charEmoji} ¡Bravo, ${childName}! ${equation} ⭐\n¿Quieres otro?`,
+        `${charEmoji} ¡Correcto! ${equation}! ¡Excelente trabajo, ${childName}! 🌟\n¿Continuamos?`,
+        `${charEmoji} ¡Fantástico! ¡${expected} es la respuesta correcta! ¡Eres un excelente matemático, ${childName}! 🎉\n¿Otro más?`
+      ][Math.floor(Math.random() * 3)];
+    }
+    return [
+      `${charEmoji} Great, ${childName}! ${equation} ⭐\nWant another one?`,
+      `${charEmoji} Correct! ${equation}! Excellent work, ${childName}! 🌟\nShall we continue?`,
+      `${charEmoji} Wonderful! ${expected} is the right answer! You're a great mathematician, ${childName}! 🎉\nOne more?`
+    ][Math.floor(Math.random() * 3)];
+  }
+  
+  // Incorrect - provide hint
+  if (lang === "bg") {
+    return [
+      `${charEmoji} Добър опит! Помисли още малко: ${a} и ${b} заедно какво ще бъдат?`,
+      `${charEmoji} Интересно мислене! Опитай отново и помисли дали това е правилния отговор.`,
+      `${charEmoji} Хубав опит! Помислете повторно за операцията: ${a} ${operationSymbol} ${b}.`
+    ][Math.floor(Math.random() * 3)];
+  }
+  if (lang === "es") {
+    return [
+      `${charEmoji} ¡Buen intento! Piensa de nuevo: ${a} y ${b} juntos, ¿cuánto será?`,
+      `${charEmoji} ¡Pensamiento interesante! Intenta de nuevo y piensa si esa es la respuesta correcta.`,
+      `${charEmoji} ¡Buen intento! Piensa de nuevo en la operación: ${a} ${operationSymbol} ${b}.`
+    ][Math.floor(Math.random() * 3)];
+  }
+  return [
+    `${charEmoji} Good try! Think again: ${a} and ${b} together equals what?`,
+    `${charEmoji} Interesting thinking! Try again and think if that's the correct answer.`,
+    `${charEmoji} Nice try! Think again about the operation: ${a} ${operationSymbol} ${b}.`
+  ][Math.floor(Math.random() * 3)];
+}
+
+/**
+ * Generate the initial prompt for a math teaching task
+ */
+export function getMathTaskPrompt(a: number, b: number, operation: string, childName: string, lang: "bg" | "es" | "en"): string {
+  const charEmoji = "🐼";
+  let operationName = "addition";
+  let operationSymbol = "+";
+  
+  if (operation === "subtraction") {
+    operationName = "subtraction";
+    operationSymbol = "-";
+  } else if (operation === "multiplication") {
+    operationName = "multiplication";
+    operationSymbol = "×";
+  } else if (operation === "division") {
+    operationName = "division";
+    operationSymbol = "÷";
+  }
+  
+  const equation = `${a} ${operationSymbol} ${b}`;
+  
+  if (lang === "bg") {
+    return [
+      `${charEmoji} Хайде да опитаме заедно, ${childName}:\n${equation} = ?`,
+      `${charEmoji} Математическо приключение, ${childName}!\nКолко е ${equation}?`,
+      `${charEmoji} Готови ли сте, ${childName}?\n${equation} = ?`
+    ][Math.floor(Math.random() * 3)];
+  }
+  
+  if (lang === "es") {
+    return [
+      `${charEmoji} Vamos a intentar juntos, ${childName}:\n${equation} = ?`,
+      `${charEmoji} ¡Una aventura matemática, ${childName}!\n¿Cuánto es ${equation}?`,
+      `${charEmoji} ¿Listos, ${childName}?\n${equation} = ?`
+    ][Math.floor(Math.random() * 3)];
+  }
+  
+  return [
+    `${charEmoji} Let's try together, ${childName}:\n${equation} = ?`,
+    `${charEmoji} A math challenge, ${childName}!\nWhat is ${equation}?`,
+    `${charEmoji} Ready, ${childName}?\n${equation} = ?`
+  ][Math.floor(Math.random() * 3)];
+}
+
 export function getAIResponse(module: string, userMessage: string, context?: JuniorContext): string {
   if (module === "junior" && context) {
     // Check if this is a greeting/casual chat first

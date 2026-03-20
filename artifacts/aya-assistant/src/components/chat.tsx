@@ -229,10 +229,26 @@ export function Chat({
     lang: hwLang,
     childId: activeChildId,
     onTranscript: (text) => {
+      console.log("[VOICE_TRANSCRIPT_RAW]", text);
+      console.log("[VOICE_TRANSCRIPT_FINAL]", text.trim());
+      
+      if (!text.trim()) {
+        console.log("[VOICE_SEND_ERROR] Empty transcript");
+        toast({ 
+          title: hwLang === "bg" ? "Не успях да чуя. Опитай отново." : 
+                 hwLang === "es" ? "No pude escuchar. Intenta de nuevo." : 
+                 "I couldn't hear you. Please try again.",
+          variant: "destructive" 
+        });
+        return;
+      }
+      
       // Auto-send recognized voice input as a real message
+      console.log("[VOICE_SEND_PAYLOAD]", { module, content: text.trim(), childId: activeChildId });
       doSend(text);
     },
     onError: (msg) => {
+      console.log("[VOICE_SEND_ERROR]", msg);
       toast({ title: msg, variant: "destructive" });
     },
   });
@@ -319,17 +335,25 @@ export function Chat({
   }, [input, sendMutation.isPending]);
 
   const doSend = (content: string, onError?: () => void) => {
-    if (!content.trim() || sendMutation.isPending) return;
+    if (!content.trim() || sendMutation.isPending) {
+      console.log("[VOICE_SEND_ERROR] Content empty or already sending", { content: content.trim(), isPending: sendMutation.isPending });
+      return;
+    }
     const fullContent = subjectContext
       ? `${metaLbl.subjectPrefix}: ${subjectContext.subjectLabel}${subjectContext.topicLabel ? ` | ${metaLbl.topicPrefix}: ${subjectContext.topicLabel}` : ""}\n${content}`
       : content;
+    console.log("[VOICE_SEND_PAYLOAD] Sending", { module, content: fullContent, childId: activeChildId });
     sendMutation.mutate(
       { data: { module, content: fullContent, childId: activeChildId } },
       {
         onSuccess: () => {
+          console.log("[VOICE_SEND_RESPONSE] Success");
           refetch().catch(() => {});
         },
-        onError: () => {
+        onError: (error: any) => {
+          console.log("[VOICE_SEND_ERROR] Failed with status:", error?.status);
+          console.log("[VOICE_SEND_ERROR] Full error:", error);
+          console.log("[VOICE_SEND_ERROR] Error response:", error?.response?.data || error?.message);
           toast({
             title: "Error sending message",
             description: "Please try again.",

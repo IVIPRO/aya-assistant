@@ -265,7 +265,14 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
       aiContent = getAdditionTaskPrompt(a, b, childName, lang);
     } else {
       // Check if this might be an answer to a recent addition task
-      const recentMessages = messages.slice(-2); // Check last 2 messages
+      // Fetch last 2 messages from database
+      const recentMessages = await db
+        .select()
+        .from(chatMessagesTable)
+        .where(and(eq(chatMessagesTable.childId, childId ?? 0), eq(chatMessagesTable.module, module)))
+        .orderBy(desc(chatMessagesTable.id))
+        .limit(2);
+      
       let isAnswerToTask = false;
       let taskA = 0, taskB = 0;
       

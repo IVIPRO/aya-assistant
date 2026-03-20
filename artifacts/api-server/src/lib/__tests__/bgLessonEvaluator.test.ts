@@ -309,3 +309,88 @@ describe("Topic progression logic (data structure)", () => {
     assert.equal(markedWeak, false);
   });
 });
+
+// ─── Test 7: Question-specific validation (bug fix) ──────────────────────────
+
+describe("Question-specific validation — no cross-question acceptance", () => {
+  test("Q1 'Как се казва котката?' accepts 'Пухче'", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "Пухче",
+    );
+    assert.equal(result.correct, true);
+  });
+
+  test("Q1 'Как се казва котката?' REJECTS 'Мария' (wrong word from passage)", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "Мария",
+    );
+    assert.equal(result.correct, false);
+    assert.ok(result.feedbackBg === "Почти!");
+  });
+
+  test("Q1 'Как се казва котката?' REJECTS 'рибица' (wrong word from passage)", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "рибица",
+    );
+    assert.equal(result.correct, false);
+  });
+
+  test("Q1 accepts '1.Пухче' (numbered + normalized)", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "1.Пухче",
+    );
+    assert.equal(result.correct, true);
+  });
+
+  test("Q1 accepts 'Пухче.' (with trailing period)", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "Пухче.",
+    );
+    assert.equal(result.correct, true);
+  });
+
+  test("Q2 'Какво обича да прави Пухче?' accepts 'топка'", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 1 },
+      "топка",
+    );
+    assert.equal(result.correct, true);
+  });
+
+  test("Q2 'Какво обича?' REJECTS 'Пухче' (character name, not action)", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 1 },
+      "Пухче",
+    );
+    assert.equal(result.correct, false);
+  });
+
+  test("Q3 'С какво го храни Мария?' accepts 'рибица'", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 2 },
+      "рибица",
+    );
+    assert.equal(result.correct, true);
+  });
+
+  test("Q3 'С какво го храни?' REJECTS 'Пухче' (character, not food)", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 2 },
+      "Пухче",
+    );
+    assert.equal(result.correct, false);
+  });
+
+  test("Q3 accepts '1) рибица!!!' (numbered + multiple punctuation)", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 2 },
+      "1) рибица!!!",
+    );
+    assert.equal(result.correct, true);
+  });
+});

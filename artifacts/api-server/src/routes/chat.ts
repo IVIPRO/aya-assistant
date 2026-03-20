@@ -278,7 +278,88 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
         }).catch(() => {}); // Silent fail if insert doesn't work
       }
     } else {
-      // First, check if there's an active unresolved teacher-loop question
+      // Get language for all non-teaching-request flows
+      const lang = getLang(context.language);
+      
+      // First, check if there's a post-success follow-up state
+      let isPostSuccessFollowup = false;
+      let postSuccessFollowupId: number | null = null;
+      
+      if (childId) {
+        const [postSuccess] = await db
+          .select()
+          .from(memoriesTable)
+          .where(and(
+            eq(memoriesTable.childId, childId),
+            eq(memoriesTable.type, "post_success_followup"),
+            eq(memoriesTable.module, module)
+          ))
+          .orderBy(desc(memoriesTable.createdAt))
+          .limit(1);
+        
+        if (postSuccess) {
+          console.log("[TEACHER_LOOP_POST_SUCCESS_ACTIVE] Found post-success follow-up state");
+          console.log("[TEACHER_LOOP_FOLLOWUP_INPUT]", cleanContent);
+          
+          // Check if child wants to continue or stop
+          const msg = cleanContent.toLowerCase().trim();
+          const continueYes = ["да", "да, още една", "дай ми още една", "дай ми още един", "още един", "още една", "да, по-трудна", "да, по-сложна", "по-трудна", "по-сложна", "да, по-лесна", "по-лесна"].some(t => msg.includes(t));
+          const stopNo = ["не", "стига", "достатъчно е", "върши"].some(t => msg.includes(t));
+          
+          console.log("[TEACHER_LOOP_FOLLOWUP_CLASSIFIED]", { continueYes, stopNo, message: msg });
+          
+          if (continueYes) {
+            // Generate a new task and continue the loop
+            console.log("[TEACHER_LOOP_NEXT_TASK_TRIGGERED] Continuing with new task");
+            postSuccessFollowupId = postSuccess.id;
+            
+            const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+            const childName = context.childName ?? fallbackName;
+            const { a, b, task } = generateAdditionTask();
+            aiContent = getAdditionTaskPrompt(a, b, childName, lang);
+            
+            // Store the new active question
+            if (childId) {
+              await db.insert(memoriesTable).values({
+                userId,
+                childId,
+                type: "active_question",
+                content: JSON.stringify({ a, b, task, createdAt: new Date().toISOString() }),
+                module,
+              }).catch(() => {});
+              
+              // Delete the post-success follow-up state since we've acted on it
+              await db
+                .delete(memoriesTable)
+                .where(eq(memoriesTable.id, postSuccessFollowupId))
+                .catch(() => {});
+            }
+            isPostSuccessFollowup = true;
+          } else if (stopNo) {
+            // Child wants to stop, exit the loop
+            console.log("[TEACHER_LOOP_FOLLOWUP_CLASSIFIED] Child wants to stop");
+            await db
+              .delete(memoriesTable)
+              .where(eq(memoriesTable.id, postSuccess.id))
+              .catch(() => {});
+            
+            // Return to friendly chat mode
+            const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+            const childName = context.childName ?? fallbackName;
+            
+            const exitMessages = {
+              bg: "Чудесна работа, {{childName}}! Когато си готов, мога да те помогна отново. 🌟",
+              es: "¡Excelente trabajo, {{childName}}! Cuando estés listo, puedo ayudarte de nuevo. 🌟",
+              en: "Great work, {{childName}}! Whenever you're ready, I can help you again. 🌟",
+            };
+            
+            aiContent = (exitMessages[lang] ?? exitMessages.en).replace("{{childName}}", childName);
+            isPostSuccessFollowup = true;
+          }
+        }
+      }
+      
+      // If not in post-success follow-up, check if there's an active unresolved teacher-loop question
       let isAnswerToTask = false;
       let taskA = 0, taskB = 0;
       let activeQuestionId: number | null = null;
@@ -319,13 +400,28 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
             // If answer is correct, remove the active question and award XP
             if (correct) {
               console.log("[TEACHER_LOOP_RESOLVED] Answer was correct");
-              await db
-                .delete(memoriesTable)
-                .where(eq(memoriesTable.id, activeQuestionId))
-                .catch(() => {}); // Silent fail if delete doesn't work
               
-              // Award small XP for correct answer in teaching loop
+              // Instead of deleting, store a post-success follow-up state
+              // This allows the next message to continue the loop
               if (childId) {
+                await db
+                  .delete(memoriesTable)
+                  .where(eq(memoriesTable.id, activeQuestionId))
+                  .catch(() => {}); // Delete the active question
+                
+                // Store post-success follow-up state for next message routing
+                await db.insert(memoriesTable).values({
+                  userId,
+                  childId,
+                  type: "post_success_followup",
+                  content: JSON.stringify({ 
+                    lastDifficulty: "medium", 
+                    createdAt: new Date().toISOString() 
+                  }),
+                  module,
+                }).catch(() => {}); // Silent fail if insert doesn't work
+                
+                // Award small XP for correct answer in teaching loop
                 const xpReward = 3;
                 await db
                   .update(childrenTable)

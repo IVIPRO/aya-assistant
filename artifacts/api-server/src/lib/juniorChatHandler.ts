@@ -717,12 +717,16 @@ export async function handleJuniorChat(
       response += `\n\n✨ Браво на теб! Ти напредва! ✨\n\n${nextPrompt}`;
     }
 
-    // Store the new lesson state if not advancing (stay on same topic)
+    // Store the new lesson state if not advancing (stay on same topic for retry)
+    // This keeps the lesson active so wrong answers don't fall back to general chat.
     if (!progression.advancedToNext) {
       await storeBulgarianLesson(userId, childId, module, topicId, grade);
     }
 
-    await clearBulgarianLesson(childId, module); // Clear after evaluation
+    // Note: Do NOT clear lesson state here. It persists so subsequent answers on the
+    // same topic stay in the lesson evaluation flow. It's only cleared when:
+    // - User switches subject (subject router), or
+    // - Topic is completed and we store the NEXT topic (line 715)
 
     return response;
   }

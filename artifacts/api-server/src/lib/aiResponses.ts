@@ -629,9 +629,9 @@ export function generateMathTask(
   if (operation === "addition") {
     do {
       a = Math.floor(Math.random() * (maxBase + 1));
-      b = Math.floor(Math.random() * (maxBase + 1));
+      b = Math.floor(Math.random() * maxBase) + 1; // Ensure b >= 1
       attempts++;
-    } while ((a + b > maxBase + 10 || (a === 0 && b === 0)) && attempts < 20);
+    } while ((a + b > maxBase + 10) && attempts < 20);
     return { a, b, task: `${a} + ${b}`, operation: "addition" };
   }
   

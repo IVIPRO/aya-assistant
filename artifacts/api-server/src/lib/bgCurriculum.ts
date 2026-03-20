@@ -838,11 +838,72 @@ const BG_LESSON_PROMPTS: Record<string, Record<number, string>> = {
  * @param childName child's first name
  * @param charEmoji character emoji (🐼 / 🤖 / 🦊 / 🦉)
  */
+/**
+ * Extract and show only the current question from a multi-question prompt.
+ * For reading_comprehension_basic with multiple questions, show lesson text
+ * and only the current question number based on questionIndex.
+ */
+function showSingleQuestion(fullPrompt: string, questionIndex: number): string {
+  // Extract lesson text (everything before "🎯 Отговори на въпросите:")
+  const questionSeparator = "🎯 Отговори на въпросите:";
+  const questionSeparator2 = "🎯 Въпроси:";
+  
+  let lessonText = "";
+  let questionSection = "";
+  
+  if (fullPrompt.includes(questionSeparator)) {
+    const parts = fullPrompt.split(questionSeparator);
+    lessonText = parts[0];
+    questionSection = parts[1];
+  } else if (fullPrompt.includes(questionSeparator2)) {
+    const parts = fullPrompt.split(questionSeparator2);
+    lessonText = parts[0];
+    questionSection = parts[1];
+  } else {
+    // No multi-question format, return as-is
+    return fullPrompt;
+  }
+  
+  // Parse questions: numbered lines like "1. Question text"
+  const questionLines = questionSection
+    .split("\n")
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+  
+  // Find question at current index (1-indexed questions, 0-indexed array)
+  let currentQuestion = "";
+  for (const line of questionLines) {
+    // Match "N. Question" or just grab the line if it looks like a question
+    const match = line.match(/^(\d+)\.\s*(.*)/);
+    if (match) {
+      const qNum = parseInt(match[1]) - 1; // Convert to 0-indexed
+      if (qNum === questionIndex) {
+        currentQuestion = match[2]; // Extract just the question text
+        break;
+      }
+    }
+  }
+  
+  // If no question found, use the first one as fallback
+  if (!currentQuestion && questionLines.length > 0) {
+    const firstMatch = questionLines[0].match(/^(\d+)\.\s*(.*)/);
+    currentQuestion = firstMatch ? firstMatch[2] : questionLines[0];
+  }
+  
+  // Reconstruct: lesson text + current question only
+  const leadingText = lessonText.includes("🎯") 
+    ? lessonText.split("🎯")[0]
+    : lessonText;
+  
+  return `${leadingText.trim()}\n\n🎯 ${currentQuestion}`;
+}
+
 export function getBulgarianLessonPrompt(
   grade: number,
   topicId: string | null,
   childName: string,
   charEmoji: string = "📚",
+  questionIndex: number = 0,
 ): string {
   const g = Math.max(1, Math.min(4, grade));
 
@@ -852,8 +913,12 @@ export function getBulgarianLessonPrompt(
   const gradePrompts = BG_LESSON_PROMPTS[resolvedTopicId];
   if (gradePrompts) {
     // Look for the exact grade, then fall back to nearest
-    const prompt = gradePrompts[g] ?? gradePrompts[1] ?? gradePrompts[2] ?? gradePrompts[3] ?? gradePrompts[4];
+    let prompt = gradePrompts[g] ?? gradePrompts[1] ?? gradePrompts[2] ?? gradePrompts[3] ?? gradePrompts[4];
     if (prompt) {
+      // For reading_comprehension_basic, show only current question
+      if (resolvedTopicId === "reading_comprehension_basic") {
+        prompt = showSingleQuestion(prompt, questionIndex);
+      }
       return `${charEmoji} Здравей, ${childName}! Нека поучим малко **Български език**!\n\n${prompt}`;
     }
   }

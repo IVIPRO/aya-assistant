@@ -1,0 +1,116 @@
+Implement Adaptive Learning Engine Phase 1D only.
+
+Work in ONE pass.
+Stay in Lite mode.
+Do NOT switch to Autonomous Agent.
+Do NOT redesign UI.
+Do NOT modify unrelated files.
+Do NOT add teacher UI.
+Do NOT add parent dashboard UI.
+Do NOT add new database schema.
+Do NOT add new routes unless absolutely required for an already existing parent fetch helper.
+Do NOT touch math engine behavior.
+Do NOT touch Bulgarian lesson validation logic.
+Do NOT refactor unrelated chat code.
+
+GOAL
+Build a parent summary helper layer that uses the already existing adaptive profile, Bulgarian progress, math progress, and weak-topic data to generate short parent-facing summaries for the child.
+
+SCOPE
+Use already built pieces:
+- adaptive profile utility
+- math adaptive flow
+- Bulgarian adaptive flow
+- topic progression
+- weak-topic detection
+- existing child/session memory structures
+
+IMPLEMENT ONLY
+
+A. Parent summary builder helper
+Create a small helper that builds a concise parent summary object for a child.
+
+Return structure like:
+{
+  childId,
+  grade,
+  currentSubject,
+  adaptiveModeBySubject: {
+    mathematics: "boost" | "normal" | "review",
+    bulgarian_language: "boost" | "normal" | "review"
+  },
+  strengths: string[],
+  weakTopics: string[],
+  recentProgress: {
+    mathematics?: {...},
+    bulgarian_language?: {...}
+  },
+  recommendedNextFocus: string[],
+  parentMessageBg: string
+}
+
+B. Deterministic summary rules
+Use deterministic rules only.
+No AI generation.
+No LLM calls.
+
+Summary rules:
+- strengths = topics with good recent success
+- weakTopics = topics already flagged weak by the adaptive/profile logic
+- recommendedNextFocus = up to 3 next practical focuses
+- parentMessageBg = short Bulgarian summary in natural language for parent
+
+C. Bulgarian parent message style
+Generate a short, clean, natural Bulgarian summary like:
+- "Магдалена се справя много добре с четенето с разбиране. Има нужда от още упражнения върху правопис на думи с ъ/а. Препоръчваме кратка 10-минутна практика по български език утре."
+- Keep it short
+- No scary wording
+- No blame
+- No overpraise
+- Useful and concrete
+
+D. Recommended-next-focus rules
+Examples:
+- if math weak topic exists -> include one math focus
+- if Bulgarian weak topic exists -> include one Bulgarian focus
+- if both subjects stable -> include one “continue current progression” style focus
+- max 3 items total
+
+E. Preserve all existing behavior
+Do NOT change:
+- math task generation
+- Bulgarian lesson flow
+- retries
+- XP
+- adaptive difficulty rules
+- teacher data layer already built
+
+F. Optional fetch helper only if trivial
+If there is already an internal parent-facing read pattern/helper, wire into that.
+If not, only create a pure internal helper function and tests.
+Do NOT build UI.
+
+TESTS
+Add focused tests only:
+
+1) child strong in math + weak in Bulgarian spelling -> summary reflects both correctly
+2) child weak in math multiplication -> appears in weakTopics and recommendedNextFocus
+3) child stable in both subjects -> parent message is positive and suggests continuing
+4) adaptive modes are included per subject
+5) summary remains deterministic
+6) no math/Bulgarian runtime behavior changed
+7) Bulgarian parent message is short and readable
+8) no empty/null crashes when one subject has no data yet
+
+STOP AFTER
+- parent summary helper
+- tests
+- clean server
+
+OUTPUT FORMAT
+At the end report only:
+1. files changed
+2. final summary object shape
+3. exact Bulgarian parent message rules
+4. tests added and total passing count
+5. what remains for next phase

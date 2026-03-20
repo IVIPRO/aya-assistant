@@ -394,7 +394,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
           
           // Check if child wants to continue or stop
           const msg = cleanContent.toLowerCase().trim();
-          const continueYes = ["да", "да, още една", "дай ми още една", "дай ми още един", "още един", "още една", "да, по-трудна", "да, по-сложна", "по-трудна", "по-сложна", "да, по-лесна", "по-лесна"].some(t => msg.includes(t));
+          const continueYes = ["да", "дай", "давай", "още", "друга", "следваща", "да, още една", "дай ми още една", "дай ми още един", "още един", "още една", "да, по-трудна", "да, по-сложна", "по-трудна", "по-сложна", "да, по-лесна", "по-лесна"].some(t => msg.includes(t));
           const stopNo = ["не", "стига", "достатъчно е", "върши"].some(t => msg.includes(t));
           
           console.log("[TEACHER_LOOP_FOLLOWUP_CLASSIFIED]", { continueYes, stopNo, requestedOperation, message: msg });

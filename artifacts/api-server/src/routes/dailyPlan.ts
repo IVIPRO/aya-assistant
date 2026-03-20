@@ -4,6 +4,7 @@ import type { DailyPlanTask, DailyPlanTaskStatus } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
 import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
 import { detectWeakTopics } from "../lib/weaknessDetection";
+import { applySmartSequencing, calculateSuccessRate, type TaskWithMetadata } from "../lib/smartTaskSequencing";
 
 const router: IRouter = Router();
 
@@ -118,35 +119,56 @@ async function generatePlan(childId: number, grade: number, xp: number): Promise
     return { ...t, score, done, started, isWeak, taskType };
   });
 
-  const notFullyDone = scored.filter(t => !t.done || t.isWeak).sort((a, b) => b.score - a.score);
+  /* ── Smart task sequencing (Phase 2C+) ────────────────────────── */
+  // Calculate overall success rate for today's difficulty adjustment
+  const allScores = Object.values(subjectScores).flat();
+  const overallSuccessRate = calculateSuccessRate(allScores);
 
-  const picked: typeof notFullyDone = [];
+  // Build task metadata for sequencing
+  const notFullyDone = scored
+    .filter(t => !t.done || t.isWeak)
+    .map(t => ({
+      ...t,
+      baseXp: t.baseXp,
+      xpReward: Math.round(t.baseXp * xpMultiplier),
+    })) as TaskWithMetadata[];
+
+  // First pass: pick 3 candidate tasks (one per subject if possible)
+  const candidates: typeof notFullyDone = [];
   const usedSubjects = new Set<string>();
 
-  for (const t of notFullyDone) {
-    if (picked.length >= 3) break;
+  for (const t of notFullyDone.sort((a, b) => b.score - a.score)) {
+    if (candidates.length >= 4) break; // Pick 4 to filter down to 3 after sequencing
     if (usedSubjects.has(t.subjectId)) continue;
-    picked.push(t);
+    candidates.push(t);
     usedSubjects.add(t.subjectId);
   }
 
-  if (picked.length < 3) {
+  if (candidates.length < 3) {
     for (const t of notFullyDone) {
-      if (picked.length >= 3) break;
-      if (!picked.find(p => p.subjectId === t.subjectId && p.topicId === t.topicId)) {
-        picked.push(t);
+      if (candidates.length >= 4) break;
+      if (!candidates.find(p => p.subjectId === t.subjectId && p.topicId === t.topicId)) {
+        candidates.push(t);
       }
     }
   }
 
-  return picked.slice(0, 3).map((t, i) => ({
+  // Apply smart sequencing to reorder tasks intelligently
+  const sequencingContext = {
+    recentSuccessRate: overallSuccessRate,
+    subjectSuccessRates: avgBySubject as Record<string, number>,
+  };
+
+  const sequenced = applySmartSequencing(candidates.slice(0, 4), sequencingContext);
+
+  return sequenced.slice(0, 3).map((t, i) => ({
     id: `task_${i}`,
     subjectId: t.subjectId,
     topicId: t.topicId,
     taskType: t.taskType,
-    xpReward: Math.round(t.baseXp * xpMultiplier),
+    xpReward: t.xpReward, // Already adjusted by smart sequencing
     status: "not_started" as DailyPlanTaskStatus,
-    isWeakTopic: t.isWeak,
+    isWeakTopic: t.isWeakTopic,
   }));
 }
 

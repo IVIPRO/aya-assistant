@@ -13,6 +13,12 @@ import {
 import { detectWeakTopics } from "../lib/weaknessDetection";
 import { buildWeeklyInsights } from "../lib/weeklyInsights";
 import { buildTeacherExport } from "../lib/teacherExport";
+import {
+  calculateDailyStreak,
+  evaluateNewBadges,
+  generateCompletionCelebration,
+  formatStreakDisplay,
+} from "../lib/gamificationSystem";
 
 const router: IRouter = Router();
 
@@ -168,7 +174,19 @@ router.post("/learning/complete", requireAuth, async (req, res): Promise<void> =
   const existingBadges = (child.badgesEarned ?? []) as BadgeRecord[];
   const newBadges = evaluateLessonBadges(badgeStats, existingBadges);
 
-  const mergedBadges: BadgeRecord[] = [...existingBadges, ...newBadges];
+  /* ── Gamification: Daily Streak & Achievement Badges ────────────── */
+  const dailyStreak = calculateDailyStreak(recentActivity.map((r) => new Date(r.createdAt)));
+  const lessonsCompleted = allTopicProgress.filter(t => t.lessonDone).length;
+  const gamificationBadges = evaluateNewBadges(dailyStreak, lessonsCompleted, existingBadges);
+  const celebration = generateCompletionCelebration(
+    child.name,
+    xpGained,
+    dailyStreak,
+    child.aiCharacter ?? "panda"
+  );
+  const streakDisplay = formatStreakDisplay(dailyStreak);
+
+  const mergedBadges: BadgeRecord[] = [...existingBadges, ...newBadges, ...gamificationBadges];
 
   const [updatedChild] = await db
     .update(childrenTable)
@@ -186,6 +204,14 @@ router.post("/learning/complete", requireAuth, async (req, res): Promise<void> =
     totalXp: updatedChild.xp,
     totalStars: updatedChild.stars,
     streakDays,
+    /* Gamification additions */
+    dailyStreak,
+    streakDisplay,
+    celebration: {
+      message: celebration.message,
+      emoji: celebration.emoji,
+    },
+    achievementsEarned: gamificationBadges,
   });
 });
 

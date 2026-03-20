@@ -1,0 +1,244 @@
+# AYA Hybrid Chat System — Master Prompt v1
+
+Use Lite mode only. Do **not** ask to switch to Autonomous Agent or Max. Do **not** propose broader architecture redesigns unless explicitly requested. Make only the changes below.
+
+## Goal
+Build a **hybrid chat system** for AYA Junior Beginner Stage so the chat becomes both:
+1. **stable** for math tasks and validation
+2. **engaging** for free educational conversation
+
+The system must stop relying on fragile mixed state and stop patching one bug at a time.
+
+## Core rule
+Implement **one unified chat pipeline** for both typed and voice input.
+Both input types must pass through the **same router**, the **same state manager**, and the **same validator**.
+No separate hidden logic for voice vs typed chat.
+
+---
+
+## Target architecture
+Build these layers clearly:
+
+### 1) Intent Router
+Create a single router function that classifies each incoming user message into exactly one of these intents:
+
+- `math_answer`
+- `new_math_task`
+- `next_task`
+- `change_operation`
+- `free_question`
+- `explain_current_task`
+- `small_talk`
+- `unknown`
+
+The router must use the **current stored session state** before deciding.
+For example:
+- if there is an active math task and the message is a number or spoken equation answer -> `math_answer`
+- if the user says “дай ми задача с умножение” -> `change_operation`
+- if the user says “още”, “следваща”, “да”, “дай” **after success follow-up only** -> `next_task`
+- if the user asks “защо”, “обясни”, “как се решава” -> `explain_current_task`
+- if the user asks a general learning question outside task flow -> `free_question`
+
+### 2) Deterministic Math Engine
+Keep math task generation and validation **deterministic**.
+Do not use AI generation for basic beginner math tasks.
+
+The math engine must own:
+- task generation
+- difficulty rules
+- expected answer
+- operation type
+- hint generation
+- correctness evaluation
+- post-success follow-up state
+
+Supported operations:
+- addition
+- subtraction
+- multiplication
+- division
+
+### 3) AI Brain / Free Chat fallback
+Create a separate fallback path for `free_question`, `small_talk`, and open educational conversation.
+This path must not corrupt the math state.
+
+When the user is in free chat mode:
+- respond warmly and helpfully
+- remain child-safe and age-appropriate
+- keep tone playful, encouraging, and educational
+- do not overwrite `active_question` unless a new task is explicitly requested
+
+### 4) State Manager
+Create one clean session state object for the active child session.
+Use explicit fields only.
+
+Required state fields:
+- `mode`: `teacher_loop` or `free_chat`
+- `active_question_id`
+- `active_question_text`
+- `operation`
+- `difficulty`
+- `expected_answer`
+- `hint_level`
+- `awaiting_answer` (boolean)
+- `post_success_waiting` (boolean)
+- `last_correct_task_id`
+- `child_name`
+
+No stale memory reuse.
+Every new task must explicitly replace the old task state.
+Every correct answer must clear the old answer-wait state before follow-up starts.
+Every follow-up continuation must create a fresh task object.
+
+---
+
+## Required behavior rules
+
+### A. Unified entry point
+Create one main handler like:
+- `handleChatInput(message, inputSource, sessionState)`
+
+This must be the only entry point used by both:
+- typed chat send
+- microphone transcript send
+
+### B. Math answer validation
+Validation must use only:
+- current `active_question_id`
+- current `expected_answer`
+- current `operation`
+
+Never validate against old task memory.
+Never infer operation from stale previous task.
+
+### C. Bulgarian parsing
+Support Bulgarian numeric understanding for both typed and spoken answers.
+Support:
+- single digits
+- teens
+- tens
+- compound numbers
+- full spoken result sentences
+
+Examples that must validate correctly when matching the current task:
+- „осемнадесет"
+- „трийсет"
+- „четиридесет и пет"
+- „две по девет е равно на осемнадесет"
+- „три по десет е равно на трийсет"
+- „осем делено на две е четири"
+- „девет минус пет е четири"
+
+For full sentences, extract the **final answer value**, but also verify that the sentence operation does not conflict with the current task.
+
+### D. Short continuation commands
+After a correct answer, when `post_success_waiting = true`, these typed or spoken short commands must generate a new task:
+- „да"
+- „дай"
+- „още"
+- „следваща"
+- „още една"
+
+Outside post-success follow-up, these must not corrupt the state.
+
+### E. Operation switching
+These must force a new task in the requested operation and replace old task state cleanly:
+- „дай ми задача със събиране"
+- „дай ми задача с изваждане"
+- „дай ми задача с умножение"
+- „дай ми задача с деление"
+- „искам по-сложна задача с умножение"
+- „още една, но с деление"
+
+### F. Explain mode
+If there is an active task and the child says:
+- „обясни"
+- „как"
+- „помогни"
+- „не разбирам"
+
+then do not mark correct or wrong immediately.
+Give a child-friendly hint based on the current task.
+
+### G. Free educational chat
+If the child asks something like:
+- „защо небето е синьо"
+- „какво е планета"
+- „прочети ми"
+- „разкажи ми за пандите"
+
+route to AI/free chat response and keep math task state untouched unless the user explicitly abandons the task.
+
+---
+
+## Beginner Stage math rules
+Implement deterministic beginner rules:
+
+### Addition
+- start range: 0–10
+- easy combinations first
+- can later scale to 20
+
+### Subtraction
+- non-negative results only
+- use pairs the child can solve mentally
+
+### Multiplication
+- begin with small tables
+- exact integer answers only
+
+### Division
+- exact integer division only
+- no fractions, no decimals
+- divisor must never be zero
+- generate only clean examples like 8 ÷ 2, 9 ÷ 3, 12 ÷ 4
+
+---
+
+## UX / tone requirements
+Responses must feel warm, playful, and motivating.
+Examples of desired behavior:
+- correct answer -> praise + gentle invitation for next task
+- wrong answer -> calm encouragement + hint
+- explanation -> short, clear, child-friendly
+- free chat -> warm and educational
+
+Never sound robotic.
+Never show internal state fields to the child.
+
+---
+
+## Important implementation constraints
+- Do not redesign unrelated screens.
+- Do not touch billing, non-chat flows, or unrelated app modules.
+- Do not propose agent switching.
+- Do not add large new infrastructure beyond what is needed for the hybrid chat pipeline.
+- Keep changes local to the current AYA Junior chat/math flow.
+
+---
+
+## What to deliver
+Implement the hybrid chat system and then report only:
+
+1. which files were changed
+2. which router intents were added
+3. which state fields were added/cleaned
+4. 10 concrete tested scenarios and whether each passed
+
+---
+
+## Mandatory test checklist
+Run and verify these exact scenarios:
+
+1. Typed: „дай ми задача със събиране" -> gets addition task
+2. Typed correct numeric answer -> marked correct
+3. Typed: „да" after success -> new task generated
+4. Typed: „дай ми задача с умножение" -> multiplication task
+5. Spoken: „две по девет е равно на осемнадесет" -> marked correct for 2×9
+6. Typed: „дай ми задача с деление" -> division task
+7. Spoken: „осем делено на две е четири" -> marked correct for 8÷2
+8. Typed: „обясни" during active task -> gives hint, does not reset task
+9. Typed free question: „защо небето е синьо" -> free educational answer, no task corruption
+10. Repeat 10 mixed cycles of task/answer/next/operation switch without stale state bugs
+
+If any test fails, fix the root cause before stopping.

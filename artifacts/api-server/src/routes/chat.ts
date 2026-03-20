@@ -568,49 +568,10 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
         }
       }
       
-      // If no active question or parsing failed, check recent messages as fallback
+      // If no active question, use default response logic
       if (!isAnswerToTask) {
-        const recentMessages = await db
-          .select()
-          .from(chatMessagesTable)
-          .where(and(eq(chatMessagesTable.childId, childId ?? 0), eq(chatMessagesTable.module, module)))
-          .orderBy(desc(chatMessagesTable.id))
-          .limit(2);
-        
-        for (const msg of recentMessages) {
-          if (msg.role === "assistant") {
-            // Look for pattern like "X + Y = ?" in recent messages
-            const match = msg.content.match(/(\d+)\s*\+\s*(\d+)\s*=\s*\?/);
-            if (match) {
-              taskA = parseInt(match[1], 10);
-              taskB = parseInt(match[2], 10);
-              isAnswerToTask = true;
-              break;
-            }
-          }
-        }
-        
-        if (isAnswerToTask) {
-          // Evaluate the answer
-          const { correct, expected } = evaluateAdditionAnswer(taskA, taskB, cleanContent);
-          const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
-          const childName = context.childName ?? fallbackName;
-          
-          aiContent = getAdditionFeedback(taskA, taskB, cleanContent, childName, lang, correct);
-          
-          // Award small XP for correct answer in teaching loop
-          if (correct && childId) {
-            const xpReward = 3;
-            await db
-              .update(childrenTable)
-              .set({ xp: (context.childXp ?? 0) + xpReward })
-              .where(eq(childrenTable.id, childId))
-              .catch(() => {}); // Silent fail if update doesn't work
-          }
-        } else {
-          // Regular chat without image - use default response logic
-          aiContent = getAIResponse(module, cleanContent, context);
-        }
+        // Regular chat without active teaching task - use default response logic
+        aiContent = getAIResponse(module, cleanContent, context);
       }
     }
     }

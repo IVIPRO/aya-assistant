@@ -394,3 +394,66 @@ describe("Question-specific validation — no cross-question acceptance", () => 
     assert.equal(result.correct, true);
   });
 });
+
+// ─── Test 8: Question index progression (correct answer flow) ────────────────
+
+describe("Question index progression — multi-question topic flow", () => {
+  test("Question 0 (Q1) validation with correct answer 'пухче'", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "пухче",
+    );
+    assert.equal(result.correct, true, "Q1 should accept 'пухче'");
+    assert.equal(result.feedbackBg, "Браво!");
+  });
+
+  test("Question 1 (Q2) validation with correct answer 'топка'", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 1 },
+      "топка",
+    );
+    assert.equal(result.correct, true, "Q2 should accept 'топка'");
+    assert.equal(result.feedbackBg, "Браво!");
+  });
+
+  test("Question 2 (Q3) validation with correct answer 'рибица'", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 2 },
+      "рибица",
+    );
+    assert.equal(result.correct, true, "Q3 should accept 'рибица'");
+    assert.equal(result.feedbackBg, "Браво!");
+  });
+
+  test("Wrong index: Q2 rejects 'пухче' (Q1 answer)", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 1 },
+      "пухче",
+    );
+    assert.equal(result.correct, false, "Q2 should NOT accept 'пухче' (Q1 answer)");
+  });
+
+  test("Wrong index: Q3 rejects 'топка' (Q2 answer)", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 2 },
+      "топка",
+    );
+    assert.equal(result.correct, false, "Q3 should NOT accept 'топка' (Q2 answer)");
+  });
+
+  test("Question index 0 with normalized '1.пухче' is correct", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 0 },
+      "1.пухче",
+    );
+    assert.equal(result.correct, true, "Q1 should accept '1.пухче'");
+  });
+
+  test("Question index 2 with normalized '3) рибица!' is correct", () => {
+    const result = evaluateBulgarianLessonAnswer(
+      { grade: 2, topicId: "reading_comprehension_basic", questionIndex: 2 },
+      "3) рибица!",
+    );
+    assert.equal(result.correct, true, "Q3 should accept '3) рибица!'");
+  });
+});

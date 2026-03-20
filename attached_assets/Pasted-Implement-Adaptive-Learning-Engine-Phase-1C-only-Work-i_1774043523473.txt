@@ -1,0 +1,99 @@
+Implement Adaptive Learning Engine Phase 1C only.
+
+Work in ONE pass.
+Stay in Lite mode.
+Do NOT switch to Autonomous Agent.
+Do NOT redesign UI.
+Do NOT modify unrelated files.
+Do NOT add new routes.
+Do NOT touch parent UI.
+Do NOT touch teacher UI.
+Do NOT touch country switching.
+Do NOT refactor the whole chat handler.
+Do NOT change math engine behavior.
+
+GOAL
+Wire the existing adaptive profile engine into Bulgarian lesson flow only.
+
+SCOPE
+Use the already built:
+- adaptive profile utility
+- Bulgarian curriculum routing
+- Bulgarian lesson evaluator
+- topic progression system
+
+IMPLEMENT ONLY
+
+A. Update adaptive profile on Bulgarian lesson answers
+On every Bulgarian lesson answer evaluation:
+- call updateAdaptiveProfile(childId, subject="bulgarian_language", topic=currentBulgarianTopic, wasCorrect)
+
+B. Read adaptive state before next Bulgarian lesson step
+Before choosing the next Bulgarian lesson item:
+- read getAdaptiveProfile(childId)
+- compute getRecommendedDifficulty(profile, "bulgarian_language")
+- compute getAdaptiveMode(profile)
+
+C. Deterministic Bulgarian adaptation rules
+If mode = "boost":
+- keep child in same subject
+- prefer slightly harder item inside current grade/topic
+- if current topic is mastered, allow move to next curriculum topic
+
+If mode = "review":
+- keep child in same subject
+- prefer easier or repeat practice inside the same topic
+- if weak topic exists, review that weak topic first
+
+If mode = "normal":
+- continue current topic progression normally
+
+D. Weak-topic review rule for Bulgarian
+- if shouldReviewWeakTopic(profile, "bulgarian_language") is true,
+  prefer the weakest Bulgarian topic for the next lesson item
+- but only inside Bulgarian lesson mode
+- never fall back to math
+- never exit to general chat on wrong answer
+
+E. Preserve current Bulgarian lesson behavior
+Keep intact:
+- one-question-at-a-time rendering
+- current-question tracking
+- numbered answer normalization
+- friendly feedback
+- multiple-attempt behavior
+- topic progression thresholds already implemented
+- XP awards if already wired
+
+F. Important guardrails
+- If child is currently in Bulgarian lesson mode, all retries and next steps must stay inside Bulgarian lesson mode until that lesson step is completed
+- Wrong answers must not reset subject
+- Wrong answers must not trigger general chat
+- Correct answers must advance within Bulgarian subject only
+- Math flow must remain untouched
+
+TESTS
+Add focused tests only for Bulgarian adaptive wiring:
+
+1) 3 correct Bulgarian answers in a row -> next Bulgarian item becomes slightly harder or advances topic
+2) 2 wrong Bulgarian answers in a row -> next Bulgarian item becomes easier/review-oriented
+3) weak reading topic gets preferred for next Bulgarian lesson item
+4) weak spelling topic gets preferred for next Bulgarian lesson item
+5) wrong Bulgarian answer stays in Bulgarian lesson mode
+6) correct Bulgarian answer advances only within Bulgarian flow
+7) Bulgarian adaptive wiring does not affect math generation
+8) Bulgarian adaptive wiring does not affect general free chat
+9) numbered short answers still validate correctly
+10) current-question tracking remains correct after adaptive choice
+
+STOP AFTER
+- Bulgarian adaptive wiring
+- tests
+- server clean
+
+OUTPUT FORMAT
+At the end report only:
+1. files changed
+2. exact Bulgarian adaptive rules wired
+3. tests added and total passing count
+4. what remains for Phase 1D

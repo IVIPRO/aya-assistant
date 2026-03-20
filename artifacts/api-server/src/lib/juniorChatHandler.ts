@@ -726,6 +726,9 @@ export async function handleJuniorChat(
     // Record the attempt
     await recordTopicAttempt(childId, "bulgarian_language", topicId, grade, evaluation.correct);
 
+    // Track adaptive learning profile
+    await updateAdaptiveProfile(userId, childId, "bulgarian_language", topicId, evaluation.correct);
+
     // Check for progression
     const progression = await checkTopicProgression(
       childId,
@@ -773,9 +776,25 @@ export async function handleJuniorChat(
     }
 
     if (progression.advancedToNext && progression.nextTopicId) {
+      // Read adaptive profile to check for weak topic preference
+      const adaptiveProfile = await getAdaptiveProfile(childId);
+      const shouldReviewWeak = shouldReviewWeakTopic(adaptiveProfile, "bulgarian_language");
+      
+      // If in review mode and weak topics exist, prefer weak Bulgarian topic
+      let topicToShow = progression.nextTopicId;
+      if (shouldReviewWeak && adaptiveProfile.weakTopics.length > 0) {
+        // Find a weak Bulgarian topic to review
+        const weakBgTopic = adaptiveProfile.weakTopics.find(t => 
+          t.startsWith("reading_") || t.startsWith("spelling_") || t === "bulgarian_language"
+        );
+        if (weakBgTopic && weakBgTopic !== "bulgarian_language") {
+          topicToShow = weakBgTopic;
+        }
+      }
+      
       // Prepare next lesson (reset question index to 0 for new topic)
-      await storeBulgarianLesson(userId, childId, module, progression.nextTopicId, grade, 0, {});
-      const nextPrompt = getBulgarianLessonPrompt(grade, progression.nextTopicId, childName, charEmoji, 0);
+      await storeBulgarianLesson(userId, childId, module, topicToShow, grade, 0, {});
+      const nextPrompt = getBulgarianLessonPrompt(grade, topicToShow, childName, charEmoji, 0);
       response += `\n\n✨ Браво на теб! Ти напредва! ✨\n\n${nextPrompt}`;
     } else if (evaluation.correct) {
       // On correct answer within a topic, try to advance to next question if available

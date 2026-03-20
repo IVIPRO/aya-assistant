@@ -34,6 +34,13 @@ import {
   recordTopicAttempt,
   checkTopicProgression,
 } from "./topicProgression";
+import {
+  getAdaptiveProfile,
+  updateAdaptiveProfile,
+  getRecommendedDifficulty,
+  shouldReviewWeakTopic,
+  getAdaptiveMode,
+} from "./studentAdaptiveProfile";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -620,10 +627,12 @@ export async function handleJuniorChat(
   // ── CHANGE_OPERATION ─────────────────────────────────────────────────────
   if (intent === "change_operation") {
     const op = detectMathOperationSwitch(msg.toLowerCase(), lang)!;
-    const { a, b, task, operation } = generateMathTask(op);
+    const adaptiveProfile = await getAdaptiveProfile(childId);
+    const recommendedDifficulty = getRecommendedDifficulty(adaptiveProfile, "mathematics");
+    const { a, b, task, operation } = generateMathTask(op, recommendedDifficulty);
     await clearPostSuccess(childId, module);
     await storeNewTask(userId, childId, module, a, b, task, operation as Operation);
-    console.log("[JUNIOR_CHAT] change_operation", { op, a, b, task });
+    console.log("[JUNIOR_CHAT] change_operation", { op, a, b, task, difficulty: recommendedDifficulty });
     return getMathTaskPrompt(a, b, operation, childName, lang);
   }
 
@@ -631,23 +640,41 @@ export async function handleJuniorChat(
   if (intent === "new_math_task") {
     const requestedOp = detectMathOperationSwitch(msg.toLowerCase(), lang);
     const op = requestedOp || "addition";
-    const { a, b, task, operation } = generateMathTask(op as Operation);
+    const adaptiveProfile = await getAdaptiveProfile(childId);
+    const recommendedDifficulty = getRecommendedDifficulty(adaptiveProfile, "mathematics");
+    const { a, b, task, operation } = generateMathTask(op as Operation, recommendedDifficulty);
     await clearPostSuccess(childId, module);
     await storeNewTask(userId, childId, module, a, b, task, operation as Operation);
-    console.log("[JUNIOR_CHAT] new_math_task", { op, a, b, task });
+    console.log("[JUNIOR_CHAT] new_math_task", { op, a, b, task, difficulty: recommendedDifficulty });
     return getMathTaskPrompt(a, b, operation, childName, lang);
   }
 
   // ── NEXT_TASK (after post-success continue) ───────────────────────────────
   if (intent === "next_task") {
     const requestedOp = detectMathOperationSwitch(msg.toLowerCase(), lang);
-    // Reuse last operation if no switch requested
     const lastOp = state.activeQuestion?.operation ?? "addition";
-    const op = requestedOp || lastOp;
-    const { a, b, task, operation } = generateMathTask(op as Operation);
+    
+    // Read adaptive profile and determine difficulty/weak topic preference
+    const adaptiveProfile = await getAdaptiveProfile(childId);
+    const recommendedDifficulty = getRecommendedDifficulty(adaptiveProfile, "mathematics");
+    const shouldReviewWeak = shouldReviewWeakTopic(adaptiveProfile, "mathematics");
+    
+    // If in review mode and there's a weak topic, prefer that operation
+    let op = requestedOp || lastOp;
+    if (shouldReviewWeak && adaptiveProfile.weakTopics.length > 0) {
+      // Find weak operation that matches our math operations
+      const weakOp = adaptiveProfile.weakTopics.find(t =>
+        ["addition", "subtraction", "multiplication", "division"].includes(t)
+      );
+      if (weakOp) {
+        op = weakOp;
+      }
+    }
+    
+    const { a, b, task, operation } = generateMathTask(op as Operation, recommendedDifficulty);
     await clearPostSuccess(childId, module);
     await storeNewTask(userId, childId, module, a, b, task, operation as Operation);
-    console.log("[JUNIOR_CHAT] next_task", { op, a, b, task });
+    console.log("[JUNIOR_CHAT] next_task", { op, a, b, task, difficulty: recommendedDifficulty });
     return getMathTaskPrompt(a, b, operation, childName, lang);
   }
 
@@ -657,6 +684,9 @@ export async function handleJuniorChat(
     const { id: aqId, a, b, operation } = state.activeQuestion;
     const { correct, expected } = evaluateMathAnswer(a, b, operation, msg);
     console.log("[JUNIOR_CHAT] math_answer", { a, b, operation, msg, correct, expected });
+
+    // Track adaptive learning profile
+    await updateAdaptiveProfile(userId, childId, "mathematics", operation, correct);
 
     if (correct) {
       await clearActiveQuestion(childId, module);

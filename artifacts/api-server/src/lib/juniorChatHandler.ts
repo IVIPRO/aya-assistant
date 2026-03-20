@@ -1,0 +1,463 @@
+/**
+ * AYA Junior — Unified Hybrid Chat Handler
+ *
+ * Single entry point for ALL child input (typed and voice).
+ * Implements the Master Prompt v1 architecture:
+ *   1. Intent Router   — classifies each message into one intent
+ *   2. State Manager   — reads/writes session state from the DB
+ *   3. Math Engine     — deterministic task generation & validation
+ *   4. Free Chat       — educational fallback that never corrupts math state
+ *   5. Explain Mode    — hint-only path that never marks right/wrong
+ */
+
+import { db, memoriesTable, childrenTable } from "@workspace/db";
+import { eq, and, desc } from "drizzle-orm";
+import {
+  generateMathTask,
+  evaluateMathAnswer,
+  getMathFeedback,
+  getMathTaskPrompt,
+  detectMathOperationSwitch,
+  getAIResponse,
+  getLang,
+} from "./aiResponses";
+
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+type Lang = "bg" | "es" | "en";
+type Operation = "addition" | "subtraction" | "multiplication" | "division";
+
+type Intent =
+  | "math_answer"
+  | "new_math_task"
+  | "next_task"
+  | "change_operation"
+  | "explain_current_task"
+  | "free_question"
+  | "small_talk"
+  | "unknown";
+
+interface ActiveQuestion {
+  id: number;
+  a: number;
+  b: number;
+  operation: Operation;
+  task: string;
+}
+
+interface SessionState {
+  activeQuestion: ActiveQuestion | null;   // awaiting_answer = !!activeQuestion
+  postSuccessId: number | null;            // post_success_waiting = !!postSuccessId
+}
+
+interface JuniorContext {
+  childName?: string;
+  grade?: number;
+  language?: string;
+  aiCharacter?: string;
+  childXp?: number;
+}
+
+// ─── State Reader ────────────────────────────────────────────────────────────
+
+async function readSessionState(
+  childId: number,
+  module: string
+): Promise<SessionState> {
+  const [aq] = await db
+    .select()
+    .from(memoriesTable)
+    .where(
+      and(
+        eq(memoriesTable.childId, childId),
+        eq(memoriesTable.type, "active_question"),
+        eq(memoriesTable.module, module)
+      )
+    )
+    .orderBy(desc(memoriesTable.createdAt))
+    .limit(1);
+
+  const [ps] = await db
+    .select()
+    .from(memoriesTable)
+    .where(
+      and(
+        eq(memoriesTable.childId, childId),
+        eq(memoriesTable.type, "post_success_followup"),
+        eq(memoriesTable.module, module)
+      )
+    )
+    .orderBy(desc(memoriesTable.createdAt))
+    .limit(1);
+
+  let activeQuestion: ActiveQuestion | null = null;
+  if (aq) {
+    try {
+      const data = JSON.parse(aq.content);
+      activeQuestion = {
+        id: aq.id,
+        a: data.a,
+        b: data.b,
+        operation: (data.operation || "addition") as Operation,
+        task: data.task ?? "",
+      };
+    } catch {
+      /* corrupt record — treat as no active question */
+    }
+  }
+
+  return {
+    activeQuestion,
+    postSuccessId: ps ? ps.id : null,
+  };
+}
+
+// ─── Intent Router ───────────────────────────────────────────────────────────
+
+function detectIntent(
+  msg: string,
+  state: SessionState,
+  lang: Lang
+): Intent {
+  const m = msg.toLowerCase().trim();
+
+  // ── 1. Operation-switch always wins (any context) ───────────────────────
+  const op = detectMathOperationSwitch(m, lang);
+  if (op) return "change_operation";
+
+  // ── 2. New math task request (any context) ──────────────────────────────
+  if (isNewMathTaskRequest(m, lang)) return "new_math_task";
+
+  // ── 3. Post-success continuation ────────────────────────────────────────
+  if (state.postSuccessId !== null) {
+    if (isContinueCommand(m, lang)) return "next_task";
+    if (isStopCommand(m, lang))     return "unknown"; // will exit loop
+  }
+
+  // ── 4. Active task context ───────────────────────────────────────────────
+  if (state.activeQuestion !== null) {
+    // Explain/help first (before answer check, avoid treating "как" as answer)
+    if (isExplainRequest(m, lang)) return "explain_current_task";
+
+    // Numeric typed answer
+    if (/^\d+([.,]\d+)?$/.test(m.trim())) return "math_answer";
+
+    // Bulgarian number word / spoken sentence
+    if (looksLikeBulgarianAnswer(m)) return "math_answer";
+  }
+
+  // ── 5. Free educational question ────────────────────────────────────────
+  if (isEducationalQuestion(m, lang)) return "free_question";
+
+  // ── 6. Small talk / greeting ─────────────────────────────────────────────
+  if (isGreeting(m, lang)) return "small_talk";
+
+  // ── 7. Fallback — unknown ────────────────────────────────────────────────
+  return "unknown";
+}
+
+// ─── Intent Helpers ──────────────────────────────────────────────────────────
+
+function isNewMathTaskRequest(m: string, lang: Lang): boolean {
+  const triggers: Record<Lang, string[]> = {
+    bg: [
+      "дай ми задача", "дай задача", "математическа задача", "задача по математика",
+      "искам задача", "дай упражнение", "искам упражнение", "математика",
+      "научи ме", "тренирай ме", "дай ми", "искам да уча",
+    ],
+    es: [
+      "dame una tarea", "tarea de matemática", "ejercicio", "matemáticas",
+      "quiero practicar", "enséñame",
+    ],
+    en: [
+      "give me a task", "math task", "give me a problem", "math problem",
+      "let's practice", "practice math", "teach me",
+    ],
+  };
+  return triggers[lang].some((t) => m.includes(t));
+}
+
+function isContinueCommand(m: string, lang: Lang): boolean {
+  const triggers: Record<Lang, string[]> = {
+    bg: ["да", "дай", "давай", "още", "друга", "следваща", "още един", "още една", "продължи", "напред"],
+    es: ["sí", "dame", "otra", "siguiente", "continúa", "más"],
+    en: ["yes", "give", "more", "another", "next", "continue", "ok"],
+  };
+  return triggers[lang].some((t) => m.includes(t));
+}
+
+function isStopCommand(m: string, lang: Lang): boolean {
+  const triggers: Record<Lang, string[]> = {
+    bg: ["не", "стига", "достатъчно", "спри", "довиждане", "чао"],
+    es: ["no", "basta", "suficiente", "parar", "adiós"],
+    en: ["no", "stop", "enough", "quit", "bye"],
+  };
+  return triggers[lang].some((t) => m.includes(t));
+}
+
+function isExplainRequest(m: string, lang: Lang): boolean {
+  const triggers: Record<Lang, string[]> = {
+    bg: ["обясни", "помогни", "не разбирам", "как се решава", "как", "помощ"],
+    es: ["explica", "ayuda", "no entiendo", "cómo se resuelve", "ayúdame"],
+    en: ["explain", "help", "don't understand", "how to", "help me"],
+  };
+  return triggers[lang].some((t) => m.includes(t));
+}
+
+function isEducationalQuestion(m: string, lang: Lang): boolean {
+  const patterns: Record<Lang, RegExp> = {
+    bg: /^(защо|какво|как|откъде|кога|кой|коя|разкажи|прочети|какво е|какви са)\b/i,
+    es: /^(por qué|qué|cómo|dónde|cuándo|quién|cuéntame|léeme)\b/i,
+    en: /^(why|what|how|where|when|who|tell me|read me)\b/i,
+  };
+  return patterns[lang].test(m);
+}
+
+function isGreeting(m: string, lang: Lang): boolean {
+  const patterns: Record<Lang, RegExp> = {
+    bg: /^(привет|здравей|здрасти|хей|салам|добър ден|добро утро|добра вечер)/i,
+    es: /^(hola|buenos|buenas|cómo estás|qué tal)/i,
+    en: /^(hi|hello|hey|good morning|good evening|how are)/i,
+  };
+  return patterns[lang].test(m);
+}
+
+function looksLikeBulgarianAnswer(m: string): boolean {
+  const bgNumbers = [
+    "нула","едно","две","три","четири","пет","шест","седем","осем","девет",
+    "десет","единадесет","дванадесет","тринадесет","четиринадесет","петнадесет",
+    "шестнадесет","седемнадесет","осемнадесет","деветнадесет","двадесет",
+    "трийсет","четирийсет","петдесет","шейсет","седемдесет","осемдесет",
+    "деветдесет","един","два",
+  ];
+  return bgNumbers.some((n) => m.includes(n));
+}
+
+// ─── Math Hint Generator ─────────────────────────────────────────────────────
+
+function getMathHint(
+  a: number,
+  b: number,
+  operation: Operation,
+  childName: string,
+  lang: Lang
+): string {
+  const emoji = "🐼";
+  const sym = { addition: "+", subtraction: "-", multiplication: "×", division: "÷" }[operation];
+
+  if (lang === "bg") {
+    const hints: Record<Operation, string> = {
+      addition: `${emoji} ${childName}, опитай да броиш на пръсти! Вземи ${a} и добави ${b} едно по едно. Какво излиза?`,
+      subtraction: `${emoji} ${childName}, представи си ${a} ябълки и вземаш ${b} от тях. Колко остават?`,
+      multiplication: `${emoji} ${childName}, умножението е повторно събиране! ${a} × ${b} е като да добавяш ${a} точно ${b} пъти.`,
+      division: `${emoji} ${childName}, раздели ${a} предмета на ${b} равни групи. Колко ще влязат в една група?`,
+    };
+    return hints[operation];
+  }
+  if (lang === "es") {
+    const hints: Record<Operation, string> = {
+      addition: `${emoji} ${childName}, ¡intenta contar con los dedos! Toma ${a} y añade ${b} uno por uno. ¿Qué obtienes?`,
+      subtraction: `${emoji} ${childName}, imagina ${a} manzanas y quitas ${b}. ¿Cuántas quedan?`,
+      multiplication: `${emoji} ${childName}, ¡la multiplicación es suma repetida! ${a} × ${b} es como sumar ${a} exactamente ${b} veces.`,
+      division: `${emoji} ${childName}, divide ${a} objetos en ${b} grupos iguales. ¿Cuántos van en cada grupo?`,
+    };
+    return hints[operation];
+  }
+  const hints: Record<Operation, string> = {
+    addition: `${emoji} ${childName}, try counting on your fingers! Take ${a} and add ${b} one by one. What do you get?`,
+    subtraction: `${emoji} ${childName}, imagine ${a} apples and you take away ${b}. How many are left?`,
+    multiplication: `${emoji} ${childName}, multiplication is repeated addition! ${a} × ${b} means adding ${a} exactly ${b} times.`,
+    division: `${emoji} ${childName}, split ${a} objects into ${b} equal groups. How many go in each group?`,
+  };
+  return hints[operation];
+}
+
+// ─── State Writers ────────────────────────────────────────────────────────────
+
+async function storeNewTask(
+  userId: number,
+  childId: number,
+  module: string,
+  a: number,
+  b: number,
+  task: string,
+  operation: Operation
+): Promise<number> {
+  // Clear ALL existing active_question records for this child+module first
+  await db
+    .delete(memoriesTable)
+    .where(
+      and(
+        eq(memoriesTable.childId, childId),
+        eq(memoriesTable.type, "active_question"),
+        eq(memoriesTable.module, module)
+      )
+    )
+    .catch(() => {});
+
+  const [inserted] = await db
+    .insert(memoriesTable)
+    .values({
+      userId,
+      childId,
+      type: "active_question",
+      content: JSON.stringify({ a, b, task, operation, createdAt: new Date().toISOString() }),
+      module,
+    })
+    .returning();
+
+  return inserted.id;
+}
+
+async function clearActiveQuestion(childId: number, module: string): Promise<void> {
+  await db
+    .delete(memoriesTable)
+    .where(
+      and(
+        eq(memoriesTable.childId, childId),
+        eq(memoriesTable.type, "active_question"),
+        eq(memoriesTable.module, module)
+      )
+    )
+    .catch(() => {});
+}
+
+async function storePostSuccess(
+  userId: number,
+  childId: number,
+  module: string
+): Promise<void> {
+  await db
+    .insert(memoriesTable)
+    .values({
+      userId,
+      childId,
+      type: "post_success_followup",
+      content: JSON.stringify({ lastDifficulty: "medium", createdAt: new Date().toISOString() }),
+      module,
+    })
+    .catch(() => {});
+}
+
+async function clearPostSuccess(childId: number, module: string): Promise<void> {
+  await db
+    .delete(memoriesTable)
+    .where(
+      and(
+        eq(memoriesTable.childId, childId),
+        eq(memoriesTable.type, "post_success_followup"),
+        eq(memoriesTable.module, module)
+      )
+    )
+    .catch(() => {});
+}
+
+async function awardXp(
+  childId: number,
+  currentXp: number,
+  xpReward: number
+): Promise<void> {
+  await db
+    .update(childrenTable)
+    .set({ xp: currentXp + xpReward })
+    .where(eq(childrenTable.id, childId))
+    .catch(() => {});
+}
+
+// ─── Main Handler ─────────────────────────────────────────────────────────────
+
+export async function handleJuniorChat(
+  userId: number,
+  childId: number,
+  module: string,
+  rawMessage: string,
+  context: JuniorContext
+): Promise<string> {
+  const lang = getLang(context.language);
+  const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+  const childName = context.childName ?? fallbackName;
+  const msg = rawMessage.trim();
+
+  // ── 1. Read current session state from DB (always fresh) ─────────────────
+  const state = await readSessionState(childId, module);
+  console.log("[JUNIOR_CHAT] state", {
+    hasActiveQ: !!state.activeQuestion,
+    postSuccess: !!state.postSuccessId,
+    operation: state.activeQuestion?.operation,
+  });
+
+  // ── 2. Classify intent ───────────────────────────────────────────────────
+  const intent = detectIntent(msg, state, lang);
+  console.log("[JUNIOR_CHAT] intent:", intent, "| msg:", msg);
+
+  // ── 3. Route to handler ──────────────────────────────────────────────────
+
+  // ── CHANGE_OPERATION ─────────────────────────────────────────────────────
+  if (intent === "change_operation") {
+    const op = detectMathOperationSwitch(msg.toLowerCase(), lang)!;
+    const { a, b, task, operation } = generateMathTask(op);
+    await clearPostSuccess(childId, module);
+    await storeNewTask(userId, childId, module, a, b, task, operation as Operation);
+    console.log("[JUNIOR_CHAT] change_operation", { op, a, b, task });
+    return getMathTaskPrompt(a, b, operation, childName, lang);
+  }
+
+  // ── NEW_MATH_TASK ────────────────────────────────────────────────────────
+  if (intent === "new_math_task") {
+    const requestedOp = detectMathOperationSwitch(msg.toLowerCase(), lang);
+    const op = requestedOp || "addition";
+    const { a, b, task, operation } = generateMathTask(op as Operation);
+    await clearPostSuccess(childId, module);
+    await storeNewTask(userId, childId, module, a, b, task, operation as Operation);
+    console.log("[JUNIOR_CHAT] new_math_task", { op, a, b, task });
+    return getMathTaskPrompt(a, b, operation, childName, lang);
+  }
+
+  // ── NEXT_TASK (after post-success continue) ───────────────────────────────
+  if (intent === "next_task") {
+    const requestedOp = detectMathOperationSwitch(msg.toLowerCase(), lang);
+    // Reuse last operation if no switch requested
+    const lastOp = state.activeQuestion?.operation ?? "addition";
+    const op = requestedOp || lastOp;
+    const { a, b, task, operation } = generateMathTask(op as Operation);
+    await clearPostSuccess(childId, module);
+    await storeNewTask(userId, childId, module, a, b, task, operation as Operation);
+    console.log("[JUNIOR_CHAT] next_task", { op, a, b, task });
+    return getMathTaskPrompt(a, b, operation, childName, lang);
+  }
+
+  // ── MATH_ANSWER ───────────────────────────────────────────────────────────
+  if (intent === "math_answer" && state.activeQuestion) {
+    // Read the EXACT values from the fresh DB record (never from cached state)
+    const { id: aqId, a, b, operation } = state.activeQuestion;
+    const { correct, expected } = evaluateMathAnswer(a, b, operation, msg);
+    console.log("[JUNIOR_CHAT] math_answer", { a, b, operation, msg, correct, expected });
+
+    if (correct) {
+      await clearActiveQuestion(childId, module);
+      await storePostSuccess(userId, childId, module);
+      await awardXp(childId, context.childXp ?? 0, 3);
+    }
+
+    return getMathFeedback(a, b, operation, msg, childName, lang, correct);
+  }
+
+  // ── EXPLAIN_CURRENT_TASK ──────────────────────────────────────────────────
+  if (intent === "explain_current_task" && state.activeQuestion) {
+    const { a, b, operation } = state.activeQuestion;
+    console.log("[JUNIOR_CHAT] explain_current_task", { a, b, operation });
+    // Do NOT mark right or wrong — just give a hint
+    return getMathHint(a, b, operation, childName, lang);
+  }
+
+  // ── STOP (inside post_success or free chat) ───────────────────────────────
+  if (state.postSuccessId !== null) {
+    // User said something unrecognised after success — clear state, go to free chat
+    await clearPostSuccess(childId, module);
+  }
+
+  // ── FREE_QUESTION / SMALL_TALK / UNKNOWN ─────────────────────────────────
+  // These paths never touch math state, so the active question remains intact
+  console.log("[JUNIOR_CHAT] free_chat / fallback", { intent });
+  return getAIResponse(module, msg, context);
+}

@@ -110,7 +110,7 @@ export function ListeningMode({
   const [hasContent, setHasContent] = useState(false);
 
   useEffect(() => {
-    const hasText = contentToRead && contentToRead.trim().length > 0;
+    const hasText = !!(contentToRead && contentToRead.trim().length > 0);
     setHasContent(hasText);
   }, [contentToRead]);
 

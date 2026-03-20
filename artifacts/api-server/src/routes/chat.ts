@@ -266,52 +266,124 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
       const childName = context.childName ?? fallbackName;
       const { a, b, task } = generateAdditionTask();
       aiContent = getAdditionTaskPrompt(a, b, childName, lang);
-    } else {
-      // Check if this might be an answer to a recent addition task
-      // Fetch last 2 messages from database
-      const recentMessages = await db
-        .select()
-        .from(chatMessagesTable)
-        .where(and(eq(chatMessagesTable.childId, childId ?? 0), eq(chatMessagesTable.module, module)))
-        .orderBy(desc(chatMessagesTable.id))
-        .limit(2);
       
+      // Store active question in memory for state persistence
+      if (childId) {
+        await db.insert(memoriesTable).values({
+          userId,
+          childId,
+          type: "active_question",
+          content: JSON.stringify({ a, b, task, createdAt: new Date().toISOString() }),
+          module,
+        }).catch(() => {}); // Silent fail if insert doesn't work
+      }
+    } else {
+      // First, check if there's an active unresolved teacher-loop question
       let isAnswerToTask = false;
       let taskA = 0, taskB = 0;
+      let activeQuestionId: number | null = null;
       
-      for (const msg of recentMessages) {
-        if (msg.role === "assistant") {
-          // Look for pattern like "X + Y = ?" in recent messages
-          const match = msg.content.match(/(\d+)\s*\+\s*(\d+)\s*=\s*\?/);
-          if (match) {
-            taskA = parseInt(match[1], 10);
-            taskB = parseInt(match[2], 10);
+      // Fetch the most recent active_question memory
+      if (childId) {
+        const [activeQuestion] = await db
+          .select()
+          .from(memoriesTable)
+          .where(and(
+            eq(memoriesTable.childId, childId),
+            eq(memoriesTable.type, "active_question"),
+            eq(memoriesTable.module, module)
+          ))
+          .orderBy(desc(memoriesTable.createdAt))
+          .limit(1);
+        
+        if (activeQuestion) {
+          console.log("[TEACHER_LOOP_ACTIVE] Found active question in memory");
+          try {
+            const questionData = JSON.parse(activeQuestion.content);
+            taskA = questionData.a;
+            taskB = questionData.b;
+            activeQuestionId = activeQuestion.id;
+            console.log("[TEACHER_LOOP_EXPECTED_ANSWER]", { taskA, taskB, expected: taskA + taskB });
+            
+            // Evaluate the child's message as a potential answer
+            console.log("[TEACHER_LOOP_CHILD_INPUT]", cleanContent);
+            const { correct, expected } = evaluateAdditionAnswer(taskA, taskB, cleanContent);
+            console.log("[TEACHER_LOOP_MATCH_RESULT]", { correct, userAnswer: cleanContent, expected });
+            
             isAnswerToTask = true;
-            break;
+            const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+            const childName = context.childName ?? fallbackName;
+            
+            aiContent = getAdditionFeedback(taskA, taskB, cleanContent, childName, lang, correct);
+            
+            // If answer is correct, remove the active question and award XP
+            if (correct) {
+              console.log("[TEACHER_LOOP_RESOLVED] Answer was correct");
+              await db
+                .delete(memoriesTable)
+                .where(eq(memoriesTable.id, activeQuestionId))
+                .catch(() => {}); // Silent fail if delete doesn't work
+              
+              // Award small XP for correct answer in teaching loop
+              if (childId) {
+                const xpReward = 3;
+                await db
+                  .update(childrenTable)
+                  .set({ xp: (context.childXp ?? 0) + xpReward })
+                  .where(eq(childrenTable.id, childId))
+                  .catch(() => {}); // Silent fail if update doesn't work
+              }
+            }
+          } catch (error) {
+            console.log("[TEACHER_LOOP_ERROR] Failed to parse active question:", error);
+            isAnswerToTask = false;
           }
         }
       }
       
-      if (isAnswerToTask) {
-        // Evaluate the answer
-        const { correct, expected } = evaluateAdditionAnswer(taskA, taskB, cleanContent);
-        const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
-        const childName = context.childName ?? fallbackName;
+      // If no active question or parsing failed, check recent messages as fallback
+      if (!isAnswerToTask) {
+        const recentMessages = await db
+          .select()
+          .from(chatMessagesTable)
+          .where(and(eq(chatMessagesTable.childId, childId ?? 0), eq(chatMessagesTable.module, module)))
+          .orderBy(desc(chatMessagesTable.id))
+          .limit(2);
         
-        aiContent = getAdditionFeedback(taskA, taskB, cleanContent, childName, lang, correct);
-        
-        // Award small XP for correct answer in teaching loop
-        if (correct && childId) {
-          const xpReward = 3;
-          await db
-            .update(childrenTable)
-            .set({ xp: (context.childXp ?? 0) + xpReward })
-            .where(eq(childrenTable.id, childId))
-            .catch(() => {}); // Silent fail if update doesn't work
+        for (const msg of recentMessages) {
+          if (msg.role === "assistant") {
+            // Look for pattern like "X + Y = ?" in recent messages
+            const match = msg.content.match(/(\d+)\s*\+\s*(\d+)\s*=\s*\?/);
+            if (match) {
+              taskA = parseInt(match[1], 10);
+              taskB = parseInt(match[2], 10);
+              isAnswerToTask = true;
+              break;
+            }
+          }
         }
-      } else {
-        // Regular chat without image - use default response logic
-        aiContent = getAIResponse(module, cleanContent, context);
+        
+        if (isAnswerToTask) {
+          // Evaluate the answer
+          const { correct, expected } = evaluateAdditionAnswer(taskA, taskB, cleanContent);
+          const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
+          const childName = context.childName ?? fallbackName;
+          
+          aiContent = getAdditionFeedback(taskA, taskB, cleanContent, childName, lang, correct);
+          
+          // Award small XP for correct answer in teaching loop
+          if (correct && childId) {
+            const xpReward = 3;
+            await db
+              .update(childrenTable)
+              .set({ xp: (context.childXp ?? 0) + xpReward })
+              .where(eq(childrenTable.id, childId))
+              .catch(() => {}); // Silent fail if update doesn't work
+          }
+        } else {
+          // Regular chat without image - use default response logic
+          aiContent = getAIResponse(module, cleanContent, context);
+        }
       }
     }
   }

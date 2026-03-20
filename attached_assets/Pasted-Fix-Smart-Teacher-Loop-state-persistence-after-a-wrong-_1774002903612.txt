@@ -1,0 +1,74 @@
+Fix Smart Teacher Loop state persistence after a wrong answer in AYA Junior.
+
+Current bug:
+When the child gets a math task wrong, AYA correctly gives a hint like:
+"Помисли още малко..."
+
+But when the child then gives the correct answer to the SAME active task,
+AYA does not validate it as the follow-up answer.
+Instead it falls back into general chat/personality mode.
+
+Important:
+Do NOT rebuild Smart Teacher Loop.
+Do NOT redesign UI.
+Do NOT use Autonomous Agent.
+This is a state persistence / answer validation bug fix only.
+
+Goal:
+After a wrong answer, the active teacher-loop question must remain open until:
+- the child gives the correct answer
+- or the loop is explicitly reset
+
+Tasks:
+
+1. Inspect current teacher loop state handling:
+   - currentQuestion
+   - currentAnswer
+   - currentTopic
+   - correctCount
+   - any active/pending question flags
+
+2. Ensure that after an incorrect answer:
+   - the same question remains active
+   - the expected answer is preserved
+   - the next child message is checked against the same active question first
+   - before general chat/personality logic runs
+
+3. Add teacher-loop priority routing:
+   If there is an active unresolved teacher-loop question,
+   then the child's next message must be interpreted as a candidate answer first.
+
+4. Only exit the active loop state when:
+   - the answer is correct
+   - the child explicitly abandons/cancels
+   - a reset/new session is intentionally triggered
+
+5. Add temporary logs:
+   [TEACHER_LOOP_ACTIVE]
+   [TEACHER_LOOP_EXPECTED_ANSWER]
+   [TEACHER_LOOP_CHILD_INPUT]
+   [TEACHER_LOOP_MATCH_RESULT]
+   [TEACHER_LOOP_RESOLVED]
+
+6. Expected behavior:
+   Example:
+   AYA: "0 + 3 = ?"
+   Child: "0"
+   AYA: "Помисли още малко..."
+   Child: "3"
+   AYA: "Точно! 0 + 3 = 3 ⭐ Продължаваме ли?"
+
+7. Do NOT break:
+   - voice-to-teacher-loop routing
+   - typed teacher loop
+   - missions
+   - homework from image
+   - child memory
+   - listening mode
+   - XP
+   - normal friendly greetings when no active loop exists
+
+At the end confirm only:
+- exact file(s) changed
+- exact teacher-loop state bug fixed
+- one example of incorrect -> hint -> correct -> success flow now working

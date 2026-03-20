@@ -70,6 +70,7 @@ interface BulgarianLessonState {
   grade: number;
   createdAt: string; // ISO timestamp
   currentQuestionIndex: number; // Tracks which question in a multi-question topic
+  attemptsPerQuestion: Record<number, number>; // Track wrong attempts per question (0-indexed)
 }
 
 interface JuniorContext {
@@ -164,6 +165,7 @@ async function readBulgarianLessonState(
       grade: data.grade,
       createdAt: data.createdAt,
       currentQuestionIndex: data.currentQuestionIndex ?? 0,
+      attemptsPerQuestion: data.attemptsPerQuestion ?? {},
     };
   } catch {
     return null;
@@ -177,6 +179,7 @@ async function storeBulgarianLesson(
   topicId: string,
   grade: number,
   currentQuestionIndex: number = 0,
+  attemptsPerQuestion: Record<number, number> = {},
 ): Promise<number> {
   // Clear existing lesson state
   await db
@@ -201,6 +204,7 @@ async function storeBulgarianLesson(
         subject: "bulgarian_language",
         grade,
         currentQuestionIndex,
+        attemptsPerQuestion,
         createdAt: new Date().toISOString(),
       }),
       module,
@@ -712,24 +716,48 @@ export async function handleJuniorChat(
     }
 
     // Build response: feedback + next prompt if advancing
-    let response = `${evaluation.feedbackBg}\n\n${evaluation.explanation}`;
     const charEmoji = getCharEmoji(context.aiCharacter);
+    let response = "";
+    
+    // Track attempts and generate friendly feedback
+    const qIndex = bgLessonState.currentQuestionIndex;
+    const attempts = bgLessonState.attemptsPerQuestion[qIndex] ?? 0;
+    
+    if (evaluation.correct) {
+      // Correct answer: short, positive feedback
+      const positiveMessages = ["Браво!", "Чудесно!", "Страхотно!", "Точно така!"];
+      const feedbackMsg = positiveMessages[Math.floor(Math.random() * positiveMessages.length)];
+      response = `${feedbackMsg}\n\n${evaluation.explanation}`;
+    } else {
+      // Wrong answer: friendly feedback based on attempt count
+      if (attempts === 0) {
+        // First wrong attempt: encourage to try again
+        response = `Почти! Помисли още малко.\n\nОпитай пак!`;
+      } else if (attempts === 1) {
+        // Second wrong attempt: give a hint using canonical answer if available
+        response = `Почти! Подсказка: ${evaluation.explanation}`;
+      } else {
+        // Third+ wrong attempt: show the correct answer
+        response = `Отговорът е: ${evaluation.explanation}`;
+      }
+    }
 
     if (progression.advancedToNext && progression.nextTopicId) {
       // Prepare next lesson (reset question index to 0 for new topic)
-      await storeBulgarianLesson(userId, childId, module, progression.nextTopicId, grade, 0);
+      await storeBulgarianLesson(userId, childId, module, progression.nextTopicId, grade, 0, {});
       const nextPrompt = getBulgarianLessonPrompt(grade, progression.nextTopicId, childName, charEmoji, 0);
       response += `\n\n✨ Браво на теб! Ти напредва! ✨\n\n${nextPrompt}`;
     } else if (evaluation.correct) {
       // On correct answer within a topic, try to advance to next question if available
       const nextQIndex = bgLessonState.currentQuestionIndex + 1;
-      await storeBulgarianLesson(userId, childId, module, topicId, grade, nextQIndex);
+      await storeBulgarianLesson(userId, childId, module, topicId, grade, nextQIndex, bgLessonState.attemptsPerQuestion);
       // Show the next question prompt if available
       const nextQuestionPrompt = getBulgarianLessonPrompt(grade, topicId, childName, charEmoji, nextQIndex);
       response += `\n\n✨ Отлично! Продължи! ✨\n\n${nextQuestionPrompt}`;
     } else {
-      // On wrong answer, stay on same question (don't increment)
-      await storeBulgarianLesson(userId, childId, module, topicId, grade, bgLessonState.currentQuestionIndex);
+      // On wrong answer, stay on same question (don't increment) but track the attempt
+      const updatedAttempts = { ...bgLessonState.attemptsPerQuestion, [qIndex]: attempts + 1 };
+      await storeBulgarianLesson(userId, childId, module, topicId, grade, bgLessonState.currentQuestionIndex, updatedAttempts);
     }
 
     // Note: Do NOT clear lesson state here. It persists so subsequent answers on the

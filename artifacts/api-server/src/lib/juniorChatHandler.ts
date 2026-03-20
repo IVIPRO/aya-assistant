@@ -69,6 +69,7 @@ interface BulgarianLessonState {
   subject: string; // "bulgarian_language"
   grade: number;
   createdAt: string; // ISO timestamp
+  currentQuestionIndex: number; // Tracks which question in a multi-question topic
 }
 
 interface JuniorContext {
@@ -162,6 +163,7 @@ async function readBulgarianLessonState(
       subject: data.subject ?? "bulgarian_language",
       grade: data.grade,
       createdAt: data.createdAt,
+      currentQuestionIndex: data.currentQuestionIndex ?? 0,
     };
   } catch {
     return null;
@@ -174,6 +176,7 @@ async function storeBulgarianLesson(
   module: string,
   topicId: string,
   grade: number,
+  currentQuestionIndex: number = 0,
 ): Promise<number> {
   // Clear existing lesson state
   await db
@@ -197,6 +200,7 @@ async function storeBulgarianLesson(
         topicId,
         subject: "bulgarian_language",
         grade,
+        currentQuestionIndex,
         createdAt: new Date().toISOString(),
       }),
       module,
@@ -674,7 +678,7 @@ export async function handleJuniorChat(
     const grade = bgLessonState.grade;
     const topicId = bgLessonState.topicId as any;
     const evaluation = evaluateBulgarianLessonAnswer(
-      { grade, topicId },
+      { grade, topicId, questionIndex: bgLessonState.currentQuestionIndex },
       msg,
     );
 
@@ -710,17 +714,18 @@ export async function handleJuniorChat(
     let response = `${evaluation.feedbackBg}\n\n${evaluation.explanation}`;
 
     if (progression.advancedToNext && progression.nextTopicId) {
-      // Prepare next lesson
+      // Prepare next lesson (reset question index to 0 for new topic)
       const charEmoji = getCharEmoji(context.aiCharacter);
-      await storeBulgarianLesson(userId, childId, module, progression.nextTopicId, grade);
+      await storeBulgarianLesson(userId, childId, module, progression.nextTopicId, grade, 0);
       const nextPrompt = getBulgarianLessonPrompt(grade, progression.nextTopicId, childName, charEmoji);
       response += `\n\n✨ Браво на теб! Ти напредва! ✨\n\n${nextPrompt}`;
-    }
-
-    // Store the new lesson state if not advancing (stay on same topic for retry)
-    // This keeps the lesson active so wrong answers don't fall back to general chat.
-    if (!progression.advancedToNext) {
-      await storeBulgarianLesson(userId, childId, module, topicId, grade);
+    } else if (evaluation.correct) {
+      // On correct answer within a topic, try to advance to next question if available
+      const nextQIndex = bgLessonState.currentQuestionIndex + 1;
+      await storeBulgarianLesson(userId, childId, module, topicId, grade, nextQIndex);
+    } else {
+      // On wrong answer, stay on same question (don't increment)
+      await storeBulgarianLesson(userId, childId, module, topicId, grade, bgLessonState.currentQuestionIndex);
     }
 
     // Note: Do NOT clear lesson state here. It persists so subsequent answers on the

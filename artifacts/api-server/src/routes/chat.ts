@@ -356,12 +356,18 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
           console.log("[TEACHER_LOOP_POST_SUCCESS_ACTIVE] Found post-success follow-up state");
           console.log("[TEACHER_LOOP_FOLLOWUP_INPUT]", cleanContent);
           
+          // Check for operation switch request
+          const requestedOperation = detectMathOperationSwitch(cleanContent, lang);
+          if (requestedOperation) {
+            console.log("[MATH_OPERATION_REQUESTED]", requestedOperation);
+          }
+          
           // Check if child wants to continue or stop
           const msg = cleanContent.toLowerCase().trim();
           const continueYes = ["да", "да, още една", "дай ми още една", "дай ми още един", "още един", "още една", "да, по-трудна", "да, по-сложна", "по-трудна", "по-сложна", "да, по-лесна", "по-лесна"].some(t => msg.includes(t));
           const stopNo = ["не", "стига", "достатъчно е", "върши"].some(t => msg.includes(t));
           
-          console.log("[TEACHER_LOOP_FOLLOWUP_CLASSIFIED]", { continueYes, stopNo, message: msg });
+          console.log("[TEACHER_LOOP_FOLLOWUP_CLASSIFIED]", { continueYes, stopNo, requestedOperation, message: msg });
           
           if (continueYes || requestedOperation) {
             // Generate a new task and continue the loop

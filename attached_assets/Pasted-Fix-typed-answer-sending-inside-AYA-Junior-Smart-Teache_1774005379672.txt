@@ -1,0 +1,75 @@
+Fix typed answer sending inside AYA Junior Smart Teacher Loop.
+
+Current bug:
+AYA now correctly starts a math task when the child asks for an operation such as addition.
+But when the child types a numeric answer in the chat input and presses send, the app shows:
+"Error sending message. Please try again."
+
+Important:
+Do NOT rebuild chat.
+Do NOT rebuild Smart Teacher Loop.
+Do NOT redesign UI.
+Do NOT use Autonomous Agent.
+This is a focused typed-send/runtime bug fix only.
+
+Goal:
+Typed child answers must send successfully during an active teacher-loop session and be validated normally.
+
+Current visible case:
+- AYA gives a math task
+- child types a short numeric answer like "7"
+- presses send
+- red error toast appears instead of normal teacher-loop validation
+
+Tasks:
+
+1. Inspect the typed chat send pipeline while a teacher loop is active.
+2. Compare:
+   - normal typed friendly chat send
+   - typed numeric answer send during teacher loop
+   - voice answer send during teacher loop
+3. Identify why numeric typed answers inside the active loop trigger send failure.
+
+4. Add temporary runtime logs:
+   [TYPED_SEND_INPUT]
+   [TYPED_SEND_PAYLOAD]
+   [TYPED_SEND_ACTIVE_LOOP]
+   [TYPED_SEND_RESPONSE]
+   [TYPED_SEND_ERROR]
+
+5. Verify:
+   - short numeric strings like "7", "10", "3" are accepted as valid child messages
+   - typed answers are not blocked by empty/trim/filter validation
+   - active loop state is attached correctly if required
+   - the same backend/message contract is used as expected
+
+6. Fix so that:
+   Example:
+   AYA: "Колко е 3 + 4?"
+   Child types: "7"
+   Send succeeds
+   AYA validates the answer normally
+
+7. Also test:
+   - "10"
+   - "3"
+   - "12"
+   - "не знам"
+   while teacher loop is active
+
+8. Keep all existing systems intact:
+   - wrong answer -> hint -> correct flow
+   - post-success follow-up state
+   - operation switching
+   - voice routing
+   - missions
+   - homework from image
+   - child memory
+   - listening mode
+   - XP
+   - normal typed chat when no active loop exists
+
+At the end confirm only:
+- exact file(s) changed
+- exact send failure cause
+- one example of typed numeric answer now sending successfully

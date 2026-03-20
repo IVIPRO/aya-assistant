@@ -17,6 +17,36 @@ export interface EvaluationResult {
   feedbackBg: string; // "Браво!" or "Почти!"
 }
 
+export interface QuestionItem {
+  questionIndex: number;
+  questionText: string;
+  acceptedAnswers: string[];
+}
+
+// ─── Question-Specific Q&A Database ──────────────────────────────────────────
+
+/**
+ * Grade 2 Reading Comprehension: "Мария и Пухче"
+ * Structured Q&A for validation against CURRENT question only.
+ */
+const readingComprehensionGrade2: QuestionItem[] = [
+  {
+    questionIndex: 0,
+    questionText: "Как се казва котката?",
+    acceptedAnswers: ["Пухче", "пухче", "котката"],
+  },
+  {
+    questionIndex: 1,
+    questionText: "Какво обича да прави Пухче?",
+    acceptedAnswers: ["спи на слънце", "играе с топка", "играя", "сън", "топка"],
+  },
+  {
+    questionIndex: 2,
+    questionText: "С какво го храни Мария?",
+    acceptedAnswers: ["рибица", "риба", "рибици"],
+  },
+];
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function normalizeAnswer(ans: string): string {
@@ -194,6 +224,7 @@ export interface EvaluationContext {
   grade: number;
   topicId: BGTopicType;
   questionKey?: string; // For future dynamic Q&A (not used yet)
+  questionIndex?: number; // Current question index for multi-question topics
 }
 
 /**
@@ -235,12 +266,14 @@ export function evaluateBulgarianLessonAnswer(
   // Grade 2 topics: reading comprehension, basic grammar
   if (grade === 2) {
     if (topicId === "reading_comprehension_basic") {
-      return evaluateComprehension(studentAnswer, [
-        "Пухче",
-        "котката",
-        "рибица",
-        "Мария",
-      ]);
+      // Use question-specific answers only
+      const qIndex = context.questionIndex ?? 0;
+      const question = readingComprehensionGrade2[qIndex];
+      if (question) {
+        return evaluateComprehension(studentAnswer, question.acceptedAnswers);
+      }
+      // Fallback if question index out of range
+      return evaluateComprehension(studentAnswer, ["Пухче", "рибица"]);
     }
 
     if (topicId === "nouns_basic" || topicId === "verbs_basic") {

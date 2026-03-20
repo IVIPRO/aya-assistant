@@ -11,6 +11,8 @@ import {
   computeStreak,
 } from "../lib/levelSystem";
 import { detectWeakTopics } from "../lib/weaknessDetection";
+import { buildWeeklyInsights } from "../lib/weeklyInsights";
+import { buildTeacherExport } from "../lib/teacherExport";
 
 const router: IRouter = Router();
 
@@ -257,6 +259,64 @@ router.get("/learning/weaknesses", requireAuth, async (req, res): Promise<void> 
   const weakTopics = detectWeakTopics(topics);
 
   res.json({ weakTopics, childId });
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   GET /api/learning/weekly-insights?childId=
+   Return weekly parent insights for a child.
+───────────────────────────────────────────────────────────────── */
+router.get("/learning/weekly-insights", requireAuth, async (req, res): Promise<void> => {
+  const childId = parseInt(req.query.childId as string, 10);
+  if (isNaN(childId)) {
+    res.status(400).json({ error: "childId is required" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
+
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const insights = await buildWeeklyInsights(childId);
+  res.json(insights);
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   GET /api/learning/teacher-export?childId=&grade=
+   Return teacher-ready export data for a child.
+───────────────────────────────────────────────────────────────── */
+router.get("/learning/teacher-export", requireAuth, async (req, res): Promise<void> => {
+  const childId = parseInt(req.query.childId as string, 10);
+  const grade = req.query.grade ? parseInt(req.query.grade as string, 10) : undefined;
+  
+  if (isNaN(childId)) {
+    res.status(400).json({ error: "childId is required" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
+
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const exportData = await buildTeacherExport(childId, grade);
+  res.json(exportData);
 });
 
 export default router;

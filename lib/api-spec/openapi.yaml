@@ -588,6 +588,74 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  # ─── Weekly Insights ───────────────────────────────────────────────────────
+  /learning/weekly-insights:
+    get:
+      operationId: getLearningWeeklyInsights
+      tags: [progress]
+      summary: Get weekly parent insights for a child
+      parameters:
+        - name: childId
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Weekly insights
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WeeklyInsights"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ─── Teacher Export ────────────────────────────────────────────────────────
+  /learning/teacher-export:
+    get:
+      operationId: getLearningTeacherExport
+      tags: [progress]
+      summary: Get teacher-ready export data for a child
+      parameters:
+        - name: childId
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: grade
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Teacher export data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherExport"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   # ─── Daily Plan ────────────────────────────────────────────────────────────
   /daily-plan:
     get:

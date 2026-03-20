@@ -595,6 +595,240 @@ const PARENT_LABELS: Record<ParentLang, {
 /* ─────────────────────────────────────────────────────────────────
    Improvement Areas Card (Smart Weakness Detection)
 ───────────────────────────────────────────────────────────────── */
+/* ─────────────────────────────────────────────────────────────────
+   Parent Progress Card — Read-only weekly insights (Phase 2B)
+───────────────────────────────────────────────────────────────── */
+
+interface WeeklyInsights {
+  childId: number;
+  period: string;
+  weeklyWins: string[];
+  weeklyNeedsSupport: string[];
+  recommendedHomePractice: string[];
+  parentMessageBg: string;
+}
+
+function ParentProgressCard({
+  childId,
+  lang,
+}: {
+  childId: number;
+  lang: LangCode;
+}) {
+  const { data: insights, isLoading } = useQuery<WeeklyInsights>({
+    queryKey: ["parent-progress", childId],
+    queryFn: async () => {
+      const res = await fetch(`/api/learning/weekly-insights?childId=${childId}`);
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: childId > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const labels: Record<LangCode, { title: string; wins: string; support: string; practice: string; empty: string }> = {
+    en: { title: "Weekly Progress", wins: "Weekly Wins", support: "Needs Support", practice: "Home Practice", empty: "Not enough data yet" },
+    bg: { title: "Седмичен напредък", wins: "Седмични успехи", support: "Нуждае се от поддържка", practice: "Домашна практика", empty: "Все още няма достатъчно данни" },
+    es: { title: "Progreso semanal", wins: "Logros semanales", support: "Necesita apoyo", practice: "Práctica en casa", empty: "Sin datos suficientes" },
+    de: { title: "Wöchentlicher Fortschritt", wins: "Wöchentliche Erfolge", support: "Braucht Unterstützung", practice: "Hausaufgabenpraktik", empty: "Noch nicht genug Daten" },
+    fr: { title: "Progrès hebdomadaire", wins: "Victoires hebdomadaires", support: "Besoin de soutien", practice: "Pratique à domicile", empty: "Pas assez de données" },
+  };
+
+  const lbl = labels[lang];
+
+  if (isLoading) {
+    return (
+      <div className="bg-blue-50 p-5 rounded-2xl border border-blue-200 animate-pulse h-32" />
+    );
+  }
+
+  if (!insights) {
+    return null;
+  }
+
+  return (
+    <div className="bg-blue-50 p-5 rounded-2xl border border-blue-200 shadow-sm">
+      <h3 className="font-bold mb-3 flex items-center gap-2 text-blue-800">
+        <TrendingUp className="w-4 h-4 text-blue-600" />
+        {lbl.title}
+      </h3>
+
+      {insights.weeklyWins.length === 0 && insights.weeklyNeedsSupport.length === 0 ? (
+        <p className="text-sm text-blue-600 italic">{lbl.empty}</p>
+      ) : (
+        <div className="space-y-3">
+          {insights.weeklyWins.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-blue-700 mb-1.5">{lbl.wins}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {insights.weeklyWins.map(win => (
+                  <span key={win} className="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full">
+                    ✨ {win}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {insights.weeklyNeedsSupport.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-blue-700 mb-1.5">{lbl.support}</p>
+              <div className="flex flex-wrap gap-1.5">
+                {insights.weeklyNeedsSupport.map(item => (
+                  <span key={item} className="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-1 rounded-full">
+                    📌 {item}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {insights.recommendedHomePractice.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-blue-700 mb-1.5">{lbl.practice}</p>
+              <ul className="text-xs text-blue-600 space-y-1">
+                {insights.recommendedHomePractice.map((rec, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <span className="text-lg">📝</span>
+                    <span>{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {insights.parentMessageBg && (
+            <div className="bg-white/60 p-2.5 rounded-lg border border-blue-100 mt-3">
+              <p className="text-xs text-blue-700 italic">{insights.parentMessageBg}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   Teacher Export Card — Read-only export data (Phase 2B)
+───────────────────────────────────────────────────────────────── */
+
+interface TeacherExportData {
+  childId: number;
+  grade?: number;
+  activeSubject: string | null;
+  weakTopics: string[];
+  strongTopics: string[];
+  interventionFlags: string[];
+  suggestedTeacherFocus: string[];
+}
+
+function TeacherExportCard({
+  childId,
+  grade,
+  lang,
+}: {
+  childId: number;
+  grade?: number;
+  lang: LangCode;
+}) {
+  const { data: exportData, isLoading } = useQuery<TeacherExportData>({
+    queryKey: ["teacher-export", childId],
+    queryFn: async () => {
+      const url = `/api/learning/teacher-export?childId=${childId}${grade ? `&grade=${grade}` : ""}`;
+      const res = await fetch(url);
+      if (!res.ok) return null;
+      return res.json();
+    },
+    enabled: childId > 0,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const labels: Record<LangCode, { title: string; weak: string; strong: string; interventions: string; focus: string; empty: string }> = {
+    en: { title: "Teacher Summary", weak: "Weak Topics", strong: "Strong Topics", interventions: "Flagged Areas", focus: "Recommended Focus", empty: "No data available" },
+    bg: { title: "Резюме за учител", weak: "Слаби теми", strong: "Силни теми", interventions: "Отбелязани области", focus: "Препоръчан фокус", empty: "Няма налични данни" },
+    es: { title: "Resumen del maestro", weak: "Temas débiles", strong: "Temas fuertes", interventions: "Áreas marcadas", focus: "Enfoque recomendado", empty: "Sin datos disponibles" },
+    de: { title: "Zusammenfassung für Lehrer", weak: "Schwache Themen", strong: "Starke Themen", interventions: "Gekennzeichnete Bereiche", focus: "Empfohlener Fokus", empty: "Keine Daten verfügbar" },
+    fr: { title: "Résumé pour l'enseignant", weak: "Sujets faibles", strong: "Sujets forts", interventions: "Zones signalées", focus: "Accent recommandé", empty: "Aucune donnée disponible" },
+  };
+
+  const lbl = labels[lang];
+
+  if (isLoading) {
+    return (
+      <div className="bg-purple-50 p-5 rounded-2xl border border-purple-200 animate-pulse h-32" />
+    );
+  }
+
+  if (!exportData || (exportData.weakTopics.length === 0 && exportData.strongTopics.length === 0)) {
+    return null;
+  }
+
+  return (
+    <div className="bg-purple-50 p-5 rounded-2xl border border-purple-200 shadow-sm">
+      <h3 className="font-bold mb-3 flex items-center gap-2 text-purple-800">
+        <Sparkles className="w-4 h-4 text-purple-600" />
+        {lbl.title}
+      </h3>
+
+      <div className="space-y-3">
+        {exportData.strongTopics.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-purple-700 mb-1.5">{lbl.strong}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {exportData.strongTopics.map(topic => (
+                <span key={topic} className="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full">
+                  ✓ {topic}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {exportData.weakTopics.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-purple-700 mb-1.5">{lbl.weak}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {exportData.weakTopics.map(topic => (
+                <span key={topic} className="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full">
+                  ⚠ {topic}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {exportData.interventionFlags.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-purple-700 mb-1.5">{lbl.interventions}</p>
+            <ul className="text-xs text-purple-600 space-y-1">
+              {exportData.interventionFlags.map((flag, idx) => (
+                <li key={idx} className="flex items-center gap-2">
+                  <span>🔔</span>
+                  <span>{flag.replace(/_/g, " ")}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {exportData.suggestedTeacherFocus.length > 0 && (
+          <div>
+            <p className="text-xs font-semibold text-purple-700 mb-1.5">{lbl.focus}</p>
+            <ul className="text-xs text-purple-600 space-y-1">
+              {exportData.suggestedTeacherFocus.map((focus, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span>💡</span>
+                  <span>{focus}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function ImprovementAreasCard({
   weakTopics,
   lang,
@@ -1356,6 +1590,23 @@ export function ParentDashboard() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* ── Weekly Parent Progress (Phase 2B) ────────────────── */}
+          {progressChild && (
+            <ParentProgressCard
+              childId={progressChild.id}
+              lang={lang}
+            />
+          )}
+
+          {/* ── Teacher Export Summary (Phase 2B) ─────────────────  */}
+          {progressChild && (
+            <TeacherExportCard
+              childId={progressChild.id}
+              grade={progressChild.grade}
+              lang={lang}
+            />
           )}
 
           {/* ── Improvement Areas (Smart Weakness Detection) ─────── */}

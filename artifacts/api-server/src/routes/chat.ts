@@ -418,6 +418,17 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
             
             // Store the new active question
             if (childId) {
+              // Clear any existing active_question to ensure clean state
+              await db
+                .delete(memoriesTable)
+                .where(and(
+                  eq(memoriesTable.childId, childId),
+                  eq(memoriesTable.type, "active_question"),
+                  eq(memoriesTable.module, module)
+                ))
+                .catch(() => {});
+              
+              // Insert the fresh new active question
               await db.insert(memoriesTable).values({
                 userId,
                 childId,

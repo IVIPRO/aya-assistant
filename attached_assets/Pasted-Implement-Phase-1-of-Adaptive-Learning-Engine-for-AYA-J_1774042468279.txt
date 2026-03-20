@@ -1,0 +1,104 @@
+Implement Phase 1 of Adaptive Learning Engine for AYA Junior.
+
+Work in ONE pass.
+Use Lite-friendly scope.
+Do NOT redesign UI.
+Do NOT touch unrelated math logic.
+Do NOT add teacher UI.
+Do NOT add country switching.
+Do NOT refactor large unrelated files.
+Only add adaptive difficulty + weak-topic reinforcement for existing Bulgarian and Math flows.
+
+GOAL
+AYA should adapt the next task/question based on the child’s recent performance.
+
+SCOPE
+Implement only these 5 parts:
+
+1) studentAdaptiveProfile.ts
+Create a new backend utility that stores and updates adaptive learning state in memoriesTable.
+Add types for:
+- recentAccuracy
+- currentDifficulty
+- streakCorrect
+- streakWrong
+- weakTopics
+- strongTopics
+- lastSubject
+- lastTopic
+- recommendedMode
+
+Functions:
+- getAdaptiveProfile(childId)
+- updateAdaptiveProfile(childId, subject, topic, wasCorrect)
+- getRecommendedDifficulty(profile, subject)
+- shouldReviewWeakTopic(profile, subject)
+- getAdaptiveMode(profile) // "normal" | "review" | "boost"
+
+Rules:
+- if 3 correct in a row -> increase difficulty by 1 (max capped)
+- if 2 wrong in a row -> decrease difficulty by 1 (min capped)
+- if topic success rate < 40% after at least 5 attempts -> add to weakTopics
+- if topic success rate > 80% after at least 5 attempts -> add to strongTopics
+- keep logic deterministic and simple
+
+2) Math adaptive wiring
+In the existing math flow, before generating the next task:
+- read adaptive profile
+- choose difficulty using getRecommendedDifficulty()
+- if shouldReviewWeakTopic() is true, prefer a previously weak topic instead of advancing
+- preserve all current validator logic
+- preserve all voice and typed behavior
+- preserve all operation switching behavior
+
+3) Bulgarian adaptive wiring
+In the existing Bulgarian lesson flow:
+- read adaptive profile
+- keep child in same topic longer if accuracy is low
+- auto-advance faster if streakCorrect is high
+- if topic is weak, keep returning similar practice in the same topic before moving on
+- preserve current one-question-at-a-time behavior
+- preserve current answer validation
+- preserve current friendly feedback behavior
+
+4) Lightweight parent-facing summary data only
+Add one helper:
+- buildAdaptiveSummary(childId)
+
+Return:
+- current subject
+- current difficulty
+- weak topics
+- strong topics
+- recent accuracy
+- recommended next mode
+
+Data only. No UI changes required.
+
+5) Tests
+Add focused tests only.
+Do NOT create huge integration suites.
+Cover:
+- 3 correct answers raise difficulty
+- 2 wrong answers lower difficulty
+- weak topic flagged after repeated low success
+- strong topic flagged after repeated high success
+- math next task uses recommended difficulty
+- Bulgarian topic does not advance too early when performance is weak
+- existing math validation still passes
+- existing Bulgarian validation still passes
+
+IMPORTANT CONSTRAINTS
+- Keep all existing APIs working
+- No schema migration unless absolutely necessary
+- Prefer storing inside existing memoriesTable structures
+- Keep changes minimal and isolated
+- If any large refactor seems necessary, do NOT do it
+- Stop after backend/data-layer adaptive engine + minimal handler wiring + tests
+
+OUTPUT FORMAT
+At the end, report only:
+1. files changed
+2. what adaptive rules were added
+3. test results
+4. what remains for Phase 2

@@ -255,10 +255,13 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
   } else {
     // Check if user wants to start an addition teaching loop (v1)
     const lang = getLang(context.language);
+    console.log("[VOICE_INTENT_INPUT]", { cleanContent, lang });
     const isTeachingRequest = detectTeachingIntent(cleanContent, lang);
+    console.log("[VOICE_INTENT_CLASSIFIED]", { isTeachingRequest, module });
     
     if (isTeachingRequest && module === "junior") {
       // Start a new addition teaching loop
+      console.log("[VOICE_TEACHER_LOOP_TRIGGERED] Starting Smart Teacher Loop for:", cleanContent);
       const fallbackName = lang === "bg" ? "приятелю" : lang === "es" ? "amigo" : "friend";
       const childName = context.childName ?? fallbackName;
       const { a, b, task } = generateAdditionTask();

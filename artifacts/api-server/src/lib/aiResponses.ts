@@ -404,25 +404,43 @@ export function detectTeachingIntent(userMessage: string, lang: "bg" | "es" | "e
   
   if (lang === "bg") {
     const triggers = [
+      // Addition-specific
       "помогни ми със събиране", "събиране", "събирам", "научи ме събиране",
       "искам да уча събиране", "задай ми събиране", "упражнение събиране",
-      "дай ми задача събиране", "тренирай ме събиране"
+      "дай ми задача събиране", "тренирай ме събиране",
+      // Broader math requests (voice-friendly)
+      "помогни ми с математика", "помогни ми с математиката", "дай ми задача по математика",
+      "дай ми математична задача", "искам задача по математика", "искам да уча математика",
+      "дай ми упражнение", "математика", "математическа задача",
+      "дай ми задача", "научи ме", "тренирай ме"
     ];
     return triggers.some(t => msg.includes(t));
   }
   
   if (lang === "es") {
     const triggers = [
+      // Addition-specific
       "ayúdame con suma", "suma", "quiero practicar suma", "enséñame suma",
-      "dame una tarea de suma", "practiquemos suma", "entrena me suma"
+      "dame una tarea de suma", "practiquemos suma", "entrena me suma",
+      // Broader math requests (voice-friendly)
+      "ayúdame con matemática", "ayúdame con matemáticas", "dame una tarea de matemática",
+      "dame una tarea de matemáticas", "quiero una tarea de matemática", "quiero aprender matemática",
+      "dame un ejercicio", "matemática", "tarea de matemática",
+      "dame una tarea", "enséñame", "entréneme"
     ];
     return triggers.some(t => msg.includes(t));
   }
   
   // English
   const triggers = [
+    // Addition-specific
     "help with addition", "addition", "teach me addition", "practice addition",
-    "give me an addition task", "let's practice addition", "addition practice"
+    "give me an addition task", "let's practice addition", "addition practice",
+    // Broader math requests (voice-friendly)
+    "help with math", "help with mathematics", "give me a math task",
+    "give me a math problem", "want to practice math", "want to learn math",
+    "give me a problem", "math", "mathematics", "teach me", "train me",
+    "give me a task"
   ];
   return triggers.some(t => msg.includes(t));
 }

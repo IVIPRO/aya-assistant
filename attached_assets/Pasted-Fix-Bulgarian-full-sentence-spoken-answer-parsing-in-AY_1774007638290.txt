@@ -1,0 +1,114 @@
+Fix Bulgarian full-sentence spoken answer parsing in AYA Junior Smart Teacher Loop.
+
+Current status:
+- Microphone works
+- Voice routing works
+- Typed numeric answers work
+- Standalone spoken number words sometimes work
+- Operation switching works
+- Teacher loop works
+- Wrong answer -> hint -> correct flow works
+
+Remaining bug:
+When the child answers with a FULL Bulgarian spoken sentence, AYA still validates incorrectly for multiplication (and likely subtraction/division too).
+
+Real failing case:
+Question: 3 × 10 = ?
+Child says by microphone:
+"три по десет е равно на трийсет"
+
+Expected:
+AYA extracts FINAL ANSWER = 30 and marks it correct.
+
+Actual:
+AYA falls back to hint logic like:
+"3 и 10 заедно какво ще бъдат?"
+This means it is still treating transcript parts as operands instead of extracting the final intended answer.
+
+Important:
+Do NOT rebuild the teacher loop.
+Do NOT redesign UI.
+Do NOT use Autonomous Agent.
+This is a focused spoken full-sentence answer extraction fix only.
+
+Goal:
+For spoken Bulgarian math answers, when a child says a full sentence, AYA must extract the FINAL intended answer, not the numbers from the left side of the equation.
+
+Required behavior:
+
+1. If transcript contains a phrase like:
+- "е равно на X"
+- "равно е на X"
+- "става X"
+- "отговорът е X"
+- "мисля че е X"
+then prioritize X as the final answer candidate.
+
+2. For full spoken math sentences, DO NOT validate using the first numbers found in the sentence.
+Always prefer the right-side / final answer portion.
+
+3. Add robust support for Bulgarian spoken tens needed for AYA Junior:
+- двадесет = 20
+- трийсет = 30
+- четирийсет = 40
+- петдесет = 50
+- шейсет = 60
+- седемдесет = 70
+- осемдесет = 80
+- деветдесет = 90
+
+4. Support these examples as CORRECT:
+Case A:
+Question: 3 × 10 = ?
+Spoken: "трийсет"
+Expected final answer: 30
+
+Case B:
+Question: 3 × 10 = ?
+Spoken: "три по десет е равно на трийсет"
+Expected final answer: 30
+
+Case C:
+Question: 12 - 5 = ?
+Spoken: "дванадесет минус пет е равно на седем"
+Expected final answer: 7
+
+Case D:
+Question: 8 ÷ 2 = ?
+Spoken: "осем делено на две е четири"
+Expected final answer: 4
+
+Case E:
+Question: 9 + 6 = ?
+Spoken: "девет плюс шест прави петнадесет"
+Expected final answer: 15
+
+Implementation guidance:
+- Add a dedicated function for extracting final spoken answer from Bulgarian sentence transcripts
+- Prefer phrase-based extraction from the tail/end of the sentence
+- Only fall back to generic number scanning if no final-answer phrase is found
+- Preserve existing typed-answer validation logic
+
+Add temporary debug logs:
+[MIC_TRANSCRIPT_RAW]
+[MIC_SENTENCE_FINAL_SEGMENT]
+[MIC_SPOKEN_NUMBER_PARSED]
+[MIC_EXPECTED_ANSWER]
+[MIC_VALIDATION_RESULT]
+
+Keep all existing systems intact:
+- typed numeric answers
+- voice routing
+- operation switching
+- wrong answer -> hint -> correct flow
+- missions
+- homework from image
+- memory
+- listening mode
+- XP
+- normal typed chat outside teacher loop
+
+At the end confirm only:
+1. exact file(s) changed
+2. exact reason "три по десет е равно на трийсет" was failing
+3. one example that now works correctly

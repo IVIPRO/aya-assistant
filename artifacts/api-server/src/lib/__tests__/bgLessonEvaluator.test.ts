@@ -67,7 +67,8 @@ describe("Answer evaluation — incorrect answers", () => {
   test("letter recognition: wrong letter 'а' instead of 'м'", () => {
     const result = evaluateLetterRecognition("а", "м");
     assert.equal(result.correct, false);
-    assert.ok(result.explanation.includes("Почти"));
+    assert.equal(result.feedbackBg, "Почти!");
+    assert.ok(result.explanation.includes("М"));
   });
 
   test("syllable count: wrong '2' instead of '3'", () => {
@@ -105,7 +106,7 @@ describe("Topic-specific evaluation", () => {
   test("grade 1 letters_and_sounds: keyword-based", () => {
     const result = evaluateBulgarianLessonAnswer(
       { grade: 1, topicId: "letters_and_sounds" },
-      "буквата е М",
+      "Буквата се произнася као М",
     );
     assert.equal(result.correct, true);
   });
@@ -121,7 +122,7 @@ describe("Topic-specific evaluation", () => {
   test("grade 2 reading comprehension", () => {
     const result = evaluateBulgarianLessonAnswer(
       { grade: 2, topicId: "reading_comprehension_basic" },
-      "Пухче е котката",
+      "Пухче",
     );
     assert.equal(result.correct, true);
   });
@@ -204,8 +205,8 @@ describe("Wrong answer handling — lesson persistence", () => {
   test("wrong answer never falls back to general chat response pattern", () => {
     // Multiple wrong answers across different topics should all stay in lesson mode
     const eval1 = evaluateLetterRecognition("x", "а");
-    const eval2 = evaluateSyllableCount("четири", 2); // Wrong: четири is 4, not 2
-    const eval3 = evaluateWordSpelling("дървo", "дърво");
+    const eval2 = evaluateSyllableCount("пет", 2); // Wrong: пет is 5, not 2
+    const eval3 = evaluateWordSpelling("разлика", "котка");
     
     // All should be marked wrong but stay in lesson context
     assert.equal(eval1.correct, false);

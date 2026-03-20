@@ -1,0 +1,139 @@
+Fix spoken-answer validation in AYA Junior Smart Teacher Loop.
+
+Current status:
+- Typed numeric answers work
+- Addition / subtraction / multiplication / division switching works
+- Wrong answer -> hint -> correct flow works
+- Voice routing works
+- Teacher loop works
+
+Current bug:
+When the child answers by voice using spoken Bulgarian words, AYA does not validate the answer correctly.
+
+Example bug:
+Question: 2 × 9 = ?
+Child says by microphone:
+- "осемнадесет"
+or
+- "две по девет е равно на осемнадесет"
+
+Expected:
+AYA should detect the final numeric answer = 18 and mark it correct.
+
+Actual:
+AYA treats it as wrong and returns a hint.
+
+Important:
+Do NOT rebuild the teacher loop.
+Do NOT redesign the UI.
+Do NOT use Autonomous Agent.
+This is a focused spoken-answer normalization and validation fix only.
+
+Goal:
+AYA must correctly validate spoken Bulgarian math answers from microphone, even when the child answers with:
+1. only the number in words
+2. a full spoken sentence containing the final answer
+
+Tasks:
+
+1. Inspect the voice-input answer validation path after transcription.
+2. Compare how typed answers are validated versus spoken answers.
+3. Add spoken-answer normalization before answer checking.
+
+Support these spoken-answer forms:
+- numeric only:
+  "18"
+  "осемнадесет"
+
+- full sentence:
+  "две по девет е равно на осемнадесет"
+  "отговорът е осемнадесет"
+  "става осемнадесет"
+  "мисля че е осемнадесет"
+
+4. Extract the final intended answer from spoken Bulgarian input.
+For validation, convert spoken Bulgarian number words to a numeric value where possible.
+
+5. At minimum support Bulgarian spoken numbers commonly used in AYA Junior:
+0 to 20
+and simple composed forms needed for early math.
+
+Examples:
+нула = 0
+едно = 1
+две = 2
+три = 3
+четири = 4
+пет = 5
+шест = 6
+седем = 7
+осем = 8
+девет = 9
+десет = 10
+единадесет = 11
+дванадесет = 12
+тринадесет = 13
+четиринадесет = 14
+петнадесет = 15
+шестнадесет = 16
+седемнадесет = 17
+осемнадесет = 18
+деветнадесет = 19
+двадесет = 20
+
+6. During validation:
+- first try strict numeric match
+- then try normalized spoken-number match
+- then try extracting final answer from a longer sentence
+
+7. Add temporary debug logs:
+[MIC_TRANSCRIPT_RAW]
+[MIC_ANSWER_NORMALIZED]
+[MIC_ANSWER_EXTRACTED_NUMBER]
+[MIC_EXPECTED_ANSWER]
+[MIC_VALIDATION_RESULT]
+
+8. Verification cases:
+Case A:
+Question: 2 × 9 = ?
+Child says: "осемнадесет"
+Expected: correct
+
+Case B:
+Question: 2 × 9 = ?
+Child says: "две по девет е равно на осемнадесет"
+Expected: correct
+
+Case C:
+Question: 7 + 3 = ?
+Child says: "десет"
+Expected: correct
+
+Case D:
+Question: 10 - 4 = ?
+Child says: "шест"
+Expected: correct
+
+Case E:
+Question: 8 ÷ 2 = ?
+Child says: "четири"
+Expected: correct
+
+Keep all existing systems intact:
+- typed numeric answers
+- operation switching
+- voice routing
+- teacher loop
+- hints flow
+- post-success follow-up
+- missions
+- homework from image
+- memory
+- listening mode
+- XP
+- normal typed chat outside teacher loop
+
+At the end confirm only:
+- exact file(s) changed
+- exact reason spoken Bulgarian answers were failing
+- one concrete example now working correctly

@@ -649,6 +649,60 @@ export function generateMathTask(operation: "addition" | "subtraction" | "multip
 }
 
 /**
+ * Bulgarian number words to numeric values mapping (0-20 + common forms)
+ */
+const BULGARIAN_NUMBERS: Record<string, number> = {
+  // Base numbers 0-20
+  "нула": 0, "едно": 1, "две": 2, "три": 3, "четири": 4, "пет": 5,
+  "шест": 6, "седем": 7, "осем": 8, "девет": 9, "десет": 10,
+  "единадесет": 11, "дванадесет": 12, "тринадесет": 13, "четиринадесет": 14,
+  "петнадесет": 15, "шестнадесет": 16, "седемнадесет": 17, "осемнадесет": 18,
+  "деветнадесет": 19, "двадесет": 20,
+  // Variations
+  "един": 1, "два": 2, "дванадесет": 12,
+};
+
+/**
+ * Normalize spoken Bulgarian math answer to numeric value
+ * Handles full sentences and standalone number words
+ */
+function normalizeSpokenBulgarianAnswer(userAnswer: string): number | null {
+  const text = userAnswer.toLowerCase().trim();
+  
+  // First, try direct numeric parsing (for typed digits)
+  const directNumeric = parseFloat(text.replace(/[^0-9.]/g, ""));
+  if (!isNaN(directNumeric) && directNumeric.toString().includes(text.replace(/[^0-9.]/g, "").charAt(0))) {
+    return directNumeric;
+  }
+  
+  // Try exact Bulgarian number word match
+  if (BULGARIAN_NUMBERS.hasOwnProperty(text)) {
+    return BULGARIAN_NUMBERS[text];
+  }
+  
+  // Try extracting Bulgarian number words from longer sentences
+  // Look for patterns like "е равно на осемнадесет" or "е осемнадесет"
+  for (const [word, value] of Object.entries(BULGARIAN_NUMBERS)) {
+    // Check if the word appears at the end or near the end of the sentence
+    if (text.includes(word)) {
+      // Find position of the word
+      const matches = text.match(new RegExp(`\\b${word}\\b`, "g"));
+      if (matches) {
+        // Prefer the last occurrence (most likely the answer)
+        const lastIndex = text.lastIndexOf(word);
+        const afterWord = text.substring(lastIndex + word.length).trim();
+        // Only count if it's at the end or followed by punctuation/spaces
+        if (afterWord === "" || afterWord.match(/^[.,!?;:\s]*$/)) {
+          return value;
+        }
+      }
+    }
+  }
+  
+  return null;
+}
+
+/**
  * Evaluate answer for any math operation
  */
 export function evaluateMathAnswer(a: number, b: number, operation: string, userAnswer: string): { correct: boolean; expected: number } {
@@ -664,8 +718,17 @@ export function evaluateMathAnswer(a: number, b: number, operation: string, user
     expected = a / b;
   }
   
+  // Try to parse as numeric first (handles typed digits)
   const cleaned = userAnswer.toLowerCase().trim().replace(/[^0-9.]/g, "");
   let answered = parseFloat(cleaned);
+  
+  // If numeric parsing failed, try Bulgarian word normalization (handles voice input)
+  if (isNaN(answered)) {
+    const normalizedAnswer = normalizeSpokenBulgarianAnswer(userAnswer);
+    if (normalizedAnswer !== null) {
+      answered = normalizedAnswer;
+    }
+  }
   
   if (operation === "division") {
     expected = Math.round(expected * 100) / 100;

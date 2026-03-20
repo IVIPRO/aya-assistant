@@ -170,7 +170,56 @@ describe("Child-friendly feedback", () => {
   });
 });
 
-// ─── Test 5: Topic progression structure ──────────────────────────────────────
+// ─── Test 5: Wrong answer handling — stays in lesson ───────────────────────
+
+describe("Wrong answer handling — lesson persistence", () => {
+  test("wrong answer returns corrective feedback (not general chat)", () => {
+    const result = evaluateLetterRecognition("а", "м");
+    // Correct behavior: returns lesson-specific feedback, not general chat
+    assert.equal(result.correct, false);
+    assert.ok(result.explanation.toLowerCase().includes("буква"));
+    assert.ok(result.feedbackBg === "Почти!");
+    // Should NOT contain general chat patterns like "Страхотно, че попита"
+    assert.ok(!result.explanation.includes("Страхотно, че попита"));
+  });
+
+  test("wrong answer on syllables returns explanation, not fallback chat", () => {
+    const result = evaluateSyllableCount("две", 3);
+    assert.equal(result.correct, false);
+    assert.ok(result.explanation.toLowerCase().includes("сричк"));
+    assert.ok(result.feedbackBg === "Почти!");
+    // Explanation should guide to retry, not escape to general chat
+    assert.ok(result.explanation.includes("3"));
+  });
+
+  test("multiple wrong answers on same topic return consistent feedback", () => {
+    const result1 = evaluateWordSpelling("слонче", "слон");
+    const result2 = evaluateWordSpelling("слонче", "слон");
+    // Both should handle as lesson answers, not escape to general chat
+    assert.equal(result1.correct, result2.correct);
+    assert.ok(result1.explanation.length > 0);
+    assert.ok(result2.explanation.length > 0);
+  });
+
+  test("wrong answer never falls back to general chat response pattern", () => {
+    // Multiple wrong answers across different topics should all stay in lesson mode
+    const eval1 = evaluateLetterRecognition("x", "а");
+    const eval2 = evaluateSyllableCount("четири", 2); // Wrong: четири is 4, not 2
+    const eval3 = evaluateWordSpelling("дървo", "дърво");
+    
+    // All should be marked wrong but stay in lesson context
+    assert.equal(eval1.correct, false);
+    assert.equal(eval2.correct, false);
+    assert.equal(eval3.correct, false);
+    
+    // All should have "Почти!" not general chat phrase
+    assert.equal(eval1.feedbackBg, "Почти!");
+    assert.equal(eval2.feedbackBg, "Почти!");
+    assert.equal(eval3.feedbackBg, "Почти!");
+  });
+});
+
+// ─── Test 6: Topic progression structure ──────────────────────────────────────
 
 describe("Topic progression logic (data structure)", () => {
   test("progression result has correct shape", () => {

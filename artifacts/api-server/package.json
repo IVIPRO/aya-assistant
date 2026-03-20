@@ -7,7 +7,7 @@
     "dev": "NODE_ENV=development tsx ./src/index.ts",
     "build": "tsx ./build.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "node --import tsx/esm --test src/lib/__tests__/subjectRouter.test.ts"
+    "test": "node --import tsx/esm --test src/lib/__tests__/*.test.ts"
   },
   "dependencies": {
     "@types/connect-pg-simple": "^7.0.3",

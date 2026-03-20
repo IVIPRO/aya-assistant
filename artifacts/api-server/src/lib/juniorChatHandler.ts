@@ -591,7 +591,8 @@ export async function handleJuniorChat(
     await storeBulgarianLesson(userId, childId, module, topicId, grade).catch(() => {});
 
     console.log("[JUNIOR_CHAT] routing → bulgarian_language", { grade, topicId });
-    return getBulgarianLessonPrompt(grade, topicId, childName, charEmoji);
+    // Start with question 0 for new lesson
+    return getBulgarianLessonPrompt(grade, topicId, childName, charEmoji, 0);
   }
 
   if (requestedSubject === "mathematics") {
@@ -712,17 +713,20 @@ export async function handleJuniorChat(
 
     // Build response: feedback + next prompt if advancing
     let response = `${evaluation.feedbackBg}\n\n${evaluation.explanation}`;
+    const charEmoji = getCharEmoji(context.aiCharacter);
 
     if (progression.advancedToNext && progression.nextTopicId) {
       // Prepare next lesson (reset question index to 0 for new topic)
-      const charEmoji = getCharEmoji(context.aiCharacter);
       await storeBulgarianLesson(userId, childId, module, progression.nextTopicId, grade, 0);
-      const nextPrompt = getBulgarianLessonPrompt(grade, progression.nextTopicId, childName, charEmoji);
+      const nextPrompt = getBulgarianLessonPrompt(grade, progression.nextTopicId, childName, charEmoji, 0);
       response += `\n\n✨ Браво на теб! Ти напредва! ✨\n\n${nextPrompt}`;
     } else if (evaluation.correct) {
       // On correct answer within a topic, try to advance to next question if available
       const nextQIndex = bgLessonState.currentQuestionIndex + 1;
       await storeBulgarianLesson(userId, childId, module, topicId, grade, nextQIndex);
+      // Show the next question prompt if available
+      const nextQuestionPrompt = getBulgarianLessonPrompt(grade, topicId, childName, charEmoji, nextQIndex);
+      response += `\n\n✨ Отлично! Продължи! ✨\n\n${nextQuestionPrompt}`;
     } else {
       // On wrong answer, stay on same question (don't increment)
       await storeBulgarianLesson(userId, childId, module, topicId, grade, bgLessonState.currentQuestionIndex);
@@ -731,7 +735,7 @@ export async function handleJuniorChat(
     // Note: Do NOT clear lesson state here. It persists so subsequent answers on the
     // same topic stay in the lesson evaluation flow. It's only cleared when:
     // - User switches subject (subject router), or
-    // - Topic is completed and we store the NEXT topic (line 715)
+    // - Topic is completed and we store the NEXT topic (line 725)
 
     return response;
   }

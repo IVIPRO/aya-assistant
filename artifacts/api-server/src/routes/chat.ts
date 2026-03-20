@@ -515,7 +515,10 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
             } else {
               // Evaluate the child's message as a potential answer
               console.log("[TEACHER_LOOP_CHILD_INPUT]", cleanContent);
+              console.log("[MIC_TRANSCRIPT_RAW]", cleanContent);
               const { correct, expected } = evaluateMathAnswer(taskA, taskB, taskOperation, cleanContent);
+              console.log("[MIC_EXPECTED_ANSWER]", expected);
+              console.log("[MIC_VALIDATION_RESULT]", { correct, userAnswer: cleanContent, expected });
               console.log("[TEACHER_LOOP_MATCH_RESULT]", { correct, userAnswer: cleanContent, expected });
               
               isAnswerToTask = true;

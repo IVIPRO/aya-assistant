@@ -1,0 +1,79 @@
+Fix post-success follow-up routing in AYA Junior Smart Teacher Loop.
+
+Current behavior:
+After the child solves a math task correctly, AYA responds correctly with praise and asks something like:
+"Още ли една?"
+
+But if the child then says:
+- "Да, дай ми още една задача"
+- "Да, но този път по-сложна"
+- "Искам още една"
+the app does NOT continue the teacher loop.
+Instead it falls back to the older general/personality response.
+
+Important:
+Do NOT rebuild Smart Teacher Loop.
+Do NOT rebuild voice chat.
+Do NOT redesign UI.
+Do NOT use Autonomous Agent.
+This is a follow-up intent routing/state bug fix only.
+
+Goal:
+After a successful solved task, AYA must keep a short-lived follow-up state so the next child message can continue the same educational loop.
+
+Tasks:
+
+1. Inspect teacher-loop state after successful answer.
+2. Add/repair a "postSuccessFollowup" or equivalent state that remains active immediately after:
+   - correct answer
+   - praise
+   - "Още ли една?" prompt
+
+3. While this follow-up state is active, interpret the next child message with priority as one of:
+   - continue same difficulty
+   - continue harder
+   - continue easier
+   - stop / exit loop
+
+4. Recognize Bulgarian follow-up phrases such as:
+   - "Да"
+   - "Да, още една"
+   - "Дай ми още една задача"
+   - "Да, но по-сложна"
+   - "Още една"
+   - "По-трудна"
+   - "По-лесна"
+   - "Не"
+   - "Стига"
+
+5. Expected behavior:
+   Example:
+   AYA: "Чудесно! 5 е верният отговор! Още ли една?"
+   Child: "Да, но този път по-сложна"
+   AYA: should stay in math loop and generate the next harder math task
+   NOT return to general personality chat
+
+6. Add temporary logs:
+   [TEACHER_LOOP_POST_SUCCESS_ACTIVE]
+   [TEACHER_LOOP_FOLLOWUP_INPUT]
+   [TEACHER_LOOP_FOLLOWUP_CLASSIFIED]
+   [TEACHER_LOOP_NEXT_TASK_TRIGGERED]
+
+7. Keep all existing systems intact:
+   - voice-to-teacher-loop routing
+   - wrong -> hint -> correct flow
+   - missions
+   - homework from image
+   - memory
+   - listening mode
+   - XP
+   - normal greetings when no active educational state exists
+
+8. If the child says "Не" or "Стига":
+   close the active follow-up state and return to friendly chat mode.
+
+At the end confirm only:
+- exact file(s) changed
+- exact follow-up routing bug fixed
+- one example of:
+  correct answer -> "Още ли една?" -> "Да, по-сложна" -> new harder task

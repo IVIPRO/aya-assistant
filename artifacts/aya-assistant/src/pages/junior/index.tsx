@@ -8,7 +8,7 @@ import type { TeacherState } from "@/components/AnimatedTeacher";
 import { Link } from "wouter";
 import { Star, Trophy, Sparkles, Map, MessageCircle, Lock, CheckCircle2, Mic, Volume2, Video, ChevronRight, ArrowLeft, BookOpen } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { useListChildren, useUpdateChild, useListMissions, getListChildrenQueryKey, getListMissionsQueryKey } from "@workspace/api-client-react";
+import { useListChildren, useUpdateChild, useListMissions, useListProgress, getListChildrenQueryKey, getListMissionsQueryKey, getListProgressQueryKey } from "@workspace/api-client-react";
 import { useState, useEffect, useCallback, useRef } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -354,6 +354,55 @@ function getLevelProgress(xp: number): number {
   return p.xpInLevel;
 }
 
+/* ── Phase 1 Gamification: Calculate streak from progress dates ────── */
+function calculateStreakFromProgressDates(progressDates: Date[]): number {
+  if (progressDates.length === 0) return 0;
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // Get unique days from progress dates
+  const uniqueDays = new Set<string>();
+  progressDates.forEach(date => {
+    const d = new Date(date);
+    const dayStr = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    uniqueDays.add(dayStr);
+  });
+
+  const sortedDays = Array.from(uniqueDays)
+    .map(dayStr => {
+      const [year, month, date] = dayStr.split("-").map(Number);
+      return new Date(year, month, date);
+    })
+    .sort((a, b) => b.getTime() - a.getTime());
+
+  // Check if streak starts today or yesterday
+  const latestDay = sortedDays[0];
+  const daysDiff = Math.floor((today.getTime() - latestDay.getTime()) / (86400000)); // ms per day
+
+  if (daysDiff > 1) return 0; // Streak broken
+
+  // Count consecutive days backward
+  let streak = 1;
+  let currentDay = new Date(latestDay);
+
+  for (let i = 1; i < sortedDays.length; i++) {
+    const prevDay = sortedDays[i];
+    const dayDiff = Math.floor(
+      (currentDay.getTime() - prevDay.getTime()) / 86400000
+    );
+
+    if (dayDiff === 1) {
+      streak++;
+      currentDay = new Date(prevDay);
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+}
+
 function getGradeLabel(grade: number, country: string): string {
   const c = (country ?? "").toUpperCase().slice(0, 2);
   if (c === "DE") return `Klasse ${grade}`;
@@ -399,9 +448,10 @@ function CharacterPicker({ child, onSelect, onClose }: { child: Child; onSelect:
   );
 }
 
-function WelcomeScreen({ child, character, onEnterWorld, onChat, onLessons, onChangeCompanion }: {
+function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLessons, onChangeCompanion }: {
   child: Child;
   character: typeof CHARACTERS[0] | undefined;
+  streak: number;
   onEnterWorld: () => void;
   onChat: () => void;
   onLessons: () => void;
@@ -472,6 +522,7 @@ function WelcomeScreen({ child, character, onEnterWorld, onChat, onLessons, onCh
               <div className="flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-orange-400" />
                 <span className="font-bold text-sm">{lbl.levelLabel} {level}</span>
+                {streak > 0 && <span className="text-sm">🔥 {streak} day{streak !== 1 ? 's' : ''}</span>}
               </div>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
@@ -700,6 +751,15 @@ export function Junior() {
     { query: { queryKey: getListMissionsQueryKey({ childId: activeChildIdResolved ?? 0 }), enabled: !!activeChildIdResolved } }
   );
 
+  /* ── Phase 1 Gamification: Fetch progress to calculate streak ────── */
+  const { data: progress = [] } = useListProgress(
+    { childId: activeChildIdResolved ?? 0 },
+    { query: { queryKey: getListProgressQueryKey({ childId: activeChildIdResolved ?? 0 }), enabled: !!activeChildIdResolved } }
+  );
+  const dailyStreak = calculateStreakFromProgressDates(
+    progress.map(p => new Date(p.createdAt))
+  );
+
   const activeChild = children.find(c => c.id === activeChildIdResolved) ?? null;
   const character = activeChild?.aiCharacter ?? null;
   const currentChar = CHARACTERS.find(c => c.id === character);
@@ -799,6 +859,7 @@ export function Junior() {
             <WelcomeScreen
               child={activeChild}
               character={currentChar}
+              streak={dailyStreak}
               onEnterWorld={() => setView("map")}
               onChat={() => { setSelectedSubject(null); setSelectedTopic(null); setView("chat"); }}
               onLessons={() => setView("subjects")}

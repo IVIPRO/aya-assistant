@@ -666,8 +666,47 @@ const BULGARIAN_NUMBERS: Record<string, number> = {
 };
 
 /**
+ * Parse Bulgarian compound numbers like "четиридесет и пет" (45)
+ * Supports: simple units, teens, tens, and compound tens + "и" + units
+ */
+function parseBulgarianCompoundNumber(phrase: string): number | null {
+  const normalized = phrase.toLowerCase().trim();
+  console.log("[BULGARIAN_NUMBER_TOKENS]", { input: normalized });
+  
+  // First try single word match
+  if (BULGARIAN_NUMBERS.hasOwnProperty(normalized)) {
+    return BULGARIAN_NUMBERS[normalized];
+  }
+  
+  // Try compound form: "tens и units" 
+  // Pattern: word + "и" + word (handles "четиридесет и пет" = 45)
+  const compoundMatch = normalized.match(/^([а-яё]+)\s+и\s+([а-яё]+)$/);
+  if (compoundMatch) {
+    const tensWord = compoundMatch[1].trim();
+    const unitsWord = compoundMatch[2].trim();
+    
+    const tensValue = BULGARIAN_NUMBERS[tensWord];
+    const unitsValue = BULGARIAN_NUMBERS[unitsWord];
+    
+    if (tensValue !== undefined && unitsValue !== undefined) {
+      // Validate this is a tens + units combination (20-99)
+      // tens must be 20, 30, 40... 90 (divisible by 10 and >= 20)
+      // units must be 1-9
+      if (tensValue >= 20 && tensValue % 10 === 0 && unitsValue > 0 && unitsValue < 10) {
+        const result = tensValue + unitsValue;
+        console.log("[BULGARIAN_NUMBER_TOKENS]", { tens: tensWord, units: unitsWord, tensValue, unitsValue, result });
+        return result;
+      }
+    }
+  }
+  
+  return null;
+}
+
+/**
  * Extract final answer from Bulgarian spoken sentence using answer indicators
  * Looks for patterns like "е равно на X", "прави X", "отговорът е X"
+ * Handles both simple numbers and compound numbers like "четиридесет и пет" (45)
  */
 function extractFinalAnswerFromSentence(text: string): number | null {
   // Patterns that indicate the final answer follows
@@ -681,14 +720,19 @@ function extractFinalAnswerFromSentence(text: string): number | null {
   ];
   
   // Try each indicator pattern
+  // Updated regex to capture optional compound form: word [и word]
   for (const indicator of answerIndicators) {
-    const pattern = new RegExp(`${indicator}\\s+([а-яА-ЯёЁ]+)`, "i");
+    const pattern = new RegExp(`${indicator}\\s+([а-яА-ЯёЁ]+(?:\\s+и\\s+[а-яА-ЯёЁ]+)?)`, "i");
     const match = text.match(pattern);
     if (match && match[1]) {
       const possibleAnswer = match[1].trim();
-      // Check if this is a Bulgarian number word
-      if (BULGARIAN_NUMBERS.hasOwnProperty(possibleAnswer)) {
-        return BULGARIAN_NUMBERS[possibleAnswer];
+      console.log("[BULGARIAN_FINAL_SEGMENT]", possibleAnswer);
+      
+      // Try to parse as compound or simple number
+      const parsedValue = parseBulgarianCompoundNumber(possibleAnswer);
+      if (parsedValue !== null) {
+        console.log("[BULGARIAN_NUMBER_PARSED]", { segment: possibleAnswer, value: parsedValue });
+        return parsedValue;
       }
     }
   }
@@ -784,6 +828,10 @@ export function evaluateMathAnswer(a: number, b: number, operation: string, user
     expected = Math.round(expected);
     answered = Math.round(answered);
   }
+  
+  const correct = answered === expected;
+  console.log("[EXPECTED_NUMERIC_ANSWER]", { operation, a, b, expected });
+  console.log("[VALIDATION_MATCH]", { userAnswer, answered, expected, correct });
   
   return {
     correct: !isNaN(answered) && answered === expected,

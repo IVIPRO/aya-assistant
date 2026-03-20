@@ -1,0 +1,109 @@
+Fix Bulgarian compound spoken number parsing in AYA Junior Smart Teacher Loop.
+
+Current status:
+- Microphone works
+- Voice routing works
+- Teacher loop works
+- Typed answers work
+- Full sentence extraction using phrases like "е равно на" works
+- Standalone spoken numbers work in some cases
+- Operation switching works
+
+Remaining bug:
+AYA still fails when the FINAL spoken Bulgarian answer is a compound number made of tens + "и" + ones.
+
+Real failing example:
+Question: 9 × 5 = ?
+Child says:
+"девет по пет е равно на четиридесет и пет"
+
+Expected final answer:
+45
+
+Actual:
+AYA marks it wrong.
+
+This means final-answer extraction is working, but Bulgarian compound spoken number parsing is incomplete.
+
+Do NOT rebuild the teacher loop.
+Do NOT redesign UI.
+Do NOT use Autonomous Agent.
+This is a focused Bulgarian number-word parsing fix only.
+
+Goal:
+AYA must correctly convert Bulgarian spoken compound numbers into integers, especially numbers from 21 to 99 that include "и".
+
+Required support examples:
+- двадесет и едно = 21
+- двадесет и две = 22
+- трийсет и четири = 34
+- четиридесет и пет = 45
+- петдесет и шест = 56
+- шейсет и седем = 67
+- седемдесет и осем = 78
+- осемдесет и девет = 89
+- деветдесет и едно = 91
+
+Also support tens without ones:
+- двадесет = 20
+- трийсет = 30
+- четиридесет = 40
+- петдесет = 50
+- шейсет = 60
+- седемдесет = 70
+- осемдесет = 80
+- деветдесет = 90
+
+Implementation requirements:
+1. Add a Bulgarian spoken-number parser that supports:
+   - simple units
+   - teens
+   - tens
+   - compound tens + "и" + units
+2. Normalize transcript text before parsing
+3. When final answer segment after phrases like:
+   - "е равно на"
+   - "става"
+   - "отговорът е"
+   - "мисля че е"
+is extracted, parse that whole segment as one Bulgarian number phrase
+4. Preserve existing numeric parsing and typed answer logic
+5. Preserve all current systems
+
+Must pass these exact validation cases:
+Case 1:
+Question: 9 × 5 = ?
+Speech: "девет по пет е равно на четиридесет и пет"
+Expected: 45
+
+Case 2:
+Question: 7 × 6 = ?
+Speech: "седем по шест е равно на четиридесет и две"
+Expected: 42
+
+Case 3:
+Question: 8 + 7 = ?
+Speech: "осем плюс седем е равно на петнадесет"
+Expected: 15
+
+Case 4:
+Question: 12 - 3 = ?
+Speech: "дванадесет минус три е равно на девет"
+Expected: 9
+
+Case 5:
+Question: 8 ÷ 2 = ?
+Speech: "осем делено на две е четири"
+Expected: 4
+
+Add temporary debug logs:
+[BULGARIAN_FINAL_SEGMENT]
+[BULGARIAN_NUMBER_TOKENS]
+[BULGARIAN_NUMBER_PARSED]
+[EXPECTED_NUMERIC_ANSWER]
+[VALIDATION_MATCH]
+
+At the end confirm only:
+1. exact file(s) changed
+2. exact reason "четиридесет и пет" was failing
+3. one working example with 45

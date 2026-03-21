@@ -113,39 +113,20 @@ export function ListeningMode({
   useEffect(() => {
     const hasText = !!(contentToRead && contentToRead.trim().length > 0);
     setHasContent(hasText);
-    if (isOpen && contentToRead) {
-      console.log("[MODAL] isOpen=true, contentToRead type:", typeof contentToRead, "content:", contentToRead.substring(0, 50));
-    }
-  }, [contentToRead, isOpen]);
+  }, [contentToRead]);
 
   const handleListen = () => {
-    // ═══════════════════════════════════════════════════════════════════════
-    // EXPLICIT SPEECH TEXT: Build from actual message data source, not DOM
-    // ═══════════════════════════════════════════════════════════════════════
+    // The visible text in the modal ({contentToRead}) must be the exact same text spoken.
+    // Do not preprocess or clean before speaking - speak the displayed text directly.
     
-    // Step 1: Validate raw text first
-    if (!contentToRead || contentToRead.trim().length === 0) {
-      console.warn("[LISTEN] No content to read");
+    if (!contentToRead || !contentToRead.trim()) {
       return;
     }
 
     const langCode = LANG_MAP[lang];
-
-    // Step 2: Preprocess BEFORE cleaning so math operators (+, =, ×, ÷) are still intact.
-    const preprocessed = preprocessBulgarianSpeech(contentToRead, langCode);
-
-    // Step 3: Now clean (remove emojis, UI labels)
-    const speechText = cleanTextForSpeech(preprocessed);
-    console.log("[LISTEN] speechText after clean:", speechText, "len:", speechText.length);
-
-    // Step 4: Validate cleaned result - allow content with 3+ chars (reject only empty/junk)
-    if (!speechText || speechText.trim().length < 3) {
-      console.warn("[LISTEN] Text too short after clean, skipping speak:", speechText);
-      return;
-    }
-
-    console.log("[LISTEN] Calling speak() with text:", speechText.substring(0, 50) + "...");
-    speak(speechText, {
+    
+    // Speak the exact displayed text without any transformations
+    speak(contentToRead, {
       lang: langCode,
       rate: 0.9,
       pitch: 1,

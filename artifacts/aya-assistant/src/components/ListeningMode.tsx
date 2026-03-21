@@ -113,7 +113,10 @@ export function ListeningMode({
   useEffect(() => {
     const hasText = !!(contentToRead && contentToRead.trim().length > 0);
     setHasContent(hasText);
-  }, [contentToRead]);
+    if (isOpen && contentToRead) {
+      console.log("[MODAL] isOpen=true, contentToRead type:", typeof contentToRead, "content:", contentToRead.substring(0, 50));
+    }
+  }, [contentToRead, isOpen]);
 
   const handleListen = () => {
     // ═══════════════════════════════════════════════════════════════════════

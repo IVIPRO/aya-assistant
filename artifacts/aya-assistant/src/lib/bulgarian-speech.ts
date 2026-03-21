@@ -144,20 +144,41 @@ export function preprocessBulgarianSpeech(text: string, lang: string): string {
  */
 export function getBulgarianVoice(): SpeechSynthesisVoice | undefined {
   if (typeof window === "undefined" || !window.speechSynthesis) {
+    console.warn("[BG_VOICE_DEBUG] No window or speechSynthesis");
     return undefined;
   }
   
-  const voices = window.speechSynthesis.getVoices();
+  const synth = window.speechSynthesis;
+  const voices = synth.getVoices();
+  
+  console.log("[BG_VOICE_DEBUG] Total voices available:", voices.length);
+  if (voices.length === 0) {
+    console.warn("[BG_VOICE_DEBUG] No voices loaded yet - voices array is empty");
+    return undefined;
+  }
+  
+  // Log all Bulgarian voices for debugging
+  const bgVoices = voices.filter(v => v.lang.startsWith("bg"));
+  console.log("[BG_VOICE_DEBUG] Bulgarian voices found:", bgVoices.length);
+  bgVoices.forEach((v, i) => {
+    console.log(`[BG_VOICE_DEBUG] Voice ${i}: lang="${v.lang}", name="${v.name}"`);
+  });
   
   // First, try to find bg-BG voice
   const bgBgVoice = voices.find(v => v.lang === "bg-BG");
-  if (bgBgVoice) return bgBgVoice;
+  if (bgBgVoice) {
+    console.log("[BG_VOICE_DEBUG] Selected bg-BG voice:", bgBgVoice.name);
+    return bgBgVoice;
+  }
   
   // Then, try to find any Bulgarian voice
   const anyBgVoice = voices.find(v => v.lang.startsWith("bg"));
-  if (anyBgVoice) return anyBgVoice;
+  if (anyBgVoice) {
+    console.log("[BG_VOICE_DEBUG] Selected Bulgarian voice:", anyBgVoice.name, anyBgVoice.lang);
+    return anyBgVoice;
+  }
   
-  // If no Bulgarian voice, return undefined
+  console.warn("[BG_VOICE_DEBUG] No Bulgarian voice found in available voices");
   return undefined;
 }
 

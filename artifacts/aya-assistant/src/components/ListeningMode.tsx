@@ -148,14 +148,16 @@ export function ListeningMode({
     
     // Step 4: Apply Bulgarian speech preprocessing (convert math expressions to natural Bulgarian)
     const langCode = LANG_MAP[lang];
+    console.log("[LISTENING_PREPROCESS_INPUT] lang=" + lang + ", langCode=" + langCode + ", text='" + speechText + "'");
     const processedText = preprocessBulgarianSpeech(speechText, langCode);
-    console.log("[SPEECH_TEXT_PREPROCESSED] '" + processedText + "'");
+    console.log("[LISTENING_PREPROCESS_OUTPUT] '" + processedText + "'");
     
     // Step 5: Final explicit speech text - ONLY from the message data
-    console.log("[SPEECH_TEXT_EXPLICIT] '" + processedText + "'");
-    console.log("[SPEECH_TEXT_LANG] " + langCode);
+    console.log("[LISTENING_FINAL_TEXT] '" + processedText + "'");
+    console.log("[LISTENING_FINAL_LANG] " + langCode);
     
     // Step 6: Speak ONLY this explicit text with forced Bulgarian language if needed
+    console.log("[LISTENING_CALLING_SPEAK]");
     speak(processedText, {
       lang: langCode,
       rate: 0.9,

@@ -47,26 +47,35 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 
     // Apply Bulgarian voice selection if language is Bulgarian
     if (utterance.lang.startsWith("bg")) {
+      console.log("[TTS_SETUP] Setting Bulgarian voice for lang:", utterance.lang);
       setBulgarianVoice(utterance, utterance.lang);
     }
 
+    console.log("[TTS_UTTERANCE] text:", text);
+    console.log("[TTS_UTTERANCE] utterance.lang:", utterance.lang);
+    console.log("[TTS_UTTERANCE] utterance.voice:", utterance.voice?.name ?? "NO VOICE SET");
+    console.log("[TTS_UTTERANCE] rate:", utterance.rate, "pitch:", utterance.pitch);
+
     utterance.onstart = () => {
+      console.log("[TTS_ONSTART] Speech started");
       setIsSpeaking(true);
       setIsPaused(false);
     };
 
     utterance.onend = () => {
+      console.log("[TTS_ONEND] Speech ended naturally");
       setIsSpeaking(false);
       setIsPaused(false);
     };
 
     utterance.onerror = (event) => {
-      console.error("[TTS_ONERROR] " + event.error);
+      console.error("[TTS_ONERROR] Error:", event.error);
       setIsSpeaking(false);
       setIsPaused(false);
     };
 
     utteranceRef.current = utterance;
+    console.log("[TTS_SPEAK] Calling synth.speak()");
     synth.speak(utterance);
   }, [synth]);
 

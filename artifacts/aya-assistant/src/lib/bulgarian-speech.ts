@@ -184,6 +184,7 @@ export function getBulgarianVoice(): SpeechSynthesisVoice | undefined {
 
 /**
  * Set Bulgarian voice on a speech utterance if available
+ * Even if no Bulgarian voice is found, the lang attribute helps the OS select the right voice
  */
 export function setBulgarianVoice(utterance: SpeechSynthesisUtterance, lang: string): void {
   if (!lang.startsWith("bg")) return;
@@ -191,5 +192,10 @@ export function setBulgarianVoice(utterance: SpeechSynthesisUtterance, lang: str
   const voice = getBulgarianVoice();
   if (voice) {
     utterance.voice = voice;
+    console.log("[BG_VOICE_SET] Voice successfully set to:", voice.name);
+  } else {
+    // Even if no Bulgarian voice is found, the lang attribute set on the utterance
+    // helps the OS select the correct voice, so speech synthesis can still work
+    console.warn("[BG_VOICE_SET] No Bulgarian voice found - relying on lang attribute (" + lang + ") for OS voice selection");
   }
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState, ReactNode } from "react";
 import { Volume2, Pause, Play, X, AlertCircle } from "lucide-react";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
+import { preprocessBulgarianSpeech } from "@/lib/bulgarian-speech";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ListeningModeProps {
@@ -145,13 +146,18 @@ export function ListeningMode({
       return;
     }
     
-    // Step 4: Final explicit speech text - ONLY from the message data
-    console.log("[SPEECH_TEXT_EXPLICIT] '" + speechText + "'");
-    console.log("[SPEECH_TEXT_LANG] " + LANG_MAP[lang]);
+    // Step 4: Apply Bulgarian speech preprocessing (convert math expressions to natural Bulgarian)
+    const langCode = LANG_MAP[lang];
+    const processedText = preprocessBulgarianSpeech(speechText, langCode);
+    console.log("[SPEECH_TEXT_PREPROCESSED] '" + processedText + "'");
     
-    // Step 5: Speak ONLY this explicit text with forced Bulgarian language if needed
-    speak(speechText, {
-      lang: LANG_MAP[lang],
+    // Step 5: Final explicit speech text - ONLY from the message data
+    console.log("[SPEECH_TEXT_EXPLICIT] '" + processedText + "'");
+    console.log("[SPEECH_TEXT_LANG] " + langCode);
+    
+    // Step 6: Speak ONLY this explicit text with forced Bulgarian language if needed
+    speak(processedText, {
+      lang: langCode,
       rate: 0.9,
       pitch: 1,
       volume: 1,

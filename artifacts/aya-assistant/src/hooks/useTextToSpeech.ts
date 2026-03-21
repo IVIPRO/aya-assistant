@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from "react";
+import { setBulgarianVoice } from "@/lib/bulgarian-speech";
 
 export interface TextToSpeechOptions {
   rate?: number;
@@ -43,6 +44,11 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
     // Set language - enforce it to ensure correct voice is used
     // Default to en-US if not provided
     utterance.lang = options?.lang ?? "en-US";
+
+    // Apply Bulgarian voice selection if language is Bulgarian
+    if (utterance.lang.startsWith("bg")) {
+      setBulgarianVoice(utterance, utterance.lang);
+    }
 
     utterance.onstart = () => {
       setIsSpeaking(true);

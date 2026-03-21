@@ -120,45 +120,37 @@ export function ListeningMode({
     // EXPLICIT SPEECH TEXT: Build from actual message data source, not DOM
     // ═══════════════════════════════════════════════════════════════════════
     
-    // Step 1: Use explicit speechText from the message data prop (contentToRead)
-    // This is the source of truth - NOT from DOM, NOT from aria-labels, NOT from headers
-    let speechText = "";
-    
-    if (contentToRead && contentToRead.trim().length > 0) {
-      // Clean the text to remove emojis and special characters
-      speechText = cleanTextForSpeech(contentToRead);
-    }
-    
-    console.log("[SPEECH_TEXT_RAW] '" + contentToRead + "'");
-    console.log("[SPEECH_TEXT_RAW_LENGTH] " + contentToRead.length + " chars");
-    console.log("[SPEECH_TEXT_CLEANED] '" + speechText + "'");
-    console.log("[SPEECH_TEXT_CLEANED_LENGTH] " + speechText.length + " chars");
-    
-    // Step 2: Validate - do not speak if text is too short or empty
-    if (!speechText || speechText.trim().length === 0) {
+    // Step 1: Validate raw text first
+    if (!contentToRead || contentToRead.trim().length === 0) {
       console.warn("[SPEECH_TEXT_INVALID] No valid text to speak");
       return;
     }
-    
-    // Step 3: Block speech if text is suspiciously short (likely a label like "AYA 2")
-    if (speechText.length < 10) {
-      console.error("[LISTENING_INVALID_TEXT_BLOCKED] Text too short (" + speechText.length + " chars): '" + speechText + "' — NOT speaking");
+
+    const langCode = LANG_MAP[lang];
+
+    // Step 2: Preprocess BEFORE cleaning so math operators (+, =, ×, ÷) are still intact.
+    // cleanTextForSpeech strips '+' and '=' via its character whitelist, which prevents
+    // the math regex from matching. Preprocessing first converts "0 + 3 = 3" →
+    // "нула плюс три е равно на три" before any stripping occurs.
+    console.log("[SPEECH_TEXT_RAW] '" + contentToRead + "'");
+    const preprocessed = preprocessBulgarianSpeech(contentToRead, langCode);
+    console.log("[LISTENING_PREPROCESS_OUTPUT] '" + preprocessed + "'");
+
+    // Step 3: Now clean (remove emojis, UI labels) — math is already converted to words
+    const speechText = cleanTextForSpeech(preprocessed);
+    console.log("[SPEECH_TEXT_CLEANED] '" + speechText + "'");
+
+    // Step 4: Validate cleaned result
+    if (!speechText || speechText.trim().length < 10) {
+      console.error("[LISTENING_INVALID_TEXT_BLOCKED] Text too short after clean (" + speechText.length + " chars): '" + speechText + "'");
       return;
     }
-    
-    // Step 4: Apply Bulgarian speech preprocessing (convert math expressions to natural Bulgarian)
-    const langCode = LANG_MAP[lang];
-    console.log("[LISTENING_PREPROCESS_INPUT] lang=" + lang + ", langCode=" + langCode + ", text='" + speechText + "'");
-    const processedText = preprocessBulgarianSpeech(speechText, langCode);
-    console.log("[LISTENING_PREPROCESS_OUTPUT] '" + processedText + "'");
-    
-    // Step 5: Final explicit speech text - ONLY from the message data
-    console.log("[LISTENING_FINAL_TEXT] '" + processedText + "'");
+
+    // Step 5: Final spoken text
+    console.log("[LISTENING_FINAL_TEXT] '" + speechText + "'");
     console.log("[LISTENING_FINAL_LANG] " + langCode);
-    
-    // Step 6: Speak ONLY this explicit text with forced Bulgarian language if needed
-    console.log("[LISTENING_CALLING_SPEAK]");
-    speak(processedText, {
+
+    speak(speechText, {
       lang: langCode,
       rate: 0.9,
       pitch: 1,

@@ -7,7 +7,7 @@
 
 import { describe, test } from "node:test";
 import assert from "node:assert";
-import { preprocessBulgarianSpeech } from "../bulgarian-speech";
+import { preprocessBulgarianSpeech } from "../../../../aya-assistant/src/lib/bulgarian-speech";
 
 /**
  * Mirrors the cleanTextForSpeech function in ListeningMode.tsx exactly.

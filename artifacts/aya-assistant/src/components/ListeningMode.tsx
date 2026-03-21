@@ -122,26 +122,26 @@ export function ListeningMode({
     
     // Step 1: Validate raw text first
     if (!contentToRead || contentToRead.trim().length === 0) {
-      console.warn("[SPEECH_TEXT_INVALID] No valid text to speak");
+      console.warn("[LISTEN] No content to read");
       return;
     }
 
     const langCode = LANG_MAP[lang];
 
     // Step 2: Preprocess BEFORE cleaning so math operators (+, =, ×, ÷) are still intact.
-    // cleanTextForSpeech strips '+' and '=' via its character whitelist, which prevents
-    // the math regex from matching. Preprocessing first converts "0 + 3 = 3" →
-    // "нула плюс три е равно на три" before any stripping occurs.
     const preprocessed = preprocessBulgarianSpeech(contentToRead, langCode);
 
-    // Step 3: Now clean (remove emojis, UI labels) — math is already converted to words
+    // Step 3: Now clean (remove emojis, UI labels)
     const speechText = cleanTextForSpeech(preprocessed);
+    console.log("[LISTEN] speechText after clean:", speechText, "len:", speechText.length);
 
     // Step 4: Validate cleaned result - allow content with 3+ chars (reject only empty/junk)
     if (!speechText || speechText.trim().length < 3) {
+      console.warn("[LISTEN] Text too short after clean, skipping speak:", speechText);
       return;
     }
 
+    console.log("[LISTEN] Calling speak() with text:", speechText.substring(0, 50) + "...");
     speak(speechText, {
       lang: langCode,
       rate: 0.9,

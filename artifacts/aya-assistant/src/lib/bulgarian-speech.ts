@@ -144,41 +144,20 @@ export function preprocessBulgarianSpeech(text: string, lang: string): string {
  */
 export function getBulgarianVoice(): SpeechSynthesisVoice | undefined {
   if (typeof window === "undefined" || !window.speechSynthesis) {
-    console.warn("[BG_VOICE_DEBUG] No window or speechSynthesis");
     return undefined;
   }
   
-  const synth = window.speechSynthesis;
-  const voices = synth.getVoices();
-  
-  console.log("[BG_VOICE_DEBUG] Total voices available:", voices.length);
-  if (voices.length === 0) {
-    console.warn("[BG_VOICE_DEBUG] No voices loaded yet - voices array is empty");
-    return undefined;
-  }
-  
-  // Log all Bulgarian voices for debugging
-  const bgVoices = voices.filter(v => v.lang.startsWith("bg"));
-  console.log("[BG_VOICE_DEBUG] Bulgarian voices found:", bgVoices.length);
-  bgVoices.forEach((v, i) => {
-    console.log(`[BG_VOICE_DEBUG] Voice ${i}: lang="${v.lang}", name="${v.name}"`);
-  });
+  const voices = window.speechSynthesis.getVoices();
   
   // First, try to find bg-BG voice
   const bgBgVoice = voices.find(v => v.lang === "bg-BG");
-  if (bgBgVoice) {
-    console.log("[BG_VOICE_DEBUG] Selected bg-BG voice:", bgBgVoice.name);
-    return bgBgVoice;
-  }
+  if (bgBgVoice) return bgBgVoice;
   
   // Then, try to find any Bulgarian voice
   const anyBgVoice = voices.find(v => v.lang.startsWith("bg"));
-  if (anyBgVoice) {
-    console.log("[BG_VOICE_DEBUG] Selected Bulgarian voice:", anyBgVoice.name, anyBgVoice.lang);
-    return anyBgVoice;
-  }
+  if (anyBgVoice) return anyBgVoice;
   
-  console.warn("[BG_VOICE_DEBUG] No Bulgarian voice found in available voices");
+  // If no Bulgarian voice, return undefined
   return undefined;
 }
 
@@ -192,10 +171,5 @@ export function setBulgarianVoice(utterance: SpeechSynthesisUtterance, lang: str
   const voice = getBulgarianVoice();
   if (voice) {
     utterance.voice = voice;
-    console.log("[BG_VOICE_SET] Voice successfully set to:", voice.name);
-  } else {
-    // Even if no Bulgarian voice is found, the lang attribute set on the utterance
-    // helps the OS select the correct voice, so speech synthesis can still work
-    console.warn("[BG_VOICE_SET] No Bulgarian voice found - relying on lang attribute (" + lang + ") for OS voice selection");
   }
 }

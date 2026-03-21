@@ -132,23 +132,15 @@ export function ListeningMode({
     // cleanTextForSpeech strips '+' and '=' via its character whitelist, which prevents
     // the math regex from matching. Preprocessing first converts "0 + 3 = 3" →
     // "нула плюс три е равно на три" before any stripping occurs.
-    console.log("[SPEECH_TEXT_RAW] '" + contentToRead + "'");
     const preprocessed = preprocessBulgarianSpeech(contentToRead, langCode);
-    console.log("[LISTENING_PREPROCESS_OUTPUT] '" + preprocessed + "'");
 
     // Step 3: Now clean (remove emojis, UI labels) — math is already converted to words
     const speechText = cleanTextForSpeech(preprocessed);
-    console.log("[SPEECH_TEXT_CLEANED] '" + speechText + "'");
 
-    // Step 4: Validate cleaned result
-    if (!speechText || speechText.trim().length < 10) {
-      console.error("[LISTENING_INVALID_TEXT_BLOCKED] Text too short after clean (" + speechText.length + " chars): '" + speechText + "'");
+    // Step 4: Validate cleaned result - allow content with 3+ chars (reject only empty/junk)
+    if (!speechText || speechText.trim().length < 3) {
       return;
     }
-
-    // Step 5: Final spoken text
-    console.log("[LISTENING_FINAL_TEXT] '" + speechText + "'");
-    console.log("[LISTENING_FINAL_LANG] " + langCode);
 
     speak(speechText, {
       lang: langCode,

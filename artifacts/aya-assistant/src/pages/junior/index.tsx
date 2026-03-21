@@ -4,6 +4,7 @@ import { SubjectPanel } from "./subjects";
 import { DailyPlanCard } from "@/components/DailyPlanCard";
 import { AnimatedTeacher } from "@/components/AnimatedTeacher";
 import { ListeningMode } from "@/components/ListeningMode";
+import { CelebrationCard } from "@/components/CelebrationCard";
 import type { TeacherState } from "@/components/AnimatedTeacher";
 import { Link } from "wouter";
 import { Star, Trophy, Sparkles, Map, MessageCircle, Lock, CheckCircle2, Mic, Volume2, Video, ChevronRight, ArrowLeft, BookOpen } from "lucide-react";
@@ -13,6 +14,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { useCelebration } from "@/hooks/use-celebration";
 import type { Badge, Child, Mission, UpdateChildBodyAiCharacter } from "@workspace/api-client-react";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { resolveLang } from "@/lib/i18n";
@@ -466,6 +468,9 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
   const gradeLabel = getGradeLabel(child.grade, child.country ?? "");
   const badges = (child.badgesEarned ?? []) as Badge[];
 
+  // Trigger celebrations for new badges, streak milestones, and level-ups
+  const { active: celebrationActive, celebration } = useCelebration(badges, streak, level);
+
   const welcomeMsg = character
     ? lbl.readyAdventure(character.name)
     : lbl.readyAdventureNoChar;
@@ -473,9 +478,11 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
   const charFirstName = character?.name?.split(" ")[1] ?? "AYA";
 
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">
-      <div className="bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 rounded-[2.5rem] border-4 border-yellow-200 shadow-2xl overflow-hidden">
-        <div className="bg-gradient-to-r from-junior/80 to-junior/60 px-8 pt-8 pb-6 text-center">
+    <>
+      <CelebrationCard celebration={celebration} active={celebrationActive} />
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">
+        <div className="bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 rounded-[2.5rem] border-4 border-yellow-200 shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-junior/80 to-junior/60 px-8 pt-8 pb-6 text-center">
           <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}
             className="text-8xl mb-4 drop-shadow-lg leading-none">
             {character?.emoji ?? "🌟"}
@@ -616,6 +623,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
         </div>
       </div>
     </motion.div>
+    </>
   );
 }
 

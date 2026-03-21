@@ -522,7 +522,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
               <div className="flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-orange-400" />
                 <span className="font-bold text-sm">{lbl.levelLabel} {level}</span>
-                {streak > 0 && <span className="text-sm">🔥 {streak} day{streak !== 1 ? 's' : ''}</span>}
+                {streak > 0 && <span className="text-sm font-semibold">🔥 {streak} {streak === 1 ? 'day' : 'days'}</span>}
               </div>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
@@ -538,11 +538,38 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
             </div>
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>{lbl.xpToNextLevel(levelProgress)}</span>
-              {badges.length > 0 && (
-                <span className="flex gap-0.5">{badges.slice(0, 4).map(b => <span key={b.id}>{b.icon}</span>)}{badges.length > 4 && `+${badges.length - 4}`}</span>
-              )}
             </div>
           </div>
+
+          {badges.length > 0 && (
+            <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-4 border-2 border-purple-200 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <Trophy className="w-4 h-4 text-purple-600" />
+                <span className="font-bold text-sm text-purple-900">Badges Unlocked</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {badges.map(badge => (
+                  <motion.div
+                    key={badge.id}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-white rounded-xl p-3 border border-purple-100 text-center shadow-sm"
+                  >
+                    <div className="text-2xl mb-1">{badge.icon}</div>
+                    <div className="text-xs font-semibold text-purple-900 line-clamp-2">{badge.title}</div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {badges.length === 0 && (
+            <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200 text-center">
+              <span className="text-2xl mb-2 block">🎯</span>
+              <p className="text-xs font-medium text-blue-900">Keep learning to unlock badges</p>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 gap-3">
             <motion.button

@@ -58,6 +58,28 @@ function numberToBulgarian(num: number): string {
 }
 
 /**
+ * Transliterate Latin brand names to Bulgarian phonetic form for proper TTS pronunciation
+ * Examples:
+ *   "AYA Panda" -> "Ей Ай Ей Панда"
+ *   "AYA" -> "Ей Ай Ей"
+ */
+const BULGARIAN_BRAND_TRANSLITERATIONS: Record<string, string> = {
+  "AYA Panda": "Ей Ай Ей Панда",
+  "AYA": "Ей Ай Ей",
+};
+
+function transliterateBrandNames(text: string): string {
+  let result = text;
+  // Process longer brand names first to avoid partial replacements
+  const sortedBrands = Object.keys(BULGARIAN_BRAND_TRANSLITERATIONS).sort((a, b) => b.length - a.length);
+  for (const brand of sortedBrands) {
+    const replacement = BULGARIAN_BRAND_TRANSLITERATIONS[brand];
+    result = result.replace(new RegExp(`\\b${brand}\\b`, "gi"), replacement);
+  }
+  return result;
+}
+
+/**
  * Preprocess Bulgarian text to convert math expressions to natural speech
  * Examples:
  *   "0 + 3 = 3" -> "нула плюс три е равно на три"
@@ -72,6 +94,9 @@ export function preprocessBulgarianSpeech(text: string, lang: string): string {
   if (!lang.startsWith("bg")) return text;
   
   let result = text;
+  
+  // First transliterate brand names for proper TTS pronunciation
+  result = transliterateBrandNames(result);
   
   // Pattern: "number operator number = number"
   // Match: 0 + 3 = 3, 4 - 1 = 3, 2 × 5 = 10, 8 ÷ 2 = 4

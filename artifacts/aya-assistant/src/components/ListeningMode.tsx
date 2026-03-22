@@ -3,15 +3,13 @@ import { Volume2, Pause, Play, X, AlertCircle } from "lucide-react";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { preprocessBulgarianSpeech } from "@/lib/bulgarian-speech";
 import { motion, AnimatePresence } from "framer-motion";
-// import { AYAAvatar } from "@/components/AYAAvatar"; // Temporarily disabled to debug mounting issue
 
 interface ListeningModeProps {
   isOpen: boolean;
   onClose: () => void;
   contentToRead: string;
   lang: "en" | "bg" | "es";
-  characterEmoji?: string; // Deprecated: use expression prop instead
-  expression?: "neutral" | "happy" | "thinking" | "encouraging" | "celebrating";
+  characterEmoji?: string;
 }
 
 /**
@@ -106,29 +104,18 @@ export function ListeningMode({
   onClose,
   contentToRead,
   lang,
-  characterEmoji, // Deprecated
-  expression: initialExpression = "neutral",
+  characterEmoji = "🐼",
 }: ListeningModeProps) {
   const lbl = LISTENING_LABELS[lang];
   const { speak, pause, resume, stop, isSpeaking, isPaused, isSupported } =
     useTextToSpeech();
   const [hasContent, setHasContent] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
-  const [expression, setExpression] = useState<"neutral" | "happy" | "thinking" | "encouraging" | "celebrating">(initialExpression);
 
   useEffect(() => {
     const hasText = !!(contentToRead && contentToRead.trim().length > 0);
     setHasContent(hasText);
   }, [contentToRead]);
-
-  // Update expression based on audio state
-  useEffect(() => {
-    if (isSpeaking) {
-      setExpression("happy");
-    } else {
-      setExpression("neutral");
-    }
-  }, [isSpeaking]);
 
   const handleListen = async () => {
     console.log("[LISTEN_CLICK] Button clicked, isSupported:", isSupported);
@@ -252,8 +239,7 @@ export function ListeningMode({
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-border/30">
             <div className="flex items-center gap-3">
-              {/* Temporarily using emoji instead of AYAAvatar while debugging */}
-              <div className="text-4xl">🐼</div>
+              <div className="text-4xl">{characterEmoji}</div>
               <div>
                 <h2 className="font-bold text-lg">{lbl.title}</h2>
                 <p className="text-xs text-muted-foreground">

@@ -3,6 +3,7 @@ import { Volume2, Pause, Play, X, AlertCircle } from "lucide-react";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { preprocessBulgarianSpeech } from "@/lib/bulgarian-speech";
 import { motion, AnimatePresence } from "framer-motion";
+// Future: import { AYAAvatar } from "@/components/AYAAvatar"; for Phase 2 avatar integration
 
 interface ListeningModeProps {
   isOpen: boolean;

@@ -299,6 +299,10 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
               ? "Mira la foto y explica la tarea paso a paso si es lo suficientemente clara."
               : "Look at the photo and explain the task step by step if it is clear enough.");
 
+        const problemsInPrompt = problemsMerged ? (problemsMerged.match(/\n/g) || []).length + 1 : 0;
+        console.log(`[AYA_HOMEWORK] ${requestId} Prompt builder: found ${problemsInPrompt} problems in merged text`);
+        console.log(`[AYA_HOMEWORK] ${requestId} User prompt length: ${userPrompt.length}`);
+
         const validMime = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(imageMimeType)
           ? (imageMimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp")
           : "image/jpeg";
@@ -321,6 +325,10 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
         });
 
         aiContent = completion.choices[0]?.message?.content ?? "";
+        const responseLines = aiContent.split('\n').filter(l => l.length > 0);
+        const emojiCount = (aiContent.match(/[1-9️⃣🔟]/g) || []).length;
+        console.log(`[AYA_HOMEWORK] ${requestId} OpenAI response: ${aiContent.length} chars, ${responseLines.length} lines, ~${emojiCount} emoji problems`);
+        console.log(`[AYA_HOMEWORK] ${requestId} Response content: ${aiContent.substring(0, 200)}...`);
       }
     } catch (error) {
       const lang = getLang(context.language);
@@ -342,10 +350,14 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
     aiContent = getAIResponse(module, cleanContent, context);
   }
 
+  console.log(`[AYA_HOMEWORK] Before DB save: aiContent length = ${aiContent.length}, first 150 chars = "${aiContent.substring(0, 150)}"`);
+
   const [assistantMsg] = await db
     .insert(chatMessagesTable)
     .values({ userId, childId: childId ?? null, module, role: "assistant", content: aiContent })
     .returning();
+
+  console.log(`[AYA_HOMEWORK] After DB save: assistantMsg.content length = ${assistantMsg.content.length}`);
 
   await db.insert(memoriesTable).values({
     userId,
@@ -355,6 +367,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
     module,
   });
 
+  console.log(`[AYA_HOMEWORK] Response being sent: ${assistantMsg.content.length} chars, content: "${assistantMsg.content.substring(0, 150)}"`);
   res.status(201).json({ userMessage: userMsg, assistantMessage: assistantMsg });
 });
 

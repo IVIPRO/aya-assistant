@@ -117,23 +117,29 @@ export function ListeningMode({
   }, [contentToRead]);
 
   const handleListen = () => {
+    console.log("[LISTEN_CLICK] Button clicked, isSupported:", isSupported);
     if (!contentToRead || !contentToRead.trim()) {
+      console.log("[LISTEN_CLICK] No content to read");
       return;
     }
 
     const langCode = LANG_MAP[lang];
+    console.log("[LISTEN_CLICK] langCode:", langCode);
 
     // Step 1: Preprocess Bulgarian math BEFORE cleaning (operators must be intact for regex)
     const preprocessed = preprocessBulgarianSpeech(contentToRead, langCode);
 
     // Step 2: Clean UI noise and decorative text (emojis, labels, UI words)
     const speechText = cleanTextForSpeech(preprocessed);
+    console.log("[LISTEN_CLICK] speechText:", speechText.substring(0, 50), "len:", speechText.length);
 
     // Step 3: Validate — only speak if there's actual content
     if (!speechText || speechText.trim().length < 3) {
+      console.log("[LISTEN_CLICK] Text too short, skipping speak");
       return;
     }
 
+    console.log("[LISTEN_CLICK] Calling speak()");
     speak(speechText, {
       lang: langCode,
       rate: 0.9,

@@ -53,9 +53,15 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
   }, [synth]);
 
   const speak = useCallback((text: string, options?: TextToSpeechOptions) => {
+    console.log("[SPEAK_CALL] text:", text.substring(0, 50), "lang:", options?.lang);
     if (!synth || !text.trim()) {
+      console.warn("[SPEAK_CALL] Skipped - no synth or empty text");
       return;
     }
+
+    // Check voices availability
+    const voices = synth.getVoices();
+    console.log("[SPEAK_VOICES] available:", voices.length);
 
     // Cancel any ongoing speech
     synth.cancel();
@@ -75,23 +81,28 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
       setBulgarianVoice(utterance, utterance.lang);
     }
 
+    console.log("[SPEAK_UTTERANCE] lang:", utterance.lang, "voice:", utterance.voice?.name ?? "DEFAULT", "text_len:", utterance.text.length);
+
     utterance.onstart = () => {
+      console.log("[SPEAK_ONSTART] Speech started");
       setIsSpeaking(true);
       setIsPaused(false);
     };
 
     utterance.onend = () => {
+      console.log("[SPEAK_ONEND] Speech ended");
       setIsSpeaking(false);
       setIsPaused(false);
     };
 
     utterance.onerror = (event) => {
-      console.error("[TTS_ERROR]", event.error);
+      console.error("[SPEAK_ONERROR] Error:", event.error);
       setIsSpeaking(false);
       setIsPaused(false);
     };
 
     utteranceRef.current = utterance;
+    console.log("[SPEAK_CALLING] synth.speak()");
     synth.speak(utterance);
   }, [synth]);
 

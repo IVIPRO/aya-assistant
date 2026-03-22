@@ -23,13 +23,13 @@ const SIZE_MAP: Record<string, { w: string; h: string; px: number }> = {
   lg: { w: "w-40", h: "h-40", px: 160 },
 };
 
-// Map expression to SVG file path
+// Map expression to SVG file path (served from public directory)
 const EXPRESSION_SVG: Record<string, string> = {
-  neutral: "/assets/aya-avatar/aya-neutral.svg",
-  happy: "/assets/aya-avatar/aya-happy.svg",
-  thinking: "/assets/aya-avatar/aya-thinking.svg",
-  encouraging: "/assets/aya-avatar/aya-encouraging.svg",
-  celebrating: "/assets/aya-avatar/aya-celebrating.svg",
+  neutral: "aya-avatar/aya-neutral.svg",
+  happy: "aya-avatar/aya-happy.svg",
+  thinking: "aya-avatar/aya-thinking.svg",
+  encouraging: "aya-avatar/aya-encouraging.svg",
+  celebrating: "aya-avatar/aya-celebrating.svg",
 };
 
 const ANIMATION_VARIANTS = {
@@ -81,7 +81,8 @@ export function AYAAvatar({
   width,
   height,
 }: AYAAvatarProps) {
-  const svgPath = EXPRESSION_SVG[expression] || EXPRESSION_SVG.neutral;
+  const svgRelativePath = EXPRESSION_SVG[expression] || EXPRESSION_SVG.neutral;
+  const svgPath = `${import.meta.env.BASE_URL}${svgRelativePath}`;
   const sizeConfig = SIZE_MAP[size];
   
   // Use custom width/height if provided, otherwise use size map
@@ -103,6 +104,7 @@ export function AYAAvatar({
           alt={`AYA ${expression}`}
           className="w-full h-full object-contain"
           draggable={false}
+          onError={() => console.error(`Failed to load avatar: ${svgPath}`)}
         />
       </motion.div>
     </div>

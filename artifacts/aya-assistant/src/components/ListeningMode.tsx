@@ -3,7 +3,7 @@ import { Volume2, Pause, Play, X, AlertCircle } from "lucide-react";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
 import { preprocessBulgarianSpeech } from "@/lib/bulgarian-speech";
 import { motion, AnimatePresence } from "framer-motion";
-import { AYAAvatar } from "@/components/AYAAvatar";
+// import { AYAAvatar } from "@/components/AYAAvatar"; // Temporarily disabled to debug mounting issue
 
 interface ListeningModeProps {
   isOpen: boolean;
@@ -252,7 +252,8 @@ export function ListeningMode({
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-border/30">
             <div className="flex items-center gap-3">
-              <AYAAvatar size="sm" expression={expression} animated />
+              {/* Temporarily using emoji instead of AYAAvatar while debugging */}
+              <div className="text-4xl">🐼</div>
               <div>
                 <h2 className="font-bold text-lg">{lbl.title}</h2>
                 <p className="text-xs text-muted-foreground">

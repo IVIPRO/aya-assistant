@@ -204,12 +204,100 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
 
         const systemPrompt = buildHomeworkAnalysisPrompt(resolvedLang, resolvedGrade, childName, charKey);
 
-        const userPrompt =
-          resolvedLang === "bg"
-            ? "Погледни снимката и обясни задачата стъпка по стъпка, ако е достатъчно ясна."
-            : resolvedLang === "es"
-            ? "Mira la foto y explica la tarea paso a paso si es lo suficientemente clara."
-            : "Look at the photo and explain the task step by step if it is clear enough.";
+        // Extract problems from left and right columns using split logic
+        let leftProblems = "";
+        let rightProblems = "";
+        let problemsMerged = "";
+
+        try {
+          console.log(`[AYA_HOMEWORK] ${requestId} Stage 2: Splitting image for 2-column detection...`);
+          const sharp = await import("sharp");
+          const buffer = Buffer.from(imageBase64, "base64");
+          const image = sharp.default(buffer);
+          const metadata = await image.metadata();
+          
+          if (metadata.width) {
+            const halfWidth = Math.floor(metadata.width / 2);
+            console.log(`[AYA_HOMEWORK] ${requestId} Image width: ${metadata.width}, half: ${halfWidth}`);
+            
+            // Extract left half
+            const leftBuffer = await sharp.default(buffer)
+              .extract({ left: 0, top: 0, width: halfWidth, height: metadata.height || 0 })
+              .toBuffer();
+            const leftBase64 = leftBuffer.toString("base64");
+            
+            // Extract right half
+            const rightBuffer = await sharp.default(buffer)
+              .extract({ left: halfWidth, top: 0, width: metadata.width - halfWidth, height: metadata.height || 0 })
+              .toBuffer();
+            const rightBase64 = rightBuffer.toString("base64");
+            
+            const validMime = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(imageMimeType)
+              ? (imageMimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp")
+              : "image/jpeg";
+
+            // Extract problems from left column
+            console.log(`[AYA_HOMEWORK] ${requestId} Extracting problems from LEFT column...`);
+            const leftCompletion = await getOpenAIClient().chat.completions.create({
+              model: "gpt-5.2",
+              max_completion_tokens: 512,
+              messages: [
+                { role: "system", content: systemPrompt },
+                {
+                  role: "user",
+                  content: [
+                    { type: "text", text: "Extract ALL math problems from this LEFT column. List each problem exactly as written, including the equals sign and answer if visible." },
+                    { type: "image_url", image_url: { url: `data:${validMime};base64,${leftBase64}`, detail: "high" } },
+                  ],
+                },
+              ],
+            });
+            leftProblems = leftCompletion.choices[0]?.message?.content ?? "";
+            const leftCount = (leftProblems.match(/\n/g) || []).length + 1;
+            console.log(`[AYA_HOMEWORK] ${requestId} LEFT column: ${leftCount} problems detected`);
+
+            // Extract problems from right column
+            console.log(`[AYA_HOMEWORK] ${requestId} Extracting problems from RIGHT column...`);
+            const rightCompletion = await getOpenAIClient().chat.completions.create({
+              model: "gpt-5.2",
+              max_completion_tokens: 512,
+              messages: [
+                { role: "system", content: systemPrompt },
+                {
+                  role: "user",
+                  content: [
+                    { type: "text", text: "Extract ALL math problems from this RIGHT column. List each problem exactly as written, including the equals sign and answer if visible." },
+                    { type: "image_url", image_url: { url: `data:${validMime};base64,${rightBase64}`, detail: "high" } },
+                  ],
+                },
+              ],
+            });
+            rightProblems = rightCompletion.choices[0]?.message?.content ?? "";
+            const rightCount = (rightProblems.match(/\n/g) || []).length + 1;
+            console.log(`[AYA_HOMEWORK] ${requestId} RIGHT column: ${rightCount} problems detected`);
+            
+            // Merge: left column first, then right column
+            problemsMerged = (leftProblems + "\n" + rightProblems).trim();
+            console.log(`[AYA_HOMEWORK] ${requestId} MERGED: LEFT + RIGHT = ${leftCount + rightCount} total problems`);
+          }
+        } catch (splitErr) {
+          console.error(`[AYA_HOMEWORK] ${requestId} Image splitting failed:`, splitErr);
+          console.log(`[AYA_HOMEWORK] ${requestId} Falling back to single full-image processing...`);
+          problemsMerged = "";
+        }
+
+        // Final explanation using merged or full image
+        const userPrompt = problemsMerged
+          ? (resolvedLang === "bg"
+              ? `Ево всички задачи от домашното (ляво + дясно):\n${problemsMerged}\n\nОбясни всяка задача стъпка по стъпка.`
+              : resolvedLang === "es"
+              ? `Aquí están todos los problemas de la tarea (izquierda + derecha):\n${problemsMerged}\n\nExplica cada problema paso a paso.`
+              : `Here are all the homework problems (left + right):\n${problemsMerged}\n\nExplain each problem step by step.`)
+          : (resolvedLang === "bg"
+              ? "Погледни снимката и обясни задачата стъпка по стъпка, ако е достатъчно ясна."
+              : resolvedLang === "es"
+              ? "Mira la foto y explica la tarea paso a paso si es lo suficientemente clara."
+              : "Look at the photo and explain the task step by step if it is clear enough.");
 
         const validMime = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(imageMimeType)
           ? (imageMimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp")
@@ -217,15 +305,17 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
 
         const completion = await getOpenAIClient().chat.completions.create({
           model: "gpt-5.2",
-          max_completion_tokens: 1024,
+          max_completion_tokens: 2048,
           messages: [
             { role: "system", content: systemPrompt },
             {
               role: "user",
-              content: [
-                { type: "text", text: userPrompt },
-                { type: "image_url", image_url: { url: `data:${validMime};base64,${imageBase64}`, detail: "high" } },
-              ],
+              content: problemsMerged 
+                ? userPrompt
+                : [
+                    { type: "text", text: userPrompt },
+                    { type: "image_url", image_url: { url: `data:${validMime};base64,${imageBase64}`, detail: "high" } },
+                  ],
             },
           ],
         });

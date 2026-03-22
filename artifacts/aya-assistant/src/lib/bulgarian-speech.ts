@@ -140,9 +140,9 @@ export function preprocessBulgarianSpeech(text: string, lang: string): string {
 
 /**
  * Get the best Bulgarian voice from available voices
- * Tries multiple strategies to find a Bulgarian voice:
- * 1. Exact match: bg-BG
- * 2. Prefix match: bg-*
+ * Preference order:
+ * 1. Female Bulgarian voice (Kalina or "female" in name)
+ * 2. Any Bulgarian voice (bg-*)
  * 3. Voice name contains "Bulgarian"
  * 4. Returns undefined to let OS select based on lang attribute
  */
@@ -154,21 +154,24 @@ export function getBulgarianVoice(): SpeechSynthesisVoice | undefined {
   const voices = window.speechSynthesis.getVoices();
   console.log("[BG_VOICE_SELECTION] Total voices available:", voices.length);
   
-  // Strategy 1: Find exact bg-BG match
-  const bgBgVoice = voices.find(v => v.lang === "bg-BG");
-  if (bgBgVoice) {
-    console.log("[BG_VOICE_SELECTION] Selected bg-BG voice:", bgBgVoice.name);
-    return bgBgVoice;
+  // Strategy 1: Prefer female Bulgarian voice (Kalina or "female" in name)
+  const bgVoices = voices.filter(v => v.lang.startsWith("bg"));
+  if (bgVoices.length > 0) {
+    const femaleBgVoice = bgVoices.find(v => 
+      v.name.toLowerCase().includes("kalina") || 
+      v.name.toLowerCase().includes("female")
+    );
+    if (femaleBgVoice) {
+      console.log("[BG_VOICE_SELECTION] Selected female Bulgarian voice:", femaleBgVoice.name, "lang:", femaleBgVoice.lang);
+      return femaleBgVoice;
+    }
+    
+    // Fallback: Select first bg-* voice
+    console.log("[BG_VOICE_SELECTION] Selected bg-* voice:", bgVoices[0].name, "lang:", bgVoices[0].lang);
+    return bgVoices[0];
   }
   
-  // Strategy 2: Find any voice with bg- prefix
-  const anyBgVoice = voices.find(v => v.lang.startsWith("bg"));
-  if (anyBgVoice) {
-    console.log("[BG_VOICE_SELECTION] Selected bg-* voice:", anyBgVoice.name, "lang:", anyBgVoice.lang);
-    return anyBgVoice;
-  }
-  
-  // Strategy 3: Look for "Bulgarian" in voice name (case-insensitive)
+  // Strategy 2: Look for "Bulgarian" in voice name (case-insensitive)
   const bgNameVoice = voices.find(v => v.name.toLowerCase().includes("bulgarian"));
   if (bgNameVoice) {
     console.log("[BG_VOICE_SELECTION] Selected Bulgarian-named voice:", bgNameVoice.name, "lang:", bgNameVoice.lang);

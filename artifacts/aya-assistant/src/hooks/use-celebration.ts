@@ -76,7 +76,6 @@ export function useCelebration(
       }, CELEBRATION_DURATION);
       return () => clearTimeout(timer);
     }
-    return;
   }, [badges, streak, level, active, celebration]);
 
   return { active, celebration };

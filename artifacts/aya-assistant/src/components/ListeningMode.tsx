@@ -110,13 +110,14 @@ export function ListeningMode({
   const { speak, pause, resume, stop, isSpeaking, isPaused, isSupported } =
     useTextToSpeech();
   const [hasContent, setHasContent] = useState(false);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const hasText = !!(contentToRead && contentToRead.trim().length > 0);
     setHasContent(hasText);
   }, [contentToRead]);
 
-  const handleListen = () => {
+  const handleListen = async () => {
     console.log("[LISTEN_CLICK] Button clicked, isSupported:", isSupported);
     if (!contentToRead || !contentToRead.trim()) {
       console.log("[LISTEN_CLICK] No content to read");
@@ -139,13 +140,70 @@ export function ListeningMode({
       return;
     }
 
-    console.log("[LISTEN_CLICK] Calling speak()");
+    // Step 4: Try server-side TTS first
+    const success = await tryServerTTS(speechText);
+    if (success) {
+      console.log("[LISTEN_CLICK] Server TTS succeeded");
+      return;
+    }
+
+    // Step 5: Fallback to browser speech
+    console.log("[LISTEN_CLICK] Server TTS failed, falling back to browser speech");
     speak(speechText, {
       lang: langCode,
       rate: 0.9,
       pitch: 1,
       volume: 1,
     });
+  };
+
+  const tryServerTTS = async (text: string): Promise<boolean> => {
+    try {
+      console.log("[TTS_API] Calling /api/tts/aya");
+      const response = await fetch("/api/tts/aya", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) {
+        console.log("[TTS_API] Server returned", response.status);
+        return false;
+      }
+
+      // Stop any existing audio
+      if (audioElement) {
+        audioElement.pause();
+        audioElement.currentTime = 0;
+      }
+
+      const blob = await response.blob();
+      console.log("[TTS_API] Audio blob received:", blob.size, "bytes");
+      
+      const url = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audio.onplay = () => {
+        console.log("[TTS_AUDIO] Audio playback started");
+      };
+      audio.onended = () => {
+        console.log("[TTS_AUDIO] Audio playback ended");
+        URL.revokeObjectURL(url);
+      };
+      audio.onerror = (e) => {
+        console.log("[TTS_AUDIO] Audio error:", e);
+        URL.revokeObjectURL(url);
+      };
+
+      setAudioElement(audio);
+      audio.play().catch((err) => {
+        console.log("[TTS_AUDIO] Failed to play:", err);
+      });
+
+      return true;
+    } catch (error) {
+      console.log("[TTS_API] Error:", error instanceof Error ? error.message : String(error));
+      return false;
+    }
   };
 
   const handleStop = () => {

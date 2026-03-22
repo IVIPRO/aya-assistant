@@ -1,4 +1,5 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useEffect } from "react";
+import { setBulgarianVoice } from "@/lib/bulgarian-speech";
 
 export interface TextToSpeechOptions {
   rate?: number;
@@ -21,15 +22,46 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const voicesLoadedRef = useRef(false);
   const synth = typeof window !== "undefined" ? window.speechSynthesis : null;
 
   const isSupported = synth !== null;
 
+  // Ensure voices are loaded on desktop Chrome before first speak() call
+  useEffect(() => {
+    if (!synth) return;
+    
+    // Force voices to load by calling getVoices()
+    synth.getVoices();
+    
+    // Listen for voiceschanged event (desktop Chrome) 
+    const handleVoicesChanged = () => {
+      voicesLoadedRef.current = true;
+      synth.getVoices(); // Cache voices after load
+    };
+    
+    synth.addEventListener("voiceschanged", handleVoicesChanged);
+    
+    // Try calling immediately in case voices are already loaded
+    if (synth.getVoices().length > 0) {
+      voicesLoadedRef.current = true;
+    }
+    
+    return () => {
+      synth.removeEventListener("voiceschanged", handleVoicesChanged);
+    };
+  }, [synth]);
+
   const speak = useCallback((text: string, options?: TextToSpeechOptions) => {
+    console.log("[SPEAK_CALL] text:", text.substring(0, 50), "lang:", options?.lang);
     if (!synth || !text.trim()) {
-      console.warn("[TTS_SPEAK_INVALID] No synth or empty text");
+      console.warn("[SPEAK_CALL] Skipped - no synth or empty text");
       return;
     }
+
+    // Check voices availability
+    const voices = synth.getVoices();
+    console.log("[SPEAK_VOICES] available:", voices.length);
 
     // Cancel any ongoing speech
     synth.cancel();
@@ -44,23 +76,33 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
     // Default to en-US if not provided
     utterance.lang = options?.lang ?? "en-US";
 
+    // Apply Bulgarian voice selection if language is Bulgarian
+    if (utterance.lang.startsWith("bg")) {
+      setBulgarianVoice(utterance, utterance.lang);
+    }
+
+    console.log("[SPEAK_UTTERANCE] lang:", utterance.lang, "voice:", utterance.voice?.name ?? "DEFAULT", "text_len:", utterance.text.length);
+
     utterance.onstart = () => {
+      console.log("[SPEAK_ONSTART] Speech started");
       setIsSpeaking(true);
       setIsPaused(false);
     };
 
     utterance.onend = () => {
+      console.log("[SPEAK_ONEND] Speech ended");
       setIsSpeaking(false);
       setIsPaused(false);
     };
 
     utterance.onerror = (event) => {
-      console.error("[TTS_ONERROR] " + event.error);
+      console.error("[SPEAK_ONERROR] Error:", event.error);
       setIsSpeaking(false);
       setIsPaused(false);
     };
 
     utteranceRef.current = utterance;
+    console.log("[SPEAK_CALLING] synth.speak()");
     synth.speak(utterance);
   }, [synth]);
 

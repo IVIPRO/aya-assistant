@@ -1,0 +1,102 @@
+Implement OpenAI-based server-side Text-to-Speech for AYA Listening Mode.
+
+Stay in Lite mode.
+Do NOT switch to Autonomous Agent.
+Do NOT redesign UI.
+Do NOT remove the current browser speech fallback.
+Do NOT modify login/auth.
+Do NOT refactor unrelated code.
+
+GOAL
+Add a new AYA server-side TTS path so Listening Mode can use a consistent AI female voice on desktop and mobile, independent of Windows/browser voices.
+
+ARCHITECTURE
+- Frontend sends the text to backend
+- Backend calls OpenAI text-to-speech
+- Backend returns mp3 audio
+- Frontend plays the returned audio
+- Keep current browser speech as fallback if API fails
+
+IMPLEMENT ONLY
+
+A. Backend route
+Create a new backend route, e.g.
+- POST /api/tts/aya
+
+Request body:
+{
+  text: string,
+  mode?: "junior" | "student" | "family" | "psychology"
+}
+
+Behavior:
+- validate text
+- trim and limit very large inputs safely
+- call OpenAI TTS
+- return audio/mpeg buffer
+
+Use environment variable:
+- OPENAI_API_KEY
+
+Use a female-friendly voice for default AYA playback.
+Prefer a voice config constant so we can later map:
+- junior -> softer female
+- family -> warm female
+- psychology -> calmer female
+
+For now use one consistent default female voice.
+
+B. Backend implementation details
+- isolate OpenAI TTS logic in a helper file
+- add basic error handling
+- log only safe diagnostics
+- never expose OPENAI_API_KEY to frontend
+
+C. Frontend Listening Mode integration
+In Listening Mode:
+- when user clicks “Слушай”, first try server-side OpenAI TTS
+- if success: play returned mp3/audio
+- if failure: fallback to existing browser speech path
+
+Requirements:
+- preserve existing modal/UI
+- preserve existing "AYA чете..." state
+- state must reflect actual audio play lifecycle
+- stop previous audio before starting a new one
+- allow replay cleanly
+
+D. Audio playback behavior
+- create audio blob/object URL
+- play it
+- clear object URL after playback
+- support onplay / onended / onerror state updates
+
+E. Safety / scope
+- frontend + backend only
+- no DB changes
+- no OpenAPI redesign unless required by current architecture
+- no unrelated refactors
+
+F. Tests
+Add focused tests if feasible:
+1. backend rejects empty text
+2. backend route calls TTS helper
+3. frontend uses server TTS first
+4. frontend falls back to browser speech if server TTS fails
+5. playback state resets on end/error
+
+STOP AFTER
+- backend TTS route added
+- frontend wired to use it
+- browser fallback preserved
+- build runs cleanly
+
+OUTPUT FORMAT
+At the end report only:
+1. files changed
+2. route added
+3. helper added
+4. frontend flow added
+5. fallback behavior
+6. tests added and passing count
+7. required env vars

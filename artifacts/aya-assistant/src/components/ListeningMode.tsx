@@ -1,6 +1,7 @@
 import { useEffect, useState, ReactNode } from "react";
 import { Volume2, Pause, Play, X, AlertCircle } from "lucide-react";
 import { useTextToSpeech } from "@/hooks/useTextToSpeech";
+import { preprocessBulgarianSpeech } from "@/lib/bulgarian-speech";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface ListeningModeProps {
@@ -20,20 +21,21 @@ function cleanTextForSpeech(text: string): string {
   
   let cleaned = text;
   
-  // Remove common UI labels/markers that shouldn't be spoken
+  // Remove UI labels and decorative text that shouldn't be spoken
   cleaned = cleaned
     .replace(/\bAYA\s+\d+\b/gi, "") // Remove "AYA 2", "AYA 3", etc.
     .replace(/\bAYA\s+(Panda|Robot|Fox|Owl)\b/gi, "") // Remove "AYA Panda", etc.
     .replace(/^\s*\[.*?\]\s*/g, "") // Remove labels like [LABEL]
-    .replace(/^(read|listen|say|speak):\s*/gi, ""); // Remove "read:", "listen:", etc.
+    .replace(/^(read|listen|say|speak):\s*/gi, "") // Remove "read:", "listen:", etc.
+    .replace(/\b(интерфейс|interface|interface|zero|equal|minus|star|stars|hearts?|hearts?|badges?|badges?)\b/gi, ""); // Remove common UI words
   
-  // Remove emojis and other non-text characters
+  // Remove emojis, symbols, and decoration
   cleaned = cleaned
     .replace(/[\u{1F300}-\u{1F9FF}]/gu, "") // Emoji ranges
     .replace(/[\u{2600}-\u{27BF}]/gu, "") // Miscellaneous symbols
     .replace(/[\u{1F900}-\u{1F9FF}]/gu, "") // Supplemental symbols and pictographs
     .replace(/[\u{2300}-\u{23FF}]/gu, "") // Miscellaneous technical
-    .replace(/[\u{2000}-\u{206F}]/gu, "") // General punctuation (but keep some)
+    .replace(/[\u{2000}-\u{206F}]/gu, "") // General punctuation (keep some)
     .replace(/[^\p{L}\p{N}\s.,!?;:—–-]/gu, "") // Keep only letters, numbers, and basic punctuation
     .replace(/\s+/g, " ") // Collapse multiple spaces
     .trim();
@@ -115,43 +117,31 @@ export function ListeningMode({
   }, [contentToRead]);
 
   const handleListen = () => {
-    // ═══════════════════════════════════════════════════════════════════════
-    // EXPLICIT SPEECH TEXT: Build from actual message data source, not DOM
-    // ═══════════════════════════════════════════════════════════════════════
-    
-    // Step 1: Use explicit speechText from the message data prop (contentToRead)
-    // This is the source of truth - NOT from DOM, NOT from aria-labels, NOT from headers
-    let speechText = "";
-    
-    if (contentToRead && contentToRead.trim().length > 0) {
-      // Clean the text to remove emojis and special characters
-      speechText = cleanTextForSpeech(contentToRead);
-    }
-    
-    console.log("[SPEECH_TEXT_RAW] '" + contentToRead + "'");
-    console.log("[SPEECH_TEXT_RAW_LENGTH] " + contentToRead.length + " chars");
-    console.log("[SPEECH_TEXT_CLEANED] '" + speechText + "'");
-    console.log("[SPEECH_TEXT_CLEANED_LENGTH] " + speechText.length + " chars");
-    
-    // Step 2: Validate - do not speak if text is too short or empty
-    if (!speechText || speechText.trim().length === 0) {
-      console.warn("[SPEECH_TEXT_INVALID] No valid text to speak");
+    console.log("[LISTEN_CLICK] Button clicked, isSupported:", isSupported);
+    if (!contentToRead || !contentToRead.trim()) {
+      console.log("[LISTEN_CLICK] No content to read");
       return;
     }
-    
-    // Step 3: Block speech if text is suspiciously short (likely a label like "AYA 2")
-    if (speechText.length < 10) {
-      console.error("[LISTENING_INVALID_TEXT_BLOCKED] Text too short (" + speechText.length + " chars): '" + speechText + "' — NOT speaking");
+
+    const langCode = LANG_MAP[lang];
+    console.log("[LISTEN_CLICK] langCode:", langCode);
+
+    // Step 1: Preprocess Bulgarian math BEFORE cleaning (operators must be intact for regex)
+    const preprocessed = preprocessBulgarianSpeech(contentToRead, langCode);
+
+    // Step 2: Clean UI noise and decorative text (emojis, labels, UI words)
+    const speechText = cleanTextForSpeech(preprocessed);
+    console.log("[LISTEN_CLICK] speechText:", speechText.substring(0, 50), "len:", speechText.length);
+
+    // Step 3: Validate — only speak if there's actual content
+    if (!speechText || speechText.trim().length < 3) {
+      console.log("[LISTEN_CLICK] Text too short, skipping speak");
       return;
     }
-    
-    // Step 4: Final explicit speech text - ONLY from the message data
-    console.log("[SPEECH_TEXT_EXPLICIT] '" + speechText + "'");
-    console.log("[SPEECH_TEXT_LANG] " + LANG_MAP[lang]);
-    
-    // Step 5: Speak ONLY this explicit text with forced Bulgarian language if needed
+
+    console.log("[LISTEN_CLICK] Calling speak()");
     speak(speechText, {
-      lang: LANG_MAP[lang],
+      lang: langCode,
       rate: 0.9,
       pitch: 1,
       volume: 1,

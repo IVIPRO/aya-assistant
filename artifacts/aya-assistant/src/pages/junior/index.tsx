@@ -4,6 +4,7 @@ import { SubjectPanel } from "./subjects";
 import { DailyPlanCard } from "@/components/DailyPlanCard";
 import { AnimatedTeacher } from "@/components/AnimatedTeacher";
 import { ListeningMode } from "@/components/ListeningMode";
+import { CelebrationCard } from "@/components/CelebrationCard";
 import type { TeacherState } from "@/components/AnimatedTeacher";
 import { Link } from "wouter";
 import { Star, Trophy, Sparkles, Map, MessageCircle, Lock, CheckCircle2, Mic, Volume2, Video, ChevronRight, ArrowLeft, BookOpen } from "lucide-react";
@@ -13,6 +14,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { useCelebration } from "@/hooks/use-celebration";
 import type { Badge, Child, Mission, UpdateChildBodyAiCharacter } from "@workspace/api-client-react";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { resolveLang } from "@/lib/i18n";
@@ -466,6 +468,9 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
   const gradeLabel = getGradeLabel(child.grade, child.country ?? "");
   const badges = (child.badgesEarned ?? []) as Badge[];
 
+  // Trigger celebrations for new badges, streak milestones, and level-ups
+  const { active: celebrationActive, celebration } = useCelebration(badges, streak, level);
+
   const welcomeMsg = character
     ? lbl.readyAdventure(character.name)
     : lbl.readyAdventureNoChar;
@@ -473,9 +478,11 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
   const charFirstName = character?.name?.split(" ")[1] ?? "AYA";
 
   return (
-    <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">
-      <div className="bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 rounded-[2.5rem] border-4 border-yellow-200 shadow-2xl overflow-hidden">
-        <div className="bg-gradient-to-r from-junior/80 to-junior/60 px-8 pt-8 pb-6 text-center">
+    <>
+      <CelebrationCard celebration={celebration} active={celebrationActive} />
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">
+        <div className="bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 rounded-[2.5rem] border-4 border-yellow-200 shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-junior/80 to-junior/60 px-8 pt-8 pb-6 text-center">
           <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}
             className="text-8xl mb-4 drop-shadow-lg leading-none">
             {character?.emoji ?? "🌟"}
@@ -522,7 +529,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
               <div className="flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-orange-400" />
                 <span className="font-bold text-sm">{lbl.levelLabel} {level}</span>
-                {streak > 0 && <span className="text-sm">🔥 {streak} day{streak !== 1 ? 's' : ''}</span>}
+                {streak > 0 && <span className="text-sm font-semibold">🔥 {streak} {streak === 1 ? 'day' : 'days'}</span>}
               </div>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">
@@ -538,11 +545,38 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
             </div>
             <div className="flex justify-between text-xs text-muted-foreground mt-1">
               <span>{lbl.xpToNextLevel(levelProgress)}</span>
-              {badges.length > 0 && (
-                <span className="flex gap-0.5">{badges.slice(0, 4).map(b => <span key={b.id}>{b.icon}</span>)}{badges.length > 4 && `+${badges.length - 4}`}</span>
-              )}
             </div>
           </div>
+
+          {badges.length > 0 && (
+            <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-4 border-2 border-purple-200 shadow-sm">
+              <div className="flex items-center gap-2 mb-3">
+                <Trophy className="w-4 h-4 text-purple-600" />
+                <span className="font-bold text-sm text-purple-900">Badges Unlocked</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                {badges.map(badge => (
+                  <motion.div
+                    key={badge.id}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    whileHover={{ scale: 1.05 }}
+                    className="bg-white rounded-xl p-3 border border-purple-100 text-center shadow-sm"
+                  >
+                    <div className="text-2xl mb-1">{badge.icon}</div>
+                    <div className="text-xs font-semibold text-purple-900 line-clamp-2">{badge.title}</div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {badges.length === 0 && (
+            <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200 text-center">
+              <span className="text-2xl mb-2 block">🎯</span>
+              <p className="text-xs font-medium text-blue-900">Keep learning to unlock badges</p>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 gap-3">
             <motion.button
@@ -589,6 +623,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
         </div>
       </div>
     </motion.div>
+    </>
   );
 }
 

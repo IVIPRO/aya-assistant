@@ -217,7 +217,17 @@ function TaskRow({
     <motion.div
       layout
       initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
+      animate={{ 
+        opacity: 1, 
+        y: 0,
+        ...(isDone ? { backgroundColor: "#dcfce7", scale: [1, 1.02, 1] } : {})
+      }}
+      transition={{ 
+        type: "spring",
+        stiffness: 200,
+        damping: 25,
+        duration: 0.4
+      }}
       className={`flex items-center gap-3 rounded-xl p-3 border transition-colors ${
         isDone
           ? "bg-green-50 border-green-200"
@@ -254,9 +264,11 @@ function TaskRow({
         </div>
       </div>
 
-      <button
+      <motion.button
         disabled={isDone || isPending}
         onClick={handleStart}
+        animate={isDone ? { scale: [1, 1.15, 1] } : {}}
+        transition={{ duration: 0.5, delay: 0.1 }}
         className={`flex-shrink-0 flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors ${
           isDone
             ? "bg-green-100 text-green-700 cursor-default"
@@ -269,7 +281,12 @@ function TaskRow({
           <Loader2 className="w-3.5 h-3.5 animate-spin" />
         ) : isDone ? (
           <>
-            <CheckCircle2 className="w-3.5 h-3.5" />
+            <motion.div
+              animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 0.6, delay: 0.05 }}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+            </motion.div>
             {i18n.completedBtn}
           </>
         ) : (
@@ -278,7 +295,7 @@ function TaskRow({
             {i18n.start}
           </>
         )}
-      </button>
+      </motion.button>
     </motion.div>
   );
 }

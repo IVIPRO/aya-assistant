@@ -14,11 +14,10 @@ import { detectWeakTopics } from "../lib/weaknessDetection";
 import { buildWeeklyInsights } from "../lib/weeklyInsights";
 import { buildTeacherExport } from "../lib/teacherExport";
 import {
-  calculateDailyStreak,
-  evaluateNewBadges,
-  generateCompletionCelebration,
+  calculateStreakFromProgress,
+  getEligibleBadges,
   formatStreakDisplay,
-} from "../lib/gamificationSystem";
+} from "../lib/gamificationHelpers";
 
 const router: IRouter = Router();
 
@@ -177,15 +176,15 @@ router.post("/learning/complete", requireAuth, async (req, res): Promise<void> =
   const newBadges = evaluateLessonBadges(badgeStats, existingBadges);
 
   /* ── Gamification: Daily Streak & Achievement Badges ────────────── */
-  const dailyStreak = calculateDailyStreak(recentActivity.map((r) => new Date(r.createdAt)));
+  const dailyStreak = calculateStreakFromProgress(recentActivity.map((r) => new Date(r.createdAt)));
   const lessonsCompleted = allTopicProgress.filter(t => t.lessonDone).length;
-  const gamificationBadges = evaluateNewBadges(dailyStreak, lessonsCompleted, existingBadges);
-  const celebration = generateCompletionCelebration(
-    child.name,
-    xpGained,
-    dailyStreak,
-    child.aiCharacter ?? "panda"
-  );
+  const gamificationBadges = getEligibleBadges(lessonsCompleted, dailyStreak)
+    .map(badge => ({
+      id: badge.id,
+      title: badge.title,
+      icon: badge.icon,
+      earnedAt: new Date(),
+    } as BadgeRecord));
   const streakDisplay = formatStreakDisplay(dailyStreak);
 
   const mergedBadges: BadgeRecord[] = [...existingBadges, ...newBadges, ...gamificationBadges];

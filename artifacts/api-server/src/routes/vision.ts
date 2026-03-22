@@ -3,8 +3,70 @@ import { db, childrenTable, progressTable } from "@workspace/db";
 import { eq, and, gte } from "drizzle-orm";
 import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
 import OpenAI from "openai";
+import sharp from "sharp";
 
 const router: IRouter = Router();
+
+/**
+ * Split a base64 image into left and right halves
+ * Returns [leftBase64, rightBase64]
+ */
+async function splitImageVertically(base64Image: string, mimeType: string): Promise<[string, string]> {
+  const buffer = Buffer.from(base64Image, "base64");
+  const image = sharp(buffer);
+  const metadata = await image.metadata();
+  
+  if (!metadata.width) throw new Error("Could not determine image width");
+  
+  const halfWidth = Math.floor(metadata.width / 2);
+  
+  // Extract left half
+  const leftBuffer = await sharp(buffer)
+    .extract({ left: 0, top: 0, width: halfWidth, height: metadata.height || 0 })
+    .toBuffer();
+  
+  // Extract right half
+  const rightBuffer = await sharp(buffer)
+    .extract({ left: halfWidth, top: 0, width: metadata.width - halfWidth, height: metadata.height || 0 })
+    .toBuffer();
+  
+  return [
+    leftBuffer.toString("base64"),
+    rightBuffer.toString("base64"),
+  ];
+}
+
+/**
+ * Send image half to OpenAI vision API and extract problems
+ */
+async function extractProblemsFromImage(
+  openai: OpenAI,
+  base64Image: string,
+  mimeType: string,
+  systemPrompt: string,
+  columnLabel: string,
+): Promise<string> {
+  const validMime = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(mimeType)
+    ? (mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp")
+    : "image/jpeg";
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-5.2",
+    max_completion_tokens: 512,
+    messages: [
+      { role: "system", content: systemPrompt },
+      {
+        role: "user",
+        content: [
+          { type: "text", text: `Extract ALL math problems from this ${columnLabel} column. List each problem exactly as written, including the equals sign and answer if visible.` },
+          { type: "image_url", image_url: { url: `data:${validMime};base64,${base64Image}`, detail: "high" } },
+        ],
+      },
+    ],
+  });
+
+  return completion.choices[0]?.message?.content ?? "";
+}
 
 function getOpenAIClient() {
   const baseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
@@ -119,13 +181,6 @@ router.post("/vision/homework", requireAuth, async (req, res): Promise<void> => 
 
   const systemPrompt = buildHomeworkSystemPrompt(resolvedLang, resolvedGrade, childName, charKey);
 
-  const userPrompt =
-    resolvedLang === "bg"
-      ? "Погледни снимката на домашното и обясни задачата стъпка по стъпка."
-      : resolvedLang === "es"
-      ? "Mira la foto de la tarea y explica el problema paso a paso."
-      : "Look at the homework photo and explain the problem step by step.";
-
   let openai: OpenAI;
   try {
     openai = getOpenAIClient();
@@ -134,21 +189,49 @@ router.post("/vision/homework", requireAuth, async (req, res): Promise<void> => 
     return;
   }
 
-  const validMime = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(mimeType)
-    ? (mimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp")
-    : "image/jpeg";
+  // Split image into left and right halves for two-column homework detection
+  let leftProblems = "";
+  let rightProblems = "";
+  
+  try {
+    const [leftBase64, rightBase64] = await splitImageVertically(image, mimeType);
+    
+    // Extract problems from left column
+    leftProblems = await extractProblemsFromImage(openai, leftBase64, mimeType, systemPrompt, "LEFT");
+    
+    // Extract problems from right column
+    rightProblems = await extractProblemsFromImage(openai, rightBase64, mimeType, systemPrompt, "RIGHT");
+  } catch (splitErr) {
+    console.error("Image splitting failed, falling back to full image:", splitErr);
+  }
+
+  // Merge problems: left column first, then right column
+  const mergedProblems = (leftProblems + "\n" + rightProblems).trim();
+
+  const userPrompt =
+    resolvedLang === "bg"
+      ? `Ево всички задачи от домашното (ляво + дясно):
+${mergedProblems}
+
+Обясни всяка задача стъпка по стъпка.`
+      : resolvedLang === "es"
+      ? `Aquí están todos los problemas de la tarea (izquierda + derecha):
+${mergedProblems}
+
+Explica cada problema paso a paso.`
+      : `Here are all the homework problems (left + right):
+${mergedProblems}
+
+Explain each problem step by step.`;
 
   const completion = await openai.chat.completions.create({
     model: "gpt-5.2",
-    max_completion_tokens: 1024,
+    max_completion_tokens: 2048,
     messages: [
       { role: "system", content: systemPrompt },
       {
         role: "user",
-        content: [
-          { type: "text", text: userPrompt },
-          { type: "image_url", image_url: { url: `data:${validMime};base64,${image}`, detail: "high" } },
-        ],
+        content: userPrompt,
       },
     ],
   });

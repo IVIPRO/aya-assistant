@@ -1,0 +1,82 @@
+Task: Fix AYA “Домашно от снимка” so it correctly reads and solves ALL math problems from a homework photo, including when the photo contains TWO COLUMNS.
+
+IMPORTANT RULES:
+- Use Lite mode only.
+- Do NOT switch to Agent.
+- Keep the change narrow and low-cost.
+- Use the NEW Replit interface assumptions only.
+- Do NOT touch auth, database schema, parent dashboard, TTS, styling, routing, workflows, or unrelated features.
+- Do NOT break existing working features.
+- Do NOT change visible UI text unless absolutely necessary.
+- After code changes, if deployment is needed, do not auto-run broad changes. Keep it minimal.
+
+Current problem:
+AYA currently solves only 6 out of 10 problems from a homework image and often ignores the right column. This means the Vision flow is only reading part of the image.
+
+Goal:
+When a homework image contains two columns, AYA must:
+1. Read the LEFT column from top to bottom
+2. Read the RIGHT column from top to bottom
+3. Merge both results into the correct full ordered list
+4. Solve all detected problems
+5. Return the solutions in the same order as written on the page
+
+Required implementation:
+1. In the homework-image vision flow, split the uploaded image into two vertical halves:
+   - left half
+   - right half
+2. Send each half separately through the existing vision extraction flow
+3. Extract math problems from each half
+4. Merge them in this exact order:
+   - all problems from LEFT half first
+   - then all problems from RIGHT half
+5. Solve the merged list
+6. Return the final results in order
+
+Technical requirements:
+- Prefer using `sharp` for image splitting if already available.
+- If `sharp` is missing, add only that dependency and nothing else.
+- Keep code small and localized.
+- Reuse the current homework/photo processing pipeline as much as possible.
+- Preserve current Montessori / AYA Panda behavior.
+- Keep current Bulgarian response style.
+
+Vision extraction prompt requirements:
+Update the internal image-solving prompt so it explicitly says:
+- the image may contain TWO COLUMNS
+- read LEFT column first, then RIGHT column
+- do not stop after the first visible set of problems
+- detect ALL visible math problems
+- keep original order exactly as written
+- support up to 30 problems
+
+Expected output example:
+1. 3 + 4 = 7
+2. 7 - 5 = 2
+3. 2 × 6 = 12
+4. 9 + 1 = 10
+5. 8 - 3 = 5
+6. 7 × 2 = 14
+7. 5 + 6 = 11
+8. 10 - 2 = 8
+9. 12 ÷ 3 = 4
+10. 15 ÷ 5 = 3
+
+Bulgarian response style:
+After listing and solving the problems, keep the ending child-friendly and short, for example:
+„Браво! Решихме задачите заедно!“
+
+Do NOT:
+- change login/signup
+- change parent analytics
+- change TTS
+- change other junior chat behaviors
+- refactor unrelated files
+- trigger large project-wide edits
+
+When finished, return ONLY:
+1. which file(s) were changed
+2. what was added/changed
+3. whether `sharp` was used or added
+4. whether republish is needed
+5. one short test case result summary

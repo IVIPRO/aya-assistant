@@ -21,7 +21,8 @@
     "express": "^5",
     "express-session": "^1.19.0",
     "jsonwebtoken": "^9.0.3",
-    "openai": "^6.32.0"
+    "openai": "^6.32.0",
+    "sharp": "^0.34.5"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",

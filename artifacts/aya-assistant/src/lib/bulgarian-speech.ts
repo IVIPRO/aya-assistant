@@ -140,7 +140,11 @@ export function preprocessBulgarianSpeech(text: string, lang: string): string {
 
 /**
  * Get the best Bulgarian voice from available voices
- * Prefers bg-BG if available
+ * Tries multiple strategies to find a Bulgarian voice:
+ * 1. Exact match: bg-BG
+ * 2. Prefix match: bg-*
+ * 3. Voice name contains "Bulgarian"
+ * 4. Returns undefined to let OS select based on lang attribute
  */
 export function getBulgarianVoice(): SpeechSynthesisVoice | undefined {
   if (typeof window === "undefined" || !window.speechSynthesis) {
@@ -148,22 +152,36 @@ export function getBulgarianVoice(): SpeechSynthesisVoice | undefined {
   }
   
   const voices = window.speechSynthesis.getVoices();
+  console.log("[BG_VOICE_SELECTION] Total voices available:", voices.length);
   
-  // First, try to find bg-BG voice
+  // Strategy 1: Find exact bg-BG match
   const bgBgVoice = voices.find(v => v.lang === "bg-BG");
-  if (bgBgVoice) return bgBgVoice;
+  if (bgBgVoice) {
+    console.log("[BG_VOICE_SELECTION] Selected bg-BG voice:", bgBgVoice.name);
+    return bgBgVoice;
+  }
   
-  // Then, try to find any Bulgarian voice
+  // Strategy 2: Find any voice with bg- prefix
   const anyBgVoice = voices.find(v => v.lang.startsWith("bg"));
-  if (anyBgVoice) return anyBgVoice;
+  if (anyBgVoice) {
+    console.log("[BG_VOICE_SELECTION] Selected bg-* voice:", anyBgVoice.name, "lang:", anyBgVoice.lang);
+    return anyBgVoice;
+  }
   
-  // If no Bulgarian voice, return undefined
+  // Strategy 3: Look for "Bulgarian" in voice name (case-insensitive)
+  const bgNameVoice = voices.find(v => v.name.toLowerCase().includes("bulgarian"));
+  if (bgNameVoice) {
+    console.log("[BG_VOICE_SELECTION] Selected Bulgarian-named voice:", bgNameVoice.name, "lang:", bgNameVoice.lang);
+    return bgNameVoice;
+  }
+  
+  console.log("[BG_VOICE_SELECTION] No Bulgarian voice found - will rely on lang attribute (bg-BG)");
   return undefined;
 }
 
 /**
  * Set Bulgarian voice on a speech utterance if available
- * Even if no Bulgarian voice is found, the lang attribute helps the OS select the right voice
+ * Even if no Bulgarian voice is found, the lang attribute (bg-BG) helps the OS select the right voice
  */
 export function setBulgarianVoice(utterance: SpeechSynthesisUtterance, lang: string): void {
   if (!lang.startsWith("bg")) return;
@@ -171,5 +189,8 @@ export function setBulgarianVoice(utterance: SpeechSynthesisUtterance, lang: str
   const voice = getBulgarianVoice();
   if (voice) {
     utterance.voice = voice;
+    console.log("[BG_VOICE_SET] Voice set to:", voice.name, "lang:", voice.lang);
+  } else {
+    console.log("[BG_VOICE_SET] No Bulgarian voice found - utterance.lang is:", lang);
   }
 }

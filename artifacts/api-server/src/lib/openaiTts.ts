@@ -53,14 +53,30 @@ export async function generateAyaTTS(text: string, options?: TtsOptions): Promis
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error("[TTS_ERROR] OpenAI API error:", response.status, error);
-      throw new Error(`OpenAI TTS failed: ${response.status}`);
+      const errorText = await response.text();
+      
+      // Detect quota error (429) and log with specific marker
+      if (response.status === 429) {
+        console.warn("[TTS_QUOTA_ERROR] OpenAI quota exceeded. Falling back to browser speech.");
+        const error = new Error("insufficient_quota");
+        (error as any).status = 429;
+        throw error;
+      }
+      
+      console.error("[TTS_ERROR] OpenAI API error:", response.status, errorText);
+      const error = new Error(`OpenAI TTS failed: ${response.status}`);
+      (error as any).status = response.status;
+      throw error;
     }
 
     const buffer = await response.arrayBuffer();
     return Buffer.from(buffer);
   } catch (error) {
+    const status = (error as any)?.status;
+    if (status === 429) {
+      // Re-throw quota errors with status marker
+      throw error;
+    }
     console.error("[TTS_ERROR]", error instanceof Error ? error.message : String(error));
     throw error;
   }

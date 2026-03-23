@@ -376,20 +376,30 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
     aiContent = getAIResponse(module, cleanContent, context);
   }
 
-  console.log(`[AYA_HOMEWORK] Before DB save: aiContent length = ${aiContent.length}, first 150 chars = "${aiContent.substring(0, 150)}"`);
-  const aiProblemsBeforeSave = (aiContent.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
-  console.log(`[HOMEWORK_PIPELINE] Before DB save - aiContent: ${aiContent.length} chars, ${aiProblemsBeforeSave} emoji-problems`);
-  console.log(`[TRACE] Problems in aiContent before DB save: ${aiProblemsBeforeSave}`);
+  // ── Free conversation reply marker ──────────────────────────────────────
+  if (mode === "free_conversation") {
+    console.log(`[FREE_CONV] OPENAI_REPLY (${aiContent.length} chars): "${aiContent.substring(0, 120)}"`);
+  }
+
+  // ── Homework pipeline trace logs (image flow only) ───────────────────────
+  if (hasImage) {
+    const aiProblemsBeforeSave = (aiContent.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
+    console.log(`[AYA_HOMEWORK] Before DB save: aiContent length = ${aiContent.length}, first 150 chars = "${aiContent.substring(0, 150)}"`);
+    console.log(`[HOMEWORK_PIPELINE] Before DB save - aiContent: ${aiContent.length} chars, ${aiProblemsBeforeSave} emoji-problems`);
+    console.log(`[TRACE] Problems in aiContent before DB save: ${aiProblemsBeforeSave}`);
+  }
 
   const [assistantMsg] = await db
     .insert(chatMessagesTable)
     .values({ userId, childId: childId ?? null, module, role: "assistant", content: aiContent })
     .returning();
 
-  console.log(`[AYA_HOMEWORK] After DB save: assistantMsg.content length = ${assistantMsg.content.length}`);
-  const aiProblemsAfterSave = (assistantMsg.content.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
-  console.log(`[HOMEWORK_PIPELINE] After DB save - assistantMsg: ${assistantMsg.content.length} chars, ${aiProblemsAfterSave} emoji-problems`);
-  console.log(`[TRACE] Problems in assistantMsg after DB save: ${aiProblemsAfterSave}`);
+  if (hasImage) {
+    const aiProblemsAfterSave = (assistantMsg.content.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
+    console.log(`[AYA_HOMEWORK] After DB save: assistantMsg.content length = ${assistantMsg.content.length}`);
+    console.log(`[HOMEWORK_PIPELINE] After DB save - assistantMsg: ${assistantMsg.content.length} chars, ${aiProblemsAfterSave} emoji-problems`);
+    console.log(`[TRACE] Problems in assistantMsg after DB save: ${aiProblemsAfterSave}`);
+  }
 
   await db.insert(memoriesTable).values({
     userId,
@@ -399,10 +409,13 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
     module,
   });
 
-  console.log(`[AYA_HOMEWORK] Response being sent: ${assistantMsg.content.length} chars, content: "${assistantMsg.content.substring(0, 150)}"`);
-  const finalProblems = (assistantMsg.content.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
-  console.log(`[HOMEWORK_PIPELINE] Final frontend response: ${assistantMsg.content.length} chars, ${finalProblems} emoji-problems`);
-  console.log(`[TRACE] FINAL: Sent to frontend ${finalProblems} emoji-numbered problems`);
+  if (hasImage) {
+    const finalProblems = (assistantMsg.content.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
+    console.log(`[AYA_HOMEWORK] Response being sent: ${assistantMsg.content.length} chars, content: "${assistantMsg.content.substring(0, 150)}"`);
+    console.log(`[HOMEWORK_PIPELINE] Final frontend response: ${assistantMsg.content.length} chars, ${finalProblems} emoji-problems`);
+    console.log(`[TRACE] FINAL: Sent to frontend ${finalProblems} emoji-numbered problems`);
+  }
+
   res.status(201).json({ userMessage: userMsg, assistantMessage: assistantMsg });
 });
 

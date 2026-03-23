@@ -413,6 +413,80 @@ function generateWeaknessSummary(analysis: {
 }
 
 /**
+ * Generates 3 adaptive practice problems for a weak category
+ * Returns formatted Bulgarian practice problem list
+ */
+function generateAdaptivePractice(weakCategory: string): { problems: string[]; formatted: string } {
+  const problems: string[] = [];
+  
+  // Generate 3 problems based on category
+  // Use simple deterministic number ranges appropriate for each skill
+  
+  if (weakCategory.includes("addition_to_10")) {
+    // Single-digit addition: numbers that sum to ≤10
+    problems.push("3 + 4");
+    problems.push("5 + 2");
+    problems.push("6 + 3");
+  } else if (weakCategory.includes("addition_over_10")) {
+    // Two-digit addition
+    problems.push("8 + 7");
+    problems.push("9 + 6");
+    problems.push("5 + 8");
+  } else if (weakCategory.includes("subtraction_to_10")) {
+    // Single-digit subtraction
+    problems.push("9 - 4");
+    problems.push("8 - 3");
+    problems.push("7 - 2");
+  } else if (weakCategory.includes("subtraction")) {
+    // Multi-digit subtraction
+    problems.push("15 - 7");
+    problems.push("12 - 5");
+    problems.push("18 - 9");
+  } else if (weakCategory.includes("multiplication")) {
+    // Multiplication basic facts
+    problems.push("3 × 4");
+    problems.push("5 × 2");
+    problems.push("6 × 3");
+  } else if (weakCategory.includes("division")) {
+    // Division basic facts
+    problems.push("12 ÷ 3");
+    problems.push("15 ÷ 5");
+    problems.push("20 ÷ 4");
+  }
+  
+  // Format as Bulgarian practice prompt
+  const formatted = `Виждам, че това е малко трудно.\nНека упражним още 3 задачи:\n\n1) ${problems[0]}\n2) ${problems[1]}\n3) ${problems[2]}`;
+  
+  console.log(`[ADAPTIVE_PRACTICE] category=${weakCategory} generated_problems=3`);
+  
+  return { problems, formatted };
+}
+
+/**
+ * Determines if a category has weakness (more mistakes than correct)
+ * Returns the weakest category if it exists
+ */
+function getWeakestCategory(analysis: {
+  category_mistakes: Record<string, number>;
+  total_problems: number;
+  total_mistakes: number;
+}): string | null {
+  const { category_mistakes } = analysis;
+  
+  let weakestCategory: string | null = null;
+  let maxMistakes = 0;
+  
+  for (const [category, mistakes] of Object.entries(category_mistakes)) {
+    if (mistakes > maxMistakes) {
+      maxMistakes = mistakes;
+      weakestCategory = category;
+    }
+  }
+  
+  return weakestCategory;
+}
+
+/**
  * Generates warm, teacher-style explanation for simple math
  * Uses rule-based templates for grades 1-4
  */
@@ -735,8 +809,15 @@ async function generateMultiProblemResponse(
     
     // Add weakness summary if there are mistakes
     if (weaknessSummary.has_weaknesses) {
-      response += `\n${weaknessSummary.summary}\n`;
-      response += `${weaknessSummary.practice_suggestion}`;
+      // Get weakest category and generate adaptive practice
+      const weakestCategory = getWeakestCategory(weaknessAnalysis);
+      if (weakestCategory) {
+        const adaptivePractice = generateAdaptivePractice(weakestCategory);
+        response += `\n${adaptivePractice.formatted}`;
+      } else {
+        response += `\n${weaknessSummary.summary}\n`;
+        response += `${weaknessSummary.practice_suggestion}`;
+      }
     } else {
       response += "Искаш ли още 3 задачи за упражнение?";
     }

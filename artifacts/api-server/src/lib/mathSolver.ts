@@ -24,6 +24,21 @@ interface SimpleMathMultiResult {
 }
 
 /**
+ * Normalizes OCR math symbols to ASCII operators
+ * Converts: × → *, ÷ → /, − → -, etc.
+ */
+function normalizeMathSymbols(text: string): string {
+  let normalized = text
+    .replace(/[×xX]/g, "*")      // Multiplication: × x X → *
+    .replace(/[÷:]/g, "/")        // Division: ÷ : → /
+    .replace(/[−–—]/g, "-")      // Minus: − – — → -
+    .replace(/\s+/g, " ")        // Collapse multiple spaces
+    .trim();                       // Remove leading/trailing whitespace
+  
+  return normalized;
+}
+
+/**
  * Detects simple arithmetic patterns (e.g., "5 + 7", "23+14", "9 - 4")
  */
 function detectSimpleMathExpression(text: string, requestId?: string): SimpleMathResult {
@@ -303,7 +318,9 @@ function detectMultipleSimpleMathProblems(extractedText: string): SimpleMathMult
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const mathResult = detectSimpleMathExpression(line);
+    // Normalize OCR math symbols before parsing
+    const normalizedLine = normalizeMathSymbols(line);
+    const mathResult = detectSimpleMathExpression(normalizedLine);
     
     if (mathResult.detected && mathResult.expression && mathResult.answer !== undefined) {
       problems.push({

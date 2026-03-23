@@ -222,6 +222,128 @@ function generateMistakeFeedback(expression: string, studentAnswer: number, corr
 }
 
 /**
+ * Categorizes a math problem by skill type
+ * Returns: "addition", "subtraction", "multiplication", "division"
+ */
+function categorizeProblem(expression: string): string {
+  const operands = parseExpression(expression);
+  if (!operands) return "unknown";
+  
+  const { op, num1, num2 } = operands;
+  
+  if (op === "+") {
+    return num1 + num2 <= 10 ? "addition_to_10" : "addition_over_10";
+  } else if (op === "-") {
+    return num1 <= 10 ? "subtraction_to_10" : "subtraction";
+  } else if (op === "*") {
+    return "multiplication";
+  } else if (op === "/") {
+    return "division";
+  }
+  
+  return "unknown";
+}
+
+/**
+ * Tracks weakness signals from incorrect answers
+ * Returns object with category counts and weakness status
+ */
+function analyzeWeaknesses(problems: SimpleMathProblem[]): { 
+  category_mistakes: Record<string, number>;
+  total_problems: number;
+  total_mistakes: number;
+} {
+  const category_mistakes: Record<string, number> = {};
+  let total_problems = 0;
+  let total_mistakes = 0;
+  
+  for (const problem of problems) {
+    if (problem.answer === undefined) continue;
+    
+    total_problems++;
+    const category = categorizeProblem(problem.expression);
+    
+    // Count mistakes by category
+    if (problem.hasStudentAnswer && problem.studentAnswer !== undefined) {
+      if (problem.studentAnswer !== problem.answer) {
+        if (!category_mistakes[category]) category_mistakes[category] = 0;
+        category_mistakes[category]++;
+        total_mistakes++;
+        console.log(`[WEAKNESS_DETECTION] category=${category} is_correct=false`);
+      } else {
+        console.log(`[WEAKNESS_DETECTION] category=${category} is_correct=true`);
+      }
+    } else {
+      // No student answer - assume we're providing solution
+      console.log(`[WEAKNESS_DETECTION] category=${category} no_student_answer`);
+    }
+  }
+  
+  return { category_mistakes, total_problems, total_mistakes };
+}
+
+/**
+ * Generates Bulgarian weakness summary and practice suggestions
+ * Returns { summary, practice_suggestion, has_weaknesses }
+ */
+function generateWeaknessSummary(analysis: { 
+  category_mistakes: Record<string, number>;
+  total_problems: number;
+  total_mistakes: number;
+}): { summary: string; practice_suggestion: string; has_weaknesses: boolean } {
+  const { category_mistakes, total_problems, total_mistakes } = analysis;
+  
+  const has_weaknesses = total_mistakes > 0;
+  
+  if (!has_weaknesses) {
+    return {
+      summary: "Отличен работа! Всички задачи са верни. 🌟",
+      practice_suggestion: "Готов ли си за по-трудни задачи?",
+      has_weaknesses: false
+    };
+  }
+  
+  // Build weakness summary based on categories with mistakes
+  const weakestCategory = Object.entries(category_mistakes)
+    .sort((a, b) => b[1] - a[1])[0]?.[0];
+  
+  let summary = "";
+  let practice_suggestion = "";
+  
+  if (weakestCategory) {
+    const mistakes_in_category = category_mistakes[weakestCategory];
+    
+    if (weakestCategory.includes("addition")) {
+      summary = `Изглежда, че имаш нужда от още упражнения по събиране.`;
+      practice_suggestion = `Опитай още 3 задачи по събиране.`;
+    } else if (weakestCategory.includes("subtraction")) {
+      summary = `Вадене има нужда от още малко практика.`;
+      practice_suggestion = `Нека упражним още малко вадене.`;
+    } else if (weakestCategory.includes("multiplication")) {
+      summary = `Умножението ти се получава добре, но нужна е още практика.`;
+      practice_suggestion = `Опитай още 3 задачи по умножение.`;
+    } else if (weakestCategory.includes("division")) {
+      summary = `Делението има нужда от още малко практика.`;
+      practice_suggestion = `Нека упражним още малко деление.`;
+    }
+  }
+  
+  if (total_mistakes > 1 && category_mistakes[weakestCategory || ""] === total_mistakes) {
+    // Only one category with mistakes
+    summary = summary;
+  } else if (total_mistakes > 1) {
+    // Multiple categories with mistakes
+    summary = `Вижда се, че имаш нужда от още упражнения в няколко области.`;
+    practice_suggestion = `Нека упражним още малко на всички области.`;
+  }
+  
+  console.log(`[WEAKNESS_DETECTION] weakness_summary="${summary}"`);
+  console.log(`[WEAKNESS_DETECTION] suggested_practice="${practice_suggestion}"`);
+  
+  return { summary, practice_suggestion, has_weaknesses };
+}
+
+/**
  * Generates warm, teacher-style explanation for simple math
  * Uses rule-based templates for grades 1-4
  */
@@ -527,8 +649,17 @@ function generateMultiProblemResponse(
       console.log(`[HOMEWORK_PIPELINE] Problem ${i + 1}/${problems.length}: "${problem.expression}" = ${problem.answer}`);
     }
     
-    // Add practice suggestion
-    response += "Искаш ли още 3 задачи за упражнение?";
+    // STEP: Analyze weaknesses
+    const weaknessAnalysis = analyzeWeaknesses(problems);
+    const weaknessSummary = generateWeaknessSummary(weaknessAnalysis);
+    
+    // Add weakness summary if there are mistakes
+    if (weaknessSummary.has_weaknesses) {
+      response += `\n${weaknessSummary.summary}\n`;
+      response += `${weaknessSummary.practice_suggestion}`;
+    } else {
+      response += "Искаш ли още 3 задачи за упражнение?";
+    }
     
     console.log(`[TEACHER_MODE] explanations_generated=${explanationsGenerated}`);
     console.log(`[TEACHER_MODE] final_response_length=${response.length}`);

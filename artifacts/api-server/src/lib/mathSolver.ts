@@ -389,6 +389,8 @@ function generateMultiProblemResponse(
 ): string {
   if (problems.length === 0) return "";
 
+  console.log(`[HOMEWORK_PIPELINE] generateMultiProblemResponse: formatting ${problems.length} problems into response`);
+  
   const emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
   
   const labels = {
@@ -415,10 +417,12 @@ function generateMultiProblemResponse(
     const problem = problems[i];
     const emoji = emojis[i] || `${i + 1}.`;
     response += `${emoji} ${problem.expression} = ${problem.answer}\n`;
+    console.log(`[HOMEWORK_PIPELINE] Problem ${i + 1}/${problems.length}: "${problem.expression}" = ${problem.answer}`);
   }
   
   response += "\n" + lbl.closing;
   
+  console.log(`[HOMEWORK_PIPELINE] generateMultiProblemResponse: created response with ${response.length} chars, ${problems.length} emoji-problems`);
   return response;
 }
 

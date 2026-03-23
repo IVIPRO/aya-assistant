@@ -222,6 +222,75 @@ function generateMistakeFeedback(expression: string, studentAnswer: number, corr
 }
 
 /**
+ * Persists weakness stats to database for a child
+ * Updates or creates weakness records by category
+ * Requires: import { db, childWeaknessStatsTable } from "@workspace/db"
+ */
+async function persistWeaknessStats(
+  db: any,
+  childId: number,
+  analysis: { 
+    category_mistakes: Record<string, number>;
+    total_problems: number;
+    total_mistakes: number;
+  }
+): Promise<void> {
+  const { category_mistakes, total_problems, total_mistakes } = analysis;
+  
+  // Import at runtime to avoid circular dependencies
+  const { childWeaknessStatsTable } = await import("@workspace/db");
+  const { eq, and } = await import("drizzle-orm");
+  
+  // Iterate through all problems to update stats
+  for (const [category, mistakes] of Object.entries(category_mistakes)) {
+    const correct = total_problems - total_mistakes; // Simplified: assume all non-mistakes are correct in this category
+    
+    // Upsert: try to update, if not found then insert
+    try {
+      // Check if record exists
+      const existing = await db
+        .select()
+        .from(childWeaknessStatsTable)
+        .where(and(eq(childWeaknessStatsTable.childId, childId), eq(childWeaknessStatsTable.category, category)))
+        .limit(1);
+      
+      if (existing.length > 0) {
+        // Update existing record
+        await db
+          .update(childWeaknessStatsTable)
+          .set({
+            mistakesCount: existing[0].mistakesCount + mistakes,
+            correctCount: existing[0].correctCount + correct,
+            lastSeenAt: new Date(),
+            updatedAt: new Date(),
+          })
+          .where(and(eq(childWeaknessStatsTable.childId, childId), eq(childWeaknessStatsTable.category, category)));
+        
+        const newMistakesCount = existing[0].mistakesCount + mistakes;
+        const newCorrectCount = existing[0].correctCount + correct;
+        const weaknessScore = newMistakesCount / (newMistakesCount + newCorrectCount);
+        
+        console.log(`[WEAKNESS_PERSISTENCE] childId=${childId} category=${category} mistakes_count=${newMistakesCount} correct_count=${newCorrectCount} weakness_score=${weaknessScore.toFixed(2)}`);
+      } else {
+        // Insert new record
+        await db.insert(childWeaknessStatsTable).values({
+          childId,
+          category,
+          mistakesCount: mistakes,
+          correctCount: correct,
+          lastSeenAt: new Date(),
+        });
+        
+        const weaknessScore = mistakes / (mistakes + correct);
+        console.log(`[WEAKNESS_PERSISTENCE] childId=${childId} category=${category} mistakes_count=${mistakes} correct_count=${correct} weakness_score=${weaknessScore.toFixed(2)}`);
+      }
+    } catch (err) {
+      console.error(`[WEAKNESS_PERSISTENCE] Error persisting weakness for childId=${childId} category=${category}:`, err);
+    }
+  }
+}
+
+/**
  * Categorizes a math problem by skill type
  * Returns: "addition", "subtraction", "multiplication", "division"
  */
@@ -599,10 +668,12 @@ function detectMultipleSimpleMathProblems(extractedText: string): SimpleMathMult
  * Generates multi-problem teacher response
  * Lists all problems with answers in simple, clean format
  */
-function generateMultiProblemResponse(
+async function generateMultiProblemResponse(
   lang: "bg" | "es" | "en",
-  problems: SimpleMathProblem[]
-): string {
+  problems: SimpleMathProblem[],
+  db?: any,
+  childId?: number,
+): Promise<string> {
   if (problems.length === 0) return "";
 
   console.log(`[HOMEWORK_PIPELINE] generateMultiProblemResponse: formatting ${problems.length} problems into response`);
@@ -652,6 +723,15 @@ function generateMultiProblemResponse(
     // STEP: Analyze weaknesses
     const weaknessAnalysis = analyzeWeaknesses(problems);
     const weaknessSummary = generateWeaknessSummary(weaknessAnalysis);
+    
+    // STEP: Persist weakness stats to database if db and childId provided
+    if (db && childId) {
+      try {
+        await persistWeaknessStats(db, childId, weaknessAnalysis);
+      } catch (err) {
+        console.error(`[WEAKNESS_PERSISTENCE] Failed to persist weakness stats:`, err);
+      }
+    }
     
     // Add weakness summary if there are mistakes
     if (weaknessSummary.has_weaknesses) {
@@ -745,6 +825,8 @@ async function trySimpleMathSolve(
   lang: "bg" | "es" | "en",
   openaiClient: any,
   requestId?: string,
+  db?: any,
+  childId?: number,
 ): Promise<string | null> {
   const reqId = requestId || "unknown";
   
@@ -829,7 +911,7 @@ async function trySimpleMathSolve(
       multiResult.problems.forEach((p, i) => {
         console.log(`[AYA_HOMEWORK] ${reqId} problem ${i + 1}: ${p.expression} = ${p.answer}`);
       });
-      const response = generateMultiProblemResponse(lang, multiResult.problems);
+      const response = await generateMultiProblemResponse(lang, multiResult.problems, db, childId);
       console.log(`[TRACE] Generated multi-problem response: ${response.length} chars`);
       return response;
     }

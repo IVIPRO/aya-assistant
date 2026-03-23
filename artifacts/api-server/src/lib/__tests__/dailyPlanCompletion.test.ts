@@ -79,7 +79,7 @@ describe("Daily Plan Task Completion", () => {
       id: "preserve-test",
       subjectId: "mathematics",
       topicId: "division",
-      taskType: "quiz",
+      taskType: "lesson",
       xpReward: 75,
       status: "not_started",
     };

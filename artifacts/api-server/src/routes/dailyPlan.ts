@@ -116,7 +116,7 @@ async function generatePlan(childId: number, grade: number, xp: number): Promise
       taskType = weakEntry.successRate < 50 ? "lesson" : "practice";
     }
 
-    return { ...t, score, done, started, isWeak, taskType };
+    return { ...t, score, done, started, isWeakTopic: isWeak, taskType };
   });
 
   /* ── Smart task sequencing (Phase 2C+) ────────────────────────── */
@@ -126,7 +126,7 @@ async function generatePlan(childId: number, grade: number, xp: number): Promise
 
   // Build task metadata for sequencing
   const notFullyDone = scored
-    .filter(t => !t.done || t.isWeak)
+    .filter(t => !t.done || t.isWeakTopic)
     .map(t => ({
       ...t,
       baseXp: t.baseXp,
@@ -137,7 +137,7 @@ async function generatePlan(childId: number, grade: number, xp: number): Promise
   const candidates: typeof notFullyDone = [];
   const usedSubjects = new Set<string>();
 
-  for (const t of notFullyDone.sort((a, b) => b.score - a.score)) {
+  for (const t of notFullyDone.sort((a, b) => (b.score ?? 0) - (a.score ?? 0))) {
     if (candidates.length >= 4) break; // Pick 4 to filter down to 3 after sequencing
     if (usedSubjects.has(t.subjectId)) continue;
     candidates.push(t);

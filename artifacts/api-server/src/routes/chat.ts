@@ -193,17 +193,16 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
       // ===== COST OPTIMIZATION ROUTER =====
       // Phase 1: Try cheap local math solver first
       // Skips expensive OpenAI Stage 2 if simple arithmetic detected
-      console.log(`[ROUTER] ${requestId} ===== PHASE 1: COST OPTIMIZATION =====`);
       console.log(`[AYA_HOMEWORK] ${requestId} attempting Stage 1 simple math solver...`);
       const simpleMathResult = await trySimpleMathSolve(imageBase64, imageMimeType, resolvedLang, openai, requestId);
 
       if (simpleMathResult) {
         console.log(`[AYA_HOMEWORK] ${requestId} STAGE_1_SUCCESS`);
-        console.log(`[ROUTER] ${requestId} LOCAL_SOLUTION_COMPLETE - no expensive OpenAI Stage 2 needed`);
+        console.log(`[ROUTER] local solver used - skipping expensive Stage 2 grid-split + OpenAI vision`);
         aiContent = simpleMathResult;
       } else {
         console.log(`[AYA_HOMEWORK] ${requestId} Stage 1 returned null, falling back to Stage 2 full vision analysis`);
-        console.log(`[ROUTER] ${requestId} ===== PHASE 2: EXPENSIVE FALLBACK =====`);
+        console.log(`[ROUTER] fallback to OpenAI - Stage 2 4-region grid split + vision API`);
         const resolvedGrade = context.grade ?? 2;
         const childName = context.childName ?? "the student";
         const charKey = context.aiCharacter ?? "owl";

@@ -125,6 +125,11 @@ const JUNIOR_LABELS: Record<JuniorLang, {
   voiceVideoDesc: string;
   lessons: string;
   freeChatLabel: string;
+  freeChatModeOn: string;
+  freeChatModeOff: string;
+  voiceModeLabel: string;
+  voiceModeActive: string;
+  voiceModeStop: string;
 }> = {
   en: {
     welcomeBack: "Welcome back,",
@@ -175,6 +180,11 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     voiceVideoDesc: "Meet AYA's animated video teacher for interactive face-to-face lessons.",
     lessons: "Lessons",
     freeChatLabel: "Free chat",
+    freeChatModeOn: "Voice Mode ON",
+    freeChatModeOff: "Voice Mode",
+    voiceModeLabel: "Free Chat",
+    voiceModeActive: "🎙️ Listening…",
+    voiceModeStop: "Stop",
   },
   bg: {
     welcomeBack: "Добре дошла,",
@@ -225,6 +235,11 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     voiceVideoDesc: "Запознай се с анимирания видео учител на AYA за интерактивни уроци лице в лице.",
     lessons: "Уроци",
     freeChatLabel: "Свободен разговор",
+    freeChatModeOn: "Гласов режим ВКЛ",
+    freeChatModeOff: "Гласов режим",
+    voiceModeLabel: "Свободен разговор",
+    voiceModeActive: "🎙️ Слушам…",
+    voiceModeStop: "Спри",
   },
   es: {
     welcomeBack: "Bienvenida,",
@@ -275,6 +290,11 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     voiceVideoDesc: "Conoce al maestro de video animado de AYA para lecciones interactivas cara a cara.",
     lessons: "Lecciones",
     freeChatLabel: "Chat libre",
+    freeChatModeOn: "Modo voz ACTIVADO",
+    freeChatModeOff: "Modo voz",
+    voiceModeLabel: "Chat libre",
+    voiceModeActive: "🎙️ Escuchando…",
+    voiceModeStop: "Parar",
   },
 };
 
@@ -629,19 +649,34 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
 
 function VoiceReadySection({
   lbl,
+  freeConversationMode,
+  onTalkToggle,
   onOpenListening,
 }: {
   lbl: typeof JUNIOR_LABELS["en"];
+  freeConversationMode: boolean;
+  onTalkToggle: () => void;
   onOpenListening: () => void;
 }) {
   const voiceFeatures = [
     {
       icon: Mic,
       title: lbl.voiceTalkTitle,
-      desc: lbl.voiceTalkDesc,
-      color: "from-blue-50 to-sky-50 border-blue-200",
-      iconColor: "text-blue-500 bg-blue-100",
+      desc: freeConversationMode
+        ? (lbl.voiceModeActive)
+        : lbl.voiceTalkDesc,
+      color: freeConversationMode
+        ? "from-green-100 to-emerald-100 border-green-400"
+        : "from-blue-50 to-sky-50 border-blue-200",
+      iconColor: freeConversationMode
+        ? "text-white bg-green-500"
+        : "text-blue-500 bg-blue-100",
       isActive: true,
+      onClick: onTalkToggle,
+      badge: freeConversationMode ? lbl.freeChatModeOn : "✨ Active",
+      badgeColor: freeConversationMode
+        ? "bg-green-500 text-white border-green-600 animate-pulse"
+        : "bg-green-100 text-green-700 border-green-200",
     },
     {
       icon: Volume2,
@@ -651,6 +686,8 @@ function VoiceReadySection({
       iconColor: "text-green-500 bg-green-100",
       isActive: true,
       onClick: onOpenListening,
+      badge: "✨ Active",
+      badgeColor: "bg-green-100 text-green-700 border-green-200",
     },
     {
       icon: Video,
@@ -659,6 +696,9 @@ function VoiceReadySection({
       color: "from-purple-50 to-violet-50 border-purple-200",
       iconColor: "text-purple-500 bg-purple-100",
       isActive: false,
+      onClick: undefined,
+      badge: lbl.comingSoon,
+      badgeColor: "bg-white/60 text-muted-foreground border-border/30",
     },
   ];
   return (
@@ -688,15 +728,9 @@ function VoiceReadySection({
               <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{f.desc}</div>
             </div>
             <div className="mt-auto">
-              {f.isActive ? (
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-green-100 text-green-700 px-2 py-1 rounded-full border border-green-200">
-                  ✨ Active
-                </span>
-              ) : (
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-white/60 text-muted-foreground px-2 py-1 rounded-full border border-border/30">
-                  {lbl.comingSoon}
-                </span>
-              )}
+              <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full border ${f.badgeColor}`}>
+                {f.badge}
+              </span>
             </div>
           </button>
         ))}
@@ -715,6 +749,53 @@ export function Junior() {
   const [showListeningMode, setShowListeningMode] = useState(false);
   const [listeningContent, setListeningContent] = useState("");
   const [lastAyaMessage, setLastAyaMessage] = useState("");
+
+  /* ── Free Conversation Mode ──────────────────────────────────── */
+  const [freeConversationMode, setFreeConversationMode] = useState(false);
+  const freeConvSessionStartRef = useRef<Date | null>(null);
+  const freeConvVoiceRepliesRef = useRef(0);
+  const freeConvChatRepliesRef = useRef(0);
+
+  const handleFreeConversationToggle = useCallback(() => {
+    setFreeConversationMode((prev) => {
+      const turningOff = prev;
+      if (turningOff && freeConvSessionStartRef.current && activeChildId) {
+        const durationMs = Date.now() - freeConvSessionStartRef.current.getTime();
+        const durationMinutes = Math.max(1, Math.round(durationMs / 60000));
+        const token = localStorage.getItem("aya_token");
+        console.log("[FREE_CONV] Session ended", {
+          durationMinutes,
+          voiceReplies: freeConvVoiceRepliesRef.current,
+          chatReplies: freeConvChatRepliesRef.current,
+        });
+        fetch("/api/free-conversation/session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({
+            childId: activeChildId,
+            durationMinutes,
+            voiceReplies: freeConvVoiceRepliesRef.current,
+            chatReplies: freeConvChatRepliesRef.current,
+          }),
+        }).catch(() => {});
+        freeConvSessionStartRef.current = null;
+        freeConvVoiceRepliesRef.current = 0;
+        freeConvChatRepliesRef.current = 0;
+      } else if (!turningOff) {
+        freeConvSessionStartRef.current = new Date();
+        console.log("[FREE_CONV] Session started");
+      }
+      return !prev;
+    });
+  }, [activeChildId]);
+
+  const handleFreeConversationReply = useCallback((mode: "voice" | "chat") => {
+    if (mode === "voice") freeConvVoiceRepliesRef.current++;
+    else freeConvChatRepliesRef.current++;
+  }, []);
 
   /* ── Plan teacher messages ─────────────────────────────────────────── */
   const PLAN_TEACHER_MESSAGES: Record<string, string[]> = {
@@ -764,6 +845,14 @@ export function Junior() {
     if (view === "map")      handleTeacherStateChange("encouraging");
     if (view === "chat")     handleTeacherStateChange("talking");
   }, [view, handleTeacherStateChange]);
+
+  /* ── Turn off Free Conversation Mode when leaving chat view ─────── */
+  useEffect(() => {
+    if (view !== "chat" && freeConversationMode) {
+      handleFreeConversationToggle();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view]);
 
   /* ── Auto-select first child when no active child is set ────────── */
   useEffect(() => {
@@ -1019,22 +1108,53 @@ export function Junior() {
           </motion.div>
         ) : (
           <motion.div key="chat" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-            <div className="flex items-center justify-between mb-6">
+            {/* ── Chat view header ─────────────────────────────── */}
+            <div className="flex items-center justify-between mb-6 gap-2">
               <button onClick={() => setView("welcome")}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors">
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors flex-shrink-0">
                 <ArrowLeft className="w-4 h-4" /> {lbl.back}
               </button>
-              <div className="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-xl border border-white/50">
-                <span className="text-lg">{currentChar?.emoji ?? "🌟"}</span>
-                <span className="font-bold text-sm text-junior-foreground">{currentChar?.name ?? "AYA"}</span>
-                {!selectedSubject && <span className="text-xs text-muted-foreground">{lbl.freeChatLabel}</span>}
-                {selectedSubject && currentChar && <span className="text-xs text-muted-foreground">{lbl.toneStyle(CHAR_LABELS[currentChar.id]?.[juniorLang]?.tone ?? currentChar.tone)}</span>}
+              <div className="flex items-center gap-2 bg-white/60 px-3 py-2 rounded-xl border border-white/50 flex-1 min-w-0 justify-center">
+                <span className="text-lg flex-shrink-0">{currentChar?.emoji ?? "🌟"}</span>
+                <span className="font-bold text-sm text-junior-foreground truncate">{currentChar?.name ?? "AYA"}</span>
+                {!selectedSubject && <span className="text-xs text-muted-foreground hidden sm:inline">{lbl.freeChatLabel}</span>}
+                {selectedSubject && currentChar && <span className="text-xs text-muted-foreground hidden sm:inline">{lbl.toneStyle(CHAR_LABELS[currentChar.id]?.[juniorLang]?.tone ?? currentChar.tone)}</span>}
               </div>
+              {/* Free Conversation Mode toggle — only shown in free chat (no subject) */}
+              {!selectedSubject && (
+                <button
+                  onClick={handleFreeConversationToggle}
+                  title={freeConversationMode ? lbl.freeChatModeOff : lbl.freeChatModeOn}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border transition-all text-sm font-bold flex-shrink-0 ${
+                    freeConversationMode
+                      ? "bg-green-500 text-white border-green-600 shadow-md shadow-green-200 animate-pulse"
+                      : "bg-white/60 text-muted-foreground border-white/50 hover:bg-green-50 hover:text-green-700 hover:border-green-200"
+                  }`}
+                >
+                  <Mic className="w-4 h-4" />
+                  <span className="hidden sm:inline">{freeConversationMode ? lbl.freeChatModeOn : lbl.freeChatModeOff}</span>
+                </button>
+              )}
               <button onClick={() => setView("map")}
-                className="flex items-center gap-1.5 px-3 py-2 bg-white/60 rounded-xl border border-white/50 hover:bg-yellow-50 transition-colors text-sm font-bold text-junior-foreground">
+                className="flex items-center gap-1.5 px-3 py-2 bg-white/60 rounded-xl border border-white/50 hover:bg-yellow-50 transition-colors text-sm font-bold text-junior-foreground flex-shrink-0">
                 <Map className="w-4 h-4" />
               </button>
             </div>
+
+            {/* Free Conversation Mode active indicator banner */}
+            {freeConversationMode && (
+              <div className="flex items-center gap-3 mb-3 bg-green-50 border border-green-200 rounded-2xl px-4 py-2.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
+                <span className="text-sm font-semibold text-green-800 flex-1">{lbl.voiceModeLabel}</span>
+                <span className="text-xs text-green-600">{lbl.voiceModeActive}</span>
+                <button
+                  onClick={handleFreeConversationToggle}
+                  className="text-xs font-bold text-green-700 hover:text-red-600 transition-colors px-2 py-1 rounded-lg hover:bg-red-50"
+                >
+                  {lbl.voiceModeStop}
+                </button>
+              </div>
+            )}
 
             <Chat
               module="junior"
@@ -1045,10 +1165,14 @@ export function Junior() {
               subjectContext={subjectContext}
               onTeacherStateChange={handleTeacherStateChange}
               onAyaMessageReceived={setLastAyaMessage}
+              freeConversationMode={freeConversationMode}
+              onFreeConversationReply={handleFreeConversationReply}
             />
 
             <VoiceReadySection
               lbl={lbl}
+              freeConversationMode={freeConversationMode}
+              onTalkToggle={handleFreeConversationToggle}
               onOpenListening={() => {
                 // Prepare content to read from current context
                 let contentToRead = "";

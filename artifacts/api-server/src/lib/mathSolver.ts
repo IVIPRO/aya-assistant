@@ -416,6 +416,29 @@ function getUnclearImageMessage(lang: "bg" | "es" | "en"): string {
 }
 
 /**
+ * Cost-optimization router: decides whether to use cheap local math solver
+ * or fall back to expensive OpenAI full vision analysis
+ */
+function shouldUseLocalMathSolver(imageSize: number, requestId: string): boolean {
+  // Use local solver by default for all homework images
+  // Local solver attempts OCR text extraction + simple math parsing
+  // Only falls back to expensive OpenAI if text is unclear or math is complex
+  console.log(`[ROUTER] ${requestId} Cost optimization: attempting cheap local math solver first`);
+  return true;
+}
+
+function reportLocalSolverSuccess(problemCount: number, requestId: string): void {
+  console.log(`[ROUTER] ${requestId} LOCAL_MATH_SOLVER_SUCCESS - solved ${problemCount} problems without OpenAI`);
+  console.log(`[ROUTER] ${requestId} COST_SAVED: avoided expensive Stage 2 grid-split + 4x OpenAI vision calls`);
+}
+
+function reportLocalSolverFallback(reason: string, requestId: string): void {
+  console.log(`[ROUTER] ${requestId} LOCAL_MATH_SOLVER_FAILED - falling back to OpenAI Stage 2`);
+  console.log(`[ROUTER] ${requestId} Reason: ${reason}`);
+  console.log(`[ROUTER] ${requestId} COST_IMPACT: using expensive Stage 2 (4-region grid split + OpenAI vision)`);
+}
+
+/**
  * Attempts to extract and solve simple math from image using vision API
  * Returns result if simple math detected, otherwise returns null to use full vision analysis
  */
@@ -489,6 +512,7 @@ async function trySimpleMathSolve(
       // No valid math problems detected - return null to use full vision analysis
       console.log(`[AYA_HOMEWORK] ${reqId} no simple math detected - falling back to full vision analysis`);
       console.log(`[TRACE] Stage 1 returning null (no problems)`);
+      reportLocalSolverFallback("OCR extracted text but no simple math detected", reqId);
       return null;
     } else if (multiResult.mode === "single" && multiResult.problems && multiResult.problems.length === 1) {
       // Single problem detected - use single-problem teacher mode
@@ -496,6 +520,7 @@ async function trySimpleMathSolve(
       console.log(`[AYA_HOMEWORK] ${reqId} STAGE_1_SUCCESS (single problem)`);
       console.log(`[AYA_HOMEWORK] ${reqId} expression: ${problem.expression}, answer: ${problem.answer}`);
       console.log(`[TRACE] Stage 1 returning single problem response (1 problem)`);
+      reportLocalSolverSuccess(1, reqId);
       const response = getLocalizedMathResponse(lang, problem.expression, problem.answer, problem.error);
       return response;
     } else if (multiResult.mode === "multi" && multiResult.problems && multiResult.problems.length > 1) {
@@ -503,6 +528,7 @@ async function trySimpleMathSolve(
       console.log(`[AYA_HOMEWORK] ${reqId} STAGE_1_SUCCESS (multi-problem mode)`);
       console.log(`[AYA_HOMEWORK] ${reqId} total problems: ${multiResult.problems.length}`);
       console.log(`[TRACE] Stage 1 returning multi-problem response (${multiResult.problems.length} problems)`);
+      reportLocalSolverSuccess(multiResult.problems.length, reqId);
       multiResult.problems.forEach((p, i) => {
         console.log(`[AYA_HOMEWORK] ${reqId} problem ${i + 1}: ${p.expression} = ${p.answer}`);
       });

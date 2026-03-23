@@ -416,26 +416,14 @@ function getUnclearImageMessage(lang: "bg" | "es" | "en"): string {
 }
 
 /**
- * Cost-optimization router: decides whether to use cheap local math solver
- * or fall back to expensive OpenAI full vision analysis
+ * Cost-optimization logging: reports when local solver succeeds
  */
-function shouldUseLocalMathSolver(imageSize: number, requestId: string): boolean {
-  // Use local solver by default for all homework images
-  // Local solver attempts OCR text extraction + simple math parsing
-  // Only falls back to expensive OpenAI if text is unclear or math is complex
-  console.log(`[ROUTER] ${requestId} Cost optimization: attempting cheap local math solver first`);
-  return true;
-}
-
 function reportLocalSolverSuccess(problemCount: number, requestId: string): void {
-  console.log(`[ROUTER] ${requestId} LOCAL_MATH_SOLVER_SUCCESS - solved ${problemCount} problems without OpenAI`);
-  console.log(`[ROUTER] ${requestId} COST_SAVED: avoided expensive Stage 2 grid-split + 4x OpenAI vision calls`);
+  console.log(`[ROUTER] local solver success - ${problemCount} problem${problemCount !== 1 ? "s" : ""} solved locally`);
 }
 
 function reportLocalSolverFallback(reason: string, requestId: string): void {
-  console.log(`[ROUTER] ${requestId} LOCAL_MATH_SOLVER_FAILED - falling back to OpenAI Stage 2`);
-  console.log(`[ROUTER] ${requestId} Reason: ${reason}`);
-  console.log(`[ROUTER] ${requestId} COST_IMPACT: using expensive Stage 2 (4-region grid split + OpenAI vision)`);
+  console.log(`[ROUTER] reason: ${reason}`);
 }
 
 /**

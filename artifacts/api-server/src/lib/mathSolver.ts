@@ -140,6 +140,37 @@ function parseExpression(expr: string): { op: string; num1: number; num2: number
 }
 
 /**
+ * Generates child-friendly teacher explanation for a single math problem
+ * Bulgarian language only (homework teacher mode)
+ */
+function generateProblemExplanation(expression: string, answer: number): string {
+  const operands = parseExpression(expression);
+  if (!operands) return "";
+  
+  const { op, num1, num2 } = operands;
+  
+  if (op === "+") {
+    // Addition explanation
+    return `Добавяме ${num2} към ${num1}. Резултат: ${answer}.`;
+  } else if (op === "-") {
+    // Subtraction explanation
+    return `Махаме ${num2} от ${num1}. Резултат: ${answer}.`;
+  } else if (op === "*") {
+    // Multiplication explanation
+    if (num2 === 2) {
+      return `${num1} по 2 означава ${num1} + ${num1}. Резултат: ${answer}.`;
+    } else {
+      return `${num1} повтарядо ${num2} пъти. Резултат: ${answer}.`;
+    }
+  } else if (op === "/") {
+    // Division explanation
+    return `Разделяме ${num1} на ${num2} равни части. Резултат: ${answer}.`;
+  }
+  
+  return "";
+}
+
+/**
  * Generates warm, teacher-style explanation for simple math
  * Uses rule-based templates for grades 1-4
  */
@@ -389,13 +420,50 @@ function generateMultiProblemResponse(
 ): string {
   if (problems.length === 0) return "";
 
+  console.log(`[HOMEWORK_PIPELINE] generateMultiProblemResponse: formatting ${problems.length} problems into response`);
+  
+  // TEACHER MODE: Only Bulgarian has extended teacher explanations
+  if (lang === "bg") {
+    console.log(`[TEACHER_MODE] problems_detected=${problems.length}`);
+    
+    const emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
+    
+    // Build teacher-mode response with explanations
+    let response = "Браво! Нека ги решим заедно 🙂\n\n";
+    
+    let explanationsGenerated = 0;
+    for (let i = 0; i < problems.length; i++) {
+      const problem = problems[i];
+      const emoji = emojis[i] || `${i + 1}.`;
+      
+      // Problem with answer
+      response += `${emoji} ${problem.expression} = ${problem.answer}\n`;
+      
+      // Add teacher explanation
+      const explanation = generateProblemExplanation(problem.expression, problem.answer);
+      if (explanation) {
+        response += `   💡 ${explanation}\n`;
+        explanationsGenerated++;
+      }
+      
+      response += "\n";
+      console.log(`[HOMEWORK_PIPELINE] Problem ${i + 1}/${problems.length}: "${problem.expression}" = ${problem.answer}`);
+    }
+    
+    // Add practice suggestion
+    response += "Искаш ли още 3 задачи за упражнение?";
+    
+    console.log(`[TEACHER_MODE] explanations_generated=${explanationsGenerated}`);
+    console.log(`[TEACHER_MODE] final_response_length=${response.length}`);
+    console.log(`[HOMEWORK_PIPELINE] generateMultiProblemResponse: created response with ${response.length} chars, ${problems.length} emoji-problems`);
+    
+    return response;
+  }
+  
+  // Non-Bulgarian languages: simple list format (no explanations)
   const emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"];
   
   const labels = {
-    bg: {
-      intro: "На снимката виждам няколко задачи.",
-      closing: "Браво! Решихме ги заедно.",
-    },
     es: {
       intro: "Veo varios ejercicios en la imagen.",
       closing: "¡Muy bien! Los resolvimos juntos.",
@@ -415,10 +483,12 @@ function generateMultiProblemResponse(
     const problem = problems[i];
     const emoji = emojis[i] || `${i + 1}.`;
     response += `${emoji} ${problem.expression} = ${problem.answer}\n`;
+    console.log(`[HOMEWORK_PIPELINE] Problem ${i + 1}/${problems.length}: "${problem.expression}" = ${problem.answer}`);
   }
   
   response += "\n" + lbl.closing;
   
+  console.log(`[HOMEWORK_PIPELINE] generateMultiProblemResponse: created response with ${response.length} chars, ${problems.length} emoji-problems`);
   return response;
 }
 

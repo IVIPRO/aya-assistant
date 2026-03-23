@@ -200,6 +200,10 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
         console.log(`[AYA_HOMEWORK] ${requestId} STAGE_1_SUCCESS`);
         console.log(`[ROUTER] local solver used - skipping expensive Stage 2 grid-split + OpenAI vision`);
         aiContent = simpleMathResult;
+        // Count problems in Stage 1 response
+        const stage1Problems = (aiContent.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
+        console.log(`[HOMEWORK_PIPELINE] Stage 1 aiContent: ${aiContent.length} chars, ${stage1Problems} emoji-problems`);
+        console.log(`[HOMEWORK_PIPELINE] Stage 1 response (first 200 chars): "${aiContent.substring(0, 200)}"`);
       } else {
         console.log(`[AYA_HOMEWORK] ${requestId} Stage 1 returned null, falling back to Stage 2 full vision analysis`);
         console.log(`[ROUTER] fallback to OpenAI - Stage 2 4-region grid split + vision API`);
@@ -340,6 +344,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
         const problemsInResponse = (aiContent.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
         console.log(`[AYA_HOMEWORK] ${requestId} OpenAI response: ${aiContent.length} chars, ${responseLines.length} lines, ~${emojiCount} emoji problems`);
         console.log(`[AYA_HOMEWORK] ${requestId} Response content: ${aiContent.substring(0, 200)}...`);
+        console.log(`[HOMEWORK_PIPELINE] Stage 2 (OpenAI) aiContent: ${aiContent.length} chars, ${problemsInResponse} emoji-problems`);
         console.log(`[TRACE] After OpenAI: response has ${problemsInResponse} emoji-numbered problems, ${responseLines.length} lines, ${aiContent.length} chars`);
       }
     } catch (error) {
@@ -364,6 +369,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
 
   console.log(`[AYA_HOMEWORK] Before DB save: aiContent length = ${aiContent.length}, first 150 chars = "${aiContent.substring(0, 150)}"`);
   const aiProblemsBeforeSave = (aiContent.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
+  console.log(`[HOMEWORK_PIPELINE] Before DB save - aiContent: ${aiContent.length} chars, ${aiProblemsBeforeSave} emoji-problems`);
   console.log(`[TRACE] Problems in aiContent before DB save: ${aiProblemsBeforeSave}`);
 
   const [assistantMsg] = await db
@@ -373,6 +379,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
 
   console.log(`[AYA_HOMEWORK] After DB save: assistantMsg.content length = ${assistantMsg.content.length}`);
   const aiProblemsAfterSave = (assistantMsg.content.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
+  console.log(`[HOMEWORK_PIPELINE] After DB save - assistantMsg: ${assistantMsg.content.length} chars, ${aiProblemsAfterSave} emoji-problems`);
   console.log(`[TRACE] Problems in assistantMsg after DB save: ${aiProblemsAfterSave}`);
 
   await db.insert(memoriesTable).values({
@@ -385,6 +392,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
 
   console.log(`[AYA_HOMEWORK] Response being sent: ${assistantMsg.content.length} chars, content: "${assistantMsg.content.substring(0, 150)}"`);
   const finalProblems = (assistantMsg.content.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
+  console.log(`[HOMEWORK_PIPELINE] Final frontend response: ${assistantMsg.content.length} chars, ${finalProblems} emoji-problems`);
   console.log(`[TRACE] FINAL: Sent to frontend ${finalProblems} emoji-numbered problems`);
   res.status(201).json({ userMessage: userMsg, assistantMessage: assistantMsg });
 });

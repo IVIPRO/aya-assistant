@@ -49,10 +49,9 @@ router.get("/missions", requireAuth, async (req, res): Promise<void> => {
     .where(eq(missionsTable.childId, childId))
     .orderBy(missionsTable.createdAt);
 
-  // SURGICAL DEBUG: Trace actual missions returned for BG Grade 2
-  console.log(`[TRACE] Fetching missions for childId=${childId}`);
-  console.log(`[TRACE] Child profile: country=${child.country}, grade=${child.grade}`);
-  console.log(`[TRACE] Total missions in database: ${missions.length}`);
+  // Log mission fetches with cache awareness
+  console.log(`[MISSIONS_FETCH_ONCE] childId=${childId} country=${child.country} grade=${child.grade} totalMissions=${missions.length}`);
+  console.log(`[PROFILE_CACHE_MISS] childId=${childId} (initial fetch or stale)`);
   
   const mathIslandMissions = missions.filter(m => m.zone === "Math Island");
   console.log(`[TRACE] Math Island missions (all): ${mathIslandMissions.map(m => m.title).join(", ")}`);

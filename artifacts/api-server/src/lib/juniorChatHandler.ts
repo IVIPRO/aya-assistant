@@ -326,13 +326,12 @@ function isStopCommand(m: string, lang: Lang): boolean {
 }
 
 function isExplainRequest(m: string, lang: Lang): boolean {
-  // Stronger patterns - require explicit task-related context
-  // "как" alone (e.g., "как си") should not trigger explain
-  // But "как се решава" should
+  // STRICT: Only match if clearly asking for help WITH the current task
+  // NOT general greetings or casual questions
   const patterns: Record<Lang, RegExp> = {
-    bg: /\b(обясни|помогни|не разбирам|как се решава|как го|как да|помощ|не мога)\b/i,
+    bg: /\b(обясни|помогни|не разбирам|как се решава|помощ|не мога)\b/i,
     es: /\b(explica|ayuda|no entiendo|cómo se resuelve|ayúdame|no puedo)\b/i,
-    en: /\b(explain|help|don't understand|how to|help me|can't)\b/i,
+    en: /\b(explain|help|don't understand|how to solve|help me|can't)\b/i,
   };
   return patterns[lang].test(m);
 }
@@ -633,13 +632,17 @@ export async function handleJuniorChat(
   const intent = detectIntent(msg, state, lang);
   console.log("[JUNIOR_CHAT] intent:", intent, "| msg:", msg);
   
-  // ── Task breakout check: free-chat should exit active task unless answering ──
+  // ── Task breakout: conversational msg while in task → clear task context ──
   if (state.activeQuestion && (intent === "small_talk" || intent === "free_question" || intent === "unknown")) {
-    console.log("[FREE_CHAT_BREAKOUT] breaking out of active task context", { activeOp: state.activeQuestion.operation, intent });
+    console.log("[TASK_CONTEXT_RESET] clearing active task", { activeOp: state.activeQuestion.operation, intent, msg });
+    await clearActiveQuestion(childId, module);
+    // Clear from state so downstream logic doesn't see it
+    state.activeQuestion = null;
   }
   
-  if (intent === "math_answer" && state.activeQuestion) {
-    console.log("[ACTIVE_TASK_CONTINUE] staying in math context", { operation: state.activeQuestion.operation });
+  // ── Task continue check ──────────────────────────────────────────────────
+  if (state.activeQuestion && (intent === "math_answer" || intent === "explain_current_task")) {
+    console.log("[TASK_CONTEXT_KEPT] continuing in task", { operation: state.activeQuestion.operation, intent });
   }
 
   // ── 3. Route to handler ──────────────────────────────────────────────────

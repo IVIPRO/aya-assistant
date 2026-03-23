@@ -406,4 +406,52 @@ router.get("/learning/path", requireAuth, async (req, res): Promise<void> => {
   res.json({ path: latestPath });
 });
 
+/* ─────────────────────────────────────────────────────────────────
+   POST /api/free-conversation/session
+   Record a Free Conversation Mode session for analytics.
+   Stored in the progressTable with module="free_conversation".
+───────────────────────────────────────────────────────────────── */
+router.post("/free-conversation/session", requireAuth, async (req, res): Promise<void> => {
+  const { childId, durationMinutes, voiceReplies, chatReplies } = req.body as {
+    childId: number;
+    durationMinutes: number;
+    voiceReplies: number;
+    chatReplies: number;
+  };
+
+  if (!childId || isNaN(childId)) {
+    res.status(400).json({ error: "childId is required" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
+
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const mins = Math.max(1, Math.min(durationMinutes ?? 1, 120));
+  const vReplies = Math.max(0, voiceReplies ?? 0);
+  const cReplies = Math.max(0, chatReplies ?? 0);
+
+  await db.insert(progressTable).values({
+    childId,
+    module: "free_conversation",
+    subject: "voice_session",
+    score: mins,
+    notes: JSON.stringify({ voiceReplies: vReplies, chatReplies: cReplies, durationMinutes: mins }),
+  });
+
+  console.log(`[FREE_CONV] Recorded session childId=${childId} duration=${mins}m voice=${vReplies} chat=${cReplies}`);
+
+  res.json({ ok: true, durationMinutes: mins });
+});
+
 export default router;

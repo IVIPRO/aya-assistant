@@ -25,6 +25,24 @@ interface ChatProps {
   subjectContext?: SubjectContext | null;
   onTeacherStateChange?: (state: TeacherStateSignal, message?: string) => void;
   onAyaMessageReceived?: (message: string) => void;
+  freeConversationMode?: boolean;
+  onFreeConversationReply?: (mode: "voice" | "chat") => void;
+}
+
+/**
+ * Decide if AYA's reply should be spoken aloud in Free Conversation Mode.
+ * Short, conversational replies → voice. Structured/long content → chat text only.
+ */
+function shouldVoiceReply(text: string): boolean {
+  const clean = text.replace(/\[IMAGE:[^\]]+\]\n?/g, "").trim();
+  const lines = clean.split("\n").filter((l) => l.trim().length > 0);
+  if (lines.length > 3) return false;
+  if (clean.length > 220) return false;
+  if (/^\d+[.)]\s/m.test(clean)) return false;
+  if (/стъпка|step\s+\d+/i.test(clean)) return false;
+  if (/\d+\s*[×÷\*]\s*\d|\d+\s*=\s*\d/.test(clean)) return false;
+  if (/\[ADAPTIVE_PRACTICE\]|\[PLAN\]|\[WEAK\]/.test(clean)) return false;
+  return true;
 }
 
 const CHARACTER_EMOJIS: Record<string, string> = {
@@ -199,6 +217,8 @@ export function Chat({
   subjectContext,
   onTeacherStateChange,
   onAyaMessageReceived,
+  freeConversationMode = false,
+  onFreeConversationReply,
 }: ChatProps) {
   const { activeChildId } = useAuth();
   const { t, lang } = useI18n();
@@ -261,6 +281,34 @@ export function Chat({
       toast({ title: msg, variant: "destructive" });
     },
   });
+
+  /* ── Free Conversation Mode — auto-TTS on new AYA messages ─────── */
+  const lastSpokenMsgIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!freeConversationMode) return;
+    if (messages.length === 0) return;
+    if (sendMutation.isPending) return; // Wait until response fully arrives
+
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg.role !== "assistant") return;
+
+    const msgId = String(lastMsg.id);
+    if (lastSpokenMsgIdRef.current === msgId) return; // Already handled
+    lastSpokenMsgIdRef.current = msgId;
+
+    const clean = lastMsg.content.replace(/\[IMAGE:[^\]]+\]\n?/g, "").trim();
+    if (!clean) return;
+
+    if (shouldVoiceReply(clean)) {
+      console.log("[FREE_CONV] Auto-speaking reply (voice):", clean.substring(0, 60));
+      voiceSpeaker.speak(clean, msgId);
+      onFreeConversationReply?.("voice");
+    } else {
+      console.log("[FREE_CONV] Keeping reply as chat text (structured/long)");
+      onFreeConversationReply?.("chat");
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, sendMutation.isPending, freeConversationMode]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -796,18 +844,25 @@ export function Chat({
         />
 
         <form onSubmit={handleSend} className="flex items-end gap-2 bg-muted/30 p-2 rounded-3xl border border-border/50 focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/50 transition-all">
-          {/* Microphone button */}
+          {/* Microphone button — disabled when AYA is speaking (echo prevention) */}
+          {(() => {
+            const echoLocked = freeConversationMode && voiceSpeaker.speakerState !== "idle";
+            return (
           <button
             type="button"
             onClick={handleMicToggle}
-            disabled={isTranscribing}
-            title={isRecording ? voiceLabels.stop : voiceLabels.mic}
+            disabled={isTranscribing || echoLocked}
+            title={echoLocked ? (hwLang === "bg" ? "AYA говори…" : hwLang === "es" ? "AYA está hablando…" : "AYA is speaking…") : isRecording ? voiceLabels.stop : voiceLabels.mic}
             className={cn(
               "p-3 transition-all rounded-full flex-shrink-0",
               isRecording
                 ? "text-white bg-red-500 hover:bg-red-600 shadow-md shadow-red-200 animate-pulse"
                 : isTranscribing
                 ? "text-violet-500 bg-violet-100"
+                : echoLocked
+                ? "text-amber-400 bg-amber-50 opacity-60 cursor-not-allowed"
+                : freeConversationMode
+                ? "text-white bg-green-500 hover:bg-green-600 shadow-md shadow-green-200"
                 : "text-muted-foreground hover:text-violet-600 hover:bg-violet-50"
             )}
           >
@@ -819,6 +874,8 @@ export function Chat({
               <Mic className="w-5 h-5" />
             )}
           </button>
+            );
+          })()}
 
           {/* Camera button — junior only */}
           {isJunior && (

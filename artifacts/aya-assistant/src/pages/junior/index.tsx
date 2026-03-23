@@ -872,13 +872,13 @@ export function Junior() {
 
   const { data: missions = [] } = useListMissions(
     { childId: activeChildIdResolved ?? 0 },
-    { query: { queryKey: getListMissionsQueryKey({ childId: activeChildIdResolved ?? 0 }), enabled: !!activeChildIdResolved } }
+    { query: { queryKey: getListMissionsQueryKey({ childId: activeChildIdResolved ?? 0 }), enabled: !!activeChildIdResolved, staleTime: 5 * 60 * 1000 } }
   );
 
   /* ── Phase 1 Gamification: Fetch progress to calculate streak ────── */
   const { data: progress = [] } = useListProgress(
     { childId: activeChildIdResolved ?? 0 },
-    { query: { queryKey: getListProgressQueryKey({ childId: activeChildIdResolved ?? 0 }), enabled: !!activeChildIdResolved } }
+    { query: { queryKey: getListProgressQueryKey({ childId: activeChildIdResolved ?? 0 }), enabled: !!activeChildIdResolved, staleTime: 5 * 60 * 1000 } }
   );
   const dailyStreak = calculateStreakFromProgressDates(
     progress.map(p => new Date(p.createdAt))

@@ -379,7 +379,7 @@ export function WorldMap() {
   const { data: children = [] } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
   const { data: missions = [], refetch } = useListMissions(
     { childId: activeChildId || 0 },
-    { query: { queryKey: getListMissionsQueryKey({ childId: activeChildId || 0 }), enabled: !!activeChildId } }
+    { query: { queryKey: getListMissionsQueryKey({ childId: activeChildId || 0 }), enabled: !!activeChildId, staleTime: 5 * 60 * 1000 } }
   );
 
   // DEBUG: Log rendered missions for verification

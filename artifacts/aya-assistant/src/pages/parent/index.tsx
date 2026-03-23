@@ -1043,11 +1043,11 @@ export function ParentDashboard() {
   const progressChildId = selectedChildId ?? children[0]?.id ?? 0;
   const { data: progress = [] } = useListProgress(
     { childId: progressChildId },
-    { query: { queryKey: getListProgressQueryKey({ childId: progressChildId }), enabled: children.length > 0 && progressChildId > 0 } }
+    { query: { queryKey: getListProgressQueryKey({ childId: progressChildId }), enabled: children.length > 0 && progressChildId > 0, staleTime: 5 * 60 * 1000 } }
   );
   const { data: missions = [] } = useListMissions(
     { childId: progressChildId },
-    { query: { queryKey: getListMissionsQueryKey({ childId: progressChildId }), enabled: children.length > 0 && progressChildId > 0 } }
+    { query: { queryKey: getListMissionsQueryKey({ childId: progressChildId }), enabled: children.length > 0 && progressChildId > 0, staleTime: 5 * 60 * 1000 } }
   );
 
   const progressChild = children.find(c => c.id === progressChildId);

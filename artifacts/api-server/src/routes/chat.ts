@@ -194,7 +194,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
       // Phase 1: Try cheap local math solver first
       // Skips expensive OpenAI Stage 2 if simple arithmetic detected
       console.log(`[AYA_HOMEWORK] ${requestId} attempting Stage 1 simple math solver...`);
-      const simpleMathResult = await trySimpleMathSolve(imageBase64, imageMimeType, resolvedLang, openai, requestId);
+      const simpleMathResult = await trySimpleMathSolve(imageBase64, imageMimeType, resolvedLang, openai, requestId, db, childId ?? undefined);
 
       if (simpleMathResult) {
         console.log(`[AYA_HOMEWORK] ${requestId} STAGE_1_SUCCESS`);

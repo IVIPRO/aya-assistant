@@ -11,3 +11,4 @@ export * from "./progress";
 export * from "./sessions";
 export * from "./topicProgress";
 export * from "./dailyPlan";
+export * from "./weaknessStats";

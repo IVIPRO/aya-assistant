@@ -293,6 +293,7 @@ export const SendChatMessageBody = zod.object({
   module: zod.enum(["junior", "student", "family", "psychology"]),
   content: zod.string(),
   childId: zod.number().nullish(),
+  mode: zod.enum(["free_conversation"]).nullish(),
 });
 
 /**
@@ -568,6 +569,25 @@ export const GetLearningWeaknessesResponse = zod.object({
     }),
   ),
 });
+
+/**
+ * @summary Get weekly parent insights for a child
+ */
+export const GetLearningWeeklyInsightsQueryParams = zod.object({
+  childId: zod.coerce.number(),
+});
+
+export const GetLearningWeeklyInsightsResponse = zod.unknown();
+
+/**
+ * @summary Get teacher-ready export data for a child
+ */
+export const GetLearningTeacherExportQueryParams = zod.object({
+  childId: zod.coerce.number(),
+  grade: zod.coerce.number().optional(),
+});
+
+export const GetLearningTeacherExportResponse = zod.unknown();
 
 /**
  * @summary Get or generate today's daily learning plan for a child

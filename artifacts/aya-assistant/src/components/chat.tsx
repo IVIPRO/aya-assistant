@@ -390,9 +390,10 @@ export function Chat({
     const fullContent = subjectContext
       ? `${metaLbl.subjectPrefix}: ${subjectContext.subjectLabel}${subjectContext.topicLabel ? ` | ${metaLbl.topicPrefix}: ${subjectContext.topicLabel}` : ""}\n${content}`
       : content;
-    console.log("[VOICE_SEND_PAYLOAD] Sending", { module, content: fullContent, childId: activeChildId });
+    const sendMode = freeConversationMode ? "free_conversation" : undefined;
+    console.log("[VOICE_SEND_PAYLOAD] Sending", { module, content: fullContent, childId: activeChildId, mode: sendMode });
     sendMutation.mutate(
-      { data: { module, content: fullContent, childId: activeChildId } },
+      { data: { module, content: fullContent, childId: activeChildId, mode: sendMode } },
       {
         onSuccess: () => {
           console.log("[VOICE_SEND_RESPONSE] Success");

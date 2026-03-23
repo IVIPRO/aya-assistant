@@ -14,6 +14,16 @@ function getOpenAI() {
   return new OpenAI({ baseURL, apiKey });
 }
 
+// The AI integration proxy does not support POST /audio/speech.
+// This client targets api.openai.com directly, which does support TTS.
+function getOpenAIForTTS(): OpenAI {
+  const apiKey =
+    process.env.AI_INTEGRATIONS_OPENAI_API_KEY ??
+    process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error("No OpenAI API key available for TTS");
+  return new OpenAI({ apiKey }); // no baseURL → api.openai.com
+}
+
 function langToLocale(lang: string): string {
   if (lang === "bg" || lang.toLowerCase().includes("bulgar")) return "bg";
   if (lang === "es" || lang.toLowerCase().includes("spanish")) return "es";
@@ -103,11 +113,11 @@ router.post("/voice/speak", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  let openai: OpenAI;
+  let ttsClient: OpenAI;
   try {
-    openai = getOpenAI();
+    ttsClient = getOpenAIForTTS();
   } catch {
-    res.status(500).json({ error: "AI service not configured" });
+    res.status(500).json({ error: "TTS service not configured" });
     return;
   }
 
@@ -118,7 +128,8 @@ router.post("/voice/speak", requireAuth, async (req, res): Promise<void> => {
     resolvedLang === "es" ? "nova" :
     "nova";
 
-  const speechResponse = await openai.audio.speech.create({
+  console.log("[TTS] SDK_PATH_ACTIVE");
+  const speechResponse = await ttsClient.audio.speech.create({
     model: "gpt-4o-mini-tts",
     voice,
     input: text.slice(0, 4000),

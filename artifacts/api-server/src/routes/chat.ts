@@ -255,6 +255,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
             leftProblems = leftCompletion.choices[0]?.message?.content ?? "";
             const leftCount = (leftProblems.match(/\n/g) || []).length + 1;
             console.log(`[AYA_HOMEWORK] ${requestId} LEFT column: ${leftCount} problems detected`);
+            console.log(`[TRACE] OCR Stage 2 LEFT: ${leftCount} problems - "${leftProblems.substring(0, 100)}..."`);
 
             // Extract problems from right column
             console.log(`[AYA_HOMEWORK] ${requestId} Extracting problems from RIGHT column...`);
@@ -275,10 +276,13 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
             rightProblems = rightCompletion.choices[0]?.message?.content ?? "";
             const rightCount = (rightProblems.match(/\n/g) || []).length + 1;
             console.log(`[AYA_HOMEWORK] ${requestId} RIGHT column: ${rightCount} problems detected`);
+            console.log(`[TRACE] OCR Stage 2 RIGHT: ${rightCount} problems - "${rightProblems.substring(0, 100)}..."`);
             
             // Merge: left column first, then right column
             problemsMerged = (leftProblems + "\n" + rightProblems).trim();
-            console.log(`[AYA_HOMEWORK] ${requestId} MERGED: LEFT + RIGHT = ${leftCount + rightCount} total problems`);
+            const totalMerged = leftCount + rightCount;
+            console.log(`[AYA_HOMEWORK] ${requestId} MERGED: LEFT + RIGHT = ${totalMerged} total problems`);
+            console.log(`[TRACE] OCR Stage 2 MERGED: ${totalMerged} problems detected (${leftCount} left + ${rightCount} right)`);
           }
         } catch (splitErr) {
           console.error(`[AYA_HOMEWORK] ${requestId} Image splitting failed:`, splitErr);
@@ -302,11 +306,13 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
         const problemsInPrompt = problemsMerged ? (problemsMerged.match(/\n/g) || []).length + 1 : 0;
         console.log(`[AYA_HOMEWORK] ${requestId} Prompt builder: found ${problemsInPrompt} problems in merged text`);
         console.log(`[AYA_HOMEWORK] ${requestId} User prompt length: ${userPrompt.length}`);
+        console.log(`[TRACE] Before OpenAI: ${problemsInPrompt} problems in prompt`);
 
         const validMime = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(imageMimeType)
           ? (imageMimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp")
           : "image/jpeg";
 
+        console.log(`[TRACE] Calling OpenAI with ${problemsInPrompt} problems...`);
         const completion = await getOpenAIClient().chat.completions.create({
           model: "gpt-5.2",
           max_completion_tokens: 2048,
@@ -327,8 +333,10 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
         aiContent = completion.choices[0]?.message?.content ?? "";
         const responseLines = aiContent.split('\n').filter(l => l.length > 0);
         const emojiCount = (aiContent.match(/[1-9️⃣🔟]/g) || []).length;
+        const problemsInResponse = (aiContent.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
         console.log(`[AYA_HOMEWORK] ${requestId} OpenAI response: ${aiContent.length} chars, ${responseLines.length} lines, ~${emojiCount} emoji problems`);
         console.log(`[AYA_HOMEWORK] ${requestId} Response content: ${aiContent.substring(0, 200)}...`);
+        console.log(`[TRACE] After OpenAI: response has ${problemsInResponse} emoji-numbered problems, ${responseLines.length} lines, ${aiContent.length} chars`);
       }
     } catch (error) {
       const lang = getLang(context.language);
@@ -351,6 +359,8 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
   }
 
   console.log(`[AYA_HOMEWORK] Before DB save: aiContent length = ${aiContent.length}, first 150 chars = "${aiContent.substring(0, 150)}"`);
+  const aiProblemsBeforeSave = (aiContent.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
+  console.log(`[TRACE] Problems in aiContent before DB save: ${aiProblemsBeforeSave}`);
 
   const [assistantMsg] = await db
     .insert(chatMessagesTable)
@@ -358,6 +368,8 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
     .returning();
 
   console.log(`[AYA_HOMEWORK] After DB save: assistantMsg.content length = ${assistantMsg.content.length}`);
+  const aiProblemsAfterSave = (assistantMsg.content.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
+  console.log(`[TRACE] Problems in assistantMsg after DB save: ${aiProblemsAfterSave}`);
 
   await db.insert(memoriesTable).values({
     userId,
@@ -368,6 +380,8 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
   });
 
   console.log(`[AYA_HOMEWORK] Response being sent: ${assistantMsg.content.length} chars, content: "${assistantMsg.content.substring(0, 150)}"`);
+  const finalProblems = (assistantMsg.content.match(/[1️⃣2️⃣3️⃣4️⃣5️⃣6️⃣7️⃣8️⃣9️⃣🔟]/g) || []).length;
+  console.log(`[TRACE] FINAL: Sent to frontend ${finalProblems} emoji-numbered problems`);
   res.status(201).json({ userMessage: userMsg, assistantMessage: assistantMsg });
 });
 

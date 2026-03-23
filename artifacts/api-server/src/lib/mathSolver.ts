@@ -296,6 +296,7 @@ function getLocalizedMathResponse(
  */
 function detectMultipleSimpleMathProblems(extractedText: string): SimpleMathMultiResult {
   const lines = extractedText.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+  console.log(`[TRACE] detectMultipleSimpleMathProblems: input text has ${lines.length} non-empty lines`);
   
   // Try to detect math on each line
   const problems: SimpleMathProblem[] = [];
@@ -311,15 +312,21 @@ function detectMultipleSimpleMathProblems(extractedText: string): SimpleMathMult
         answer: mathResult.answer,
         error: mathResult.error,
       });
+      console.log(`[TRACE] Detected problem ${problems.length}: ${mathResult.expression} = ${mathResult.answer}`);
     }
   }
   
+  console.log(`[TRACE] After parsing: ${problems.length} valid problems detected from ${lines.length} lines`);
+  
   // Determine mode based on number of problems detected
   if (problems.length === 0) {
+    console.log(`[TRACE] Mode: none (no problems found)`);
     return { mode: "none" };
   } else if (problems.length === 1) {
+    console.log(`[TRACE] Mode: single (1 problem)`);
     return { mode: "single", problems };
   } else {
+    console.log(`[TRACE] Mode: multi (${problems.length} problems)`);
     return { mode: "multi", problems };
   }
 }
@@ -459,26 +466,31 @@ async function trySimpleMathSolve(
     
     console.log(`[AYA_HOMEWORK] ${reqId} detection mode: ${multiResult.mode}`);
     console.log(`[AYA_HOMEWORK] ${reqId} problems found: ${multiResult.problems?.length ?? 0}`);
+    console.log(`[TRACE] Stage 1 result: mode=${multiResult.mode}, problems=${multiResult.problems?.length ?? 0}`);
 
     if (multiResult.mode === "none") {
       // No valid math problems detected - return null to use full vision analysis
       console.log(`[AYA_HOMEWORK] ${reqId} no simple math detected - falling back to full vision analysis`);
+      console.log(`[TRACE] Stage 1 returning null (no problems)`);
       return null;
     } else if (multiResult.mode === "single" && multiResult.problems && multiResult.problems.length === 1) {
       // Single problem detected - use single-problem teacher mode
       const problem = multiResult.problems[0];
       console.log(`[AYA_HOMEWORK] ${reqId} STAGE_1_SUCCESS (single problem)`);
       console.log(`[AYA_HOMEWORK] ${reqId} expression: ${problem.expression}, answer: ${problem.answer}`);
+      console.log(`[TRACE] Stage 1 returning single problem response (1 problem)`);
       const response = getLocalizedMathResponse(lang, problem.expression, problem.answer, problem.error);
       return response;
     } else if (multiResult.mode === "multi" && multiResult.problems && multiResult.problems.length > 1) {
       // Multiple problems detected - use multi-problem teacher mode
       console.log(`[AYA_HOMEWORK] ${reqId} STAGE_1_SUCCESS (multi-problem mode)`);
       console.log(`[AYA_HOMEWORK] ${reqId} total problems: ${multiResult.problems.length}`);
+      console.log(`[TRACE] Stage 1 returning multi-problem response (${multiResult.problems.length} problems)`);
       multiResult.problems.forEach((p, i) => {
         console.log(`[AYA_HOMEWORK] ${reqId} problem ${i + 1}: ${p.expression} = ${p.answer}`);
       });
       const response = generateMultiProblemResponse(lang, multiResult.problems);
+      console.log(`[TRACE] Generated multi-problem response: ${response.length} chars`);
       return response;
     }
 

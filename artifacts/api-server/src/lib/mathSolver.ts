@@ -291,6 +291,50 @@ async function persistWeaknessStats(
 }
 
 /**
+ * Generates 5 practice problems for a given weakness category
+ * Used for AI Personal Learning Path
+ */
+function generateLearningPathProblems(category: string): string[] {
+  if (category.includes("addition_to_10")) {
+    return ["2 + 3", "4 + 5", "3 + 4", "1 + 7", "5 + 4"];
+  } else if (category.includes("addition_over_10")) {
+    return ["8 + 7", "9 + 6", "5 + 8", "7 + 6", "9 + 4"];
+  } else if (category.includes("subtraction_to_10")) {
+    return ["9 - 4", "8 - 3", "7 - 2", "6 - 4", "10 - 5"];
+  } else if (category.includes("subtraction")) {
+    return ["15 - 7", "12 - 5", "18 - 9", "14 - 6", "17 - 8"];
+  } else if (category.includes("multiplication")) {
+    return ["3 × 4", "5 × 2", "6 × 3", "4 × 4", "7 × 2"];
+  } else if (category.includes("division")) {
+    return ["12 ÷ 3", "15 ÷ 5", "20 ÷ 4", "16 ÷ 2", "18 ÷ 6"];
+  }
+  return ["2 + 3", "4 + 5", "3 + 4", "1 + 7", "5 + 4"];
+}
+
+/**
+ * Persists AI learning path to database
+ * Stores priority topic and 5 generated practice problems
+ */
+async function persistLearningPath(
+  db: any,
+  childId: number,
+  priorityTopic: string,
+  generatedPractice: string[]
+): Promise<void> {
+  try {
+    const { learningPathTable } = await import("@workspace/db");
+    await db.insert(learningPathTable).values({
+      childId,
+      priorityTopic,
+      generatedPractice,
+    });
+    console.log(`[ADAPTIVE_PRACTICE] learning_path saved childId=${childId} priority_topic=${priorityTopic} generated_problems=5`);
+  } catch (err) {
+    console.error(`[ADAPTIVE_PRACTICE] Failed to persist learning path:`, err);
+  }
+}
+
+/**
  * Categorizes a math problem by skill type
  * Returns: "addition", "subtraction", "multiplication", "division"
  */
@@ -783,7 +827,7 @@ async function generateMultiProblemResponse(
         response += `${emoji} ${problem.expression} = ${problem.answer}\n`;
         
         // Add teacher explanation
-        const explanation = generateProblemExplanation(problem.expression, problem.answer);
+        const explanation = problem.answer !== undefined ? generateProblemExplanation(problem.expression, problem.answer) : "";
         if (explanation) {
           response += `   💡 ${explanation}\n`;
           explanationsGenerated++;
@@ -814,6 +858,12 @@ async function generateMultiProblemResponse(
       if (weakestCategory) {
         const adaptivePractice = generateAdaptivePractice(weakestCategory);
         response += `\n${adaptivePractice.formatted}`;
+
+        // Persist AI Learning Path for this child
+        if (db && childId) {
+          const learningPathProblems = generateLearningPathProblems(weakestCategory);
+          await persistLearningPath(db, childId, weakestCategory, learningPathProblems);
+        }
       } else {
         response += `\n${weaknessSummary.summary}\n`;
         response += `${weaknessSummary.practice_suggestion}`;

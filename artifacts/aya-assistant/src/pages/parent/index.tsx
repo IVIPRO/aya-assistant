@@ -229,6 +229,9 @@ const PARENT_LABELS: Record<ParentLang, {
   improvementAreasEmpty: string;
   weakLabelMap: Record<string, string>;
   weakRecommendationMap: Record<string, string>;
+  aiLearningFocusTitle: string;
+  aiLearningFocusEmpty: string;
+  aiLearningFocusFocus: (topic: string, count: number) => string;
 }> = {
   en: {
     tabMemories: "Memory Engine",
@@ -301,6 +304,9 @@ const PARENT_LABELS: Record<ParentLang, {
       weak_topic: "Recommended for review",
       recommended_review: "Recommended for review",
     },
+    aiLearningFocusTitle: "Today's AI Learning Focus",
+    aiLearningFocusEmpty: "No learning path yet — complete a homework session to generate one!",
+    aiLearningFocusFocus: (topic, count) => `Focus today: ${topic} practice (${count} problems)`,
   },
   bg: {
     tabMemories: "Паметта на AYA",
@@ -373,6 +379,9 @@ const PARENT_LABELS: Record<ParentLang, {
       weak_topic: "Препоръчано за преговор",
       recommended_review: "Препоръчано за преговор",
     },
+    aiLearningFocusTitle: "Днешна AI учебна фокус тема",
+    aiLearningFocusEmpty: "Все още няма учебен път — завърши домашна работа!",
+    aiLearningFocusFocus: (topic, count) => `Фокус днес: ${topic} (${count} задачи)`,
   },
   es: {
     tabMemories: "Memoria AYA",
@@ -445,6 +454,9 @@ const PARENT_LABELS: Record<ParentLang, {
       weak_topic: "Recomendado para repaso",
       recommended_review: "Recomendado para repaso",
     },
+    aiLearningFocusTitle: "Enfoque de aprendizaje AI de hoy",
+    aiLearningFocusEmpty: "Sin ruta de aprendizaje aún — ¡completa una tarea!",
+    aiLearningFocusFocus: (topic, count) => `Foco hoy: práctica de ${topic} (${count} problemas)`,
   },
   de: {
     tabMemories: "AI Familienerinnerung",
@@ -517,6 +529,9 @@ const PARENT_LABELS: Record<ParentLang, {
       weak_topic: "Zur Wiederholung empfohlen",
       recommended_review: "Zur Wiederholung empfohlen",
     },
+    aiLearningFocusTitle: "Heutiger KI-Lernfokus",
+    aiLearningFocusEmpty: "Noch kein Lernpfad — schließe eine Hausaufgabe ab!",
+    aiLearningFocusFocus: (topic, count) => `Fokus heute: ${topic} Übung (${count} Aufgaben)`,
   },
   fr: {
     tabMemories: "Mémoire familiale IA",
@@ -589,6 +604,9 @@ const PARENT_LABELS: Record<ParentLang, {
       weak_topic: "Recommandé pour révision",
       recommended_review: "Recommandé pour révision",
     },
+    aiLearningFocusTitle: "Focus d'apprentissage IA d'aujourd'hui",
+    aiLearningFocusEmpty: "Pas encore de parcours — complète un devoir !",
+    aiLearningFocusFocus: (topic, count) => `Focus aujourd'hui : pratique de ${topic} (${count} problèmes)`,
   },
 };
 
@@ -917,6 +935,71 @@ function ImprovementAreasCard({
               </div>
             </div>
           ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const TOPIC_LABELS: Record<string, Record<string, string>> = {
+  addition_to_10:      { en: "Addition (to 10)",     bg: "Събиране до 10",        es: "Suma (hasta 10)",     de: "Addition (bis 10)",      fr: "Addition (jusqu'à 10)" },
+  addition_over_10:    { en: "Addition (over 10)",   bg: "Събиране над 10",       es: "Suma (más de 10)",    de: "Addition (über 10)",     fr: "Addition (plus de 10)" },
+  subtraction_to_10:   { en: "Subtraction (to 10)",  bg: "Изваждане до 10",       es: "Resta (hasta 10)",    de: "Subtraktion (bis 10)",   fr: "Soustraction (jusqu'à 10)" },
+  subtraction:         { en: "Subtraction",           bg: "Изваждане",             es: "Resta",               de: "Subtraktion",            fr: "Soustraction" },
+  multiplication:      { en: "Multiplication",        bg: "Умножение",             es: "Multiplicación",      de: "Multiplikation",         fr: "Multiplication" },
+  division:            { en: "Division",              bg: "Деление",               es: "División",            de: "Division",               fr: "Division" },
+};
+
+function AILearningFocusCard({
+  childId,
+  lang,
+  plbl,
+}: {
+  childId: number;
+  lang: string;
+  plbl: { aiLearningFocusTitle: string; aiLearningFocusEmpty: string; aiLearningFocusFocus: (topic: string, count: number) => string };
+}) {
+  const { data } = useQuery<{ path: { priorityTopic: string; generatedPractice: string[]; createdAt: string } | null }>({
+    queryKey: ["learning-path", childId],
+    queryFn: async () => {
+      const res = await fetch(`/api/learning/path?childId=${childId}`);
+      if (!res.ok) return { path: null };
+      return res.json();
+    },
+    enabled: childId > 0,
+    staleTime: 60 * 1000,
+  });
+
+  const path = data?.path ?? null;
+  const topicLabel = path ? (TOPIC_LABELS[path.priorityTopic]?.[lang] ?? path.priorityTopic) : null;
+  const practiceCount = path ? (path.generatedPractice as string[]).length : 0;
+
+  return (
+    <div className="bg-blue-50 p-5 rounded-2xl border border-blue-200 shadow-sm">
+      <h3 className="font-bold mb-3 flex items-center gap-2 text-blue-800">
+        <BrainCircuit className="w-4 h-4 text-blue-600" />
+        {plbl.aiLearningFocusTitle}
+      </h3>
+      {!path ? (
+        <p className="text-sm text-blue-600 italic">{plbl.aiLearningFocusEmpty}</p>
+      ) : (
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-blue-800">
+            {plbl.aiLearningFocusFocus(topicLabel ?? "", practiceCount)}
+          </p>
+          <div className="flex flex-wrap gap-2 mt-2">
+            {(path.generatedPractice as string[]).map((problem, i) => (
+              <span
+                key={i}
+                className="bg-white border border-blue-200 rounded-lg px-3 py-1 text-sm font-mono text-blue-700"
+              >
+                {i + 1}. {problem}
+              </span>
+            ))}
+          </div>
+          <p className="text-[10px] text-blue-500 mt-1">
+            {new Date(path.createdAt).toLocaleDateString()}
+          </p>
         </div>
       )}
     </div>
@@ -1613,6 +1696,15 @@ export function ParentDashboard() {
           {progressChild && (
             <ImprovementAreasCard
               weakTopics={weakTopics}
+              lang={lang}
+              plbl={plbl}
+            />
+          )}
+
+          {/* ── Today's AI Learning Focus ─────────────────────────── */}
+          {progressChild && (
+            <AILearningFocusCard
+              childId={progressChild.id}
               lang={lang}
               plbl={plbl}
             />

@@ -9,7 +9,7 @@ import type { Badge, Child } from "@workspace/api-client-react";
 
 describe("Gamification Display", () => {
   test("streak renders when value is greater than zero", () => {
-    const streak = 3;
+    const streak: number = 3;
     const streakText = `🔥 ${streak} ${streak === 1 ? 'day' : 'days'}`;
     
     assert.equal(streakText, "🔥 3 days", "Should display 3 days streak");

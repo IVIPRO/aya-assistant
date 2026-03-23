@@ -667,7 +667,7 @@ export async function handleJuniorChat(
         ["addition", "subtraction", "multiplication", "division"].includes(t)
       );
       if (weakOp) {
-        op = weakOp;
+        op = weakOp as Operation;
       }
     }
     

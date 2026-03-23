@@ -11,6 +11,7 @@ export interface TaskWithMetadata {
   successRate?: number;
   baseXp: number;
   xpReward: number;
+  score?: number;
 }
 
 export interface SequencingContext {

@@ -183,7 +183,8 @@ router.post("/learning/complete", requireAuth, async (req, res): Promise<void> =
       id: badge.id,
       title: badge.title,
       icon: badge.icon,
-      earnedAt: new Date(),
+      description: badge.description ?? badge.title,
+      earnedAt: new Date().toISOString(),
     } as BadgeRecord));
   const streakDisplay = formatStreakDisplay(dailyStreak);
 
@@ -231,10 +232,7 @@ router.post("/learning/complete", requireAuth, async (req, res): Promise<void> =
     /* Gamification additions */
     dailyStreak,
     streakDisplay,
-    celebration: {
-      message: celebration.message,
-      emoji: celebration.emoji,
-    },
+    celebration: dailyStreak >= 3 ? { message: streakDisplay, emoji: "🎉" } : null,
     achievementsEarned: gamificationBadges,
   });
 });

@@ -3,6 +3,24 @@ import { db, missionsTable, childrenTable, progressTable, missionTasksTable, mem
 import { eq, and, desc } from "drizzle-orm";
 import { CompleteMissionParams, CompleteMissionBody } from "@workspace/api-zod";
 import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
+
+// In-memory cache for mission data (5 min TTL per child)
+const MISSIONS_CACHE = new Map<number, { missions: any[]; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function getCachedMissions(childId: number): any[] | null {
+  const cached = MISSIONS_CACHE.get(childId);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    console.log(`[MISSIONS_FETCH_SKIPPED] childId=${childId} (cache hit)`);
+    return cached.missions;
+  }
+  MISSIONS_CACHE.delete(childId);
+  return null;
+}
+
+function setCachedMissions(childId: number, missions: any[]): void {
+  MISSIONS_CACHE.set(childId, { missions, timestamp: Date.now() });
+}
 import { evaluateBadges, type BadgeStats } from "../lib/badges";
 import { 
   generateMissionTasks, 
@@ -43,15 +61,24 @@ router.get("/missions", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const missions = await db
-    .select()
-    .from(missionsTable)
-    .where(eq(missionsTable.childId, childId))
-    .orderBy(missionsTable.createdAt);
-
-  // Log mission fetches with cache awareness
-  console.log(`[MISSIONS_FETCH_ONCE] childId=${childId} country=${child.country} grade=${child.grade} totalMissions=${missions.length}`);
-  console.log(`[PROFILE_CACHE_MISS] childId=${childId} (initial fetch or stale)`);
+  // Check cache first
+  let missions = getCachedMissions(childId);
+  
+  if (!missions) {
+    // Cache miss — fetch from DB
+    console.log(`[PROFILE_CACHE_MISS] childId=${childId} (initial fetch or stale)`);
+    missions = await db
+      .select()
+      .from(missionsTable)
+      .where(eq(missionsTable.childId, childId))
+      .orderBy(missionsTable.createdAt);
+    
+    setCachedMissions(childId, missions);
+    console.log(`[MISSIONS_FETCH_ONCE] childId=${childId} country=${child.country} grade=${child.grade} totalMissions=${missions.length}`);
+  } else {
+    // Cache hit
+    console.log(`[PROFILE_CACHE_HIT] childId=${childId} totalMissions=${missions.length}`);
+  }
   
   const mathIslandMissions = missions.filter(m => m.zone === "Math Island");
   console.log(`[TRACE] Math Island missions (all): ${mathIslandMissions.map(m => m.title).join(", ")}`);
@@ -198,6 +225,10 @@ router.post("/missions/:id/complete", requireAuth, async (req, res): Promise<voi
       .set({ badgesEarned: [...existingBadges, ...newBadges] })
       .where(eq(childrenTable.id, mission.childId));
   }
+
+  // Invalidate missions cache when a mission completes
+  MISSIONS_CACHE.delete(mission.childId);
+  console.log(`[TASK_CONTEXT_RESET] cleared missions cache childId=${mission.childId}`);
 
   res.json({ ...updated, newBadges });
 });

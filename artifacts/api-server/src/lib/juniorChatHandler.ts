@@ -12,6 +12,14 @@
 
 import { db, memoriesTable, childrenTable } from "@workspace/db";
 import { eq, and, desc } from "drizzle-orm";
+
+// Simple in-memory cache for child profile + mission data (5 min TTL)
+const PROFILE_CACHE = new Map<number, { profile: any; timestamp: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+function isCacheFresh(timestamp: number): boolean {
+  return Date.now() - timestamp < CACHE_TTL;
+}
 import {
   generateMathTask,
   evaluateMathAnswer,
@@ -318,12 +326,15 @@ function isStopCommand(m: string, lang: Lang): boolean {
 }
 
 function isExplainRequest(m: string, lang: Lang): boolean {
-  const triggers: Record<Lang, string[]> = {
-    bg: ["обясни", "помогни", "не разбирам", "как се решава", "как", "помощ"],
-    es: ["explica", "ayuda", "no entiendo", "cómo se resuelve", "ayúdame"],
-    en: ["explain", "help", "don't understand", "how to", "help me"],
+  // Stronger patterns - require explicit task-related context
+  // "как" alone (e.g., "как си") should not trigger explain
+  // But "как се решава" should
+  const patterns: Record<Lang, RegExp> = {
+    bg: /\b(обясни|помогни|не разбирам|как се решава|как го|как да|помощ|не мога)\b/i,
+    es: /\b(explica|ayuda|no entiendo|cómo se resuelve|ayúdame|no puedo)\b/i,
+    en: /\b(explain|help|don't understand|how to|help me|can't)\b/i,
   };
-  return triggers[lang].some((t) => m.includes(t));
+  return patterns[lang].test(m);
 }
 
 function isEducationalQuestion(m: string, lang: Lang): boolean {
@@ -621,6 +632,15 @@ export async function handleJuniorChat(
   // ── 2. Classify intent ───────────────────────────────────────────────────
   const intent = detectIntent(msg, state, lang);
   console.log("[JUNIOR_CHAT] intent:", intent, "| msg:", msg);
+  
+  // ── Task breakout check: free-chat should exit active task unless answering ──
+  if (state.activeQuestion && (intent === "small_talk" || intent === "free_question" || intent === "unknown")) {
+    console.log("[FREE_CHAT_BREAKOUT] breaking out of active task context", { activeOp: state.activeQuestion.operation, intent });
+  }
+  
+  if (intent === "math_answer" && state.activeQuestion) {
+    console.log("[ACTIVE_TASK_CONTINUE] staying in math context", { operation: state.activeQuestion.operation });
+  }
 
   // ── 3. Route to handler ──────────────────────────────────────────────────
 

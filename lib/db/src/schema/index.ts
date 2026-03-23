@@ -12,3 +12,4 @@ export * from "./sessions";
 export * from "./topicProgress";
 export * from "./dailyPlan";
 export * from "./weaknessStats";
+export * from "./learningPath";

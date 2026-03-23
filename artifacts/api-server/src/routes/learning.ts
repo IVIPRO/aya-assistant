@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
-import { db, childrenTable, childTopicProgressTable, progressTable, dailyPlansTable } from "@workspace/db";
+import { db, childrenTable, childTopicProgressTable, progressTable, dailyPlansTable, learningPathTable } from "@workspace/db";
 import type { BadgeRecord, DailyPlanTask } from "@workspace/db";
-import { eq, and, gte } from "drizzle-orm";
+import { eq, and, gte, desc } from "drizzle-orm";
 import { requireAuth, getUser, getFamilyIdFromDb } from "../lib/auth";
 import {
   getLevel,
@@ -367,6 +367,45 @@ router.get("/learning/teacher-export", requireAuth, async (req, res): Promise<vo
 
   const exportData = await buildTeacherExport(childId, grade);
   res.json(exportData);
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   GET /api/learning/path?childId=
+   Return the latest AI-generated personal learning path for a child.
+───────────────────────────────────────────────────────────────── */
+router.get("/learning/path", requireAuth, async (req, res): Promise<void> => {
+  const childId = parseInt(req.query.childId as string, 10);
+  if (isNaN(childId)) {
+    res.status(400).json({ error: "childId is required" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
+
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const [latestPath] = await db
+    .select()
+    .from(learningPathTable)
+    .where(eq(learningPathTable.childId, childId))
+    .orderBy(desc(learningPathTable.createdAt))
+    .limit(1);
+
+  if (!latestPath) {
+    res.json({ path: null });
+    return;
+  }
+
+  res.json({ path: latestPath });
 });
 
 export default router;

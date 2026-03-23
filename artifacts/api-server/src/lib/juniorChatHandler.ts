@@ -705,9 +705,20 @@ export async function handleJuniorChat(
     return getMathHint(a, b, operation, childName, lang);
   }
 
+  // ── EARLY EXIT for conversational messages ────────────────────────────────
+  // Greetings, free questions, and unknown inputs must never be evaluated as
+  // lesson answers. Return the AI fallback immediately and skip everything below.
+  if (intent === "small_talk" || intent === "free_question" || intent === "unknown") {
+    if (state.postSuccessId !== null) {
+      await clearPostSuccess(childId, module);
+    }
+    console.log("[JUNIOR_CHAT] free_chat / early_return — skipping lesson eval", { intent });
+    return getAIResponse(module, msg, context);
+  }
+
   // ── BULGARIAN_LESSON_ANSWER ────────────────────────────────────────────────
-  // If there's an active Bulgarian lesson and message is not a subject request,
-  // evaluate it as an answer to the lesson prompt.
+  // Reached only when intent is structural (not small_talk / free_question / unknown).
+  // Evaluates the message as an answer to the active lesson prompt.
   const bgLessonState = await readBulgarianLessonState(childId, module);
   if (bgLessonState && requestedSubject === null) {
     const grade = bgLessonState.grade;

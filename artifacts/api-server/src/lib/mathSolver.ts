@@ -16,6 +16,8 @@ interface SimpleMathProblem {
   expression: string;
   answer?: number;
   error?: string;
+  studentAnswer?: number;  // Student's written answer (if detected)
+  hasStudentAnswer?: boolean;  // True if student already answered
 }
 
 interface SimpleMathMultiResult {
@@ -168,6 +170,55 @@ function generateProblemExplanation(expression: string, answer: number): string 
   }
   
   return "";
+}
+
+/**
+ * Detects if student already wrote an answer on homework
+ * Pattern: "expression = student_answer" (e.g., "7 + 5 = 11")
+ * Returns: { hasAnswer: boolean, expression: string, studentAnswer: number }
+ */
+function detectStudentAnswer(line: string): { hasAnswer: boolean; expression?: string; studentAnswer?: number } {
+  // Pattern: "number operator number = number"
+  // Examples: "7 + 5 = 11", "3 × 4 = 12", "12 ÷ 3 = 4"
+  const pattern = /^(\d+)\s*([+\-*\/x×÷])\s*(\d+)\s*=\s*(\d+)$/i;
+  
+  const match = line.trim().match(pattern);
+  if (!match) {
+    return { hasAnswer: false };
+  }
+  
+  const [, num1Str, opStr, num2Str, answerStr] = match;
+  const expression = `${num1Str} ${opStr} ${num2Str}`;
+  const studentAnswer = parseInt(answerStr, 10);
+  
+  console.log(`[MISTAKE_DETECTION] Student answer detected: "${expression}" = ${studentAnswer}`);
+  return { hasAnswer: true, expression, studentAnswer };
+}
+
+/**
+ * Generates teacher feedback for student homework answer
+ * Compares student answer with correct answer
+ * Returns Bulgarian feedback message
+ */
+function generateMistakeFeedback(expression: string, studentAnswer: number, correctAnswer: number): { feedback: string; isCorrect: boolean } {
+  const isCorrect = studentAnswer === correctAnswer;
+  
+  console.log(`[MISTAKE_DETECTION] student_answer=${studentAnswer} correct_answer=${correctAnswer} is_correct=${isCorrect}`);
+  
+  if (isCorrect) {
+    // Correct answer - praise
+    return {
+      feedback: "Браво! Това е правилно. ✅",
+      isCorrect: true
+    };
+  } else {
+    // Incorrect answer - constructive feedback
+    const feedback = `Почти вярно 🙂\n${expression} = ${correctAnswer}\nНека преброим заедно.`;
+    return {
+      feedback,
+      isCorrect: false
+    };
+  }
 }
 
 /**
@@ -369,6 +420,9 @@ function detectMultipleSimpleMathProblems(extractedText: string): SimpleMathMult
     console.log(`\n[MULTI_PARSE] ===== LINE ${i + 1} / ${lines.length} =====`);
     console.log(`[MULTI_PARSE] Raw line: "${line}"`);
     
+    // STEP 1: Check if student already wrote an answer (before normalization)
+    const studentAnswerInfo = detectStudentAnswer(line);
+    
     // Normalize OCR math symbols before parsing (ONLY for this line)
     const normalizedLine = normalizeMathSymbols(line);
     console.log(`[MULTI_PARSE] After symbol normalization: "${normalizedLine}"`);
@@ -379,13 +433,22 @@ function detectMultipleSimpleMathProblems(extractedText: string): SimpleMathMult
     
     if (mathResult.detected && mathResult.expression && mathResult.answer !== undefined) {
       // Verify expression matches the line we just parsed
-      problems.push({
+      const problem: SimpleMathProblem = {
         lineNumber: i + 1,
         expression: mathResult.expression,
         answer: mathResult.answer,
         error: mathResult.error,
-      });
-      console.log(`[MULTI_PARSE] ✓ Problem ${problems.length} added: "${mathResult.expression}" = ${mathResult.answer}`);
+        hasStudentAnswer: studentAnswerInfo.hasAnswer,
+        studentAnswer: studentAnswerInfo.studentAnswer,
+      };
+      
+      problems.push(problem);
+      
+      if (studentAnswerInfo.hasAnswer) {
+        console.log(`[MULTI_PARSE] ✓ Problem ${problems.length} added with student answer: "${mathResult.expression}" = ${studentAnswerInfo.studentAnswer} (correct: ${mathResult.answer})`);
+      } else {
+        console.log(`[MULTI_PARSE] ✓ Problem ${problems.length} added: "${mathResult.expression}" = ${mathResult.answer}`);
+      }
     } else {
       console.log(`[MULTI_PARSE] ✗ No valid math detected on this line`);
     }
@@ -436,14 +499,28 @@ function generateMultiProblemResponse(
       const problem = problems[i];
       const emoji = emojis[i] || `${i + 1}.`;
       
-      // Problem with answer
-      response += `${emoji} ${problem.expression} = ${problem.answer}\n`;
-      
-      // Add teacher explanation
-      const explanation = generateProblemExplanation(problem.expression, problem.answer);
-      if (explanation) {
-        response += `   💡 ${explanation}\n`;
+      // Check if student already wrote an answer
+      if (problem.hasStudentAnswer && problem.studentAnswer !== undefined) {
+        // Show mistake detection feedback
+        const mistakeFeedback = generateMistakeFeedback(
+          problem.expression,
+          problem.studentAnswer,
+          problem.answer || 0
+        );
+        
+        response += `${emoji} ${problem.expression} = ${problem.studentAnswer}\n`;
+        response += `   ${mistakeFeedback.feedback}\n`;
         explanationsGenerated++;
+      } else {
+        // No student answer - show our solution with explanation
+        response += `${emoji} ${problem.expression} = ${problem.answer}\n`;
+        
+        // Add teacher explanation
+        const explanation = generateProblemExplanation(problem.expression, problem.answer);
+        if (explanation) {
+          response += `   💡 ${explanation}\n`;
+          explanationsGenerated++;
+        }
       }
       
       response += "\n";

@@ -5,6 +5,7 @@ import { SendChatMessageBody } from "@workspace/api-zod";
 import { requireAuth, getUser } from "../lib/auth";
 import { getAIResponse, getLang } from "../lib/aiResponses";
 import { handleJuniorChat } from "../lib/juniorChatHandler";
+import { handleFreeConversationChat } from "../lib/freeConversationHandler";
 import { trySimpleMathSolve } from "../lib/mathSolver";
 import OpenAI from "openai";
 
@@ -117,7 +118,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
     return;
   }
 
-  const { module, content, childId } = parsed.data;
+  const { module, content, childId, mode } = parsed.data;
 
   const imageMatch = content.match(/^\[IMAGE_DATA:([^:]+):([^:]+):([^\]]+)\]/);
   const hasImage = !!imageMatch;
@@ -361,8 +362,14 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
 
   // ── UNIFIED CHAT HANDLER ─────────────────────────────────────────────────
   } else if (module === "junior" && childId) {
-    // Single unified pipeline for typed and voice — no separate paths
-    aiContent = await handleJuniorChat(userId, childId, module, cleanContent, context);
+    if (mode === "free_conversation") {
+      // Free conversation: OpenAI-first, then internal tools only if action detected
+      const openai = getOpenAIClient();
+      aiContent = await handleFreeConversationChat(userId, childId, module, cleanContent, context, openai);
+    } else {
+      // Structured learning: internal-first (math engine, BG lessons, etc.)
+      aiContent = await handleJuniorChat(userId, childId, module, cleanContent, context);
+    }
 
   } else {
     // Non-junior modules

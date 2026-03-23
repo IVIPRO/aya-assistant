@@ -942,6 +942,10 @@ components:
           type: string
         childId:
           type: ["integer", "null"]
+        mode:
+          type: string
+          enum: [free_conversation]
+          nullable: true
       required: [module, content]
 
     ChatMessage:

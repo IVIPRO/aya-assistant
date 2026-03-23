@@ -35,7 +35,9 @@ import type {
   Family,
   FamilyTask,
   GetDailyPlanParams,
+  GetLearningTeacherExportParams,
   GetLearningWeaknessesParams,
+  GetLearningWeeklyInsightsParams,
   HealthStatus,
   ListChatMessagesParams,
   ListMemoriesParams,
@@ -48,11 +50,13 @@ import type {
   Progress,
   RegisterBody,
   SendChatMessageBody,
+  TeacherExport,
   UpdateChildBody,
   UpdateDailyPlanTaskBody,
   UpdateFamilyTaskBody,
   User,
   WeaknessResponse,
+  WeeklyInsights,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -2414,6 +2418,212 @@ export function useGetLearningWeaknesses<
   },
 ): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getGetLearningWeaknessesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get weekly parent insights for a child
+ */
+export const getGetLearningWeeklyInsightsUrl = (
+  params: GetLearningWeeklyInsightsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/learning/weekly-insights?${stringifiedParams}`
+    : `/api/learning/weekly-insights`;
+};
+
+export const getLearningWeeklyInsights = async (
+  params: GetLearningWeeklyInsightsParams,
+  options?: RequestInit,
+): Promise<WeeklyInsights> => {
+  return customFetch<WeeklyInsights>(getGetLearningWeeklyInsightsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetLearningWeeklyInsightsQueryKey = (
+  params?: GetLearningWeeklyInsightsParams,
+) => {
+  return [
+    `/api/learning/weekly-insights`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetLearningWeeklyInsightsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLearningWeeklyInsights>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetLearningWeeklyInsightsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLearningWeeklyInsights>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetLearningWeeklyInsightsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getLearningWeeklyInsights>>
+  > = ({ signal }) =>
+    getLearningWeeklyInsights(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getLearningWeeklyInsights>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetLearningWeeklyInsightsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getLearningWeeklyInsights>>
+>;
+export type GetLearningWeeklyInsightsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get weekly parent insights for a child
+ */
+
+export function useGetLearningWeeklyInsights<
+  TData = Awaited<ReturnType<typeof getLearningWeeklyInsights>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetLearningWeeklyInsightsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLearningWeeklyInsights>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetLearningWeeklyInsightsQueryOptions(
+    params,
+    options,
+  );
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get teacher-ready export data for a child
+ */
+export const getGetLearningTeacherExportUrl = (
+  params: GetLearningTeacherExportParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/learning/teacher-export?${stringifiedParams}`
+    : `/api/learning/teacher-export`;
+};
+
+export const getLearningTeacherExport = async (
+  params: GetLearningTeacherExportParams,
+  options?: RequestInit,
+): Promise<TeacherExport> => {
+  return customFetch<TeacherExport>(getGetLearningTeacherExportUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetLearningTeacherExportQueryKey = (
+  params?: GetLearningTeacherExportParams,
+) => {
+  return [`/api/learning/teacher-export`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetLearningTeacherExportQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLearningTeacherExport>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetLearningTeacherExportParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLearningTeacherExport>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetLearningTeacherExportQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getLearningTeacherExport>>
+  > = ({ signal }) =>
+    getLearningTeacherExport(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getLearningTeacherExport>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetLearningTeacherExportQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getLearningTeacherExport>>
+>;
+export type GetLearningTeacherExportQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get teacher-ready export data for a child
+ */
+
+export function useGetLearningTeacherExport<
+  TData = Awaited<ReturnType<typeof getLearningTeacherExport>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetLearningTeacherExportParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLearningTeacherExport>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetLearningTeacherExportQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;

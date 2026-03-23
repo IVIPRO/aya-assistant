@@ -183,11 +183,20 @@ export const SendChatMessageBodyModule = {
   psychology: "psychology",
 } as const;
 
+export type SendChatMessageBodyMode =
+  | (typeof SendChatMessageBodyMode)[keyof typeof SendChatMessageBodyMode]
+  | null;
+
+export const SendChatMessageBodyMode = {
+  free_conversation: "free_conversation",
+} as const;
+
 export interface SendChatMessageBody {
   module: SendChatMessageBodyModule;
   content: string;
   /** @nullable */
   childId?: number | null;
+  mode?: SendChatMessageBodyMode;
 }
 
 export type ChatMessageRole =
@@ -526,6 +535,15 @@ export type ListProgressParams = {
 
 export type GetLearningWeaknessesParams = {
   childId: number;
+};
+
+export type GetLearningWeeklyInsightsParams = {
+  childId: number;
+};
+
+export type GetLearningTeacherExportParams = {
+  childId: number;
+  grade?: number;
 };
 
 export type GetDailyPlanParams = {

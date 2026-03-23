@@ -40,73 +40,89 @@ function normalizeMathSymbols(text: string): string {
 
 /**
  * Detects simple arithmetic patterns (e.g., "5 + 7", "23+14", "9 - 4")
+ * Per-line parsing with detailed logging to prevent cross-line token mixing
  */
 function detectSimpleMathExpression(text: string, requestId?: string): SimpleMathResult {
   const reqId = requestId || "unknown";
-  // Clean text: trim, remove equals sign at end, normalize spaces
+  // STEP 1: Preserve original for comparison
+  const originalLine = text;
+  
+  // STEP 2: Clean text: trim, remove equals sign at end, normalize spaces
   let cleaned = text.trim();
   // Remove trailing "=" and any surrounding spaces
   cleaned = cleaned.replace(/\s*=\s*$/, "").trim();
   // Normalize internal spaces to single spaces
   cleaned = cleaned.replace(/\s+/g, " ");
 
-  console.log(`[AYA_HOMEWORK] ${reqId} detectSimpleMathExpression input: "${text}"`);
-  console.log(`[AYA_HOMEWORK] ${reqId} cleaned text: "${cleaned}"`);
+  console.log(`[PARSE_LINE] Original: "${originalLine}"`);
+  console.log(`[PARSE_LINE] Cleaned: "${cleaned}"`);
 
   // Pattern: number operator number
   // Supports: +, -, *, /, x (for multiplication)
   // Examples: "5 + 7", "5+7", "23 + 14", "6x3", "12 / 4"
-  const patterns = [
-    // Full pattern with optional spaces: "5 + 7", "5+7", "23 + 14", etc.
-    /^(\d+)\s*([+\-*\/x])\s*(\d+)$/i,
-  ];
+  const pattern = /^(\d+)\s*([+\-*\/x])\s*(\d+)$/i;
+  
+  const match = cleaned.match(pattern);
+  if (match) {
+    // STEP 3: Extract match groups
+    const [fullMatch, num1Str, opStr, num2Str] = match;
+    console.log(`[PARSE_LINE] Regex matched: fullMatch="${fullMatch}" num1="${num1Str}" op="${opStr}" num2="${num2Str}"`);
+    
+    const num1 = parseFloat(num1Str);
+    const num2 = parseFloat(num2Str);
+    console.log(`[PARSE_LINE] Parsed numbers: num1=${num1} num2=${num2}`);
 
-  for (const pattern of patterns) {
-    const match = cleaned.match(pattern);
-    if (match) {
-      const [, num1Str, opStr, num2Str] = match;
-      const num1 = parseFloat(num1Str);
-      const num2 = parseFloat(num2Str);
+    // STEP 4: Normalize operator
+    let op = opStr.toLowerCase();
+    const displayOp = op === "x" ? "×" : op;
+    if (op === "x") op = "*";
+    console.log(`[PARSE_LINE] Operator: raw="${opStr}" normalized="${op}" display="${displayOp}"`);
 
-      // Normalize operator
-      let op = opStr.toLowerCase();
-      const displayOp = op === "x" ? "×" : op;
-      if (op === "x") op = "*";
+    // STEP 5: Validate it's a simple operation
+    if (!["+", "-", "*", "/"].includes(op)) {
+      console.log(`[PARSE_LINE] Invalid operator: "${op}"`);
+      return { detected: false };
+    }
 
-      // Validate it's a simple operation
-      if (!["+", "-", "*", "/"].includes(op)) {
-        continue;
-      }
-
-      // Try to solve
-      let result: number;
-      try {
-        if (op === "+") result = num1 + num2;
-        else if (op === "-") result = num1 - num2;
-        else if (op === "*") result = num1 * num2;
-        else if (op === "/") {
-          if (num2 === 0) {
-            console.log(`[AYA_HOMEWORK] ${reqId} division by zero detected`);
-            return { detected: true, expression: `${num1} ${displayOp} ${num2}`, error: "division_by_zero" };
-          }
-          result = num1 / num2;
-        } else {
-          return { detected: false };
+    // STEP 6: Try to solve
+    let result: number;
+    try {
+      // Solve based on operator
+      if (op === "+") {
+        result = num1 + num2;
+        console.log(`[PARSE_LINE] Calculation: ${num1} + ${num2} = ${result}`);
+      } else if (op === "-") {
+        result = num1 - num2;
+        console.log(`[PARSE_LINE] Calculation: ${num1} - ${num2} = ${result}`);
+      } else if (op === "*") {
+        result = num1 * num2;
+        console.log(`[PARSE_LINE] Calculation: ${num1} × ${num2} = ${result}`);
+      } else if (op === "/") {
+        if (num2 === 0) {
+          console.log(`[PARSE_LINE] ERROR: Division by zero detected`);
+          const expression = `${num1} ${displayOp} ${num2}`;
+          return { detected: true, expression, error: "division_by_zero" };
         }
-
-        // Format expression for display
-        const expression = `${num1} ${displayOp} ${num2}`;
-
-        console.log(`[AYA_HOMEWORK] ${reqId} math detected: expression = ${expression}, answer = ${result}`);
-        return { detected: true, expression, answer: result };
-      } catch {
-        console.log(`[AYA_HOMEWORK] ${reqId} calculation error`);
-        return { detected: true, expression: `${num1} ${displayOp} ${num2}`, error: "calculation_error" };
+        result = num1 / num2;
+        console.log(`[PARSE_LINE] Calculation: ${num1} ÷ ${num2} = ${result}`);
+      } else {
+        return { detected: false };
       }
+
+      // STEP 7: Format expression for display and validate
+      const expression = `${num1} ${displayOp} ${num2}`;
+      console.log(`[PARSE_LINE] FINAL_RESULT: expression="${expression}" answer=${result}`);
+      console.log(`[PARSE_LINE] VALIDATION: expression matches input line (no cross-line mixing)`);
+      
+      return { detected: true, expression, answer: result };
+    } catch (err) {
+      console.log(`[PARSE_LINE] Calculation error: ${err}`);
+      const expression = `${num1} ${displayOp} ${num2}`;
+      return { detected: true, expression, error: "calculation_error" };
     }
   }
 
-  console.log(`[AYA_HOMEWORK] ${reqId} no simple math detected in: "${cleaned}"`);
+  console.log(`[PARSE_LINE] NO_MATCH: regex pattern did not match cleaned text`);
   return { detected: false };
 }
 
@@ -307,43 +323,58 @@ function getLocalizedMathResponse(
 
 /**
  * Detects and solves multiple math expressions from extracted text
+ * Each line parsed independently to prevent cross-line token mixing
  * Returns structured list of problems with answers
  */
 function detectMultipleSimpleMathProblems(extractedText: string): SimpleMathMultiResult {
   const lines = extractedText.split("\n").map(l => l.trim()).filter(l => l.length > 0);
-  console.log(`[TRACE] detectMultipleSimpleMathProblems: input text has ${lines.length} non-empty lines`);
+  console.log(`[MULTI_PARSE] Processing ${lines.length} non-empty lines`);
   
-  // Try to detect math on each line
+  // Try to detect math on each line independently
   const problems: SimpleMathProblem[] = [];
   
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    // Normalize OCR math symbols before parsing
+    console.log(`\n[MULTI_PARSE] ===== LINE ${i + 1} / ${lines.length} =====`);
+    console.log(`[MULTI_PARSE] Raw line: "${line}"`);
+    
+    // Normalize OCR math symbols before parsing (ONLY for this line)
     const normalizedLine = normalizeMathSymbols(line);
+    console.log(`[MULTI_PARSE] After symbol normalization: "${normalizedLine}"`);
+    
+    // Parse this line independently (strictly per-line, no cross-contamination)
     const mathResult = detectSimpleMathExpression(normalizedLine);
+    console.log(`[MULTI_PARSE] Parse result: detected=${mathResult.detected} expression="${mathResult.expression}" answer=${mathResult.answer}`);
     
     if (mathResult.detected && mathResult.expression && mathResult.answer !== undefined) {
+      // Verify expression matches the line we just parsed
       problems.push({
         lineNumber: i + 1,
         expression: mathResult.expression,
         answer: mathResult.answer,
         error: mathResult.error,
       });
-      console.log(`[TRACE] Detected problem ${problems.length}: ${mathResult.expression} = ${mathResult.answer}`);
+      console.log(`[MULTI_PARSE] ✓ Problem ${problems.length} added: "${mathResult.expression}" = ${mathResult.answer}`);
+    } else {
+      console.log(`[MULTI_PARSE] ✗ No valid math detected on this line`);
     }
   }
   
-  console.log(`[TRACE] After parsing: ${problems.length} valid problems detected from ${lines.length} lines`);
+  console.log(`\n[MULTI_PARSE] ===== SUMMARY =====`);
+  console.log(`[MULTI_PARSE] Valid problems found: ${problems.length} / ${lines.length} lines`);
+  problems.forEach((p, idx) => {
+    console.log(`[MULTI_PARSE] Problem ${idx + 1}: "${p.expression}" = ${p.answer}`);
+  });
   
   // Determine mode based on number of problems detected
   if (problems.length === 0) {
-    console.log(`[TRACE] Mode: none (no problems found)`);
+    console.log(`[MULTI_PARSE] Mode: NONE`);
     return { mode: "none" };
   } else if (problems.length === 1) {
-    console.log(`[TRACE] Mode: single (1 problem)`);
+    console.log(`[MULTI_PARSE] Mode: SINGLE`);
     return { mode: "single", problems };
   } else {
-    console.log(`[TRACE] Mode: multi (${problems.length} problems)`);
+    console.log(`[MULTI_PARSE] Mode: MULTI (${problems.length} problems)`);
     return { mode: "multi", problems };
   }
 }

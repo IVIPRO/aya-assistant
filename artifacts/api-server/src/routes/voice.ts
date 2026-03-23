@@ -119,10 +119,9 @@ router.post("/voice/speak", requireAuth, async (req, res): Promise<void> => {
     "nova";
 
   const speechResponse = await openai.audio.speech.create({
-    model: "tts-1",
+    model: "gpt-4o-mini-tts",
     voice,
     input: text.slice(0, 4000),
-    speed: 0.9,
     response_format: "mp3",
   });
 

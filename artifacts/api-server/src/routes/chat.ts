@@ -210,79 +210,78 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
         let problemsMerged = "";
 
         try {
-          console.log(`[AYA_HOMEWORK] ${requestId} Stage 2: Splitting image for 2-column detection...`);
+          console.log(`[AYA_HOMEWORK] ${requestId} Stage 2: Splitting image into 4-region grid...`);
           const sharp = await import("sharp");
           const buffer = Buffer.from(imageBase64, "base64");
           const image = sharp.default(buffer);
           const metadata = await image.metadata();
           
-          if (metadata.width) {
+          if (metadata.width && metadata.height) {
             const halfWidth = Math.floor(metadata.width / 2);
-            console.log(`[AYA_HOMEWORK] ${requestId} Image width: ${metadata.width}, half: ${halfWidth}`);
-            
-            // Extract left half
-            const leftBuffer = await sharp.default(buffer)
-              .extract({ left: 0, top: 0, width: halfWidth, height: metadata.height || 0 })
-              .toBuffer();
-            const leftBase64 = leftBuffer.toString("base64");
-            
-            // Extract right half
-            const rightBuffer = await sharp.default(buffer)
-              .extract({ left: halfWidth, top: 0, width: metadata.width - halfWidth, height: metadata.height || 0 })
-              .toBuffer();
-            const rightBase64 = rightBuffer.toString("base64");
+            const halfHeight = Math.floor(metadata.height / 2);
+            console.log(`[AYA_HOMEWORK] ${requestId} Image: ${metadata.width}x${metadata.height}, split at (${halfWidth}, ${halfHeight})`);
             
             const validMime = ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(imageMimeType)
               ? (imageMimeType as "image/jpeg" | "image/png" | "image/gif" | "image/webp")
               : "image/jpeg";
 
-            // Extract problems from left column
-            console.log(`[AYA_HOMEWORK] ${requestId} Extracting problems from LEFT column...`);
-            const leftCompletion = await getOpenAIClient().chat.completions.create({
-              model: "gpt-5.2",
-              max_completion_tokens: 512,
-              messages: [
-                { role: "system", content: systemPrompt },
-                {
-                  role: "user",
-                  content: [
-                    { type: "text", text: "Extract ALL math problems from this LEFT column. List each problem exactly as written, including the equals sign and answer if visible." },
-                    { type: "image_url", image_url: { url: `data:${validMime};base64,${leftBase64}`, detail: "high" } },
-                  ],
-                },
-              ],
-            });
-            leftProblems = leftCompletion.choices[0]?.message?.content ?? "";
-            const leftCount = (leftProblems.match(/\n/g) || []).length + 1;
-            console.log(`[AYA_HOMEWORK] ${requestId} LEFT column: ${leftCount} problems detected`);
-            console.log(`[TRACE] OCR Stage 2 LEFT: ${leftCount} problems - "${leftProblems.substring(0, 100)}..."`);
+            // Helper to extract region and call OCR
+            const extractRegionProblems = async (
+              regionName: string,
+              left: number,
+              top: number,
+              width: number,
+              height: number
+            ): Promise<{ problems: string; count: number }> => {
+              console.log(`[AYA_HOMEWORK] ${requestId} Extracting problems from ${regionName}...`);
+              const regionBuffer = await sharp.default(buffer)
+                .extract({ left, top, width, height })
+                .toBuffer();
+              const regionBase64 = regionBuffer.toString("base64");
+              
+              const completion = await getOpenAIClient().chat.completions.create({
+                model: "gpt-5.2",
+                max_completion_tokens: 512,
+                messages: [
+                  { role: "system", content: systemPrompt },
+                  {
+                    role: "user",
+                    content: [
+                      { type: "text", text: `Extract ALL math problems from this ${regionName} region. List each problem exactly as written, including the equals sign and answer if visible.` },
+                      { type: "image_url", image_url: { url: `data:${validMime};base64,${regionBase64}`, detail: "high" } },
+                    ],
+                  },
+                ],
+              });
+              
+              const problemText = completion.choices[0]?.message?.content ?? "";
+              const count = problemText.trim().length > 0 ? (problemText.match(/\n/g) || []).length + 1 : 0;
+              console.log(`[TRACE] ${regionName}: ${count} problems detected`);
+              return { problems: problemText, count };
+            };
 
-            // Extract problems from right column
-            console.log(`[AYA_HOMEWORK] ${requestId} Extracting problems from RIGHT column...`);
-            const rightCompletion = await getOpenAIClient().chat.completions.create({
-              model: "gpt-5.2",
-              max_completion_tokens: 512,
-              messages: [
-                { role: "system", content: systemPrompt },
-                {
-                  role: "user",
-                  content: [
-                    { type: "text", text: "Extract ALL math problems from this RIGHT column. List each problem exactly as written, including the equals sign and answer if visible." },
-                    { type: "image_url", image_url: { url: `data:${validMime};base64,${rightBase64}`, detail: "high" } },
-                  ],
-                },
-              ],
-            });
-            rightProblems = rightCompletion.choices[0]?.message?.content ?? "";
-            const rightCount = (rightProblems.match(/\n/g) || []).length + 1;
-            console.log(`[AYA_HOMEWORK] ${requestId} RIGHT column: ${rightCount} problems detected`);
-            console.log(`[TRACE] OCR Stage 2 RIGHT: ${rightCount} problems - "${rightProblems.substring(0, 100)}..."`);
+            // Extract problems from all 4 regions in reading order: TL, TR, BL, BR
+            const tlResult = await extractRegionProblems("TOP-LEFT", 0, 0, halfWidth, halfHeight);
+            const trResult = await extractRegionProblems("TOP-RIGHT", halfWidth, 0, metadata.width - halfWidth, halfHeight);
+            const blResult = await extractRegionProblems("BOTTOM-LEFT", 0, halfHeight, halfWidth, metadata.height - halfHeight);
+            const brResult = await extractRegionProblems("BOTTOM-RIGHT", halfWidth, halfHeight, metadata.width - halfWidth, metadata.height - halfHeight);
+
+            // Merge in reading order: TL, TR, BL, BR
+            const allProblems = [tlResult.problems, trResult.problems, blResult.problems, brResult.problems]
+              .map(p => p.trim())
+              .filter(p => p.length > 0)
+              .join("\n")
+              .trim();
             
-            // Merge: left column first, then right column
-            problemsMerged = (leftProblems + "\n" + rightProblems).trim();
-            const totalMerged = leftCount + rightCount;
-            console.log(`[AYA_HOMEWORK] ${requestId} MERGED: LEFT + RIGHT = ${totalMerged} total problems`);
-            console.log(`[TRACE] OCR Stage 2 MERGED: ${totalMerged} problems detected (${leftCount} left + ${rightCount} right)`);
+            const totalProblems = tlResult.count + trResult.count + blResult.count + brResult.count;
+            
+            // Cap at 30 problems max
+            const problemLines = allProblems.split("\n").filter(l => l.length > 0);
+            const cappedProblems = problemLines.slice(0, 30).join("\n");
+            problemsMerged = cappedProblems;
+            
+            console.log(`[AYA_HOMEWORK] ${requestId} MERGED: TL(${tlResult.count}) + TR(${trResult.count}) + BL(${blResult.count}) + BR(${brResult.count}) = ${totalProblems} total`);
+            console.log(`[TRACE] 4-region grid OCR MERGED: ${totalProblems} problems detected (capped at ${Math.min(totalProblems, 30)})`);
           }
         } catch (splitErr) {
           console.error(`[AYA_HOMEWORK] ${requestId} Image splitting failed:`, splitErr);

@@ -1,0 +1,106 @@
+Improve Bulgarian child voice transcription with story vocabulary in Preview only.
+
+Goal:
+Make AYA Junior understand Bulgarian children speech better during stories, play, and free talk.
+
+Context:
+Current Bulgarian voice transcription works, but still mishears child/story words such as:
+- "лошия вълк"
+- "червената шапчица"
+- similar fairy-tale words
+
+Work only in Preview.
+Do NOT publish.
+Do NOT use Agent.
+Do NOT change routing, math logic, TTS logic, UI, or OpenAI chat behavior.
+Only improve Bulgarian voice transcription normalization/hints.
+
+Implement minimal improvement in the Bulgarian voice transcription layer:
+
+1. Expand Bulgarian vocabulary hints with child/story words:
+лошия
+лошият
+вълк
+червената
+шапчица
+червената шапчица
+баба
+ловец
+гора
+приказка
+герой
+героиня
+принцеса
+принц
+дракон
+фея
+магия
+замък
+зайче
+мечка
+лисица
+коте
+кученце
+игра
+играем
+песничка
+книжка
+рисуване
+цвете
+слънце
+облак
+дъжд
+мама
+татко
+приятел
+приятелка
+
+2. Add Bulgarian correction rules only for bg speech:
+Common examples:
+"моше вълк" -> "лошия вълк"
+"моше" -> "лошия"
+"вулк" -> "вълк"
+"шапцица" -> "шапчица"
+"червената шапцица" -> "червената шапчица"
+"лусия вълк" -> "лошия вълк"
+
+3. Add phrase-level correction before intent routing, only when VOICE_LANG=bg.
+
+4. Keep corrections conservative:
+- only replace when confidence is Bulgarian
+- only replace exact known bad variants
+- do not rewrite the whole sentence
+- do not affect numbers/math phrases
+
+5. Add logs:
+[VOICE_BG_STORY_HINTS]
+[VOICE_BG_CORRECTION_ACTIVE]
+[VOICE_BG_CORRECTED_TEXT]
+[VOICE_BG_NO_CORRECTION]
+
+Preview tests:
+1. Say: "Лошия вълк"
+Expected normalized text: "лошия вълк"
+
+2. Say: "Червената шапчица"
+Expected normalized text: "червената шапчица"
+
+3. Say: "Спасявам бабата от лошия вълк"
+Expected normalized text close to:
+"спасявам бабата от лошия вълк"
+
+4. Say: "Искам приказка за принцеса и дракон"
+Expected text should preserve:
+"приказка", "принцеса", "дракон"
+
+5. Say: "Хайде да играем"
+Expected text should preserve:
+"играем"
+
+Hard rules:
+Preview only
+no publish
+no Agent
+minimal change only
+report changed file
+stop after task

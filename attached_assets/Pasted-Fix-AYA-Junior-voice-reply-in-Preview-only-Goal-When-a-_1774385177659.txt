@@ -1,0 +1,65 @@
+Fix AYA Junior voice reply in Preview only.
+
+Goal:
+When a child speaks in Junior mode, AYA must not only transcribe and send a text reply, but also PLAY a spoken reply automatically in the UI after the response text arrives.
+
+Work only on the existing Preview flow in Replit.
+Do NOT publish.
+Do NOT touch unrelated logic.
+Do NOT change math/task routing unless strictly needed for voice playback.
+If voice output already exists partially, reuse it instead of rebuilding.
+
+What to inspect first:
+1. Find the exact Junior voice input flow:
+   - microphone button
+   - /voice/transcribe
+   - message send to /chat/messages
+   - response rendering in Junior chat
+2. Find whether there is already any TTS / speech synthesis code in the app or API.
+3. Find whether the “Гласов учител” mode already has voice playback pieces that can be reused.
+
+Implement minimal working solution:
+A. After a successful assistant reply in Junior chat, automatically speak the final assistant text aloud.
+B. Prefer browser-side speech first if already available or simplest:
+   - use existing client-side speech synthesis if present
+   - if none exists, wire the minimal safe browser speech playback
+C. Use Bulgarian voice/language settings for Junior mode:
+   - lang: bg-BG
+   - choose a Bulgarian voice if available
+D. Only speak the latest assistant reply once.
+E. Prevent duplicate speaking on rerender / refresh.
+F. Stop previous speech before starting a new one.
+G. If speech playback fails, text reply must still work normally.
+
+Add exact diagnostics:
+- [JUNIOR_VOICE_REPLY_ENABLED]
+- [JUNIOR_VOICE_REPLY_TEXT]
+- [JUNIOR_VOICE_PLAY_ATTEMPT]
+- [JUNIOR_VOICE_PLAY_SUCCESS]
+- [JUNIOR_VOICE_PLAY_ERROR]
+
+Preview test cases:
+1. Say: "Как се казваш?"
+   - should transcribe
+   - should answer in text
+   - should speak the same answer aloud in Bulgarian
+2. Say: "Колко е пет плюс три?"
+   - should answer correctly
+   - should speak the answer aloud
+3. Press quick action: "Да четем заедно"
+   - should answer in text
+   - should speak the reply aloud
+4. Press quick action: "Упражнявай с мен английски"
+   - should answer in text
+   - should speak the reply aloud
+5. Send two voice requests one after another
+   - second reply should stop the first speech and play only the latest one
+
+Hard rules:
+- Preview only
+- no publish
+- no broad refactor
+- no Agent escalation unless truly required
+- report exact files changed
+- report exact restart needed
+- stop after this voice-reply task

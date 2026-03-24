@@ -70,14 +70,27 @@ router.post("/voice/transcribe", requireAuth, async (req, res): Promise<void> =>
 
   const file = new File([audioBuffer], `recording.${ext}`, { type: mimeType ?? "audio/webm" });
 
+  // Bulgarian transcription hint to improve accuracy for math words and numbers
+  const bgTranscriptionHint = resolvedLang === "bg"
+    ? "Разпознавай точно българска реч, включително числа и математически думи: нула, едно, две, три, четири, пет, шест, седем, осем, девет, десет, плюс, минус, по, делено, разделено, на, колко."
+    : undefined;
+
+  console.log("[VOICE_TRANSCRIBE_MODEL]", "gpt-4o-mini-transcribe");
+  console.log("[VOICE_TRANSCRIBE_LANG]", resolvedLang);
+  if (bgTranscriptionHint) {
+    console.log("[VOICE_TRANSCRIBE_HINT] Bulgarian hint enabled");
+  }
+
   const transcription = await openai.audio.transcriptions.create({
     model: "gpt-4o-mini-transcribe",
     file,
     language: resolvedLang,
     response_format: "json",
+    ...(bgTranscriptionHint ? { prompt: bgTranscriptionHint } : {}),
   });
 
   const text = transcription.text ?? "";
+  console.log("[VOICE_TRANSCRIBE_TEXT]", { raw: text, lang: resolvedLang });
 
   if (childId && text.trim()) {
     const { userId } = getUser(req);

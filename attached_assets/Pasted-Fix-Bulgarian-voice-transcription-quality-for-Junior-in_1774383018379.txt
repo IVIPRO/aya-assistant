@@ -1,0 +1,67 @@
+Fix Bulgarian voice transcription quality for Junior in Preview only, with the smallest safe patch.
+
+Current state:
+- typed free-chat works
+- typed direct math questions work
+- the bug is now in voice transcription for Bulgarian
+- Preview logs show /voice/transcribe is reached, but spoken Bulgarian is transcribed badly
+- example spoken "колко е осем делено на две" becomes garbage like "Конкуренсем делено на две"
+- then routing works on the wrong transcript
+
+Goal:
+Improve Bulgarian speech-to-text accuracy first, without changing typed chat logic.
+
+Scope:
+Inspect ONLY the voice transcription path used by Junior preview:
+- /voice/transcribe
+- any client request that sends the audio blob
+- any server transcription helper
+- any language / prompt / model / mime handling for transcription
+
+Required:
+1. Find the exact file/function that performs speech transcription
+2. Confirm the exact model/provider used for voice transcription
+3. Confirm whether language="bg" is explicitly sent
+4. Confirm whether the server sends any Bulgarian transcription prompt/hint
+5. Improve Bulgarian transcription quality with the smallest safe change
+6. Add minimal logs only:
+   - [VOICE_TRANSCRIBE_MODEL]
+   - [VOICE_TRANSCRIBE_LANG]
+   - [VOICE_TRANSCRIBE_TEXT]
+   - [VOICE_TRANSCRIBE_ERROR]
+
+Important constraints:
+- Do NOT touch typed chat logic
+- Do NOT touch math routing unless required by transcribed text normalization after transcription
+- Do NOT touch published app
+- Preview only
+- Keep API server fallback safe
+- If there is a blocker, stop and report the exact blocker
+
+If supported by the current transcription API, prefer:
+- explicit Bulgarian language
+- a short Bulgarian prompt/hint such as:
+  "Разпознавай точно българска реч, включително числа и математически думи като плюс, минус, по, делено, разделено, на, колко е."
+
+If post-processing is needed, add only a minimal Bulgarian normalization layer AFTER transcription for common math speech phrases, for example:
+- "едно, две, три, четири, пет, шест, седем, осем, девет, десет"
+- "плюс, минус, по, делено, разделено на"
+But first inspect the real transcription path before changing normalization.
+
+At the end report only:
+1. exact files changed
+2. exact functions changed
+3. exact transcription model/provider used now
+4. whether bg language is explicitly sent now
+5. whether a Bulgarian prompt/hint is sent now
+6. whether API server restart is needed
+7. exact Preview voice tests to run
+
+Preview voice tests:
+1. Say: "Как се казваш?"
+2. Say: "Колко е пет плюс три?"
+3. Say: "Колко е осем делено на две?"
+4. Say: "Колко е девет без четири?"
+5. Say: "Помогни ми с математика"
+
+If you are not sure, inspect first and do not invent.

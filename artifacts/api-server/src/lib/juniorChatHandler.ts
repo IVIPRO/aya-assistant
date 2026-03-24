@@ -327,12 +327,29 @@ function isNewMathTaskRequest(m: string, lang: Lang): boolean {
 }
 
 function containsMathOperators(m: string, lang: Lang): boolean {
+  // Don't treat direct math questions (starting with "колко", "какво", etc.) as new tasks
+  // These should be answered, not create a new random task
+  if (lang === "bg" && /^(колко|какво|как|кой|коя|кое|къде|кога|защо)/.test(m)) {
+    console.log("[MATH_OPERATORS] skipping - starts with question word");
+    return false;
+  }
+  if (lang === "es" && /^(cuánto|qué|cómo|quién|dónde|cuándo|por)/.test(m)) {
+    console.log("[MATH_OPERATORS] skipping - starts with question word");
+    return false;
+  }
+  if (lang === "en" && /^(how|what|which|when|where|who|why)/.test(m)) {
+    console.log("[MATH_OPERATORS] skipping - starts with question word");
+    return false;
+  }
+  
   const operators: Record<Lang, string[]> = {
     bg: ["плюс", "минус", "умножено", "разделено", "+", "-", "×", "÷", "*", "/"],
     es: ["más", "menos", "multiplicado", "dividido", "+", "-", "×", "÷", "*", "/"],
     en: ["plus", "minus", "times", "multiplied", "divided", "+", "-", "×", "÷", "*", "/"],
   };
-  return operators[lang].some((op) => m.includes(op));
+  const hasOp = operators[lang].some((op) => m.includes(op));
+  if (hasOp) console.log("[MATH_OPERATORS] detected - treating as new task request");
+  return hasOp;
 }
 
 function isContinueCommand(m: string, lang: Lang): boolean {

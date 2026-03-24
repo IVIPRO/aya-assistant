@@ -277,11 +277,24 @@ function detectIntent(
     // Explain/help first (before answer check, avoid treating "как" as answer)
     if (isExplainRequest(m, lang)) return "explain_current_task";
 
-    // Numeric typed answer
-    if (/^\d+([.,]\d+)?$/.test(m.trim())) return "math_answer";
+    // NEW: Check if this is a complete direct math question (e.g., "Колко е пет плюс три?")
+    // If so, route it to OpenAI to answer, NOT to the active task answer handler
+    if (isDirectMathQuestion(m, lang)) {
+      console.log("[DIRECT_MATH_QUESTION] detected - will answer via OpenAI");
+      return "unknown"; // Routes to OpenAI for answering
+    }
 
-    // Bulgarian number word / spoken sentence
-    if (looksLikeBulgarianAnswer(m)) return "math_answer";
+    // Numeric typed answer
+    if (/^\d+([.,]\d+)?$/.test(m.trim())) {
+      console.log("[MATH_ANSWER_ROUTE] numeric answer detected");
+      return "math_answer";
+    }
+
+    // Bulgarian number word / spoken sentence (but NOT a full question)
+    if (looksLikeBulgarianAnswer(m)) {
+      console.log("[MATH_ANSWER_ROUTE] bulgarian answer detected");
+      return "math_answer";
+    }
   }
 
   // ── 5. Free educational question ────────────────────────────────────────
@@ -466,6 +479,33 @@ function getCharEmoji(aiCharacter?: string): string {
     owl: "🦉",
   };
   return map[(aiCharacter ?? "").toLowerCase()] ?? "📚";
+}
+
+function isDirectMathQuestion(m: string, lang: Lang): boolean {
+  // Detects complete math questions like "Колко е пет плюс три?"
+  // but NOT short answers like "пет" or "8" or "осем"
+  
+  if (lang === "bg") {
+    // Must contain: question word + operator + at least 2 numbers
+    const hasQuestionWord = /^(колко|какво|как)\s+/.test(m);
+    const hasOperator = /плюс|минус|умножено|разделено|\+|-|×|÷|\*|\//.test(m);
+    const hasMultipleNumbers = /(нула|едно|две|три|четири|пет|шест|седем|осем|девет|десет|\d+).*?(нула|едно|две|три|четири|пет|шест|седем|осем|девет|десет|\d+)/.test(m);
+    const isComplete = hasQuestionWord && hasOperator && hasMultipleNumbers;
+    return isComplete;
+  }
+  if (lang === "es") {
+    const hasQuestionWord = /^(cuánto|qué|cómo)\s+/.test(m);
+    const hasOperator = /más|menos|multiplicado|dividido|\+|-|×|÷|\*|\//.test(m);
+    const hasMultipleNumbers = /(\d+|cero|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez).*?(\d+|cero|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)/.test(m);
+    return hasQuestionWord && hasOperator && hasMultipleNumbers;
+  }
+  if (lang === "en") {
+    const hasQuestionWord = /^(how|what|which)\s+/.test(m);
+    const hasOperator = /plus|minus|times|divided|\+|-|×|÷|\*|\//.test(m);
+    const hasMultipleNumbers = /(\d+|zero|one|two|three|four|five|six|seven|eight|nine|ten).*?(\d+|zero|one|two|three|four|five|six|seven|eight|nine|ten)/.test(m);
+    return hasQuestionWord && hasOperator && hasMultipleNumbers;
+  }
+  return false;
 }
 
 function looksLikeBulgarianAnswer(m: string): boolean {

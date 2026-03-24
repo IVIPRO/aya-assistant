@@ -538,13 +538,26 @@ function parseBulgarianSpokenMath(m: string): { expression: string; type: "full_
     "един": 1, "два": 2,
   };
   
-  // Map operators to symbols
+  // Map operators to symbols (longer operators first to avoid partial matches)
   const opMap: Record<string, string> = {
-    "плюс": "+",
-    "минус": "-",
-    "по": "*",
-    "умножено по": "*",
+    // Division synonyms
     "разделено на": "/",
+    "раздели на": "/",
+    "делено на": "/",
+    "разделено": "/",
+    "делено": "/",
+    // Multiplication synonyms
+    "умножено по": "*",
+    "умножи по": "*",
+    "по": "*",
+    // Addition synonyms
+    "събери с": "+",
+    "събрано с": "+",
+    "плюс": "+",
+    // Subtraction synonyms
+    "извади": "-",
+    "без": "-",
+    "минус": "-",
   };
 
   let normalized = m.toLowerCase().trim();
@@ -552,8 +565,10 @@ function parseBulgarianSpokenMath(m: string): { expression: string; type: "full_
   // Try to parse as spoken math: "число оператор число"
   // e.g., "пет плюс три", "осем разделено на две"
   
-  // First try multi-word operators
-  for (const [op, sym] of Object.entries(opMap)) {
+  // Sort operators by length (longest first) to avoid partial matches
+  const sortedOps = Object.entries(opMap).sort((a, b) => b[0].length - a[0].length);
+  
+  for (const [op, sym] of sortedOps) {
     if (normalized.includes(op)) {
       const parts = normalized.split(op).map(p => p.trim());
       if (parts.length === 2) {
@@ -563,7 +578,7 @@ function parseBulgarianSpokenMath(m: string): { expression: string; type: "full_
           const expr = `${leftNum} ${sym} ${rightNum}`;
           // Check if it's a question (starts with "колко", etc.)
           const isQuestion = /^(колко|какво)/.test(m.toLowerCase());
-          console.log("[BG_SPOKEN_MATH_DETECTED]", { raw: m, parsed: expr });
+          console.log("[BG_SPOKEN_MATH_DETECTED]", { raw: m, parsed: expr, synonym: op });
           return {
             expression: expr,
             type: isQuestion ? "full_question" : "short_answer",

@@ -1,0 +1,72 @@
+Add Bulgarian spoken-math operator synonyms in Junior chat with the smallest safe change only.
+
+Goal:
+Keep the current working behavior exactly as is, but extend spoken-math recognition with common Bulgarian synonym words/phrases.
+
+Already working and must stay working:
+- "пет плюс три" -> 8
+- "колко е пет плюс три" -> 8
+- "осем разделено на две" -> 4
+- "помогни ми с математика" -> still creates a new random task
+- "как се казваш" -> still uses OpenAI free-chat
+- short answers like "8" / "осем" while a task is active -> still validate as math_answer
+
+New synonyms to support:
+Division:
+- делено на
+- раздели на
+- разделено на
+- разделено
+- делено
+
+Multiplication:
+- по
+- умножено по
+- умножи по
+
+Addition:
+- плюс
+- събери с
+- събрано с
+
+Subtraction:
+- минус
+- без
+- извади
+
+Important routing rule:
+- Full spoken math questions like "колко е осем делено на две" must be treated as direct math question, not as math_answer to the currently active task
+- Do NOT break current direct-math-question behavior
+- Do NOT break current active-task answer behavior
+
+Scope rules:
+- Do NOT touch voice/transcribe flow
+- Do NOT touch UI
+- Do NOT touch published app
+- Test only in Preview
+- Do NOT refactor unrelated files
+- Minimal safe patch only
+
+Logging:
+Add only if needed:
+- [BG_SPOKEN_MATH_SYNONYM]
+- [BG_SPOKEN_MATH_PARSED]
+
+At the end report only:
+1. exact files changed
+2. exact functions changed
+3. exact lines/branch changed
+4. what was not touched
+5. whether API server must be restarted
+6. exact Preview test cases to run
+
+Required Preview tests:
+1. "колко е осем делено на две" -> 4
+2. "осем делено на две" -> 4
+3. "колко е шест по три" -> 18
+4. "колко е девет без четири" -> 5
+5. "помогни ми с математика" -> new random task
+6. active task answer "осем" -> still validates as answer
+7. "как се казваш" -> still OpenAI free-chat
+
+If there is any blocker, stop and describe the blocker clearly without changing unrelated code.

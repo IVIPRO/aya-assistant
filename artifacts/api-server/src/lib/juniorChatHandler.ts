@@ -277,7 +277,25 @@ function detectIntent(
     // Explain/help first (before answer check, avoid treating "как" as answer)
     if (isExplainRequest(m, lang)) return "explain_current_task";
 
-    // NEW: Check if this is a complete direct math question (e.g., "Колко е пет плюс три?")
+    // NEW: Check for Bulgarian spoken math (e.g., "пет плюс три" or "колко е пет плюс три?")
+    // Only in Bulgarian language
+    if (lang === "bg") {
+      const spokenMath = parseBulgarianSpokenMath(m);
+      if (spokenMath) {
+        console.log("[BG_SPOKEN_MATH_PARSED]", spokenMath);
+        if (spokenMath.type === "full_question") {
+          // Full question like "Колко е пет плюс три?" -> answer via OpenAI
+          console.log("[BG_SPOKEN_MATH_ROUTE] full question -> answering via OpenAI");
+          return "unknown";
+        } else {
+          // Short answer like "пет плюс три" -> treat as math answer to current task
+          console.log("[BG_SPOKEN_MATH_ROUTE] short answer -> validating against current task");
+          return "math_answer";
+        }
+      }
+    }
+
+    // Check if this is a complete direct math question (e.g., "Колко е пет плюс три?")
     // If so, route it to OpenAI to answer, NOT to the active task answer handler
     if (isDirectMathQuestion(m, lang)) {
       console.log("[DIRECT_MATH_QUESTION] detected - will answer via OpenAI");
@@ -506,6 +524,56 @@ function isDirectMathQuestion(m: string, lang: Lang): boolean {
     return hasQuestionWord && hasOperator && hasMultipleNumbers;
   }
   return false;
+}
+
+function parseBulgarianSpokenMath(m: string): { expression: string; type: "full_question" | "short_answer" | null } | null {
+  // Parses Bulgarian spoken math like "пет плюс три" -> "5 + 3"
+  // Returns null if not a recognizable math phrase
+  
+  const bgToNum: Record<string, number> = {
+    "нула": 0, "едно": 1, "две": 2, "три": 3, "четири": 4, "пет": 5,
+    "шест": 6, "седем": 7, "осем": 8, "девет": 9, "десет": 10,
+    "единадесет": 11, "дванадесет": 12, "тринадесет": 13, "четиринадесет": 14, "петнадесет": 15,
+    "шестнадесет": 16, "седемнадесет": 17, "осемнадесет": 18, "деветнадесет": 19, "двадесет": 20,
+    "един": 1, "два": 2,
+  };
+  
+  // Map operators to symbols
+  const opMap: Record<string, string> = {
+    "плюс": "+",
+    "минус": "-",
+    "по": "*",
+    "умножено по": "*",
+    "разделено на": "/",
+  };
+
+  let normalized = m.toLowerCase().trim();
+  
+  // Try to parse as spoken math: "число оператор число"
+  // e.g., "пет плюс три", "осем разделено на две"
+  
+  // First try multi-word operators
+  for (const [op, sym] of Object.entries(opMap)) {
+    if (normalized.includes(op)) {
+      const parts = normalized.split(op).map(p => p.trim());
+      if (parts.length === 2) {
+        const leftNum = bgToNum[parts[0]];
+        const rightNum = bgToNum[parts[1]];
+        if (leftNum !== undefined && rightNum !== undefined) {
+          const expr = `${leftNum} ${sym} ${rightNum}`;
+          // Check if it's a question (starts with "колко", etc.)
+          const isQuestion = /^(колко|какво)/.test(m.toLowerCase());
+          console.log("[BG_SPOKEN_MATH_DETECTED]", { raw: m, parsed: expr });
+          return {
+            expression: expr,
+            type: isQuestion ? "full_question" : "short_answer",
+          };
+        }
+      }
+    }
+  }
+  
+  return null;
 }
 
 function looksLikeBulgarianAnswer(m: string): boolean {

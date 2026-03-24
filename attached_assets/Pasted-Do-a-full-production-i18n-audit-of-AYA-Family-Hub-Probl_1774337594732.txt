@@ -1,0 +1,74 @@
+Do a full production i18n audit of AYA Family Hub.
+
+Problem:
+The app already has multiple languages added, but some UI still shows hardcoded English or mixed-language text inside non-English interfaces (for example in Bulgarian). I want all visible UI text to come only from the translation system.
+
+Main goals:
+1. Find all hardcoded user-facing text in frontend UI.
+2. Replace hardcoded strings with i18n translation keys.
+3. Ensure Bulgarian UI shows only Bulgarian terms, English UI only English terms, etc.
+4. Preserve all existing logic, routing, API behavior, auth, and database behavior.
+5. Do NOT change styling unless necessary for text overflow.
+6. Do NOT touch TTS, chat routing, task logic, or backend business logic in this task.
+
+Important:
+This is a localization cleanup task only.
+Do not use Agent-style broad rewrites. Keep changes minimal and localized only to i18n/UI text.
+
+Audit and fix all visible user-facing text in areas such as:
+- dashboard
+- junior screen
+- parent dashboard
+- badges
+- progress cards
+- level / streak / stars / points labels
+- buttons
+- tabs
+- status chips
+- placeholders
+- empty states
+- modals
+- onboarding
+- reward / gamification UI
+- voice mode cards
+- listening mode cards
+- video teacher cards
+
+Specifically normalize these terms for Bulgarian:
+XP -> точки
+total XP -> общо точки
+Level -> Ниво
+days -> дни
+Badge / Badges -> Значка / Значки
+Badges Unlocked -> Отключени значки
+First Steps -> Първи стъпки
+Active -> Активно
+Progress -> Напредък
+Streak -> Поредица
+Points -> Точки
+
+Also review whether “Общо XP” should become “Общо точки” everywhere in Bulgarian. Use the most natural child-friendly Bulgarian wording consistently across the app.
+
+Requirements:
+1. Search for all hardcoded strings in frontend files.
+2. Search for fallback English strings inside locale-aware components.
+3. Add missing translation keys to all existing locale files.
+4. Keep translation key names clear and reusable.
+5. If a locale is missing a value, add it.
+6. If duplicate keys exist for the same concept, consolidate carefully without breaking usage.
+7. If badges or reward labels are repeated incorrectly, identify whether the issue is translation-related or data-related, and fix only the translation/rendering side if possible without touching backend logic.
+8. Make sure the same concept uses the same wording everywhere in Bulgarian.
+9. Check text overflow or wrapping only where a localization change causes visible UI breakage.
+
+Validation:
+- Run the app after changes.
+- Verify Bulgarian UI no longer shows English terms like XP / First Steps / Active / days.
+- Verify other languages still load correctly.
+- Verify no broken translation keys appear in UI.
+- Verify no raw key names appear in UI.
+
+Return:
+1. Exact list of modified files
+2. Exact new translation keys added
+3. Short summary of hardcoded texts found
+4. Confirmation that business logic was not changed

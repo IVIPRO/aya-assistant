@@ -115,7 +115,7 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          {selected ? labels.backToSubjects : "Back"}
+          {selected ? labels.backToSubjects : (lang === "bg" ? "Назад" : lang === "es" ? "Volver" : "Back")}
         </button>
         <div className="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-xl border border-white/50">
           <span className="text-lg">{characterEmoji}</span>
@@ -228,9 +228,9 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
                         </div>
                         {done && (
                           <div className="flex gap-1.5 items-center flex-shrink-0">
-                            {done.lessonDone && <span title="Lesson done" className="text-green-500"><BookOpen className="w-3 h-3" /></span>}
-                            {done.practiceDone && <span title="Practice done" className="text-blue-500"><Pencil className="w-3 h-3" /></span>}
-                            {done.quizPassed && <span title="Quiz passed" className="text-purple-500"><Brain className="w-3 h-3" /></span>}
+                            {done.lessonDone && <span title={lang === "bg" ? "Урокът е завършен" : lang === "es" ? "Lección completada" : "Lesson done"} className="text-green-500"><BookOpen className="w-3 h-3" /></span>}
+                            {done.practiceDone && <span title={lang === "bg" ? "Упражнението е завършено" : lang === "es" ? "Práctica completada" : "Practice done"} className="text-blue-500"><Pencil className="w-3 h-3" /></span>}
+                            {done.quizPassed && <span title={lang === "bg" ? "Тестът е издържан" : lang === "es" ? "Test aprobado" : "Quiz passed"} className="text-purple-500"><Brain className="w-3 h-3" /></span>}
                           </div>
                         )}
                       </div>

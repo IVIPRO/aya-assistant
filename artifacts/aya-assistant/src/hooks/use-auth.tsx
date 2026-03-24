@@ -37,8 +37,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const handleExpired = () => {
-      // Real 401 from server — the fetch interceptor dispatches this
-      console.log("[AUTH] auth-expired event received — real 401, redirecting to /login");
+      // Real 401 on a core API route — the fetch interceptor dispatches this.
+      // NOTE: Voice/TTS routes are excluded from dispatching this event (see fetch-interceptor.ts).
+      // This only fires for real auth failures on chat, missions, auth/me, etc.
+      const currentPath = window.location.pathname;
+      console.warn("[AUTH] auth-expired event received — core API returned 401", {
+        reason: "server rejected token on a core route",
+        currentPath,
+        action: "clearing token and redirecting to /login",
+      });
       setToken(null);
       setLocation("/login");
     };

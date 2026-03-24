@@ -33,6 +33,7 @@ export function useVoiceSpeaker({ childId, lang, onError }: UseVoiceSpeakerOptio
 
     try {
       const token = localStorage.getItem("aya_token");
+      console.log("[VOICE_SPEAKER] speak() called", { id, lang, hasToken: !!token, textLen: text.length });
       const res = await fetch("/api/voice/speak", {
         method: "POST",
         headers: {
@@ -42,7 +43,10 @@ export function useVoiceSpeaker({ childId, lang, onError }: UseVoiceSpeakerOptio
         body: JSON.stringify({ text, lang: lang ?? "en", childId: childId ?? undefined }),
       });
 
-      if (!res.ok) throw new Error("TTS failed");
+      if (!res.ok) {
+        console.warn("[VOICE_SPEAKER] /api/voice/speak failed", { status: res.status, id });
+        throw new Error(`TTS failed (HTTP ${res.status})`);
+      }
 
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);

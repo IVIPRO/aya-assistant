@@ -61,7 +61,10 @@ export function clearSession(req: Request): Promise<void> {
 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const sessionUserId = req.session.userId;
+
   if (sessionUserId) {
+    // Session-cookie path (set at login time via setSession)
+    console.log("[AUTH] session OK", { userId: sessionUserId, path: req.path });
     req.authUser = {
       userId: sessionUserId,
       email: req.session.email ?? "",
@@ -72,17 +75,31 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
     return;
   }
 
+  // No session — fall back to JWT Bearer token
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    console.warn("[AUTH] 401 — no session and no Bearer header", {
+      path: req.path,
+      hasAuthHeader: !!authHeader,
+      headerPrefix: authHeader ? authHeader.slice(0, 10) : "(none)",
+    });
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
+
   const token = authHeader.slice(7);
   const payload = verifyToken(token);
+
   if (!payload) {
+    console.warn("[AUTH] 401 — Bearer token invalid or expired", {
+      path: req.path,
+      tokenPrefix: token.slice(0, 12),
+    });
     res.status(401).json({ error: "Invalid or expired token" });
     return;
   }
+
+  console.log("[AUTH] JWT OK", { userId: payload.userId, path: req.path });
   req.authUser = payload;
   next();
 }

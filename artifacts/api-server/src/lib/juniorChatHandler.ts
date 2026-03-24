@@ -753,7 +753,7 @@ export async function handleJuniorChat(
       await clearPostSuccess(childId, module);
     }
     console.log("[JUNIOR_CHAT] free_chat / early_return — skipping lesson eval", { intent });
-    const reply = getAIResponse(module, msg, context);
+    const reply = await getAIResponse(module, msg, context);
     console.log("[FREE_CHAT_REPLY_TEXT]", reply);
     console.log("[FREE_CHAT_FALLBACK_USED]", intent === "unknown");
     return reply;
@@ -880,5 +880,5 @@ export async function handleJuniorChat(
   // ── FREE_QUESTION / SMALL_TALK / UNKNOWN ─────────────────────────────────
   // These paths never touch math state, so the active question remains intact
   console.log("[JUNIOR_CHAT] free_chat / fallback", { intent });
-  return getAIResponse(module, msg, context);
+  return await getAIResponse(module, msg, context);
 }

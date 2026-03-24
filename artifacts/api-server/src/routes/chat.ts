@@ -373,7 +373,7 @@ router.post("/chat/messages", requireAuth, async (req, res): Promise<void> => {
 
   } else {
     // Non-junior modules
-    aiContent = getAIResponse(module, cleanContent, context);
+    aiContent = await getAIResponse(module, cleanContent, context);
   }
 
   // ── Free conversation reply marker ──────────────────────────────────────

@@ -1,3 +1,5 @@
+import OpenAI from "openai";
+
 interface JuniorContext {
   grade?: number;
   country?: string;
@@ -978,16 +980,41 @@ export function getMathTaskPrompt(a: number, b: number, operation: string, child
   return `${charEmoji} What is ${equation}?`;
 }
 
-export function getAIResponse(module: string, userMessage: string, context?: JuniorContext): string {
+const openaiClient = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export async function getAIResponse(module: string, userMessage: string, context?: JuniorContext): Promise<string> {
   console.log("[OPENAI_KEY_PRESENT]", Boolean(process.env.OPENAI_API_KEY));
-  console.log("[OPENAI_CALL_ATTEMPT]");
+
   if (module === "junior" && context) {
-    // Check if this is a greeting/casual chat first
+    console.log("[OPENAI_CALL_ATTEMPT]");
+    try {
+      const lang = getLang(context.language);
+      const characterName = context.aiCharacter
+        ? (CHARACTER_NAMES[context.aiCharacter]?.[lang] ?? "AYA")
+        : "AYA";
+      const characterEmoji = context.aiCharacter
+        ? (CHARACTER_EMOJIS[context.aiCharacter] ?? "🌟")
+        : "🌟";
+      const systemPrompt = `You are ${characterName} ${characterEmoji}, a friendly and encouraging AI tutor for children aged 5-10. You speak in a warm, playful, age-appropriate way. Reply in the same language as the child's message. Keep responses short (1-3 sentences). Be enthusiastic and supportive.`;
+      const completion = await openaiClient.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userMessage },
+        ],
+        max_tokens: 150,
+      });
+      const reply = completion.choices[0]?.message?.content?.trim() ?? "";
+      console.log("[OPENAI_RESPONSE_RECEIVED]", reply.slice(0, 60));
+      if (reply) return reply;
+    } catch (err) {
+      console.log("[OPENAI_CALL_ERROR]", String(err));
+    }
+    // Fallback for junior
     const lang = getLang(context.language);
     if (detectGreetingIntent(userMessage, lang)) {
       return getFriendlyChatResponse(context);
     }
-    // Otherwise, use Montessori tutoring mode
     return getMontessoriGuidingResponse(userMessage, context);
   }
 

@@ -77,7 +77,8 @@ router.post("/voice/transcribe", requireAuth, async (req, res): Promise<void> =>
       "математика (плюс, минус, по, делено, разделено на, умножено, събери, извади, колко е), " +
       "урок (задача, упражнение, помощ, обясни, не разбирам, помогни ми, дай ми), " +
       "активности (да четем, четем заедно, упражнявай, хайде да си играем, да учим, нека учим, задай ми въпрос, логически, английски), " +
-      "основни фрази (как се казваш, какво можеш, разкажи ми, привет, здравей)."
+      "основни фрази (как се казваш, какво можеш, разкажи ми, привет, здравей), " +
+      "приказки и истории (лошия, лошият, вълк, червената, шапчица, баба, ловец, гора, приказка, спасявам, бяга, помощ, зайче, мечка, лисица)."
     : undefined;
 
   console.log("[VOICE_MODEL]", "gpt-4o-mini-transcribe");
@@ -99,6 +100,8 @@ router.post("/voice/transcribe", requireAuth, async (req, res): Promise<void> =>
 
   // Bulgarian normalization: collapse spaces, preserve Cyrillic, normalize punctuation
   if (resolvedLang === "bg") {
+    console.log("[VOICE_BG_CORRECTION_ACTIVE]", true);
+    
     text = text
       .replace(/\s+/g, " ")  // Collapse multiple spaces
       .trim();
@@ -108,6 +111,53 @@ router.post("/voice/transcribe", requireAuth, async (req, res): Promise<void> =>
     const latin = (text.match(/[a-zA-Z]/g) || []).length;
     
     console.log("[VOICE_BG_CONFIDENCE_HINT]", { cyrillic, latin, ratio: latin > 0 ? (cyrillic / (cyrillic + latin) * 100).toFixed(1) : "100" });
+    
+    // Bulgarian story/children's words vocabulary hints for correction
+    const bgWordHints = [
+      "лошия", "лошият", "вълк", "червената", "шапчица", "баба", 
+      "ловец", "гора", "приказка", "спасявам", "бяга", "помощ", 
+      "зайче", "мечка", "лисица"
+    ];
+    console.log("[VOICE_BG_WORD_HINTS]", bgWordHints.join(", "));
+    
+    // Common transcription correction rules for Bulgarian children's speech
+    const corrections: Record<string, string> = {
+      "моше вълк": "лошия вълк",
+      "моше": "лошия",
+      "моше вълка": "лошия вълк",
+      "моше вулк": "лошия вълк",
+      "вулк": "вълк",
+      "шапцица": "шапчица",
+      "шапцата": "шапчицата",
+      "спасавам": "спасявам",
+      "спасава": "спасява",
+      "спасаем": "спасяваме",
+    };
+    
+    let correctedText = text;
+    let correctionsMade = 0;
+    
+    // Apply corrections (case-insensitive match, preserve original case)
+    for (const [wrong, right] of Object.entries(corrections)) {
+      const regex = new RegExp(`\\b${wrong}\\b`, "gi");
+      if (regex.test(correctedText)) {
+        correctedText = correctedText.replace(regex, (match) => {
+          // Preserve case from original match
+          if (match === wrong) return right;
+          if (match === wrong.charAt(0).toUpperCase() + wrong.slice(1)) {
+            return right.charAt(0).toUpperCase() + right.slice(1);
+          }
+          if (match === wrong.toUpperCase()) return right.toUpperCase();
+          return right;
+        });
+        correctionsMade++;
+      }
+    }
+    
+    if (correctionsMade > 0) {
+      console.log("[VOICE_BG_CORRECTED_TEXT]", correctedText);
+      text = correctedText;
+    }
     
     console.log("[VOICE_TEXT_NORMALIZED]", text);
   }

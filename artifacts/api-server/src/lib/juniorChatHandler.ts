@@ -250,6 +250,8 @@ function detectIntent(
   lang: Lang
 ): Intent {
   const m = msg.toLowerCase().trim();
+  console.log("[INTENT_RAW]", msg);
+  console.log("[INTENT_NORMALIZED]", m);
 
   // ── 1. Operation-switch always wins (any context) ───────────────────────
   const op = detectMathOperationSwitch(m, lang);
@@ -277,12 +279,23 @@ function detectIntent(
   }
 
   // ── 5. Free educational question ────────────────────────────────────────
-  if (isEducationalQuestion(m, lang)) return "free_question";
+  if (isEducationalQuestion(m, lang)) {
+    console.log("[INTENT_RESULT]", "free_question");
+    console.log("[INTENT_ROUTE]", "getFreeQuestionReply");
+    return "free_question";
+  }
 
   // ── 6. Small talk / greeting ─────────────────────────────────────────────
-  if (isGreeting(m, lang)) return "small_talk";
+  if (isGreeting(m, lang)) {
+    console.log("[INTENT_RESULT]", "small_talk");
+    console.log("[INTENT_ROUTE]", "getAIResponse");
+    return "small_talk";
+  }
 
   // ── 7. Fallback — unknown ────────────────────────────────────────────────
+  console.log("[INTENT_FALLBACK_REASON]", "no intent matched");
+  console.log("[INTENT_RESULT]", "unknown");
+  console.log("[INTENT_ROUTE]", "getAIResponse");
   return "unknown";
 }
 
@@ -338,7 +351,7 @@ function isExplainRequest(m: string, lang: Lang): boolean {
 
 function isEducationalQuestion(m: string, lang: Lang): boolean {
   const patterns: Record<Lang, RegExp> = {
-    bg: /^(защо|какво|как|откъде|кога|кой|коя|разкажи|прочети|какво е|какви са)\b/i,
+    bg: /^(защо|какво|как|откъде|кога|кой|коя|къде|как се|какви|какъв|каква|разкажи|прочети|кажи ми|помогни ми|да четем|хайде да)\b/i,
     es: /^(por qué|qué|cómo|dónde|cuándo|quién|cuéntame|léeme)\b/i,
     en: /^(why|what|how|where|when|who|tell me|read me)\b/i,
   };

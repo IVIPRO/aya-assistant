@@ -1,0 +1,70 @@
+Investigate and fix ONLY the junior chat intent classification path that is causing normal free-text messages to fall into the generic fallback instead of the proper conversational reply path.
+
+STRICT RULES
+- Use Replit new interface only.
+- Use Lite only. Do NOT use Agent.
+- Make the smallest possible fix.
+- Do NOT touch TTS, voice recording, auth/session, i18n, UI, math solving, missions, parent dashboard, or published deployment config.
+- Do NOT refactor unrelated code.
+- If no code change is needed, say so clearly and stop.
+
+PROBLEM TO FIX
+In AYA Junior chat, ordinary Bulgarian free-text messages like:
+- "как се казваш"
+- "къде живееш"
+- "какво можеш да правиш"
+- "хайде да си играем"
+are still reaching the generic fallback / curiosity-style response instead of the correct normal conversational reply path.
+
+IMPORTANT OBSERVATIONS
+- The routing branch in juniorChatHandler for:
+  if (intent === "free_question") return getFreeQuestionReply(...)
+  already exists.
+- Therefore the bug is likely BEFORE that branch:
+  - intent classification
+  - preprocessing / normalization
+  - classifier output mapping
+  - fallback conditions overriding the correct intent
+
+YOUR TASK
+1. Find the exact place where junior text messages get classified into intent.
+2. Trace the full path for a normal typed Bulgarian message from request entry to final handler branch.
+3. Identify exactly why messages like "как се казваш" are NOT ending up with intent = "free_question".
+4. Fix only that logic.
+5. Add minimal logs so we can verify the classifier result clearly.
+
+REQUIRED LOGS
+Add concise logs in the server path for junior text messages:
+- raw incoming text
+- normalized text
+- detected intent
+- why fallback was chosen, if fallback is chosen
+- final selected reply path
+
+Example style:
+[INTENT_RAW] ...
+[INTENT_NORMALIZED] ...
+[INTENT_RESULT] free_question
+[INTENT_FALLBACK_REASON] ...
+[INTENT_ROUTE] getFreeQuestionReply
+
+SUCCESS CRITERIA
+After the fix, typed Bulgarian questions like:
+- "как се казваш"
+- "къде живееш"
+- "какво можеш да правиш"
+must go to the normal conversational reply path, not the generic fallback.
+
+These must remain unchanged:
+- math prompts like "5+3" or "помогни ми с математиката"
+- lesson / mission routing
+- voice/TTS behavior
+- auth/session behavior
+
+OUTPUT FORMAT
+At the end report only:
+1. exact file(s) changed
+2. exact condition/branch changed
+3. short reason for root cause
+4. exact logs added
+5. what I should test next in browser

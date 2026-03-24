@@ -1,0 +1,50 @@
+Investigate ONLY why Junior chat messages are reaching the server with missing or wrong intent before juniorChatHandler.ts.
+
+Goal:
+Fix ONLY the intent detection / routing path for normal Junior chat text so these examples get proper intent before reaching juniorChatHandler:
+- "как се казваш"
+- "къде живееш"
+- "какво можеш да правиш"
+- "хайде да си играем"
+- "5+3"
+- "помогни ми с математиката"
+- "да четем заедно"
+
+Important constraints:
+- DO NOT touch TTS
+- DO NOT touch voice recording
+- DO NOT touch free mode UI
+- DO NOT touch auth/session logic
+- DO NOT touch i18n/translations
+- DO NOT touch math solving logic itself
+- DO NOT touch juniorChatHandler.ts unless absolutely required for wiring after the real root cause is found
+- Make only the minimum code change needed
+- If there is no safe minimal fix, say so and stop
+
+What to do:
+1. Trace the exact path from frontend send payload -> API route -> intent detection -> router -> juniorChatHandler.
+2. Identify the FIRST place where intent becomes missing, undefined, skipped, or overwritten.
+3. Fix only that point.
+4. Add short diagnostic logs only around that path, using clear tags like:
+   [INTENT_IN]
+   [INTENT_CLASSIFIED]
+   [INTENT_ROUTED]
+5. After the fix, verify with these expected outcomes:
+   - "как се казваш" -> free_question
+   - "къде живееш" -> free_question
+   - "какво можеш да правиш" -> free_question
+   - "хайде да си играем" -> free_question or game-related route if already designed
+   - "5+3" -> math-related intent
+   - "помогни ми с математиката" -> math-related intent
+   - "да четем заедно" -> reading-related intent if implemented, otherwise proper non-fallback conversational route
+
+Output format:
+- exact files changed
+- exact root cause found
+- exact lines / branch changed
+- why this was the minimal fix
+- what was NOT touched
+- whether API server restart or republish is needed
+
+Do not make any other fixes in this run.
+If you find another bug, report it but do not fix it.

@@ -1,0 +1,68 @@
+Improve Junior Bulgarian small-talk reply style in Preview only.
+
+Problem:
+The routing and transcription are correct, but some small-talk replies still sound too generic or too adult-like.
+Example from log:
+User: "Здравей, къде живееш?"
+Current reply:
+"Здравей! Аз съм любимият ти виртуален приятел, а нямам точно място, където да живея, но съм тук за теб! Какво ново при теб?"
+This is understandable, but not ideal for AYA Panda. It should sound more child-friendly, warmer, simpler, and more playful.
+
+Goal:
+Make Junior small-talk replies in Bulgarian feel:
+- more child-friendly
+- more natural
+- more warm and playful
+- less generic / less “virtual assistant” sounding
+- more consistent with AYA Panda character
+
+Work only in Preview.
+Do NOT publish.
+Do NOT use Agent.
+Do NOT change routing, transcription, math logic, voice plumbing, TTS plumbing, auth, or unrelated UI.
+
+Implement only a minimal style-layer fix for junior small-talk / free-chat replies:
+1. Adjust the junior prompt/style instructions for Bulgarian small-talk.
+2. The assistant should refer to itself naturally as:
+   - "Аз съм АЯ Панда."
+   - or "Казвам се АЯ Панда."
+3. Avoid phrases like:
+   - "любимият ти виртуален приятел"
+   - "нямам точно място, където да живея"
+   - other stiff / chatbot-like wording
+4. Prefer child-friendly wording such as:
+   - "Аз живея тук, в AYA!"
+   - "В моето малко дигитално местенце."
+   - "Аз съм винаги тук, когато искаш да си говорим."
+   - "Хайде да си побъбрим!"
+5. Keep replies short, warm, imaginative, and suitable for a child.
+6. Replies should sound engaging, not flat.
+
+Add diagnostics:
+- [JUNIOR_SMALL_TALK_STYLE]
+- [JUNIOR_SMALL_TALK_REPLY_FINAL]
+
+Preview tests:
+1. "Здравей, къде живееш?"
+   Expected style example:
+   "Здравей! Аз съм АЯ Панда. Живея тук, в AYA, и винаги съм готова да си говорим. А ти как си днес?"
+2. "Как се казваш?"
+   Expected: short, natural, child-friendly
+3. "Как си?"
+   Expected: warm and simple
+4. "Да четем заедно"
+   Expected: playful invitation
+5. "Упражнявай с мен английски"
+   Expected: still natural Bulgarian tone
+
+Hard rules:
+- Preview only
+- no publish
+- no Agent
+- no routing changes
+- no transcription changes
+- no math changes
+- change only the Bulgarian junior small-talk/free-chat style prompt
+- report exact file changed
+- report exact style rule changed
+- stop after this task

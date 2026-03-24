@@ -1,0 +1,63 @@
+Fix Bulgarian response style for Junior free-chat in Preview only.
+
+Problem:
+The transcription and routing are already correct, but some generated replies still sound unnatural in Bulgarian.
+Example from logs:
+user: "Здравей, как се казваш?"
+reply: "Здравей! Аз съм АЯ Панда! Как ти е днес?"
+This is understandable, but not the clean Bulgarian style we want.
+
+Goal:
+Make Junior free-chat replies sound natural, child-friendly, and clean in Bulgarian.
+
+Work only on the existing Preview flow in Replit.
+Do NOT publish.
+Do NOT use Agent.
+Do NOT change voice transcription, math routing, TTS plumbing, auth, or unrelated UI.
+
+Inspect:
+1. The exact prompt/messages sent into getAIResponse for junior free-chat
+2. Any junior/system style instructions currently used
+3. Whether the assistant is told how to refer to itself in Bulgarian
+
+Implement minimal safe fix:
+A. Adjust only the junior free-chat system/style prompt so replies use natural Bulgarian.
+B. The assistant should introduce itself naturally as:
+   - "Аз съм АЯ Панда."
+   or
+   - "Казвам се АЯ Панда."
+   whichever reads better in context
+C. Avoid awkward phrasing like:
+   - "Как ти е днес?"
+   - unnatural literal wording
+D. Prefer natural Bulgarian child-friendly phrases like:
+   - "Как си днес?"
+   - "Радвам се да си тук."
+   - "С какво да ти помогна?"
+E. Keep replies short, warm, simple, and appropriate for a child.
+F. Do not change routing logic. Do not change transcription. Do not change math/task behavior.
+
+Add diagnostics:
+- [JUNIOR_STYLE_PROMPT_ACTIVE]
+- [JUNIOR_REPLY_STYLE_CHECK]
+- [JUNIOR_REPLY_TEXT_FINAL]
+
+Preview tests:
+1. Say or type: "Здравей, как се казваш?"
+   Expected style: "Здравей! Аз съм АЯ Панда. Как си днес?"
+2. Say or type: "Как си?"
+   Expected: natural Bulgarian, short and warm
+3. Say or type: "Да четем заедно"
+   Expected: natural Bulgarian invitation to read together
+4. Say or type: "Упражнявай с мен английски"
+   Expected: natural Bulgarian wording, not stiff or translated-sounding
+
+Hard rules:
+- Preview only
+- no publish
+- no Agent
+- no broad refactor
+- change only the junior free-chat style/prompt layer
+- report exact file changed
+- report exact before/after wording rule
+- stop after this task

@@ -351,7 +351,7 @@ function isExplainRequest(m: string, lang: Lang): boolean {
 
 function isEducationalQuestion(m: string, lang: Lang): boolean {
   const patterns: Record<Lang, RegExp> = {
-    bg: /^(защо|какво|как|откъде|кога|кой|коя|къде|как се|какви|какъв|каква|разкажи|прочети|кажи ми|помогни ми|да четем|хайде да)\b/i,
+    bg: /^(защо|какво|как|откъде|кога|кой|коя|къде|как се|как се казваш|какво можеш да правиш|какви|какъв|каква|разкажи|прочети|кажи ми|помогни ми|да четем|хайде да си играем|хайде да)\b/i,
     es: /^(por qué|qué|cómo|dónde|cuándo|quién|cuéntame|léeme)\b/i,
     en: /^(why|what|how|where|when|who|tell me|read me)\b/i,
   };

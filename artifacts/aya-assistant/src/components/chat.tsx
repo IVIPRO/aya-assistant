@@ -283,9 +283,12 @@ export function Chat({
   });
 
   /* ── Free Conversation Mode — auto-TTS on new AYA messages ─────── */
+  /* ── Junior Module — auto-TTS on all AYA messages ──────────────── */
   const lastSpokenMsgIdRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!freeConversationMode) return;
+    // Both free conversation mode AND Junior module should auto-speak replies
+    const shouldAutoSpeak = freeConversationMode || module === "junior";
+    if (!shouldAutoSpeak) return;
     if (messages.length === 0) return;
     if (sendMutation.isPending) return; // Wait until response fully arrives
 
@@ -299,16 +302,25 @@ export function Chat({
     const clean = lastMsg.content.replace(/\[IMAGE:[^\]]+\]\n?/g, "").trim();
     if (!clean) return;
 
-    if (shouldVoiceReply(clean)) {
-      console.log("[FREE_CONV] Auto-speaking reply (voice):", clean.substring(0, 60));
+    // For Junior: always speak (shorter replies expected). For free conversation: check length
+    const shouldSpeak = module === "junior" ? true : shouldVoiceReply(clean);
+    
+    if (shouldSpeak) {
+      console.log("[JUNIOR_VOICE_REPLY_ENABLED]", module === "junior");
+      console.log("[JUNIOR_VOICE_REPLY_TEXT]", clean.substring(0, 80));
+      console.log("[JUNIOR_VOICE_PLAY_ATTEMPT]", msgId);
       voiceSpeaker.speak(clean, msgId);
-      onFreeConversationReply?.("voice");
+      if (module === "junior") {
+        console.log("[JUNIOR_VOICE_PLAY_SUCCESS]", "speech started");
+      } else {
+        onFreeConversationReply?.("voice");
+      }
     } else {
       console.log("[FREE_CONV] Keeping reply as chat text (structured/long)");
       onFreeConversationReply?.("chat");
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages, sendMutation.isPending, freeConversationMode]);
+  }, [messages, sendMutation.isPending, freeConversationMode, module]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

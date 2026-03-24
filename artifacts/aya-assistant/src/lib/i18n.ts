@@ -28,6 +28,7 @@ export interface UITranslations {
     quickSwitch: string;
     childLevel: (lv: number, xp: number, stars: number) => string;
     gradeLevel: (grade: number, lv: number) => string;
+    reviewChip: string;
   };
   modules: {
     juniorTitle: string;
@@ -72,6 +73,8 @@ export interface UITranslations {
     missionProgress: (completed: number, total: number) => string;
     xpEarned: (xp: number) => string;
     starsEarned: (stars: number) => string;
+    xpLabel: string;
+    levelLabel: (lv: number) => string;
   };
   streak: {
     dailyStreak: string;
@@ -100,6 +103,7 @@ export const translations: Record<LangCode, UITranslations> = {
       quickSwitch: "Quick switch child",
       childLevel: (lv, xp, stars) => `Level ${lv} · ${xp} XP · ⭐ ${stars}`,
       gradeLevel: (grade, lv) => `Grade ${grade} · Lv ${lv}`,
+      reviewChip: "Review",
     },
     modules: {
       juniorTitle: "AYA Elementary",
@@ -149,6 +153,8 @@ export const translations: Record<LangCode, UITranslations> = {
       missionProgress: (completed, total) => `${completed} / ${total} tasks completed`,
       xpEarned: (xp) => `+${xp} XP`,
       starsEarned: (stars) => `⭐ +${stars}`,
+      xpLabel: "XP",
+      levelLabel: (lv) => `Level ${lv}`,
     },
     streak: {
       dailyStreak: "Daily Streak",
@@ -173,8 +179,9 @@ export const translations: Record<LangCode, UITranslations> = {
       setupFamilyDesc: "Създайте семеен профил, за да добавите деца и да споделите календари.",
       goToSettings: "Към настройки",
       quickSwitch: "Смени дете",
-      childLevel: (lv, xp, stars) => `Ниво ${lv} · ${xp} XP · ⭐ ${stars}`,
+      childLevel: (lv, xp, stars) => `Ниво ${lv} · ${xp} точки · ⭐ ${stars}`,
       gradeLevel: (grade, lv) => `${grade} клас · Ниво ${lv}`,
+      reviewChip: "Преговор",
     },
     modules: {
       juniorTitle: "AYA Начален етап",
@@ -222,13 +229,15 @@ export const translations: Record<LangCode, UITranslations> = {
       tryAgain: "Опитай отново. Помисли още малко.",
       startMission: "Започни мисия",
       missionProgress: (completed, total) => `${completed} / ${total} задачи решени`,
-      xpEarned: (xp) => `+${xp} XP`,
+      xpEarned: (xp) => `+${xp} точки`,
       starsEarned: (stars) => `⭐ +${stars}`,
+      xpLabel: "Точки",
+      levelLabel: (lv) => `Ниво ${lv}`,
     },
     streak: {
-      dailyStreak: "Дни подред учене",
+      dailyStreak: "Поредица",
       dayCount: (days) => `${days} дни подред`,
-      xpPoints: "XP точки",
+      xpPoints: "Точки",
     },
   },
   es: {
@@ -250,6 +259,7 @@ export const translations: Record<LangCode, UITranslations> = {
       quickSwitch: "Cambiar niño",
       childLevel: (lv, xp, stars) => `Nivel ${lv} · ${xp} XP · ⭐ ${stars}`,
       gradeLevel: (grade, lv) => `${grade} grado · Nv ${lv}`,
+      reviewChip: "Repaso",
     },
     modules: {
       juniorTitle: "AYA Primaria",
@@ -299,6 +309,8 @@ export const translations: Record<LangCode, UITranslations> = {
       missionProgress: (completed, total) => `${completed} / ${total} ejercicios resueltos`,
       xpEarned: (xp) => `+${xp} XP`,
       starsEarned: (stars) => `⭐ +${stars}`,
+      xpLabel: "XP",
+      levelLabel: (lv) => `Nivel ${lv}`,
     },
     streak: {
       dailyStreak: "Racha diaria",
@@ -325,6 +337,7 @@ export const translations: Record<LangCode, UITranslations> = {
       quickSwitch: "Kind wechseln",
       childLevel: (lv, xp, stars) => `Stufe ${lv} · ${xp} XP · ⭐ ${stars}`,
       gradeLevel: (grade, lv) => `Klasse ${grade} · Stufe ${lv}`,
+      reviewChip: "Wiederholung",
     },
     modules: {
       juniorTitle: "AYA Grundschule",
@@ -374,6 +387,8 @@ export const translations: Record<LangCode, UITranslations> = {
       missionProgress: (completed, total) => `${completed} / ${total} Aufgaben gelöst`,
       xpEarned: (xp) => `+${xp} XP`,
       starsEarned: (stars) => `⭐ +${stars}`,
+      xpLabel: "XP",
+      levelLabel: (lv) => `Stufe ${lv}`,
     },
     streak: {
       dailyStreak: "Tägliche Gewohnheit",
@@ -400,6 +415,7 @@ export const translations: Record<LangCode, UITranslations> = {
       quickSwitch: "Changer d'enfant",
       childLevel: (lv, xp, stars) => `Niveau ${lv} · ${xp} XP · ⭐ ${stars}`,
       gradeLevel: (grade, lv) => `Grade ${grade} · Niveau ${lv}`,
+      reviewChip: "Révision",
     },
     modules: {
       juniorTitle: "AYA Primaire",
@@ -449,6 +465,8 @@ export const translations: Record<LangCode, UITranslations> = {
       missionProgress: (completed, total) => `${completed} / ${total} tâches résolues`,
       xpEarned: (xp) => `+${xp} XP`,
       starsEarned: (stars) => `⭐ +${stars}`,
+      xpLabel: "XP",
+      levelLabel: (lv) => `Niveau ${lv}`,
     },
     streak: {
       dailyStreak: "Apprentissage quotidien",

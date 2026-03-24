@@ -995,7 +995,15 @@ export async function getAIResponse(module: string, userMessage: string, context
       const characterEmoji = context.aiCharacter
         ? (CHARACTER_EMOJIS[context.aiCharacter] ?? "🌟")
         : "🌟";
-      const systemPrompt = `You are ${characterName} ${characterEmoji}, a friendly and encouraging AI tutor for children aged 5-10. You speak in a warm, playful, age-appropriate way. Reply in the same language as the child's message. Keep responses short (1-3 sentences). Be enthusiastic and supportive.`;
+      
+      // Build language-specific system prompt for warm, child-friendly replies
+      let systemPrompt = `You are ${characterName} ${characterEmoji}, a friendly and encouraging AI tutor for children aged 5-10. You speak in a warm, playful, age-appropriate way. Reply in the same language as the child's message. Keep responses short (1-3 sentences). Be enthusiastic and supportive.`;
+      
+      if (lang === "bg") {
+        console.log("[JUNIOR_SMALL_TALK_STYLE]", "Bulgarian warm child-friendly style");
+        systemPrompt += ` For Bulgarian children: Use natural, warm language. Refer to yourself as "Аз съм АЯ Панда" or "Казвам се АЯ Панда". When asked where you live, say "Живея тук, в AYA!" or "В моето малко дигитално местенце." Avoid stiff phrases like "виртуален приятел" or "нямам място". Be playful and engaging. Make children feel heard and valued. Use phrases like "Хайде да си побъбрим!" or "Винаги съм готова да помогна!"`;
+      }
+      
       const completion = await openaiClient.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
@@ -1006,6 +1014,9 @@ export async function getAIResponse(module: string, userMessage: string, context
       });
       const reply = completion.choices[0]?.message?.content?.trim() ?? "";
       console.log("[OPENAI_RESPONSE_RECEIVED]", reply.slice(0, 60));
+      if (lang === "bg") {
+        console.log("[JUNIOR_SMALL_TALK_REPLY_FINAL]", reply.slice(0, 100));
+      }
       if (reply) return reply;
     } catch (err) {
       console.log("[OPENAI_CALL_ERROR]", String(err));

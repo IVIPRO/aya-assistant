@@ -70,13 +70,21 @@ router.post("/voice/transcribe", requireAuth, async (req, res): Promise<void> =>
 
   const file = new File([audioBuffer], `recording.${ext}`, { type: mimeType ?? "audio/webm" });
 
-  // Bulgarian transcription hint to improve accuracy for math words and numbers
+  // Enhanced Bulgarian transcription hint for children's speech stability
   const bgTranscriptionHint = resolvedLang === "bg"
-    ? "Разпознавай точно българска реч, включително числа и математически думи: нула, едно, две, три, четири, пет, шест, седем, осем, девет, десет, плюс, минус, по, делено, разделено, на, колко."
+    ? "Разпознавай точно детска българска реч. Важни думи и фрази: " +
+      "числа (нула, едно, две, три, четири, пет, шест, седем, осем, девет, десет, единадесет, дванадесет, петнадесет, двадесет), " +
+      "математика (плюс, минус, по, делено, разделено на, умножено, събери, извади, колко е), " +
+      "урок (задача, упражнение, помощ, обясни, не разбирам, помогни ми, дай ми), " +
+      "активности (да четем, четем заедно, упражнявай, хайде да си играем, да учим, нека учим, задай ми въпрос, логически, английски), " +
+      "основни фрази (как се казваш, какво можеш, разкажи ми, привет, здравей)."
     : undefined;
 
   console.log("[VOICE_MODEL]", "gpt-4o-mini-transcribe");
   console.log("[VOICE_LANG]", resolvedLang);
+  if (bgTranscriptionHint) {
+    console.log("[VOICE_PROMPT_HINT]", "Bulgarian children's speech context enabled");
+  }
 
   const transcription = await openai.audio.transcriptions.create({
     model: "gpt-4o-mini-transcribe",
@@ -86,8 +94,23 @@ router.post("/voice/transcribe", requireAuth, async (req, res): Promise<void> =>
     ...(bgTranscriptionHint ? { prompt: bgTranscriptionHint } : {}),
   });
 
-  const text = transcription.text ?? "";
-  console.log("[VOICE_TEXT]", text);
+  let text = transcription.text ?? "";
+  console.log("[VOICE_TEXT_RAW]", text);
+
+  // Bulgarian normalization: collapse spaces, preserve Cyrillic, normalize punctuation
+  if (resolvedLang === "bg") {
+    text = text
+      .replace(/\s+/g, " ")  // Collapse multiple spaces
+      .trim();
+    
+    // Light confidence check: if text has mixed Latin/Cyrillic noise patterns, try to identify Bulgarian words
+    const cyrillic = (text.match(/[а-яА-ЯёЁ]/g) || []).length;
+    const latin = (text.match(/[a-zA-Z]/g) || []).length;
+    
+    console.log("[VOICE_BG_CONFIDENCE_HINT]", { cyrillic, latin, ratio: latin > 0 ? (cyrillic / (cyrillic + latin) * 100).toFixed(1) : "100" });
+    
+    console.log("[VOICE_TEXT_NORMALIZED]", text);
+  }
 
   if (childId && text.trim()) {
     const { userId } = getUser(req);

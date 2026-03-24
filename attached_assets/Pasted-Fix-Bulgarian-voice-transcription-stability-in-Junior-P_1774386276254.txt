@@ -1,0 +1,73 @@
+Fix Bulgarian voice transcription stability in Junior Preview only.
+
+Problem:
+Bulgarian speech is sometimes transcribed incorrectly and the result drifts into the wrong wording/language. Example: the spoken Bulgarian input should stay Bulgarian, but the transcription comes back distorted and then the chat answers to the distorted text.
+
+Work only on the existing Preview flow in Replit.
+Do NOT publish.
+Do NOT use Agent.
+Do NOT rebuild the whole voice system.
+Do NOT change unrelated chat, math, UI, or auth logic.
+
+Goal:
+Make Bulgarian voice input more stable and consistently interpreted as Bulgarian before it is sent into Junior chat.
+
+Inspect first:
+1. Exact /voice/transcribe request path
+2. Which model/options are currently sent for transcription
+3. Whether language, prompt, temperature, or response format are explicitly passed
+4. Whether normalization after transcription is too weak or missing
+
+Implement minimal safe fix:
+A. Force Bulgarian transcription settings in the transcribe request for Junior voice flow.
+B. Add a Bulgarian transcription prompt/hint so the model expects:
+   - Bulgarian children’s speech
+   - Bulgarian math words
+   - Bulgarian school phrases
+   - common Bulgarian quick actions
+C. Add a lightweight Bulgarian normalization pass AFTER transcription and BEFORE routing:
+   - trim spaces
+   - collapse repeated spaces
+   - normalize punctuation
+   - preserve Cyrillic
+   - do not translate
+D. If transcription contains mixed Latin/Cyrillic noise but is clearly intended as Bulgarian, normalize it toward Bulgarian instead of letting it drift.
+E. Keep existing math/task/free-chat routing intact unless required only to consume the cleaned transcript.
+F. Do not touch TTS playback in this task.
+
+Important:
+This task is about improving recognition quality, not inventing meaning.
+Do not guess aggressively.
+Only normalize obvious transcription noise.
+
+Add exact diagnostics:
+- [VOICE_MODEL]
+- [VOICE_LANG]
+- [VOICE_PROMPT_HINT]
+- [VOICE_TEXT_RAW]
+- [VOICE_TEXT_NORMALIZED]
+- [VOICE_BG_CONFIDENCE_HINT]
+
+Preview tests to run after restart:
+1. Say: "Как се казваш?"
+2. Say: "Колко е пет плюс три?"
+3. Say: "Колко е осем делено на две?"
+4. Say: "Да четем заедно"
+5. Say: "Упражнявай с мен английски"
+6. Say: "Задай ми логически въпрос"
+
+Expected:
+- transcription stays in Bulgarian
+- no random foreign-language drift
+- normalized Bulgarian text goes into routing
+- existing correct routing keeps working
+
+Hard rules:
+- Preview only
+- no publish
+- no Agent
+- no broad refactor
+- report exact files changed
+- report exact transcribe options changed
+- report exact restart needed
+- stop after this task

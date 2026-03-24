@@ -75,11 +75,8 @@ router.post("/voice/transcribe", requireAuth, async (req, res): Promise<void> =>
     ? "Разпознавай точно българска реч, включително числа и математически думи: нула, едно, две, три, четири, пет, шест, седем, осем, девет, десет, плюс, минус, по, делено, разделено, на, колко."
     : undefined;
 
-  console.log("[VOICE_TRANSCRIBE_MODEL]", "gpt-4o-mini-transcribe");
-  console.log("[VOICE_TRANSCRIBE_LANG]", resolvedLang);
-  if (bgTranscriptionHint) {
-    console.log("[VOICE_TRANSCRIBE_HINT] Bulgarian hint enabled");
-  }
+  console.log("[VOICE_MODEL]", "gpt-4o-mini-transcribe");
+  console.log("[VOICE_LANG]", resolvedLang);
 
   const transcription = await openai.audio.transcriptions.create({
     model: "gpt-4o-mini-transcribe",
@@ -90,7 +87,7 @@ router.post("/voice/transcribe", requireAuth, async (req, res): Promise<void> =>
   });
 
   const text = transcription.text ?? "";
-  console.log("[VOICE_TRANSCRIBE_TEXT]", { raw: text, lang: resolvedLang });
+  console.log("[VOICE_TEXT]", text);
 
   if (childId && text.trim()) {
     const { userId } = getUser(req);

@@ -19,6 +19,11 @@ export function useVoiceRecorder({ onTranscript, onError, childId, lang }: UseVo
     if (state !== "idle") return;
 
     try {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        console.warn("[FREE_MODE_BLOCKED_BY_PLATFORM]", { reason: "mediaDevices.getUserMedia unavailable" });
+        onError?.("Гласовият режим не се поддържа в този браузър. Отвори в Safari.");
+        return;
+      }
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
@@ -86,7 +91,13 @@ export function useVoiceRecorder({ onTranscript, onError, childId, lang }: UseVo
 
       mr.start(1000);
       setState("recording");
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (message.includes("not allowed by the user agent") || message.includes("permission") || message.includes("user denied")) {
+        console.warn("[FREE_MODE_BLOCKED_BY_PLATFORM]", { reason: message });
+        onError?.("Гласовият режим не се поддържа в този браузър. Отвори в Safari.");
+        return;
+      }
       onError?.("Microphone access denied");
       setState("idle");
     }

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 export type SpeakerState = "idle" | "loading" | "playing";
 
@@ -13,6 +13,19 @@ export function useVoiceSpeaker({ childId, lang, onError }: UseVoiceSpeakerOptio
   const [playingId, setPlayingId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const blobUrlRef = useRef<string | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      try {
+        audioRef.current?.pause();
+      } catch {}
+      audioRef.current = null;
+      if (blobUrlRef.current) URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
+    };
+  }, []);
 
   const speak = useCallback(async (text: string, id: string) => {
     if (!text.trim()) return;
@@ -49,27 +62,35 @@ export function useVoiceSpeaker({ childId, lang, onError }: UseVoiceSpeakerOptio
       }
 
       const blob = await res.blob();
+      if (!mountedRef.current) return;
       const url = URL.createObjectURL(blob);
       blobUrlRef.current = url;
 
       const audio = new Audio(url);
       audioRef.current = audio;
 
-      audio.onplay = () => setSpeakerState("playing");
+      audio.onplay = () => {
+        if (mountedRef.current) setSpeakerState("playing");
+      };
       audio.onended = () => {
+        if (!mountedRef.current) return;
         setSpeakerState("idle");
         setPlayingId(null);
         URL.revokeObjectURL(url);
         blobUrlRef.current = null;
+        audioRef.current = null;
       };
       audio.onerror = () => {
+        if (!mountedRef.current) return;
         setSpeakerState("idle");
         setPlayingId(null);
         onError?.("Playback failed");
       };
 
+      if (!mountedRef.current) return;
       await audio.play();
     } catch (err) {
+      if (!mountedRef.current) return;
       setSpeakerState("idle");
       setPlayingId(null);
       onError?.(err instanceof Error ? err.message : "TTS error");
@@ -77,11 +98,16 @@ export function useVoiceSpeaker({ childId, lang, onError }: UseVoiceSpeakerOptio
   }, [state, playingId, childId, lang, onError]);
 
   const stop = useCallback(() => {
-    audioRef.current?.pause();
+    if (audioRef.current) {
+      try {
+        audioRef.current.pause();
+      } catch {}
+    }
     if (blobUrlRef.current) {
       URL.revokeObjectURL(blobUrlRef.current);
       blobUrlRef.current = null;
     }
+    audioRef.current = null;
     setSpeakerState("idle");
     setPlayingId(null);
   }, []);

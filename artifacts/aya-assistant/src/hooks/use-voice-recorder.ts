@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 
 export type RecorderState = "idle" | "recording" | "processing";
 
@@ -14,6 +14,20 @@ export function useVoiceRecorder({ onTranscript, onError, childId, lang }: UseVo
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      mountedRef.current = false;
+      try {
+        mediaRecorderRef.current?.stop();
+      } catch {}
+      mediaRecorderRef.current = null;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+      chunksRef.current = [];
+    };
+  }, []);
 
   const start = useCallback(async () => {
     if (state !== "idle") return;
@@ -42,6 +56,7 @@ export function useVoiceRecorder({ onTranscript, onError, childId, lang }: UseVo
       };
 
       mr.onstop = async () => {
+        if (!mountedRef.current) return;
         stream.getTracks().forEach((t) => t.stop());
         streamRef.current = null;
 
@@ -81,17 +96,18 @@ export function useVoiceRecorder({ onTranscript, onError, childId, lang }: UseVo
           }
 
           const { text } = await res.json() as { text: string };
-          if (text.trim()) onTranscript(text.trim());
+          if (mountedRef.current && text.trim()) onTranscript(text.trim());
         } catch (err) {
-          onError?.(err instanceof Error ? err.message : "Transcription error");
+          if (mountedRef.current) onError?.(err instanceof Error ? err.message : "Transcription error");
         } finally {
-          setState("idle");
+          if (mountedRef.current) setState("idle");
         }
       };
 
       mr.start(1000);
-      setState("recording");
+      if (mountedRef.current) setState("recording");
     } catch (err) {
+      if (!mountedRef.current) return;
       const message = err instanceof Error ? err.message : String(err);
       if (message.includes("not allowed by the user agent") || message.includes("permission") || message.includes("user denied")) {
         console.warn("[FREE_MODE_BLOCKED_BY_PLATFORM]", { reason: message });
@@ -104,8 +120,11 @@ export function useVoiceRecorder({ onTranscript, onError, childId, lang }: UseVo
   }, [state, childId, lang, onTranscript, onError]);
 
   const stop = useCallback(() => {
-    if (mediaRecorderRef.current && state === "recording") {
+    if (!mediaRecorderRef.current || state !== "recording") return;
+    try {
       mediaRecorderRef.current.stop();
+    } catch {
+      if (mountedRef.current) setState("idle");
     }
   }, [state]);
 

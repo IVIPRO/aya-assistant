@@ -751,18 +751,19 @@ export function Junior() {
   const [lastAyaMessage, setLastAyaMessage] = useState("");
 
   /* ── Free Conversation Mode ──────────────────────────────────── */
-  const [freeConversationMode, setFreeConversationMode] = useState(false);
+  const [conversationMode, setConversationMode] = useState<"default" | "free">("default");
   const freeConvSessionStartRef = useRef<Date | null>(null);
   const freeConvVoiceRepliesRef = useRef(0);
   const freeConvChatRepliesRef = useRef(0);
 
   const handleFreeConversationToggle = useCallback(() => {
-    setFreeConversationMode((prev) => {
-      const turningOff = prev;
+    setConversationMode((prev) => {
+      const turningOff = prev === "free";
       if (turningOff && freeConvSessionStartRef.current && activeChildId) {
         const durationMs = Date.now() - freeConvSessionStartRef.current.getTime();
         const durationMinutes = Math.max(1, Math.round(durationMs / 60000));
         const token = localStorage.getItem("aya_token");
+        console.log("[FREE_MODE_OFF]");
         console.log("[FREE_CONV] Session ended", {
           durationMinutes,
           voiceReplies: freeConvVoiceRepliesRef.current,
@@ -786,9 +787,9 @@ export function Junior() {
         freeConvChatRepliesRef.current = 0;
       } else if (!turningOff) {
         freeConvSessionStartRef.current = new Date();
-        console.log("[FREE_CONV] Session started");
+        console.log("[FREE_MODE_ON]");
       }
-      return !prev;
+      return turningOff ? "default" : "free";
     });
   }, [activeChildId]);
 
@@ -848,7 +849,7 @@ export function Junior() {
 
   /* ── Turn off Free Conversation Mode when leaving chat view ─────── */
   useEffect(() => {
-    if (view !== "chat" && freeConversationMode) {
+    if (view !== "chat" && conversationMode === "free") {
       handleFreeConversationToggle();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1124,15 +1125,15 @@ export function Junior() {
               {!selectedSubject && (
                 <button
                   onClick={handleFreeConversationToggle}
-                  title={freeConversationMode ? lbl.freeChatModeOff : lbl.freeChatModeOn}
+                  title={conversationMode === "free" ? lbl.freeChatModeOff : lbl.freeChatModeOn}
                   className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border transition-all text-sm font-bold flex-shrink-0 ${
-                    freeConversationMode
+                    conversationMode === "free"
                       ? "bg-green-500 text-white border-green-600 shadow-md shadow-green-200 animate-pulse"
                       : "bg-white/60 text-muted-foreground border-white/50 hover:bg-green-50 hover:text-green-700 hover:border-green-200"
                   }`}
                 >
                   <Mic className="w-4 h-4" />
-                  <span className="hidden sm:inline">{freeConversationMode ? lbl.freeChatModeOn : lbl.freeChatModeOff}</span>
+                  <span className="hidden sm:inline">{conversationMode === "free" ? lbl.freeChatModeOn : lbl.freeChatModeOff}</span>
                 </button>
               )}
               <button onClick={() => setView("map")}
@@ -1142,7 +1143,7 @@ export function Junior() {
             </div>
 
             {/* Free Conversation Mode active indicator banner */}
-            {freeConversationMode && (
+            {conversationMode === "free" && (
               <div className="flex items-center gap-3 mb-3 bg-green-50 border border-green-200 rounded-2xl px-4 py-2.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse flex-shrink-0" />
                 <span className="text-sm font-semibold text-green-800 flex-1">{lbl.voiceModeLabel}</span>
@@ -1165,13 +1166,13 @@ export function Junior() {
               subjectContext={subjectContext}
               onTeacherStateChange={handleTeacherStateChange}
               onAyaMessageReceived={setLastAyaMessage}
-              freeConversationMode={freeConversationMode}
+              freeConversationMode={conversationMode === "free"}
               onFreeConversationReply={handleFreeConversationReply}
             />
 
             <VoiceReadySection
               lbl={lbl}
-              freeConversationMode={freeConversationMode}
+              freeConversationMode={conversationMode === "free"}
               onTalkToggle={handleFreeConversationToggle}
               onOpenListening={() => {
                 // Prepare content to read from current context

@@ -646,6 +646,9 @@ export async function handleJuniorChat(
   }
 
   // ── 3. Route to handler ──────────────────────────────────────────────────
+  if (intent === "free_question") {
+    return getFreeQuestionReply(msg, context, childName, lang);
+  }
 
   // ── CHANGE_OPERATION ─────────────────────────────────────────────────────
   if (intent === "change_operation") {

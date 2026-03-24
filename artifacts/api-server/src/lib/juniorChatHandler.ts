@@ -528,6 +528,7 @@ function isDirectMathQuestion(m: string, lang: Lang): boolean {
 
 function parseBulgarianSpokenMath(m: string): { expression: string; type: "full_question" | "short_answer" | null } | null {
   // Parses Bulgarian spoken math like "пет плюс три" -> "5 + 3"
+  // Handles both questions ("колко е пет плюс три?") and short answers ("пет плюс три")
   // Returns null if not a recognizable math phrase
   
   const bgToNum: Record<string, number> = {
@@ -562,6 +563,17 @@ function parseBulgarianSpokenMath(m: string): { expression: string; type: "full_
 
   let normalized = m.toLowerCase().trim();
   
+  // Check if it's a full question BEFORE stripping question words
+  const isQuestion = /^(колко|какво)/.test(normalized);
+  
+  // Strip question words and the linking verb "е" to get the core math expression
+  // e.g., "колко е пет плюс три" -> "пет плюс три"
+  let coreExpression = normalized
+    .replace(/^(колко|какво)\s+/, "")  // Remove question word
+    .replace(/^е\s+/, "")               // Remove linking verb
+    .replace(/\?$/, "")                 // Remove trailing question mark
+    .trim();
+  
   // Try to parse as spoken math: "число оператор число"
   // e.g., "пет плюс три", "осем разделено на две"
   
@@ -569,16 +581,14 @@ function parseBulgarianSpokenMath(m: string): { expression: string; type: "full_
   const sortedOps = Object.entries(opMap).sort((a, b) => b[0].length - a[0].length);
   
   for (const [op, sym] of sortedOps) {
-    if (normalized.includes(op)) {
-      const parts = normalized.split(op).map(p => p.trim());
+    if (coreExpression.includes(op)) {
+      const parts = coreExpression.split(op).map(p => p.trim());
       if (parts.length === 2) {
         const leftNum = bgToNum[parts[0]];
         const rightNum = bgToNum[parts[1]];
         if (leftNum !== undefined && rightNum !== undefined) {
           const expr = `${leftNum} ${sym} ${rightNum}`;
-          // Check if it's a question (starts with "колко", etc.)
-          const isQuestion = /^(колко|какво)/.test(m.toLowerCase());
-          console.log("[BG_SPOKEN_MATH_DETECTED]", { raw: m, parsed: expr, synonym: op });
+          console.log("[BG_SPOKEN_MATH_DETECTED]", { raw: m, parsed: expr, synonym: op, isQuestion });
           return {
             expression: expr,
             type: isQuestion ? "full_question" : "short_answer",

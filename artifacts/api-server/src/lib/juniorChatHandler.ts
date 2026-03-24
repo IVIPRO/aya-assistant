@@ -257,6 +257,20 @@ function detectIntent(
   const op = detectMathOperationSwitch(m, lang);
   if (op) return "change_operation";
 
+  // ── 1b. Quick-action buttons (highest priority, bypass all context) ────
+  // These buttons should never be caught as task answers or treated as continue
+  const quickAction = isQuickActionButton(m, lang);
+  if (quickAction) {
+    if (quickAction === "math") {
+      console.log("[QUICK_ACTION] detected: math button");
+      return "new_math_task";
+    } else {
+      // reading, logic, english → safe placeholder reply via OpenAI
+      console.log("[QUICK_ACTION] detected:", quickAction, "→ routing to OpenAI");
+      return "unknown";
+    }
+  }
+
   // ── 2. New math task request (any context, even with active question) ────
   if (isNewMathTaskRequest(m, lang)) return "new_math_task";
 
@@ -497,6 +511,29 @@ function getCharEmoji(aiCharacter?: string): string {
     owl: "🦉",
   };
   return map[(aiCharacter ?? "").toLowerCase()] ?? "📚";
+}
+
+function isQuickActionButton(m: string, lang: Lang): "math" | "reading" | "logic" | "english" | null {
+  // Detect quick-action buttons from Junior chat UI
+  const normalized = m.toLowerCase().trim();
+  
+  if (lang === "bg") {
+    if (normalized === "помогни ми с математика") return "math";
+    if (normalized === "да четем заедно") return "reading";
+    if (normalized === "задай ми логически въпрос") return "logic";
+    if (normalized === "упражнявай с мен английски") return "english";
+  } else if (lang === "en") {
+    if (normalized === "help with math") return "math";
+    if (normalized === "let's read together") return "reading";
+    if (normalized === "ask me a logic question") return "logic";
+    if (normalized === "practice english") return "english";
+  } else if (lang === "es") {
+    if (normalized === "ayúdame con matemáticas") return "math";
+    if (normalized === "leamos juntos") return "reading";
+    if (normalized === "hazme una pregunta de lógica") return "logic";
+    if (normalized === "practicar inglés") return "english";
+  }
+  return null;
 }
 
 function isDirectMathQuestion(m: string, lang: Lang): boolean {

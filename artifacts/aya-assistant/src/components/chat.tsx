@@ -281,19 +281,10 @@ export function Chat({
       toast({ title: msg, variant: "destructive" });
     },
   });
-  const mountedRef = useRef(true);
-  useEffect(() => {
-    return () => {
-      mountedRef.current = false;
-      voiceRecorder.stop();
-      voiceSpeaker.stop();
-    };
-  }, [voiceRecorder, voiceSpeaker]);
 
   /* ── Free Conversation Mode — auto-TTS on new AYA messages ─────── */
   const lastSpokenMsgIdRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!mountedRef.current) return;
     if (!freeConversationMode) return;
     if (messages.length === 0) return;
     if (sendMutation.isPending) return; // Wait until response fully arrives
@@ -310,8 +301,7 @@ export function Chat({
 
     if (shouldVoiceReply(clean)) {
       console.log("[FREE_CONV] Auto-speaking reply (voice):", clean.substring(0, 60));
-      if (!mountedRef.current) return;
-      void voiceSpeaker.speak(clean, msgId);
+      voiceSpeaker.speak(clean, msgId);
       onFreeConversationReply?.("voice");
     } else {
       console.log("[FREE_CONV] Keeping reply as chat text (structured/long)");
@@ -321,7 +311,6 @@ export function Chat({
   }, [messages, sendMutation.isPending, freeConversationMode]);
 
   const scrollToBottom = () => {
-    if (!mountedRef.current) return;
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
@@ -519,8 +508,7 @@ export function Chat({
               onSuccess: () => {
                 console.log(`[AYA_HOMEWORK] ${imageId} upload completed`);
                 console.log(`[AYA_HOMEWORK] ${imageId} refetching message list`);
-          if (!mountedRef.current) return;
-          refetch().catch(() => {
+                refetch().catch(() => {
                   console.log(`[AYA_HOMEWORK] ${imageId} refetch error`);
                 });
               },
@@ -958,7 +946,6 @@ function PlayButton({ text, msgId, voiceSpeaker, label, stopLabel }: PlayButtonP
         if (isThisPlaying) {
           voiceSpeaker.stop();
         } else {
-          if (typeof window === "undefined") return;
           void voiceSpeaker.speak(text, msgId);
         }
       }}

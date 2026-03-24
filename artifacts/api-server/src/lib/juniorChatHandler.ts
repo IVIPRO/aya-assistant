@@ -257,8 +257,14 @@ function detectIntent(
   const op = detectMathOperationSwitch(m, lang);
   if (op) return "change_operation";
 
-  // ── 2. New math task request (any context) ──────────────────────────────
+  // ── 2. New math task request (any context, even with active question) ────
   if (isNewMathTaskRequest(m, lang)) return "new_math_task";
+
+  // ── 2b. If there's an active question, check if this is a NEW math problem (e.g., "колко е 5+3")
+  // before treating it as an answer to the current task ──────────────────────
+  if (state.activeQuestion !== null) {
+    if (containsMathOperators(m, lang)) return "new_math_task";
+  }
 
   // ── 3. Post-success continuation ────────────────────────────────────────
   if (state.postSuccessId !== null) {
@@ -318,6 +324,15 @@ function isNewMathTaskRequest(m: string, lang: Lang): boolean {
     ],
   };
   return triggers[lang].some((t) => m.includes(t));
+}
+
+function containsMathOperators(m: string, lang: Lang): boolean {
+  const operators: Record<Lang, string[]> = {
+    bg: ["плюс", "минус", "умножено", "разделено", "+", "-", "×", "÷", "*", "/"],
+    es: ["más", "menos", "multiplicado", "dividido", "+", "-", "×", "÷", "*", "/"],
+    en: ["plus", "minus", "times", "multiplied", "divided", "+", "-", "×", "÷", "*", "/"],
+  };
+  return operators[lang].some((op) => m.includes(op));
 }
 
 function isContinueCommand(m: string, lang: Lang): boolean {

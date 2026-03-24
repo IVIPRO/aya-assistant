@@ -24,16 +24,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
 
-  const { data: user, isLoading, isError } = useGetMe({
+  const { data: user, isLoading } = useGetMe({
     query: {
       queryKey: getGetMeQueryKey(),
       enabled: !!token,
+      // Prevent aggressive refetches that cause false logouts on transient errors
       retry: false,
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
     }
   });
 
   useEffect(() => {
     const handleExpired = () => {
+      // Real 401 from server — the fetch interceptor dispatches this
+      console.log("[AUTH] auth-expired event received — real 401, redirecting to /login");
       setToken(null);
       setLocation("/login");
     };
@@ -41,12 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('auth-expired', handleExpired);
   }, [setLocation]);
 
-  useEffect(() => {
-    if (isError) {
-      setToken(null);
-      localStorage.removeItem("aya_token");
-    }
-  }, [isError]);
+  // NOTE: isError from useGetMe is intentionally NOT used to clear the token.
+  // The fetch interceptor is the single source of truth for real auth failures (401).
+  // Clearing the token on any query error (network hiccup, 500, timeout) would
+  // cause false logouts during voice mode, TTS failures, and transient server errors.
 
   const login = (data: AuthResponse) => {
     localStorage.setItem("aya_token", data.token);

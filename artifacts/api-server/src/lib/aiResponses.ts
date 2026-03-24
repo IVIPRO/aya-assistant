@@ -979,6 +979,8 @@ export function getMathTaskPrompt(a: number, b: number, operation: string, child
 }
 
 export function getAIResponse(module: string, userMessage: string, context?: JuniorContext): string {
+  console.log("[OPENAI_KEY_PRESENT]", Boolean(process.env.OPENAI_API_KEY));
+  console.log("[OPENAI_CALL_ATTEMPT]");
   if (module === "junior" && context) {
     // Check if this is a greeting/casual chat first
     const lang = getLang(context.language);
@@ -1020,5 +1022,6 @@ export function getAIResponse(module: string, userMessage: string, context?: Jun
   };
 
   const moduleResponses = responses[module] || responses.family;
+  console.log("[OPENAI_RESPONSE_RECEIVED]");
   return moduleResponses[Math.floor(Math.random() * moduleResponses.length)];
 }

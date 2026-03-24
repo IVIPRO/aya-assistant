@@ -646,7 +646,7 @@ export async function handleJuniorChat(
   console.log("[JUNIOR_CHAT] intent:", intent, "| msg:", msg);
   
   // ── Task breakout: conversational msg while in task → clear task context ──
-  if (state.activeQuestion && (intent === "small_talk" || intent === "free_question" || intent === "unknown")) {
+  if (state.activeQuestion && intent === "unknown" && isEducationalQuestion(msg.toLowerCase().trim(), lang)) {
     console.log("[TASK_CONTEXT_RESET] clearing active task", { activeOp: state.activeQuestion.operation, intent, msg });
     await clearActiveQuestion(childId, module);
     // Clear from state so downstream logic doesn't see it
@@ -660,6 +660,7 @@ export async function handleJuniorChat(
 
   // ── 3. Route to handler ──────────────────────────────────────────────────
   if (intent === "free_question") {
+    console.log("[FREE_CHAT_REPLY_PATH]", "getFreeQuestionReply");
     return getFreeQuestionReply(msg, context, childName, lang);
   }
 
@@ -752,7 +753,10 @@ export async function handleJuniorChat(
       await clearPostSuccess(childId, module);
     }
     console.log("[JUNIOR_CHAT] free_chat / early_return — skipping lesson eval", { intent });
-    return getAIResponse(module, msg, context);
+    const reply = getAIResponse(module, msg, context);
+    console.log("[FREE_CHAT_REPLY_TEXT]", reply);
+    console.log("[FREE_CHAT_FALLBACK_USED]", intent === "unknown");
+    return reply;
   }
 
   // ── BULGARIAN_LESSON_ANSWER ────────────────────────────────────────────────

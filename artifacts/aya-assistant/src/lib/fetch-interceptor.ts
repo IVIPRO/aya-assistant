@@ -26,7 +26,7 @@ window.fetch = async (...args) => {
   const isVoiceRequest = isApiRequest && resource.includes('/voice/');
 
   if (token && isApiRequest) {
-    // For voice requests that already have Authorization, pass through
+    // For requests that already have Authorization, pass through
     // For other requests, ensure Authorization is added
     const existingHeaders = config?.headers;
     const hasExistingAuth = 
@@ -34,11 +34,17 @@ window.fetch = async (...args) => {
       (typeof existingHeaders === 'object' && existingHeaders && 'Authorization' in existingHeaders) ||
       (typeof existingHeaders === 'object' && existingHeaders && 'authorization' in existingHeaders);
     
-    // Build headers as plain object to avoid Headers API conversion issues on Android
+    // Convert all headers to plain object for consistency and Android compatibility
     const plainHeaders: Record<string, string> = {};
     
-    // Copy existing headers if they're a plain object
-    if (typeof existingHeaders === 'object' && !(existingHeaders instanceof Headers)) {
+    // Copy existing headers from either plain object or Headers instance
+    if (existingHeaders instanceof Headers) {
+      // Headers instance: iterate and copy all entries
+      existingHeaders.forEach((value, key) => {
+        plainHeaders[key] = value;
+      });
+    } else if (typeof existingHeaders === 'object' && existingHeaders) {
+      // Plain object: copy all properties
       Object.assign(plainHeaders, existingHeaders);
     }
     

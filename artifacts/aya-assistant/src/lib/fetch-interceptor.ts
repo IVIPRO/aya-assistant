@@ -26,18 +26,34 @@ window.fetch = async (...args) => {
   const isVoiceRequest = isApiRequest && resource.includes('/voice/');
 
   if (token && isApiRequest) {
-    // Use Headers API to properly copy existing headers (including Content-Type)
-    // Spreading a Headers instance with {...} loses all headers, so we use new Headers()
-    const mergedHeaders = new Headers(config?.headers);
-    mergedHeaders.set('Authorization', `Bearer ${token}`);
-
-    const newConfig = { ...(config || {}), headers: mergedHeaders };
+    // For voice requests that already have Authorization, pass through
+    // For other requests, ensure Authorization is added
+    const existingHeaders = config?.headers;
+    const hasExistingAuth = 
+      (existingHeaders instanceof Headers && existingHeaders.has('Authorization')) ||
+      (typeof existingHeaders === 'object' && existingHeaders && 'Authorization' in existingHeaders) ||
+      (typeof existingHeaders === 'object' && existingHeaders && 'authorization' in existingHeaders);
+    
+    // Build headers as plain object to avoid Headers API conversion issues on Android
+    const plainHeaders: Record<string, string> = {};
+    
+    // Copy existing headers if they're a plain object
+    if (typeof existingHeaders === 'object' && !(existingHeaders instanceof Headers)) {
+      Object.assign(plainHeaders, existingHeaders);
+    }
+    
+    // Add Authorization if not already present
+    if (!hasExistingAuth) {
+      plainHeaders['Authorization'] = `Bearer ${token}`;
+    }
+    
+    const newConfig = { ...(config || {}), headers: plainHeaders };
     
     if (isVoiceRequest) {
       console.log("[FETCH_INTERCEPTOR_VOICE]", {
         resource,
         method: config?.method || "GET",
-        hasAuthHeader: mergedHeaders.has("Authorization"),
+        hasAuthHeader: !!plainHeaders['Authorization'],
         credentialsMode: newConfig.credentials || "default",
       });
     }

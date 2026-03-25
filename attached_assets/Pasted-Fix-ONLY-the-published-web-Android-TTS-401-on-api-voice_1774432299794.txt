@@ -1,0 +1,42 @@
+Fix ONLY the published-web Android TTS 401 on /api/voice/speak.
+
+Context:
+- In Replit Preview, voice works.
+- In published web app on Android browser, text reply appears but TTS fails with HTTP 401.
+- This means the bug is in published auth/session/header handling for /api/voice/speak, not in the core chat logic.
+- Keep all existing chat/transcribe logic unchanged.
+- Do NOT touch math, routing, or UI styling.
+- Work in Lite mode only.
+
+Goal:
+Make /api/voice/speak succeed in the published web app on Android exactly like it succeeds in Preview.
+
+Do exactly this:
+1. Inspect the frontend request path used for voice playback in the published build:
+   - artifacts/aya-assistant/src/hooks/use-voice-speaker.ts
+   - any shared fetch/auth helper used by it
+   - confirm whether Authorization header is actually attached for /api/voice/speak in production build
+
+2. Inspect the backend auth expectation for:
+   - artifacts/api-server/src/routes/voice.ts
+   - any auth middleware/interceptor used by /api/voice/speak
+   - determine why published Android gets 401 while Preview succeeds
+
+3. Implement the SMALLEST safe fix so /api/voice/speak accepts the same authenticated user in published mobile web:
+   - if frontend is missing bearer token on this route, add it
+   - if backend only accepts session cookie there, allow the same bearer-token auth method already used by working routes
+   - if route is behind the wrong auth middleware, fix only that route
+   - preserve security; do NOT make the route public
+
+4. Add precise logs only for this route:
+   - frontend: [VOICE_SPEAK_REQUEST], [VOICE_SPEAK_RESPONSE], hasToken, hasAuthHeader
+   - backend: [VOICE_SPEAK_AUTH], authSource=session|bearer|none, status=200|401
+
+5. Restart only what is needed and provide exact Preview + Published verification steps.
+
+Success criteria:
+- Published Android no longer shows “TTS failed (HTTP 401)”
+- /api/voice/speak returns 200
+- AYA voice plays normally in published web app
+- Preview still works
+- No unrelated changes

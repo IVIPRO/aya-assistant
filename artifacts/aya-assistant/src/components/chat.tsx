@@ -396,25 +396,36 @@ export function Chat({
 
   const doSend = (content: string, onError?: () => void) => {
     if (!content.trim() || sendMutation.isPending) {
-      console.log("[VOICE_SEND_ERROR] Content empty or already sending", { content: content.trim(), isPending: sendMutation.isPending });
+      console.log("[CHAT_SEND_ERROR] Content empty or already sending", { content: content.trim(), isPending: sendMutation.isPending });
       return;
     }
     const fullContent = subjectContext
       ? `${metaLbl.subjectPrefix}: ${subjectContext.subjectLabel}${subjectContext.topicLabel ? ` | ${metaLbl.topicPrefix}: ${subjectContext.topicLabel}` : ""}\n${content}`
       : content;
     const sendMode = freeConversationMode ? "free_conversation" : undefined;
-    console.log("[VOICE_SEND_PAYLOAD] Sending", { module, content: fullContent, childId: activeChildId, mode: sendMode });
+    const hasToken = !!localStorage.getItem("aya_token");
+    console.log("[CHAT_SEND_REQUEST]", { 
+      module, 
+      contentLength: fullContent.length, 
+      childId: activeChildId, 
+      mode: sendMode,
+      hasToken
+    });
     sendMutation.mutate(
       { data: { module, content: fullContent, childId: activeChildId, mode: sendMode } },
       {
         onSuccess: () => {
-          console.log("[VOICE_SEND_RESPONSE] Success");
+          console.log("[CHAT_SEND_RESPONSE]", { status: 200, ok: true });
           refetch().catch(() => {});
         },
         onError: (error: any) => {
-          console.log("[VOICE_SEND_ERROR] Failed with status:", error?.status);
-          console.log("[VOICE_SEND_ERROR] Full error:", error);
-          console.log("[VOICE_SEND_ERROR] Error response:", error?.response?.data || error?.message);
+          const status = error?.status || error?.response?.status || "unknown";
+          console.log("[CHAT_SEND_RESPONSE]", { status, ok: false });
+          console.log("[CHAT_SEND_ERROR] Full error:", { 
+            status, 
+            message: error?.message,
+            response: error?.response?.data || "(no response data)"
+          });
           toast({
             title: "Error sending message",
             description: "Please try again.",

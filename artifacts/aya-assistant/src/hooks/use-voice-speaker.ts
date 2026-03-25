@@ -32,20 +32,31 @@ export function useVoiceSpeaker({ childId, lang, onError }: UseVoiceSpeakerOptio
     setPlayingId(id);
 
     try {
-      const hasToken = !!localStorage.getItem("aya_token");
+      const token = localStorage.getItem("aya_token");
+      const hasToken = !!token;
       console.log("[VOICE_SPEAKER] speak() starting", { id, lang, textLen: text.length, hasToken });
+      
+      // Ensure Authorization header is present (backup for Android/published where interceptor may not work)
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+        console.log("[VOICE_SPEAKER] adding Authorization header directly (backup)");
+      }
       
       const fetchConfig = {
         method: "POST",
         credentials: "include" as const,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers,
         body: JSON.stringify({ text, lang: lang ?? "en", childId: childId ?? undefined }),
       };
       console.log("[VOICE_SPEAKER] fetch config", { 
         url: "/api/voice/speak", 
-        hasContentType: !!fetchConfig.headers["Content-Type"],
+        method: "POST",
+        hasContentType: !!headers["Content-Type"],
+        hasAuthHeader: !!headers["Authorization"],
         credentials: fetchConfig.credentials,
       });
       

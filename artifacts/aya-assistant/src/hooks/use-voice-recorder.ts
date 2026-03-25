@@ -58,14 +58,23 @@ export function useVoiceRecorder({ onTranscript, onError, childId, lang }: UseVo
         try {
           const arrayBuffer = await blob.arrayBuffer();
           const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-          console.log("[VOICE_RECORDER] sending transcription", { lang, mimeType, blobSize: blob.size });
+          const token = localStorage.getItem("aya_token");
+          console.log("[VOICE_RECORDER] sending transcription", { lang, mimeType, blobSize: blob.size, hasToken: !!token });
+
+          // Ensure Authorization header is present (backup for Android/published where interceptor may not work)
+          const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+          };
+          
+          if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+            console.log("[VOICE_RECORDER] adding Authorization header directly (backup)");
+          }
 
           const res = await fetch("/api/voice/transcribe", {
             method: "POST",
             credentials: "include",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers,
             body: JSON.stringify({
               audio: base64,
               mimeType,

@@ -29,6 +29,7 @@ import {
   getAIResponse,
   getLang,
 } from "./aiResponses";
+import { getLocalSmallTalkReply } from "./localSmallTalk";
 import {
   getBulgarianLessonPrompt,
   getDefaultBulgarianTopic,
@@ -955,6 +956,18 @@ export async function handleJuniorChat(
       await clearPostSuccess(childId, module);
     }
     console.log("[JUNIOR_CHAT] free_chat / early_return — skipping lesson eval", { intent });
+    
+    // ── TRY LOCAL SMALL-TALK FIRST (BEFORE OpenAI) ──
+    const localMatch = getLocalSmallTalkReply(msg, childName, context.aiCharacter);
+    if (localMatch) {
+      console.log("[LOCAL_SMALL_TALK_MATCH]", localMatch.category);
+      console.log("[LOCAL_SMALL_TALK_REPLY]", localMatch.reply);
+      console.log("[LOCAL_SMALL_TALK_USED]", true);
+      console.log("[OPENAI_SKIPPED_LOCAL]", true);
+      return localMatch.reply;
+    }
+    
+    // ── FALLBACK TO OpenAI ──
     const reply = await getAIResponse(module, msg, context);
     console.log("[FREE_CHAT_REPLY_TEXT]", reply);
     console.log("[FREE_CHAT_FALLBACK_USED]", intent === "unknown");

@@ -1,0 +1,169 @@
+AYA Junior / Preview only / minimal-cost change.
+
+Goal:
+Build a LOCAL small-talk / quick-reply layer for Junior chat so common Bulgarian child messages are answered WITHOUT calling OpenAI. OpenAI must be used only for richer/open-ended free conversation, stories, explanations, or complex requests.
+
+IMPORTANT RULES:
+- Work ONLY in Preview in Replit.
+- Do NOT use/publish the online version.
+- Keep Agent OFF by default mindset; do the smallest safe change.
+- Do NOT invent architecture. First inspect the current real runtime path and reuse existing files/patterns.
+- Preserve current working behavior for:
+  - direct math questions
+  - math task creation
+  - logic prompt button
+  - reading prompt button
+  - English practice button
+  - Bulgarian voice transcription
+  - OpenAI free-chat fallback
+- If unsure, log and inspect first, then patch minimally.
+
+What to build:
+Create a LOCAL response layer before getAIResponse(...) is called for simple Junior Bulgarian conversational prompts.
+
+Local route should handle these categories WITHOUT OpenAI:
+1. greeting
+   examples:
+   - здравей
+   - здрасти
+   - привет
+   - добър ден
+2. identity / name
+   examples:
+   - как се казваш
+   - кой си ти
+   - ти коя си
+3. where/live
+   examples:
+   - къде живееш
+   - къде си
+4. wellbeing / what are you doing
+   examples:
+   - как си
+   - какво правиш
+5. play invitation
+   examples:
+   - хайде да играем
+   - искам да играем
+   - ще играем ли
+6. reading invitation
+   examples:
+   - да четем заедно
+   - искам да четем
+7. logic invitation
+   examples:
+   - задай ми логически въпрос
+   - искам логическа задача
+8. english invitation
+   examples:
+   - упражнявай с мен английски
+   - хайде английски
+9. encouragement / generic child-safe prompts
+   examples:
+   - обичам те
+   - скучно ми е
+   - искам приказка (NOTE: short local starter only if simple; long/custom story should still go to OpenAI)
+10. short acknowledgements
+   examples:
+   - да
+   - не
+   - добре
+   - ок
+
+Behavior requirements:
+- Replies must be:
+  - Bulgarian
+  - warm
+  - child-friendly
+  - simple
+  - playful
+  - short (1–3 sentences)
+  - consistent with AYA Panda persona
+- Never say weird phrases like:
+  - "любимият ти виртуален приятел"
+  - overly formal / robotic wording
+- Keep tone natural for a young child.
+- For local replies, do not call OpenAI.
+- For anything outside local categories, keep existing OpenAI path unchanged.
+
+Cost-control rule:
+- Add a hard local-first router:
+  - if message matches local category → return local reply immediately
+  - otherwise continue existing route to OpenAI
+- This must reduce unnecessary OpenAI calls for repeated small talk.
+
+Implementation constraints:
+- Minimal patch only.
+- Reuse existing intent normalization if present.
+- Prefer one small helper file or one helper section instead of spreading logic everywhere.
+- Do NOT refactor large unrelated code.
+- Do NOT break current voice flow.
+- Do NOT break current buttons.
+- Do NOT change DB/schema.
+- Do NOT touch auth/session/i18n unless absolutely required.
+
+Add diagnostics:
+Print logs for preview testing:
+- [LOCAL_SMALL_TALK_MATCH] <category>
+- [LOCAL_SMALL_TALK_REPLY] <reply text>
+- [LOCAL_SMALL_TALK_USED] true
+- [OPENAI_SKIPPED_LOCAL] true
+
+If no local match:
+- continue current behavior
+- do not change existing OpenAI logs
+
+Suggested local reply style examples:
+- greeting:
+  "Здрасти! 😊 Аз съм АYA Панда. Готова съм да учим и играем заедно!"
+- name:
+  "Аз съм АYA Панда! 🐼 Мога да ти помагам с учене, игри и въпроси."
+- where/live:
+  "Живея в твоя компютър и съм винаги наблизо, когато искаш да учим заедно! ✨"
+- how are you:
+  "Чудесно съм! 😊 Готова съм за ново приключение с теб."
+- play:
+  "Даа, хайде да играем! 🎉 Искаш ли игра с думи, числа или логика?"
+- read together:
+  "Супер идея! 📚 Каква приказка или тема искаш да четем?"
+- logic:
+  "С удоволствие! 🧩 Готов ли си за хитър логически въпрос?"
+- english:
+  "Страхотно! 🇬🇧 Хайде да упражняваме английски заедно. С коя дума да започнем?"
+- скучно ми е:
+  "Нека измислим нещо забавно! 🎈 Искаш ли игра, гатанка или кратка история?"
+
+Preview test cases after patch:
+1. "Здравей"
+   → local reply
+   → NO OpenAI call
+2. "Как се казваш?"
+   → local reply
+   → NO OpenAI call
+3. "Къде живееш?"
+   → local reply
+   → NO OpenAI call
+4. "Как си?"
+   → local reply
+   → NO OpenAI call
+5. "Хайде да играем"
+   → local reply
+   → NO OpenAI call
+6. "Да четем заедно"
+   → local reply
+   → NO OpenAI call
+7. "Задай ми логически въпрос"
+   → either existing working quick-action/local route, but still NO unnecessary OpenAI unless current design intentionally uses it
+8. "Упражнявай с мен английски"
+   → local/quick-action style, minimal-cost path
+9. "Разкажи ми приказка за лисица"
+   → OpenAI path kept
+10. "Защо небето е синьо?"
+   → OpenAI path kept
+
+What to report back:
+- exact changed file(s)
+- exact function(s) touched
+- whether Preview restart is needed
+- which cases are now local vs OpenAI
+- confirm no online publish was used

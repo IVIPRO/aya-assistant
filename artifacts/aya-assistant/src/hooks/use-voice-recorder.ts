@@ -63,6 +63,7 @@ export function useVoiceRecorder({ onTranscript, onError, childId, lang }: UseVo
 
           const res = await fetch("/api/voice/transcribe", {
             method: "POST",
+            credentials: "include",
             headers: {
               "Content-Type": "application/json",
               ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -74,6 +75,7 @@ export function useVoiceRecorder({ onTranscript, onError, childId, lang }: UseVo
               childId: childId ?? undefined,
             }),
           });
+          console.log("[VOICE_TRANSCRIBE_REQUEST]", { status: res.status, ok: res.ok });
 
           if (!res.ok) {
             console.warn("[VOICE_RECORDER] /api/voice/transcribe failed", { status: res.status });

@@ -1,0 +1,87 @@
+AYA / published voice bug / minimal fix only.
+
+We already know:
+- Preview in Replit works.
+- Published/online version fails only on TTS playback.
+- Browser console shows:
+  - POST /api/voice/speak -> 401 Unauthorized
+  - AUTH_INTERCEPTOR 401 on voice/TTS route
+- Voice transcription works.
+- Chat reply works.
+- Only the voice speak/TTS request fails in published.
+
+Goal:
+Fix the published/online voice playback auth issue so /api/voice/speak works the same as in Preview.
+
+IMPORTANT RULES:
+- First inspect the REAL runtime path and auth/session handling for /api/voice/speak.
+- Do NOT refactor unrelated code.
+- Do NOT touch working preview voice transcription/chat logic unless required.
+- Make the smallest safe fix.
+- Preserve current working behavior in Preview.
+- Be explicit about exact file(s), route(s), cookie/session settings, and why published fails while Preview works.
+- Do not guess. Inspect first.
+
+What to inspect first:
+1. The exact backend route for /api/voice/speak
+2. Whether it requires auth/session
+3. How the published frontend sends credentials to that route
+4. Whether fetch/axios is missing credentials: 'include'
+5. Whether cookie/session config blocks published domain
+6. Whether secure/sameSite/domain/proxy settings differ between Preview and published
+7. Whether auth middleware incorrectly rejects valid published requests only for voice/speak
+8. Whether /voice/transcribe and /chat/messages use a different fetch helper than /voice/speak
+
+Likely bug classes to verify:
+- frontend /api/voice/speak request not sending cookies in published
+- backend session cookie sameSite/secure/domain mismatch
+- auth middleware applied differently on speak route
+- published route calling different base URL / origin than preview
+- auth interceptor swallowing the real reason
+
+Required diagnostics to add if missing:
+- [VOICE_SPEAK_REQUEST] origin, hasCredentials, mode
+- [VOICE_SPEAK_AUTH_STATE] hasSession, userId
+- [VOICE_SPEAK_401_REASON]
+- [VOICE_SPEAK_ROUTE_OK]
+- [VOICE_SPEAK_ROUTE_FAIL]
+
+Fix target:
+Make /api/voice/speak authenticate correctly in published online app while keeping Preview working.
+
+If the root cause is frontend request credentials:
+- patch only the specific voice/speak request to send credentials correctly
+
+If the root cause is cookie/session config:
+- patch only the minimal session/cookie setting needed for published domain
+
+If the root cause is auth middleware mismatch:
+- patch only the minimal route/auth handling needed
+
+Do NOT change:
+- junior local small-talk logic
+- math routing
+- voice transcription model logic
+- OpenAI usage logic
+- buttons logic
+- database/schema
+
+After fix:
+1. restart only what is needed
+2. test in Preview first
+3. then explain what must be verified in published
+4. report:
+   - exact changed files
+   - exact root cause
+   - exact minimal fix
+   - whether online republish/redeploy is needed
+
+Success condition:
+- In published version:
+  - voice transcription succeeds
+  - chat reply succeeds
+  - /api/voice/speak no longer returns 401
+  - AYA speaks the returned answer normally
+
+Use the console evidence above as the source of truth:
+published bug is specifically 401 on /api/voice/speak, not on transcription or chat.

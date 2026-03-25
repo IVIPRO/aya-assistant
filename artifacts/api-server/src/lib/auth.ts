@@ -61,20 +61,25 @@ export function clearSession(req: Request): Promise<void> {
 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const sessionUserId = req.session.userId;
-  const isVoiceSpeak = req.path === "/voice/speak";
+  const isVoiceSpeak = req.path.includes("voice/speak");
 
   if (isVoiceSpeak) {
     console.log("[VOICE_SPEAK_AUTH_CHECK]", {
+      path: req.path,
+      method: req.method,
       hasSession: !!sessionUserId,
       sessionUserId,
       hasAuthHeader: !!req.headers.authorization,
-      authHeaderPrefix: req.headers.authorization?.slice(0, 20),
+      authHeaderType: req.headers.authorization?.split(" ")[0],
     });
   }
 
   if (sessionUserId) {
     // Session-cookie path (set at login time via setSession)
     console.log("[AUTH] session OK", { userId: sessionUserId, path: req.path });
+    if (isVoiceSpeak) {
+      console.log("[VOICE_SPEAK_SESSION_RESOLVED]", { userId: sessionUserId });
+    }
     req.authUser = {
       userId: sessionUserId,
       email: req.session.email ?? "",
@@ -94,7 +99,7 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
       headerPrefix: authHeader ? authHeader.slice(0, 10) : "(none)",
     });
     if (isVoiceSpeak) {
-      console.log("[VOICE_SPEAK_401_REASON]", "no session and no valid Bearer header");
+      console.log("[VOICE_SPEAK_401_REASON]", { reason: "no session cookie and no Bearer header", hasAuthHeader: !!authHeader });
     }
     res.status(401).json({ error: "Not authenticated" });
     return;
@@ -109,13 +114,16 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
       tokenPrefix: token.slice(0, 12),
     });
     if (isVoiceSpeak) {
-      console.log("[VOICE_SPEAK_401_REASON]", "Bearer token invalid or expired");
+      console.log("[VOICE_SPEAK_401_REASON]", { reason: "Bearer token invalid or expired" });
     }
     res.status(401).json({ error: "Invalid or expired token" });
     return;
   }
 
   console.log("[AUTH] JWT OK", { userId: payload.userId, path: req.path });
+  if (isVoiceSpeak) {
+    console.log("[VOICE_SPEAK_JWT_RESOLVED]", { userId: payload.userId });
+  }
   req.authUser = payload;
   next();
 }

@@ -32,16 +32,25 @@ export function useVoiceSpeaker({ childId, lang, onError }: UseVoiceSpeakerOptio
     setPlayingId(id);
 
     try {
-      console.log("[VOICE_SPEAKER] speak() called", { id, lang, textLen: text.length });
-      const res = await fetch("/api/voice/speak", {
+      const hasToken = !!localStorage.getItem("aya_token");
+      console.log("[VOICE_SPEAKER] speak() starting", { id, lang, textLen: text.length, hasToken });
+      
+      const fetchConfig = {
         method: "POST",
-        credentials: "include",
+        credentials: "include" as const,
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ text, lang: lang ?? "en", childId: childId ?? undefined }),
+      };
+      console.log("[VOICE_SPEAKER] fetch config", { 
+        url: "/api/voice/speak", 
+        hasContentType: !!fetchConfig.headers["Content-Type"],
+        credentials: fetchConfig.credentials,
       });
-      console.log("[VOICE_SPEAK_RESPONSE]", { status: res.status, ok: res.ok });
+      
+      const res = await fetch("/api/voice/speak", fetchConfig);
+      console.log("[VOICE_SPEAK_RESPONSE]", { status: res.status, ok: res.ok, statusText: res.statusText });
 
       if (!res.ok) {
         console.warn("[VOICE_SPEAKER] /api/voice/speak failed", { status: res.status, id });

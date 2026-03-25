@@ -23,6 +23,7 @@ window.fetch = async (...args) => {
   
   // Only intercept requests to our API
   const isApiRequest = typeof resource === 'string' && resource.startsWith('/api');
+  const isVoiceRequest = isApiRequest && resource.includes('/voice/');
 
   if (token && isApiRequest) {
     // Use Headers API to properly copy existing headers (including Content-Type)
@@ -31,6 +32,15 @@ window.fetch = async (...args) => {
     mergedHeaders.set('Authorization', `Bearer ${token}`);
 
     const newConfig = { ...(config || {}), headers: mergedHeaders };
+    
+    if (isVoiceRequest) {
+      console.log("[FETCH_INTERCEPTOR_VOICE]", {
+        resource,
+        method: config?.method || "GET",
+        hasAuthHeader: mergedHeaders.has("Authorization"),
+        credentialsMode: newConfig.credentials || "default",
+      });
+    }
     
     try {
       const response = await originalFetch(resource, newConfig);

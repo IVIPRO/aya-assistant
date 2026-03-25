@@ -1,0 +1,70 @@
+AYA / fix published Android TTS 401 for /api/voice/speak
+
+We now have confirmed production evidence from Android published app:
+
+Observed behavior:
+- published URL: aya-family-hub.replit.app
+- text chat works
+- OpenAI text reply works
+- only voice playback fails
+- user sees red toast: "TTS failed (HTTP 401)"
+- this happens on Android published app, while Preview works
+
+Conclusion:
+This is a published/mobile auth issue on /api/voice/speak, not an OpenAI text-generation issue.
+
+Goal:
+Fix /api/voice/speak so published Android can play TTS successfully with the same authenticated user/session context as the working chat routes.
+
+Critical rules:
+- inspect first, do not guess
+- do not touch working Preview behavior unless required
+- do not refactor unrelated code
+- do not change transcription behavior
+- do not change chat reply behavior
+- make the smallest safe fix
+- keep costs low
+
+Inspect exactly:
+1. backend route for /api/voice/speak
+2. auth middleware used by /api/voice/speak
+3. auth used by working routes:
+   - /chat/messages
+   - /voice/transcribe
+4. frontend request code for /api/voice/speak in published build
+5. whether Android published request loses cookie/session and needs Authorization/JWT fallback
+6. whether /api/voice/speak currently rejects valid bearer token / JWT / mobile auth header
+7. whether CORS / credentials / cookie sameSite / secure mismatch affects this route only
+
+Most likely root cause to confirm or reject:
+- chat routes work because they resolve auth from bearer/JWT/session correctly
+- /api/voice/speak still depends on session/cookie-only auth path, so Android published gets 401
+
+Required fix target:
+Make /api/voice/speak use the SAME auth resolution path as the already-working published routes.
+If bearer token or JWT is available, /api/voice/speak must accept it.
+Do not rely on cookie-only auth if the working mobile app uses token auth.
+
+Add/keep diagnostics:
+- [VOICE_SPEAK_AUTH_HEADER_PRESENT]
+- [VOICE_SPEAK_COOKIE_PRESENT]
+- [VOICE_SPEAK_SESSION_PRESENT]
+- [VOICE_SPEAK_JWT_PRESENT]
+- [VOICE_SPEAK_USER_RESOLVED]
+- [VOICE_SPEAK_401_REASON]
+- [VOICE_SPEAK_ROUTE_OK]
+
+Success criteria:
+In published Android:
+- text chat still works
+- voice transcription still works
+- /api/voice/speak returns 200 instead of 401
+- AYA plays the spoken reply normally
+- no regression in Preview
+
+After patch:
+1. restart only what is needed
+2. tell me exact changed files
+3. tell me exact root cause
+4. tell me exact minimal fix
+5. tell me clearly if I must republish manually or auto-redeploy is enough

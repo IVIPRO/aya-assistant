@@ -32,18 +32,16 @@ export function useVoiceSpeaker({ childId, lang, onError }: UseVoiceSpeakerOptio
     setPlayingId(id);
 
     try {
-      const token = localStorage.getItem("aya_token");
-      console.log("[VOICE_SPEAKER] speak() called", { id, lang, hasToken: !!token, textLen: text.length });
+      console.log("[VOICE_SPEAKER] speak() called", { id, lang, textLen: text.length });
       const res = await fetch("/api/voice/speak", {
         method: "POST",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({ text, lang: lang ?? "en", childId: childId ?? undefined }),
       });
-      console.log("[VOICE_SPEAK_REQUEST]", { status: res.status, ok: res.ok });
+      console.log("[VOICE_SPEAK_RESPONSE]", { status: res.status, ok: res.ok });
 
       if (!res.ok) {
         console.warn("[VOICE_SPEAKER] /api/voice/speak failed", { status: res.status, id });

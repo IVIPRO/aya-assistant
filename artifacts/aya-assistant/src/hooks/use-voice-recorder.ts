@@ -58,15 +58,13 @@ export function useVoiceRecorder({ onTranscript, onError, childId, lang }: UseVo
         try {
           const arrayBuffer = await blob.arrayBuffer();
           const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
-          const token = localStorage.getItem("aya_token");
-          console.log("[VOICE_RECORDER] sending transcription", { hasToken: !!token, lang, mimeType, blobSize: blob.size });
+          console.log("[VOICE_RECORDER] sending transcription", { lang, mimeType, blobSize: blob.size });
 
           const res = await fetch("/api/voice/transcribe", {
             method: "POST",
             credentials: "include",
             headers: {
               "Content-Type": "application/json",
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
             },
             body: JSON.stringify({
               audio: base64,
@@ -75,7 +73,7 @@ export function useVoiceRecorder({ onTranscript, onError, childId, lang }: UseVo
               childId: childId ?? undefined,
             }),
           });
-          console.log("[VOICE_TRANSCRIBE_REQUEST]", { status: res.status, ok: res.ok });
+          console.log("[VOICE_TRANSCRIBE_RESPONSE]", { status: res.status, ok: res.ok });
 
           if (!res.ok) {
             console.warn("[VOICE_RECORDER] /api/voice/transcribe failed", { status: res.status });

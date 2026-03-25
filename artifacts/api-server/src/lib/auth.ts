@@ -61,6 +61,16 @@ export function clearSession(req: Request): Promise<void> {
 
 export function requireAuth(req: Request, res: Response, next: NextFunction): void {
   const sessionUserId = req.session.userId;
+  const isVoiceSpeak = req.path === "/voice/speak";
+
+  if (isVoiceSpeak) {
+    console.log("[VOICE_SPEAK_AUTH_CHECK]", {
+      hasSession: !!sessionUserId,
+      sessionUserId,
+      hasAuthHeader: !!req.headers.authorization,
+      authHeaderPrefix: req.headers.authorization?.slice(0, 20),
+    });
+  }
 
   if (sessionUserId) {
     // Session-cookie path (set at login time via setSession)
@@ -83,6 +93,9 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
       hasAuthHeader: !!authHeader,
       headerPrefix: authHeader ? authHeader.slice(0, 10) : "(none)",
     });
+    if (isVoiceSpeak) {
+      console.log("[VOICE_SPEAK_401_REASON]", "no session and no valid Bearer header");
+    }
     res.status(401).json({ error: "Not authenticated" });
     return;
   }
@@ -95,6 +108,9 @@ export function requireAuth(req: Request, res: Response, next: NextFunction): vo
       path: req.path,
       tokenPrefix: token.slice(0, 12),
     });
+    if (isVoiceSpeak) {
+      console.log("[VOICE_SPEAK_401_REASON]", "Bearer token invalid or expired");
+    }
     res.status(401).json({ error: "Invalid or expired token" });
     return;
   }

@@ -1,0 +1,79 @@
+AYA / published voice TTS still failing with 401 / exact auth mismatch fix only
+
+We have fresh evidence from the published console:
+
+- voice transcription works
+- chat reply works
+- junior voice reply text is generated correctly
+- /api/voice/speak still fails with 401 in published only
+- frontend log shows:
+  - [VOICE_SPEAKER] speak() called
+  - hasToken: true
+  - POST /api/voice/speak 401
+  - [AUTH_INTERCEPTOR] 401 on voice/TTS route
+  - note: "session token may still be valid for core routes"
+
+This means:
+- the frontend is already sending a token
+- published auth works for core routes
+- /api/voice/speak backend auth handling is still inconsistent with the other working routes
+
+Goal:
+Fix ONLY the published auth mismatch for /api/voice/speak so it accepts the same valid auth/session/token as the working chat routes.
+
+Critical rules:
+- inspect first, do not guess
+- do not refactor unrelated code
+- do not touch transcription logic
+- do not touch OpenAI text reply logic
+- do not touch Preview-only behavior unless necessary
+- preserve working Preview behavior
+- make the smallest safe fix
+
+Inspect exactly:
+1. the backend implementation of /api/voice/speak
+2. the auth middleware/guard used on /api/voice/speak
+3. the auth middleware/guard used on the working routes:
+   - /chat/messages
+   - /voice/transcribe
+4. whether /api/voice/speak is using different auth extraction:
+   - cookie only
+   - session only
+   - bearer token missing
+   - different middleware order
+   - different published/proxy path handling
+5. whether the frontend voice speak request sends Authorization header differently from the working routes
+
+Required output after inspection:
+- exact root cause
+- exact file(s)
+- exact mismatch between /api/voice/speak and working routes
+- exact minimal fix
+
+Preferred fix direction:
+Make /api/voice/speak use the SAME auth resolution path as the already-working chat/voice routes.
+If /chat/messages or /voice/transcribe accepts bearer token + session fallback, /api/voice/speak must do the same.
+
+Required diagnostics to add if missing:
+- [VOICE_SPEAK_AUTH_HEADER_PRESENT]
+- [VOICE_SPEAK_SESSION_PRESENT]
+- [VOICE_SPEAK_USER_RESOLVED]
+- [VOICE_SPEAK_401_REASON]
+- [VOICE_SPEAK_ROUTE_OK]
+
+Success condition:
+In published app:
+- transcription still works
+- chat reply still works
+- /api/voice/speak returns 200
+- AYA voice plays normally
+
+After patch:
+1. restart only what is needed
+2. report exact changed files
+3. report exact root cause
+4. report exact minimal fix
+5. tell me whether republish is required or auto-redeploy is enough
+
+Use the newest console evidence as source of truth:
+published TTS still fails even though token exists, so the bug is backend auth mismatch on /api/voice/speak.

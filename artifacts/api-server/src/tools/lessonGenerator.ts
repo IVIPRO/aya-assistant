@@ -17,6 +17,7 @@ export interface GeneratorParams {
   grade: number;
   subject: "mathematics" | "bulgarian-language" | "reading";
   topic: string;
+  lessonCount?: number;
   lang?: LangCode;
 }
 
@@ -452,35 +453,120 @@ function generateBulgarianReading(grade: number, lang: LangCode): LessonContent 
   };
 }
 
-/* ─── Main Generator Function ──────────────────────────────────────── */
+/* ─── Multiplication Generator ─────────────────────────────────────── */
 
+function generateMathMultiplication(grade: number, lang: LangCode): LessonContent {
+  const b = band(grade);
+  const maxA = b === "low" ? 5 : 9;
+  const maxB = b === "low" ? 3 : 9;
+
+  const title = lang === "bg" ? "Умножение" : lang === "es" ? "Multiplicación" : "Multiplication";
+  const explanation =
+    lang === "bg"
+      ? `Умножението е бързо събиране. ${rnd(2, maxA)} × ${rnd(2, maxB)} означава ${rnd(2, maxA)} групи от ${rnd(2, maxB)}.`
+      : lang === "es"
+      ? `La multiplicación es suma rápida. ${rnd(2, maxA)} × ${rnd(2, maxB)} significa ${rnd(2, maxA)} grupos de ${rnd(2, maxB)}.`
+      : `Multiplication is fast adding. ${rnd(2, maxA)} × ${rnd(2, maxB)} means ${rnd(2, maxA)} groups of ${rnd(2, maxB)}.`;
+
+  const makeExample = () => {
+    const a = rnd(2, maxA), bv = rnd(2, maxB), ans = a * bv;
+    return {
+      problem: `${a} × ${bv} = ?`,
+      solution: String(ans),
+      hint:
+        lang === "bg" ? `Добави ${a} точно ${bv} пъти` :
+        lang === "es" ? `Suma ${a} exactamente ${bv} veces` :
+        `Add ${a} exactly ${bv} times`,
+    };
+  };
+
+  const makeProb = (): { question: string; answer: string } => {
+    const prob = mulProb(grade);
+    return { question: prob.question, answer: prob.answer };
+  };
+
+  return {
+    lesson: {
+      title,
+      explanation,
+      examples: [makeExample(), makeExample(), makeExample()],
+      tip:
+        lang === "bg" ? "✖️ Научи таблицата за умножение наизуст!" :
+        lang === "es" ? "✖️ ¡Aprende la tabla de multiplicar de memoria!" :
+        "✖️ Learn your times tables by heart!",
+    },
+    practice: {
+      instructions:
+        lang === "bg" ? "Реши задачите с умножение." :
+        lang === "es" ? "Resuelve los ejercicios de multiplicación." :
+        "Solve the multiplication problems.",
+      problems: [makeProb(), makeProb(), makeProb(), makeProb(), makeProb()],
+    },
+    quiz: {
+      instructions:
+        lang === "bg" ? "Избери верния отговор." :
+        lang === "es" ? "Elige la respuesta correcta." :
+        "Choose the correct answer.",
+      questions: Array.from({ length: 4 }, () => {
+        const prob = mulProb(grade);
+        const correct = parseInt(prob.answer);
+        return { question: prob.question, ...mcOptions(correct, 8) };
+      }),
+    },
+  };
+}
+
+/* ─── Main Generator Functions ─────────────────────────────────────── */
+
+/**
+ * Generate a single lesson variation for the given parameters.
+ * Each call produces randomized but schema-compliant content.
+ */
 export function generateLesson(params: GeneratorParams): LessonContent {
   const { grade, subject, topic, lang = "en" } = params;
 
-  // Validate parameters
-  if (grade !== 2 && grade !== 3 && grade !== 4) {
-    throw new Error(`Generator supports grades 2, 3, 4 only. Got grade ${grade}`);
+  if (grade < 2 || grade > 4) {
+    throw new Error(`Generator supports grades 2–4 only. Got grade ${grade}`);
   }
 
-  if (subject === "mathematics" && topic === "word-problems") {
-    return generateMathWortProblems(grade, lang);
+  if (subject === "mathematics") {
+    if (topic === "word-problems") return generateMathWortProblems(grade, lang);
+    if (topic === "multiplication_intro" || topic === "multiplication") return generateMathMultiplication(grade, lang);
   }
 
   if (subject === "bulgarian-language" && topic === "reading") {
     return generateBulgarianReading(grade, lang);
   }
 
-  // Fallback for unsupported topics
   throw new Error(
     `Generator does not support subject="${subject}" topic="${topic}". ` +
-    `Supported: mathematics/word-problems, bulgarian-language/reading`
+    `Supported: mathematics/word-problems, mathematics/multiplication_intro, bulgarian-language/reading`
   );
 }
 
-/* ─── Demo / Export ────────────────────────────────────────────────── */
+/**
+ * Generate multiple lesson variations for the given parameters.
+ *
+ * generateLessons({ grade: 2, subject: "mathematics", topic: "multiplication_intro", lessonCount: 5 })
+ *
+ * Returns an array of LessonContent objects — each is a fresh random variation.
+ * Does NOT modify curriculum, DB, UI, or routes. Dev utility only.
+ */
+export function generateLessons(params: GeneratorParams): LessonContent[] {
+  const { lessonCount = 1 } = params;
+  if (lessonCount < 1 || lessonCount > 20) {
+    throw new Error(`lessonCount must be between 1 and 20. Got ${lessonCount}`);
+  }
+  return Array.from({ length: lessonCount }, () => generateLesson(params));
+}
+
+/* ─── Dev Logging Helper ───────────────────────────────────────────── */
 
 export function generateAndLog(params: GeneratorParams): void {
-  const lesson = generateLesson(params);
-  console.log("\n✅ Generated lesson:");
-  console.log(JSON.stringify(lesson, null, 2));
+  const lessons = generateLessons(params);
+  console.log(`\n✅ Generated ${lessons.length} lesson(s) for ${params.subject}/${params.topic} grade ${params.grade}:`);
+  lessons.forEach((lesson, i) => {
+    console.log(`\n--- Lesson ${i + 1} ---`);
+    console.log(JSON.stringify(lesson, null, 2));
+  });
 }

@@ -1,0 +1,181 @@
+IMPORTANT: Read carefully before doing anything.
+
+You previously assumed this task required database schema changes, OpenAPI codegen, and frontend work. That assumption is incorrect.
+
+This is NOT a multi-system architecture task.
+
+This is a SMALL developer utility task.
+
+You must keep changes extremely minimal.
+
+---------------------------------------
+
+PROJECT CONTEXT
+
+This project already has a working architecture with:
+
+- curriculum.ts
+- bgCurriculum.ts
+- lessonContent.ts
+- missions.ts
+- mathTaskGenerator.ts
+
+Lessons already work in the app.
+
+The UI already works.
+
+Missions already work.
+
+XP and progress already work.
+
+The goal is ONLY to make generating lesson content easier for development.
+
+---------------------------------------
+
+ABSOLUTE RULES
+
+DO NOT:
+
+• create database schema
+• create migrations
+• modify DB tables
+• create OpenAPI codegen
+• rebuild APIs
+• create new frontend pages
+• modify dashboard
+• modify missions
+• modify world map
+• modify lesson UI
+• create parallel lesson systems
+• duplicate lesson structures
+
+No UI changes.
+
+No DB changes.
+
+No new architecture.
+
+---------------------------------------
+
+TASK 1 — AUDIT EXISTING FILES
+
+Inspect these files first:
+
+artifacts/api-server/src/lib/lessonContent.ts  
+artifacts/api-server/src/lib/mathTaskGenerator.ts  
+artifacts/api-server/src/lib/curriculum.ts  
+artifacts/api-server/src/lib/bgCurriculum.ts
+
+Understand the current lesson schema.
+
+---------------------------------------
+
+TASK 2 — REUSE EXISTING HELPERS
+
+If mathTaskGenerator.ts already contains useful helpers for generating tasks or quizzes, reuse them.
+
+Do NOT create a second math generator if one already exists.
+
+---------------------------------------
+
+TASK 3 — CREATE A SMALL DEV TOOL
+
+Create ONLY ONE small development utility file:
+
+artifacts/api-server/src/tools/lessonGenerator.ts
+
+This tool will help generate lesson seed content compatible with the existing LessonContent schema.
+
+---------------------------------------
+
+FUNCTION DESIGN
+
+The generator function should look like:
+
+generateLessons({
+  grade: number,
+  subject: string,
+  topic: string,
+  lessonCount: number
+})
+
+Example call:
+
+generateLessons({
+  grade: 2,
+  subject: "mathematics",
+  topic: "multiplication_intro",
+  lessonCount: 5
+})
+
+---------------------------------------
+
+OUTPUT STRUCTURE
+
+The generated lesson must match the existing schema used in lessonContent.ts.
+
+Each lesson should contain:
+
+lesson
+- title
+- explanation
+- example
+- tip
+
+practice
+- instructions
+- 5 problems
+
+quiz
+- instructions
+- 4 multiple choice questions
+
+If helper utilities already exist (like mcOptions or shuffle), reuse them.
+
+---------------------------------------
+
+INITIAL SCOPE
+
+Support ONLY:
+
+Grade 2
+
+Subjects:
+
+- mathematics
+- bulgarian-language
+- reading
+
+Do NOT implement other grades yet.
+
+---------------------------------------
+
+IMPORTANT
+
+Do NOT automatically inject generated lessons into the curriculum.
+
+This generator is a dev tool only.
+
+It should only RETURN generated lesson content.
+
+---------------------------------------
+
+FINAL OUTPUT REQUIRED
+
+When finished, report:
+
+1. Which files were audited
+2. Whether mathTaskGenerator.ts was reused
+3. The exact new or modified file
+4. The generator function signature
+5. One example generator call
+6. One example generated lesson output
+7. Confirmation that no DB, no UI, and no routes were modified
+
+---------------------------------------
+
+Again:
+
+This is a small dev utility.
+
+Keep implementation minimal and safe.

@@ -1,0 +1,100 @@
+AUDIT FIRST. DO NOT CREATE NEW UI. DO NOT CREATE NEW LESSON SYSTEMS. DO NOT DUPLICATE EXISTING ARCHITECTURE.
+
+Goal:
+Create a minimal internal AYA Lesson Generator dev utility that can generate lesson seed content using the existing architecture.
+
+Important context:
+The project already contains:
+- curriculum.ts
+- bgCurriculum.ts
+- lessonContent.ts
+- missions.ts
+- mathTaskGenerator.ts
+
+These systems already work and must NOT be duplicated or replaced.
+
+Step 1 — Audit existing generators
+Check whether mathTaskGenerator.ts already provides reusable helpers for generating math problems or quizzes.
+
+If possible:
+reuse its logic instead of creating a second generator.
+
+Step 2 — Create minimal generator utility
+Create ONE small dev-only generator utility file:
+
+api-server/src/tools/lessonGenerator.ts
+
+This file must generate lesson seed content compatible with the EXISTING schema used in lessonContent.ts.
+
+Input parameters:
+- grade
+- subject
+- topic
+- lessonCount
+
+Example:
+
+generateLessons({
+  grade: 2,
+  subject: "mathematics",
+  topic: "multiplication_intro",
+  lessonCount: 5
+})
+
+Output must match the existing LessonContent format used by the system:
+- lesson
+- practice
+- quiz
+
+Do not invent a new schema.
+
+Step 3 — Supported subjects (initial scope)
+Support ONLY Grade 2 and only these subjects:
+
+- mathematics
+- bulgarian-language
+- reading
+
+Do not generate other subjects yet.
+
+Step 4 — Lesson format
+Each generated lesson should include:
+
+lesson
+- title
+- short explanation
+- example
+- tip
+
+practice
+- instructions
+- 5 problems
+
+quiz
+- instructions
+- 4 multiple choice questions
+
+Reuse helper utilities already used in lessonContent.ts such as:
+- mcOptions
+- shuffle
+
+Step 5 — Do NOT modify UI or routing
+Do NOT change:
+- dashboard
+- missions
+- badges
+- world map
+- lesson viewer
+- curriculum structure
+
+This is a dev utility only.
+
+Step 6 — Output
+Return:
+1. files audited
+2. whether mathTaskGenerator.ts was reused
+3. the generator file created
+4. example generator call
+5. example generated lesson output
+
+Do not auto-run generation yet.

@@ -14,14 +14,22 @@ function getOpenAI() {
   return new OpenAI({ baseURL, apiKey });
 }
 
-// The AI integration proxy does not support POST /audio/speech.
-// This client targets api.openai.com directly, which does support TTS.
+// TTS client resolution:
+// 1. If a real OPENAI_API_KEY is set, use it directly with api.openai.com.
+// 2. Otherwise fall back to the Replit AI integration proxy (same as getOpenAI()).
+//    The AI_INTEGRATIONS_OPENAI_API_KEY is a proxy-only placeholder key that is
+//    rejected by api.openai.com with "Incorrect API key" (HTTP 401 from OpenAI,
+//    not from our auth middleware). Always route through the proxy in published mode.
 function getOpenAIForTTS(): OpenAI {
-  const apiKey =
-    process.env.AI_INTEGRATIONS_OPENAI_API_KEY ??
-    process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error("No OpenAI API key available for TTS");
-  return new OpenAI({ apiKey }); // no baseURL → api.openai.com
+  const directKey = process.env.OPENAI_API_KEY;
+  if (directKey) {
+    return new OpenAI({ apiKey: directKey }); // real key → api.openai.com
+  }
+  // Fall back to the Replit AI integration proxy (works in both preview and published)
+  const baseURL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+  const apiKey = process.env.AI_INTEGRATIONS_OPENAI_API_KEY ?? "sk-placeholder";
+  if (!baseURL) throw new Error("No OpenAI API key or proxy URL configured for TTS");
+  return new OpenAI({ baseURL, apiKey });
 }
 
 function langToLocale(lang: string): string {
@@ -240,12 +248,29 @@ router.post("/voice/speak", requireAuth, async (req, res): Promise<void> => {
     "nova";
 
   console.log("[TTS] SDK_PATH_ACTIVE");
-  const speechResponse = await ttsClient.audio.speech.create({
-    model: "gpt-4o-mini-tts",
-    voice,
-    input: text.slice(0, 4000),
-    response_format: "mp3",
-  });
+
+  let speechResponse: Awaited<ReturnType<typeof ttsClient.audio.speech.create>>;
+  try {
+    speechResponse = await ttsClient.audio.speech.create({
+      model: "gpt-4o-mini-tts",
+      voice,
+      input: text.slice(0, 4000),
+      response_format: "mp3",
+    });
+  } catch (err: unknown) {
+    const status = (err as { status?: number })?.status;
+    const message = (err as Error)?.message ?? "TTS failed";
+    console.error("[TTS_ERROR]", { status, message });
+    if (status === 429) {
+      res.status(429).json({ error: "TTS quota exceeded" });
+    } else {
+      // Return 503 (service error) regardless of what OpenAI returned.
+      // This prevents OpenAI's own 401 (bad API key) from being misread
+      // by the client as a user-auth failure.
+      res.status(503).json({ error: "TTS service unavailable" });
+    }
+    return;
+  }
 
   const arrayBuffer = await speechResponse.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);

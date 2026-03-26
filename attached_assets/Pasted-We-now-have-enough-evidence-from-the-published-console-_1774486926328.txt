@@ -1,0 +1,61 @@
+We now have enough evidence from the published console logs. Do not guess. Fix only the real cause.
+
+Facts confirmed from published mode:
+- Voice transcription works
+- Chat send works
+- Chat response works
+- JUNIOR_VOICE_REPLY_TEXT is generated
+- VOICE_SPEAKER starts
+- Authorization header is being added
+- Request reaches POST /api/voice/speak
+- Only /api/voice/speak returns 401 Unauthorized in published mode
+- Preview still works
+- Published chat still works
+- Published voice still fails
+- AUTH_INTERCEPTOR explicitly reports 401 on voice/TTS route
+
+Conclusion:
+The problem is NOT general auth, NOT chat, NOT transcription, NOT voice trigger.
+The problem is specifically the auth handling or middleware path for published /api/voice/speak.
+
+Your task:
+1. Inspect the exact auth resolution used by the WORKING published chat route
+2. Inspect the exact auth resolution used by the FAILING published /api/voice/speak route
+3. Compare them line by line:
+   - middleware
+   - token extraction
+   - bearer parsing
+   - session fallback
+   - route registration
+   - published-only conditions
+4. Make /api/voice/speak use the SAME auth resolution path as the working chat route
+5. Remove any duplicate / conflicting voice-only auth logic left from previous fixes
+6. Do not change curriculum, lessons, junior logic, OpenAI response logic, UI, or transcription
+7. Do not add broad refactors
+8. Apply the smallest production-safe patch
+
+Very important:
+- Do NOT stop at diagnostics
+- Do NOT suggest autonomous mode
+- Do NOT say “needs restart” unless you actually changed backend code that requires it
+- Do NOT touch Android-specific code
+- Fix published web voice first
+
+Likely files to inspect:
+- artifacts/api-server/src/routes/voice.ts
+- artifacts/api-server/src/routes/chat.ts
+- artifacts/api-server/src/lib/auth.ts
+- any auth middleware directly used by those routes
+- frontend voice fetch file only if necessary to confirm request shape
+
+Success criteria:
+- published chat remains working
+- published POST /api/voice/speak returns 200
+- voice playback works in published mode
+- preview remains unchanged
+
+After fix, report only:
+1. root cause
+2. exact files changed
+3. why chat worked but voice failed
+4. whether API Server restart and Republish are required

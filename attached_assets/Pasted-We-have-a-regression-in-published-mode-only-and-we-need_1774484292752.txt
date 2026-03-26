@@ -1,0 +1,74 @@
+We have a regression in published mode only and we need a precise fix, not speculative changes.
+
+Project context:
+- Replit Preview voice works correctly
+- Published mode chat works correctly
+- Published mode POST /api/voice/speak returns 401 Unauthorized
+- Browser console consistently shows:
+  - FETCH_INTERCEPTOR_VOICE runs
+  - CHAT_SEND_RESPONSE returns 200
+  - JUNIOR_VOICE_REPLY_TEXT is generated
+  - VOICE_SPEAKER starts
+  - POST /api/voice/speak -> 401
+  - AUTH_INTERCEPTOR reports 401 on voice/TTS route
+- Multiple Lite fixes and even rollback did NOT restore working published voice
+- Preview must remain unchanged and working
+- Published web voice must be restored first
+- Do NOT broaden scope
+
+Goal:
+Fix published web voice authentication for /api/voice/speak so it works exactly like the working chat route, with the smallest safe production patch.
+
+Strict constraints:
+1. Do NOT refactor unrelated code
+2. Do NOT touch curriculum, lessons, math logic, junior chat behavior, OpenAI prompt logic, or UI styling
+3. Do NOT change Android-specific behavior separately
+4. Fix published web voice first
+5. Preserve Preview behavior
+6. Preserve working chat behavior
+7. Add diagnostics only if absolutely necessary
+8. Remove only conflicting voice auth logic if rollback left overlapping paths
+
+Your task:
+1. Inspect the exact auth flow used by the working chat route
+2. Inspect the exact auth flow used by /api/voice/speak
+3. Compare:
+   - middleware chain
+   - session auth
+   - bearer token auth
+   - route registration
+   - fetch/interceptor expectations
+   - published vs preview runtime differences
+4. Identify the true root cause of why published mode rejects voice while preview accepts it
+5. Apply the smallest production-safe fix so published /api/voice/speak authenticates exactly like the working chat route
+6. If voice route currently uses a different middleware/auth path than chat, unify it with chat’s working auth resolution
+7. If there is a published-only mismatch, fix only that mismatch
+8. If there are duplicated/conflicting voice auth paths from prior fixes, remove only the conflicting one
+
+Focus files likely relevant:
+- artifacts/api-server/src/routes/chat.ts
+- artifacts/api-server/src/routes/voice.ts
+- artifacts/api-server/src/lib/auth.ts
+- any middleware/interceptor/auth-resolution files directly used by these routes
+- only inspect frontend voice fetch files if needed to confirm header/session behavior, but do not make unrelated frontend edits
+
+Important observed behavior from console:
+- Auth header appears to be sent
+- Chat route still succeeds with 200
+- Only /api/voice/speak fails with 401
+This strongly suggests voice auth path differs from chat auth path or published runtime handles voice route differently.
+
+Deliverables required:
+1. Root cause
+2. Exact files changed
+3. Minimal patch summary
+4. How to verify in published mode
+
+Success condition:
+- Published chat still works
+- Published POST /api/voice/speak returns 200
+- Voice playback works in published mode
+- No regressions in Preview
+
+Do not stop at diagnostics only.
+Find the cause and fix it.

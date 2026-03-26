@@ -445,6 +445,20 @@ function isGreeting(m: string, lang: Lang): boolean {
   return patterns[lang].test(m);
 }
 
+// ─── Free Question Reply ──────────────────────────────────────────────────────
+//
+// Handles "free_question" intent: calls OpenAI to answer an educational question
+// the child asked outside of a structured lesson/quiz context.
+//
+async function getFreeQuestionReply(
+  module: string,
+  msg: string,
+  context: JuniorContext,
+): Promise<string> {
+  console.log("[FREE_QUESTION_REPLY]", { module, msgLen: msg.length });
+  return getAIResponse(module, msg, context);
+}
+
 // ─── Subject Router ───────────────────────────────────────────────────────────
 //
 // Runs BEFORE intent detection. Returns the requested subject if the child is
@@ -864,7 +878,7 @@ export async function handleJuniorChat(
   // ── 3. Route to handler ──────────────────────────────────────────────────
   if (intent === "free_question") {
     console.log("[FREE_CHAT_REPLY_PATH]", "getFreeQuestionReply");
-    return getFreeQuestionReply(msg, context, childName, lang);
+    return getFreeQuestionReply(module, msg, context);
   }
 
   // ── CHANGE_OPERATION ─────────────────────────────────────────────────────
@@ -949,9 +963,10 @@ export async function handleJuniorChat(
   }
 
   // ── EARLY EXIT for conversational messages ────────────────────────────────
-  // Greetings, free questions, and unknown inputs must never be evaluated as
-  // lesson answers. Return the AI fallback immediately and skip everything below.
-  if (intent === "small_talk" || intent === "free_question" || intent === "unknown") {
+  // Greetings and unknown inputs must never be evaluated as lesson answers.
+  // Note: "free_question" is handled above with an early return.
+  // Return the AI fallback immediately and skip everything below.
+  if (intent === "small_talk" || intent === "unknown") {
     if (state.postSuccessId !== null) {
       await clearPostSuccess(childId, module);
     }

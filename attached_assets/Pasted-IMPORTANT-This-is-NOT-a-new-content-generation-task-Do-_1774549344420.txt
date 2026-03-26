@@ -1,0 +1,69 @@
+IMPORTANT: This is NOT a new content-generation task.
+
+Do NOT generate new lessons.
+Do NOT modify UI.
+Do NOT modify routes.
+Do NOT modify DB.
+Do NOT create new files.
+Do NOT create duplicate systems.
+
+Goal:
+Audit why the Junior subject cards still show the old small number of topics after lesson content expansion, and then minimally sync the existing curriculum mapping with the already added lesson content.
+
+Context:
+We already expanded lesson content, but the UI still shows:
+- Bulgarian Language: 4 topics
+- Reading: 2 topics
+- Logic: 2 topics
+- Environment: 3 topics
+etc.
+
+This strongly suggests the visible subject/topic counts come from curriculum.ts / bgCurriculum.ts rather than directly from lessonContent.ts.
+
+Task 1 — Audit source of truth for visible topic counts
+Inspect and identify exactly which files determine:
+1. the subject cards topic counts
+2. the subject detail topic list
+3. the mapping between UI subjects and lesson topics
+4. whether the UI reads from curriculum.ts, bgCurriculum.ts, lessonContent.ts, or another mapping file
+
+Task 2 — Compare mappings
+Compare:
+- existing topics currently present in lessonContent.ts
+with
+- topics currently registered in curriculum.ts / bgCurriculum.ts
+
+Find all missing mappings for Grade 2 in:
+- mathematics
+- bulgarian-language
+- reading
+
+Task 3 — Minimal sync only
+Update only the existing curriculum mapping files that are actually used by the UI so that the already existing lesson content becomes visible.
+
+Rules:
+- do not generate new lesson content
+- do not change lesson schema
+- do not change UI
+- do not change routes
+- do not create new curriculum architecture
+- do not duplicate topics
+- only add missing topic registrations that already exist in lessonContent.ts
+
+Task 4 — Validation
+After syncing:
+- subject cards should show updated topic counts
+- opening a subject should show the newly registered topics
+- newly visible topics should resolve to already existing lesson content
+- existing topics must still work
+
+Task 5 — Return format
+Return exactly:
+1. files audited
+2. exact source of truth for visible topic counts
+3. exact missing mappings found
+4. exact file(s) changed
+5. updated topic counts expected in Preview
+6. confirmation that no new content, no UI, no DB, and no duplicate systems were created
+
+Do not publish automatically.

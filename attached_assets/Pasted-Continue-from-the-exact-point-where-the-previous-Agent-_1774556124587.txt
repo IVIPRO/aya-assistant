@@ -1,0 +1,46 @@
+Continue from the exact point where the previous Agent run stopped.
+
+Context from the previous run:
+- Root cause was already identified:
+  When opening a Daily Plan task, the Chat component mounts and shows prior chat history, including old math questions.
+  No auto-send happens on mount, so the subject context is never switched.
+- The planned fix was:
+  Add a one-time auto-send useEffect in artifacts/aya-assistant/src/components/chat.tsx
+  that fires only when the component mounts with a valid subjectContext from Daily Plan.
+- The auto-sent starter message should be something like:
+  "Нека започнем"
+  and it must go through the existing doSend flow so that the subject prefix is prepended correctly and detectSubjectRequest routes to the correct subject.
+- The previous run had already opened:
+  artifacts/aya-assistant/src/components/chat.tsx
+
+IMPORTANT RULES:
+- Do NOT restart the investigation from scratch
+- Do NOT re-audit unrelated systems
+- Do NOT touch DB
+- Do NOT touch routes unless absolutely necessary
+- Do NOT change UI layout or styles
+- Do NOT create new files
+- Do NOT rebuild the chat system
+- Do NOT add a second routing layer
+- Make the smallest safe change only
+
+Task:
+1. Resume from the identified fix point in chat.tsx
+2. Implement the one-time auto-send on mount only when entering via Daily Plan with subjectContext
+3. Ensure it does NOT repeatedly auto-send on every render
+4. Ensure it does NOT break normal chat behavior outside Daily Plan
+5. Ensure it works with existing conversation history without showing stale math context as the active first task
+6. Keep using the existing doSend / detectSubjectRequest flow
+7. After implementation, briefly test these cases in Preview logic:
+   - Bulgarian Language Daily Plan task starts Bulgarian content
+   - Math Daily Plan task starts Math content
+   - Reading Daily Plan task starts Reading content
+
+Return exactly:
+1. exact file changed
+2. exact root cause fixed
+3. short description of the implementation
+4. confirmation that no DB, no UI redesign, and no duplicate systems were changed
+5. manual test steps for Preview
+
+Do not publish automatically.

@@ -230,6 +230,7 @@ export function Chat({
   const [imagePreviewsMap, setImagePreviewsMap] = useState<Record<string, string>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const autoStartSentRef = useRef(false);
 
   const hwLang: "en" | "bg" | "es" = lang === "bg" ? "bg" : lang === "es" ? "es" : "en";
   const hwLabels = HOMEWORK_LABELS[hwLang];
@@ -393,6 +394,26 @@ export function Chat({
     return () => { if (idleTimerRef.current) clearTimeout(idleTimerRef.current); };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [input, sendMutation.isPending]);
+
+  // ── Auto-send starter message when entering chat via Daily Plan ──────────
+  // Fires once on mount. If a subjectContext is already set (user clicked
+  // "Start" on a Daily Plan task), send a short trigger phrase so the backend
+  // can route to the correct subject immediately instead of leaving stale
+  // math history as the apparent active task.
+  // The phrase is prepended with the subject prefix by doSend(), e.g.:
+  //   "Предмет: Български език | Тема: Правопис\nНека започнем"
+  // which detectSubjectRequest() in juniorChatHandler picks up correctly.
+  useEffect(() => {
+    if (!subjectContext || autoStartSentRef.current || !activeChildId || freeConversationMode) return;
+    autoStartSentRef.current = true;
+    const phrase =
+      hwLang === "bg" ? "Нека започнем" :
+      hwLang === "es" ? "Empecemos" :
+      "Let's start";
+    const timer = setTimeout(() => doSend(phrase), 300);
+    return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const doSend = (content: string, onError?: () => void) => {
     if (!content.trim() || sendMutation.isPending) {

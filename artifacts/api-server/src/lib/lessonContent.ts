@@ -1127,6 +1127,286 @@ function getTopicText(subjectId: string, topicId: string, grade: number, lang: L
         },
       },
     },
+
+    /* ── LOGIC THINKING / PUZZLES ── */
+    "logic-thinking/puzzles": {
+      en: {
+        low: {
+          title: "Puzzles & Logic",
+          explanation: "A puzzle is a problem that needs clever thinking to solve. Look at all the clues, think carefully, and you can find the answer!",
+          examples: [
+            { problem: "I have 2 legs in the morning, 4 legs at noon, and 3 legs in the evening. What am I?", solution: "A person (baby crawls, adult walks, elderly uses a cane)", hint: "Think about stages of life, not real creatures!" },
+            { problem: "Which is heavier: 1 kg of feathers or 1 kg of iron?", solution: "They weigh the same — both are 1 kg!", hint: "Read carefully — the trick is in the question." },
+            { problem: "There are 3 apples. You take 2. How many do YOU have?", solution: "2 (you took 2 apples)", hint: "The question asks what YOU have, not what's left." },
+          ],
+          tip: "🧩 Read the puzzle twice. The trick is usually in the wording!",
+        },
+        high: {
+          title: "Logic Puzzles",
+          explanation: "Logic puzzles use if-then reasoning. Read every clue, eliminate wrong answers, and use what you know to reach the right conclusion.",
+          examples: [
+            { problem: "All cats are animals. Whiskers is a cat. What is Whiskers?", solution: "Whiskers is an animal.", hint: "If A=B and C=A, then C=B. This is logical deduction!" },
+            { problem: "Anna is older than Ben. Ben is older than Carla. Who is youngest?", solution: "Carla is youngest.", hint: "Build a chain: Anna > Ben > Carla." },
+            { problem: "A man has 3 daughters. Each daughter has 1 brother. How many children?", solution: "4 children (3 daughters + 1 son)", hint: "All daughters share the same brother." },
+          ],
+          tip: "🔎 Draw a diagram or list clues in order — it makes complex logic much easier!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Пъзели и логика",
+          explanation: "Пъзелът е задача, която изисква умно мислене. Погледни всички улики, мисли внимателно и ще намериш отговора!",
+          examples: [
+            { problem: "Сутринта имам 2 крака, на обед — 4, вечер — 3. Какво съм?", solution: "Човек (бебе пълзи, възрастен ходи, старец с бастун)", hint: "Мисли за етапите на живота, не за реални животни!" },
+            { problem: "Кое е по-тежко: 1 кг перушина или 1 кг желязо?", solution: "Те тежат еднакво — и двете са 1 кг!", hint: "Прочети внимателно — хитростта е в въпроса." },
+            { problem: "Има 3 ябълки. Вземаш 2. Колко ТИ имаш?", solution: "2 (ти взе 2 ябълки)", hint: "Въпросът е какво ТИ имаш, не какво е останало." },
+          ],
+          tip: "🧩 Прочети пъзела два пъти. Хитростта е обикновено в думите!",
+        },
+        high: {
+          title: "Логически задачи",
+          explanation: "Логическите задачи използват разсъждение 'ако-тогава'. Прочети всяка улика, изключи грешните отговори и стигни до верния извод.",
+          examples: [
+            { problem: "Всички котки са животни. Мишка е котка. Какво е Мишка?", solution: "Мишка е животно.", hint: "Ако А=Б и В=А, тогава В=Б. Това е логическо заключение!" },
+            { problem: "Анна е по-голяма от Бен. Бен е по-голям от Карла. Кой е най-малък?", solution: "Карла е най-малката.", hint: "Построй верига: Анна > Бен > Карла." },
+            { problem: "Мъж има 3 дъщери. Всяка дъщеря има 1 брат. Колко деца има?", solution: "4 деца (3 дъщери + 1 син)", hint: "Всички дъщери споделят един и същ брат." },
+          ],
+          tip: "🔎 Нарисувай схема или изпиши уликите по ред — така логиката става много по-лесна!",
+        },
+      },
+      es: {
+        low: {
+          title: "Puzles y lógica",
+          explanation: "Un puzle es un problema que necesita pensamiento inteligente para resolverse. ¡Mira todas las pistas, piensa con cuidado y encontrarás la respuesta!",
+          examples: [
+            { problem: "Por la mañana tengo 2 patas, al mediodía 4 y por la noche 3. ¿Qué soy?", solution: "Una persona (bebé gatea, adulto camina, anciano usa bastón)", hint: "¡Piensa en las etapas de la vida, no en criaturas reales!" },
+            { problem: "¿Qué pesa más: 1 kg de plumas o 1 kg de hierro?", solution: "¡Pesan lo mismo — ambos son 1 kg!", hint: "Lee con cuidado — el truco está en la pregunta." },
+            { problem: "Hay 3 manzanas. Tomas 2. ¿Cuántas TIENES TÚ?", solution: "2 (tú tomaste 2 manzanas)", hint: "La pregunta es cuántas tienes TÚ, no cuántas quedan." },
+          ],
+          tip: "🧩 ¡Lee el puzle dos veces. El truco suele estar en la redacción!",
+        },
+        high: {
+          title: "Puzles lógicos",
+          explanation: "Los puzles lógicos usan el razonamiento si-entonces. Lee cada pista, elimina las respuestas incorrectas y usa lo que sabes para llegar a la conclusión correcta.",
+          examples: [
+            { problem: "Todos los gatos son animales. Bigotes es un gato. ¿Qué es Bigotes?", solution: "Bigotes es un animal.", hint: "Si A=B y C=A, entonces C=B. ¡Esto es deducción lógica!" },
+            { problem: "Ana es mayor que Ben. Ben es mayor que Carla. ¿Quién es el más joven?", solution: "Carla es la más joven.", hint: "Construye una cadena: Ana > Ben > Carla." },
+            { problem: "Un hombre tiene 3 hijas. Cada hija tiene 1 hermano. ¿Cuántos hijos tiene?", solution: "4 hijos (3 hijas + 1 hijo)", hint: "Todas las hijas comparten el mismo hermano." },
+          ],
+          tip: "🔎 ¡Dibuja un diagrama o lista las pistas en orden — hace que la lógica compleja sea mucho más fácil!",
+        },
+      },
+    },
+
+    /* ── NATURE SCIENCE / ANIMALS ── */
+    "nature-science/animals": {
+      en: {
+        low: {
+          title: "Animals",
+          explanation: "Animals are living things that can move on their own. They eat food, grow, breathe, and have babies. Animals can live on land, in water, or both!",
+          examples: [
+            { problem: "Name 3 animals that live in the sea.", solution: "Fish, dolphin, whale (many correct answers)", hint: "Think about creatures that swim in the ocean." },
+            { problem: "What do herbivores eat?", solution: "Only plants (grass, leaves, fruit)", hint: "Herb = plant. Herbivore = plant eater!" },
+            { problem: "Name a mammal that lives in water.", solution: "Dolphin, whale, seal (any are correct)", hint: "Mammals breathe air even if they live in water." },
+          ],
+          tip: "🐾 Animals are grouped: mammals, birds, fish, reptiles, amphibians, insects!",
+        },
+        high: {
+          title: "Animal Classification",
+          explanation: "Scientists classify animals into groups: vertebrates (with a backbone) and invertebrates (without). Vertebrates include mammals, birds, fish, reptiles, and amphibians. Each group has special features.",
+          examples: [
+            { problem: "What makes mammals different from other animals?", solution: "Mammals have fur/hair, are warm-blooded, and feed young with milk.", hint: "Key mammal features: warm-blooded, fur, live birth, milk for young." },
+            { problem: "What is the difference between a frog (amphibian) and a lizard (reptile)?", solution: "Frogs live both in water and on land; lizards are fully land animals with scales.", hint: "Amphi = both sides (water and land)." },
+            { problem: "Give an example of an invertebrate.", solution: "Insects, spiders, worms, jellyfish (no backbone)", hint: "Invert = turned inward; invertebrates have no backbone." },
+          ],
+          tip: "🔬 The animal kingdom is divided into 35+ phyla — vertebrates are just one small group!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Животни",
+          explanation: "Животните са живи същества, които могат да се движат сами. Те се хранят, растат, дишат и имат малки. Животните могат да живеят на сушата, във водата или и на двете!",
+          examples: [
+            { problem: "Назови 3 животни, които живеят в морето.", solution: "Риба, делфин, кит (много верни отговори)", hint: "Мисли за същества, които плуват в океана." },
+            { problem: "Какво ядат тревопасните?", solution: "Само растения (трева, листа, плодове)", hint: "Тревопасни = ядат трева и растения!" },
+            { problem: "Назови бозайник, който живее във водата.", solution: "Делфин, кит, тюлен (всеки е верен)", hint: "Бозайниците дишат въздух, дори ако живеят във вода." },
+          ],
+          tip: "🐾 Животните се делят на: бозайници, птици, риби, влечуги, земноводни, насекоми!",
+        },
+        high: {
+          title: "Класификация на животните",
+          explanation: "Учените класифицират животните на групи: гръбначни (с гръбначен стълб) и безгръбначни (без). Гръбначните включват бозайници, птици, риби, влечуги и земноводни. Всяка група има специални белези.",
+          examples: [
+            { problem: "Какво отличава бозайниците от другите животни?", solution: "Бозайниците имат козина, са топлокръвни и кърмят малките си.", hint: "Ключови белези: топлокръвни, козина, живо раждане, кърмене." },
+            { problem: "Каква е разликата между жаба (земноводно) и гущер (влечуго)?", solution: "Жабите живеят и във вода, и на суша; гущерите са сухоземни с люспи.", hint: "Земноводни = живеят и в двете среди." },
+            { problem: "Дай пример за безгръбначно животно.", solution: "Насекоми, паяци, червеи, медузи (без гръбначен стълб)", hint: "Безгръбначни = нямат гръбначен стълб." },
+          ],
+          tip: "🔬 Животинското царство е разделено на 35+ типа — гръбначните са само малка група!",
+        },
+      },
+      es: {
+        low: {
+          title: "Animales",
+          explanation: "Los animales son seres vivos que pueden moverse solos. Comen, crecen, respiran y tienen crías. ¡Los animales pueden vivir en tierra, en el agua o en ambos!",
+          examples: [
+            { problem: "Nombra 3 animales que viven en el mar.", solution: "Pez, delfín, ballena (muchas respuestas correctas)", hint: "Piensa en criaturas que nadan en el océano." },
+            { problem: "¿Qué comen los herbívoros?", solution: "Solo plantas (hierba, hojas, fruta)", hint: "Herbívoro = comedor de plantas (hierba)." },
+            { problem: "Nombra un mamífero que viva en el agua.", solution: "Delfín, ballena, foca (cualquiera es correcto)", hint: "Los mamíferos respiran aire aunque vivan en el agua." },
+          ],
+          tip: "🐾 ¡Los animales se agrupan en: mamíferos, aves, peces, reptiles, anfibios, insectos!",
+        },
+        high: {
+          title: "Clasificación de animales",
+          explanation: "Los científicos clasifican los animales en grupos: vertebrados (con columna vertebral) e invertebrados (sin ella). Los vertebrados incluyen mamíferos, aves, peces, reptiles y anfibios. Cada grupo tiene características especiales.",
+          examples: [
+            { problem: "¿Qué distingue a los mamíferos de otros animales?", solution: "Los mamíferos tienen pelo/piel, son de sangre caliente y alimentan a sus crías con leche.", hint: "Características clave: sangre caliente, pelo, nacimiento vivo, leche para crías." },
+            { problem: "¿Cuál es la diferencia entre una rana (anfibio) y un lagarto (reptil)?", solution: "Las ranas viven en agua y tierra; los lagartos son terrestres con escamas.", hint: "Anfibio = vive en ambos medios (agua y tierra)." },
+            { problem: "Da un ejemplo de invertebrado.", solution: "Insectos, arañas, gusanos, medusas (sin columna vertebral)", hint: "Invertebrado = sin columna vertebral." },
+          ],
+          tip: "🔬 ¡El reino animal está dividido en más de 35 filos — los vertebrados son solo un pequeño grupo!",
+        },
+      },
+    },
+
+    /* ── NATURE SCIENCE / EARTH ── */
+    "nature-science/earth": {
+      en: {
+        low: {
+          title: "Our Earth",
+          explanation: "Earth is our planet — the place where we all live. It has land, oceans, mountains, rivers, and sky. The Earth moves around the Sun, which gives us day and night and the seasons.",
+          examples: [
+            { problem: "What are the four seasons?", solution: "Spring, Summer, Autumn (Fall), Winter", hint: "Think about how the weather changes throughout the year." },
+            { problem: "What covers most of Earth's surface?", solution: "Water (oceans cover about 71% of Earth)", hint: "Look at a globe — most of it is blue!" },
+            { problem: "What gives us day and night?", solution: "Earth spinning (rotating) on its axis", hint: "When your side faces the Sun = day. Away from Sun = night." },
+          ],
+          tip: "🌍 Earth is the only planet we know of with liquid water and living things!",
+        },
+        high: {
+          title: "Earth Science",
+          explanation: "Earth is made of layers: crust, mantle, outer core, and inner core. The surface is shaped by tectonic plates, volcanoes, and erosion. Earth orbits the Sun in 365 days — one year.",
+          examples: [
+            { problem: "Name the four layers of the Earth from outside to centre.", solution: "Crust → Mantle → Outer core → Inner core", hint: "Remember: C-M-OC-IC or think of a hard-boiled egg (shell, white, yolk)." },
+            { problem: "What causes earthquakes?", solution: "Movement of tectonic plates along fault lines", hint: "Tectonic plates are huge pieces of Earth's crust that move slowly." },
+            { problem: "Why does Earth have seasons?", solution: "Because Earth is tilted on its axis as it orbits the Sun", hint: "When your hemisphere tilts toward the Sun = summer. Away = winter." },
+          ],
+          tip: "🌋 The rock cycle, water cycle, and carbon cycle are three key Earth systems — all interconnected!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Нашата Земя",
+          explanation: "Земята е нашата планета — мястото, където всички живеем. Тя има суша, океани, планини, реки и небе. Земята се върти около Слънцето, което ни дава ден и нощ и сезоните.",
+          examples: [
+            { problem: "Кои са четирите сезона?", solution: "Пролет, Лято, Есен, Зима", hint: "Мисли как се сменя времето през годината." },
+            { problem: "Какво покрива повечето от повърхността на Земята?", solution: "Вода (океаните покриват около 71% от Земята)", hint: "Погледни глобус — по-голямата му част е синя!" },
+            { problem: "Какво ни дава ден и нощ?", solution: "Въртенето (ротацията) на Земята около оста й", hint: "Когато твоята страна е обърната към Слънцето = ден. Обратно = нощ." },
+          ],
+          tip: "🌍 Земята е единствената планета, за която знаем, че има течна вода и живи същества!",
+        },
+        high: {
+          title: "Науката за Земята",
+          explanation: "Земята е изградена от слоеве: земна кора, мантия, външно ядро и вътрешно ядро. Повърхността е оформена от тектонски плочи, вулкани и ерозия. Земята обикаля Слънцето за 365 дни — една година.",
+          examples: [
+            { problem: "Назови четирите слоя на Земята отвън към центъра.", solution: "Земна кора → Мантия → Външно ядро → Вътрешно ядро", hint: "Помни: К-М-ВЯ-ВЯ или мисли за сварено яйце (черупка, белтък, жълтък)." },
+            { problem: "Какво предизвиква земетресенията?", solution: "Движението на тектонските плочи по разломи", hint: "Тектонските плочи са огромни парчета от земната кора, които се движат бавно." },
+            { problem: "Защо Земята има сезони?", solution: "Защото Земята е наклонена на оста си, докато обикаля Слънцето", hint: "Когато твоят полукълб е наклонен към Слънцето = лято. Обратно = зима." },
+          ],
+          tip: "🌋 Цикълът на скалите, водният цикъл и въглеродният цикъл са три ключови земни системи — всички взаимосвързани!",
+        },
+      },
+      es: {
+        low: {
+          title: "Nuestra Tierra",
+          explanation: "La Tierra es nuestro planeta — el lugar donde todos vivimos. Tiene tierra, océanos, montañas, ríos y cielo. La Tierra se mueve alrededor del Sol, lo que nos da el día y la noche y las estaciones.",
+          examples: [
+            { problem: "¿Cuáles son las cuatro estaciones?", solution: "Primavera, Verano, Otoño, Invierno", hint: "Piensa en cómo cambia el tiempo durante el año." },
+            { problem: "¿Qué cubre la mayor parte de la superficie de la Tierra?", solution: "Agua (los océanos cubren aproximadamente el 71% de la Tierra)", hint: "¡Mira un globo terráqueo — la mayor parte es azul!" },
+            { problem: "¿Qué nos da el día y la noche?", solution: "La rotación de la Tierra sobre su eje", hint: "Cuando tu lado apunta al Sol = día. Lejos del Sol = noche." },
+          ],
+          tip: "🌍 ¡La Tierra es el único planeta que conocemos con agua líquida y seres vivos!",
+        },
+        high: {
+          title: "Ciencias de la Tierra",
+          explanation: "La Tierra está formada por capas: corteza, manto, núcleo externo y núcleo interno. La superficie está moldeada por placas tectónicas, volcanes y erosión. La Tierra orbita alrededor del Sol en 365 días — un año.",
+          examples: [
+            { problem: "Nombra las cuatro capas de la Tierra de afuera hacia el centro.", solution: "Corteza → Manto → Núcleo externo → Núcleo interno", hint: "Recuerda: C-M-NE-NI o piensa en un huevo duro (cáscara, clara, yema)." },
+            { problem: "¿Qué causa los terremotos?", solution: "El movimiento de las placas tectónicas a lo largo de las fallas", hint: "Las placas tectónicas son enormes trozos de la corteza terrestre que se mueven lentamente." },
+            { problem: "¿Por qué la Tierra tiene estaciones?", solution: "Porque la Tierra está inclinada en su eje mientras orbita alrededor del Sol", hint: "Cuando tu hemisferio se inclina hacia el Sol = verano. Lejos = invierno." },
+          ],
+          tip: "🌋 ¡El ciclo de las rocas, el ciclo del agua y el ciclo del carbono son tres sistemas terrestres clave — todos interconectados!",
+        },
+      },
+    },
+
+    /* ── ENGLISH LANGUAGE / SIMPLE SENTENCES ── */
+    "english-language/simple-sentences": {
+      en: {
+        low: {
+          title: "Simple Sentences",
+          explanation: "A sentence is a group of words that makes a complete thought. Every sentence needs a subject (who/what) and a verb (action). It starts with a capital letter and ends with a full stop.",
+          examples: [
+            { problem: "Build a sentence: [dog] [runs]", solution: "The dog runs.", hint: "Subject + verb = simple sentence. Add 'The' at the start!" },
+            { problem: "Is this a sentence? 'Big red ball.'", solution: "No — it has no verb (action word).", hint: "A sentence must have an action: 'The big red ball bounces.'" },
+            { problem: "Fix the sentence: 'the cat is happy'", solution: "'The cat is happy.' (capital T, full stop)", hint: "Capital letter at start, punctuation at end!" },
+          ],
+          tip: "✍️ Subject + Verb + (Object) = a sentence! Example: 'Maria eats an apple.'",
+        },
+        high: {
+          title: "Simple & Compound Sentences",
+          explanation: "A simple sentence has one independent clause. A compound sentence joins two simple sentences with a conjunction (and, but, or, so). Complex sentences use subordinating conjunctions (because, although, when).",
+          examples: [
+            { problem: "Join into one sentence: 'I was tired.' + 'I went to bed early.'", solution: "I was tired, so I went to bed early.", hint: "Use 'so' (result) to join cause and effect." },
+            { problem: "Identify the conjunction: 'She studied hard but still failed.'", solution: "Conjunction: 'but' (showing contrast)", hint: "Conjunctions join ideas: and (addition), but (contrast), or (choice), so (result)." },
+            { problem: "Add a subordinate clause: 'I eat breakfast ___ I go to school.'", solution: "I eat breakfast before I go to school.", hint: "Subordinating conjunctions: because, before, after, although, when, if." },
+          ],
+          tip: "📝 Vary your sentences! Short sentences create impact. Longer sentences build detail and flow.",
+        },
+      },
+      bg: {
+        low: {
+          title: "Прости изречения на английски",
+          explanation: "Изречението е група думи, която изразява пълна мисъл. Всяко изречение се нуждае от подлог (кой/какво) и сказуемо (действие). Започва с главна буква и завършва с точка.",
+          examples: [
+            { problem: "Построй изречение: [dog] [runs]", solution: "The dog runs.", hint: "Подлог + сказуемо = просто изречение. Добави 'The' в началото!" },
+            { problem: "Изречение ли е? 'Big red ball.'", solution: "Не — няма глагол (сказуемо).", hint: "Изречението трябва да има действие: 'The big red ball bounces.'" },
+            { problem: "Поправи: 'the cat is happy'", solution: "'The cat is happy.' (главна Т, точка)", hint: "Главна буква в началото, пунктуация в края!" },
+          ],
+          tip: "✍️ Подлог + Сказуемо + (Допълнение) = изречение! Пример: 'Maria eats an apple.'",
+        },
+        high: {
+          title: "Прости и съставни изречения",
+          explanation: "Простото изречение има едно главно изречение. Съставното изречение съединява две прости с съюз (and, but, or, so). Сложните изречения използват подчинителни съюзи (because, although, when).",
+          examples: [
+            { problem: "Съедини в едно: 'I was tired.' + 'I went to bed early.'", solution: "I was tired, so I went to bed early.", hint: "Използвай 'so' (резултат) за причина и следствие." },
+            { problem: "Намери съюза: 'She studied hard but still failed.'", solution: "Съюз: 'but' (контраст)", hint: "Съюзи: and (добавяне), but (контраст), or (избор), so (резултат)." },
+            { problem: "Добави подчинено изречение: 'I eat breakfast ___ I go to school.'", solution: "I eat breakfast before I go to school.", hint: "Подчинителни съюзи: because, before, after, although, when, if." },
+          ],
+          tip: "📝 Редувай изреченията! Кратките изречения създават удар. По-дългите добавят детайл.",
+        },
+      },
+      es: {
+        low: {
+          title: "Oraciones simples en inglés",
+          explanation: "Una oración es un grupo de palabras que expresa un pensamiento completo. Cada oración necesita un sujeto (quién/qué) y un verbo (acción). Empieza con mayúscula y termina con punto.",
+          examples: [
+            { problem: "Construye una oración: [dog] [runs]", solution: "The dog runs.", hint: "Sujeto + verbo = oración simple. ¡Añade 'The' al principio!" },
+            { problem: "¿Es una oración? 'Big red ball.'", solution: "No — no tiene verbo (palabra de acción).", hint: "Una oración debe tener acción: 'The big red ball bounces.'" },
+            { problem: "Corrige: 'the cat is happy'", solution: "'The cat is happy.' (mayúscula T, punto final)", hint: "¡Mayúscula al inicio, puntuación al final!" },
+          ],
+          tip: "✍️ ¡Sujeto + Verbo + (Objeto) = oración! Ejemplo: 'Maria eats an apple.'",
+        },
+        high: {
+          title: "Oraciones simples y compuestas",
+          explanation: "Una oración simple tiene una cláusula independiente. Una oración compuesta une dos simples con una conjunción (and, but, or, so). Las oraciones complejas usan conjunciones subordinantes (because, although, when).",
+          examples: [
+            { problem: "Une en una sola: 'I was tired.' + 'I went to bed early.'", solution: "I was tired, so I went to bed early.", hint: "Usa 'so' (resultado) para unir causa y efecto." },
+            { problem: "Identifica la conjunción: 'She studied hard but still failed.'", solution: "Conjunción: 'but' (contraste)", hint: "Conjunciones: and (adición), but (contraste), or (elección), so (resultado)." },
+            { problem: "Añade una cláusula subordinada: 'I eat breakfast ___ I go to school.'", solution: "I eat breakfast before I go to school.", hint: "Conjunciones subordinantes: because, before, after, although, when, if." },
+          ],
+          tip: "📝 ¡Varía tus oraciones! Las cortas crean impacto. Las más largas añaden detalle y fluidez.",
+        },
+      },
+    },
   };
 
   // Fallback for topics not fully authored
@@ -1397,6 +1677,98 @@ function textPractice(topicId: string, lang: LangCode, grade: number): Array<{ q
         { question: "¿Qué deberías hacer si no entiendes una oración?", answer: "releerla" },
       ],
     },
+    puzzles: {
+      en: [
+        { question: "I have 2 legs in the morning, 4 at noon, 3 in the evening. What am I?", answer: "a person" },
+        { question: "Which is heavier: 1 kg of feathers or 1 kg of iron?", answer: "they weigh the same" },
+        { question: "There are 3 apples. You take 2. How many do YOU have?", answer: "2" },
+        { question: "All cats are animals. Whiskers is a cat. What is Whiskers?", answer: "an animal" },
+        { question: "A man has 3 daughters. Each daughter has 1 brother. How many children total?", answer: "4" },
+      ],
+      bg: [
+        { question: "Сутринта имам 2 крака, на обед — 4, вечер — 3. Какво съм?", answer: "човек" },
+        { question: "Кое е по-тежко: 1 кг перушина или 1 кг желязо?", answer: "еднакво тежки" },
+        { question: "Има 3 ябълки. Ти вземаш 2. Колко ТИ имаш?", answer: "2" },
+        { question: "Всички котки са животни. Мишка е котка. Какво е Мишка?", answer: "животно" },
+        { question: "Мъж има 3 дъщери. Всяка дъщеря има 1 брат. Колко деца общо?", answer: "4" },
+      ],
+      es: [
+        { question: "Por la mañana tengo 2 patas, al mediodía 4 y por la noche 3. ¿Qué soy?", answer: "una persona" },
+        { question: "¿Qué pesa más: 1 kg de plumas o 1 kg de hierro?", answer: "pesan lo mismo" },
+        { question: "Hay 3 manzanas. Tomas 2. ¿Cuántas TIENES TÚ?", answer: "2" },
+        { question: "Todos los gatos son animales. Bigotes es un gato. ¿Qué es Bigotes?", answer: "un animal" },
+        { question: "Un hombre tiene 3 hijas. Cada hija tiene 1 hermano. ¿Cuántos hijos en total?", answer: "4" },
+      ],
+    },
+    animals: {
+      en: [
+        { question: "What do herbivores eat?", answer: "only plants" },
+        { question: "Name one mammal that lives in water.", answer: "dolphin / whale / seal" },
+        { question: "What makes mammals unique?", answer: "warm-blooded, have fur, feed young with milk" },
+        { question: "Are fish vertebrates or invertebrates?", answer: "vertebrates" },
+        { question: "What is an example of an invertebrate?", answer: "insect / spider / worm / jellyfish" },
+      ],
+      bg: [
+        { question: "Какво ядат тревопасните?", answer: "само растения" },
+        { question: "Назови един бозайник, живеещ във вода.", answer: "делфин / кит / тюлен" },
+        { question: "Какво прави бозайниците уникални?", answer: "топлокръвни, козина, кърмят малките" },
+        { question: "Рибите гръбначни или безгръбначни ли са?", answer: "гръбначни" },
+        { question: "Дай пример за безгръбначно животно.", answer: "насекомо / паяк / червей / медуза" },
+      ],
+      es: [
+        { question: "¿Qué comen los herbívoros?", answer: "solo plantas" },
+        { question: "Nombra un mamífero que viva en el agua.", answer: "delfín / ballena / foca" },
+        { question: "¿Qué hace únicos a los mamíferos?", answer: "sangre caliente, pelo, alimentan crías con leche" },
+        { question: "¿Los peces son vertebrados o invertebrados?", answer: "vertebrados" },
+        { question: "Da un ejemplo de invertebrado.", answer: "insecto / araña / gusano / medusa" },
+      ],
+    },
+    earth: {
+      en: [
+        { question: "Name the four seasons.", answer: "spring, summer, autumn, winter" },
+        { question: "What covers most of Earth's surface?", answer: "water (oceans)" },
+        { question: "What causes day and night?", answer: "Earth rotating on its axis" },
+        { question: "Name the four layers of Earth from outside to centre.", answer: "crust, mantle, outer core, inner core" },
+        { question: "What causes earthquakes?", answer: "movement of tectonic plates" },
+      ],
+      bg: [
+        { question: "Назови четирите сезона.", answer: "пролет, лято, есен, зима" },
+        { question: "Какво покрива по-голямата част от Земята?", answer: "вода (океани)" },
+        { question: "Какво причинява ден и нощ?", answer: "въртенето на Земята около оста й" },
+        { question: "Назови четирите слоя на Земята отвън към центъра.", answer: "земна кора, мантия, външно ядро, вътрешно ядро" },
+        { question: "Какво причинява земетресенията?", answer: "движение на тектонски плочи" },
+      ],
+      es: [
+        { question: "Nombra las cuatro estaciones.", answer: "primavera, verano, otoño, invierno" },
+        { question: "¿Qué cubre la mayor parte de la Tierra?", answer: "agua (océanos)" },
+        { question: "¿Qué causa el día y la noche?", answer: "la rotación de la Tierra sobre su eje" },
+        { question: "Nombra las cuatro capas de la Tierra de afuera hacia el centro.", answer: "corteza, manto, núcleo externo, núcleo interno" },
+        { question: "¿Qué causa los terremotos?", answer: "movimiento de las placas tectónicas" },
+      ],
+    },
+    "simple-sentences": {
+      en: [
+        { question: "What two parts does every sentence need?", answer: "a subject and a verb" },
+        { question: "What letter must start a sentence?", answer: "a capital letter" },
+        { question: "What punctuation ends a statement?", answer: "a full stop (period)" },
+        { question: "Which word joins two ideas with contrast: 'I was tired ___ I stayed up.'", answer: "but" },
+        { question: "Name a subordinating conjunction.", answer: "because / when / although / before / after / if" },
+      ],
+      bg: [
+        { question: "От какви две части се нуждае всяко изречение?", answer: "подлог и сказуемо" },
+        { question: "С каква буква трябва да започва изречение?", answer: "главна буква" },
+        { question: "Каква пунктуация завършва изявително изречение?", answer: "точка" },
+        { question: "Коя дума свързва две идеи с контраст: 'Бях уморен ___ останах буден.'", answer: "но (but)" },
+        { question: "Назови подчинителен съюз.", answer: "because / when / although / before / after / if" },
+      ],
+      es: [
+        { question: "¿Qué dos partes necesita cada oración?", answer: "sujeto y verbo" },
+        { question: "¿Con qué letra debe comenzar una oración?", answer: "mayúscula" },
+        { question: "¿Qué signo de puntuación termina una afirmación?", answer: "punto final" },
+        { question: "¿Qué palabra une dos ideas con contraste: 'Estaba cansado ___ me quedé despierto.'?", answer: "but (pero)" },
+        { question: "Nombra una conjunción subordinante.", answer: "because / when / although / before / after / if" },
+      ],
+    },
   };
 
   // Grade-band-sensitive: add harder items for high band
@@ -1474,6 +1846,186 @@ function textQuiz(topicId: string, lang: LangCode): QuizQuestion[] {
         { question: "¿Qué significa 'home'?", options: ["escuela", "parque", "hogar", "tienda"], correctIndex: 2 },
         { question: "¿Qué significa el prefijo 'un-'?", options: ["de nuevo", "antes", "no", "después"], correctIndex: 2 },
         { question: "¿Qué significa 'graph'?", options: ["dibujar", "escribir", "hablar", "leer"], correctIndex: 1 },
+      ],
+    },
+    reading: {
+      en: [
+        { question: "Who are the people in a story called?", options: ["setting", "plot", "characters", "theme"], correctIndex: 2 },
+        { question: "Where and when a story happens is the...?", options: ["plot", "setting", "character", "climax"], correctIndex: 1 },
+        { question: "What is the lesson of a story called?", options: ["setting", "characters", "plot", "theme"], correctIndex: 3 },
+        { question: "What should you do if you don't understand a sentence?", options: ["skip it", "guess", "reread it", "ask someone"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Как се казват хората в разказа?", options: ["обстановка", "сюжет", "герои", "тема"], correctIndex: 2 },
+        { question: "Как се казва къде и кога се случва разказа?", options: ["сюжет", "обстановка", "герой", "кулминация"], correctIndex: 1 },
+        { question: "Как се казва урокът на разказа?", options: ["обстановка", "герои", "сюжет", "тема"], correctIndex: 3 },
+        { question: "Какво трябва да направиш, ако не разбираш изречение?", options: ["прескочи го", "познай", "прочети отново", "попитай"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Cómo se llaman las personas en una historia?", options: ["escenario", "trama", "personajes", "tema"], correctIndex: 2 },
+        { question: "¿Cómo se llama dónde y cuándo ocurre una historia?", options: ["trama", "escenario", "personaje", "clímax"], correctIndex: 1 },
+        { question: "¿Cómo se llama la lección de una historia?", options: ["escenario", "personajes", "trama", "tema"], correctIndex: 3 },
+        { question: "¿Qué deberías hacer si no entiendes una oración?", options: ["saltarla", "adivinar", "releerla", "preguntar"], correctIndex: 2 },
+      ],
+    },
+    writing: {
+      en: [
+        { question: "What is a group of words that expresses a complete thought?", options: ["a paragraph", "a sentence", "a word", "a letter"], correctIndex: 1 },
+        { question: "What is a noun?", options: ["an action word", "a describing word", "a person, place, or thing", "a connecting word"], correctIndex: 2 },
+        { question: "What is a verb?", options: ["a person, place, or thing", "an action word", "a describing word", "a number"], correctIndex: 1 },
+        { question: "What must start every sentence?", options: ["a small letter", "a capital letter", "a comma", "a full stop"], correctIndex: 1 },
+      ],
+      bg: [
+        { question: "Какво е група думи, изразяваща пълна мисъл?", options: ["абзац", "изречение", "дума", "буква"], correctIndex: 1 },
+        { question: "Какво е съществително?", options: ["действие", "описание", "човек, място или нещо", "свързваща дума"], correctIndex: 2 },
+        { question: "Какво е глагол?", options: ["човек, място или нещо", "дума за действие", "описателна дума", "число"], correctIndex: 1 },
+        { question: "С какво трябва да започва всяко изречение?", options: ["малка буква", "главна буква", "запетая", "точка"], correctIndex: 1 },
+      ],
+      es: [
+        { question: "¿Qué es un grupo de palabras que expresa un pensamiento completo?", options: ["un párrafo", "una oración", "una palabra", "una letra"], correctIndex: 1 },
+        { question: "¿Qué es un sustantivo?", options: ["una palabra de acción", "una palabra descriptiva", "una persona, lugar o cosa", "una palabra de enlace"], correctIndex: 2 },
+        { question: "¿Qué es un verbo?", options: ["una persona, lugar o cosa", "una palabra de acción", "una palabra descriptiva", "un número"], correctIndex: 1 },
+        { question: "¿Con qué debe comenzar cada oración?", options: ["una letra minúscula", "una letra mayúscula", "una coma", "un punto"], correctIndex: 1 },
+      ],
+    },
+    grammar: {
+      en: [
+        { question: "How many genders do Bulgarian nouns have?", options: ["one", "two", "three", "four"], correctIndex: 2 },
+        { question: "What is a word that describes a noun?", options: ["a verb", "an adjective", "a pronoun", "a conjunction"], correctIndex: 1 },
+        { question: "How many main tenses are there in Bulgarian?", options: ["two", "three", "four", "five"], correctIndex: 1 },
+        { question: "What must agree with a noun in gender?", options: ["verbs only", "pronouns only", "adjectives and articles", "conjunctions"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Колко рода имат българските съществителни?", options: ["един", "два", "три", "четири"], correctIndex: 2 },
+        { question: "Каква дума описва съществително?", options: ["глагол", "прилагателно", "местоимение", "съюз"], correctIndex: 1 },
+        { question: "Колко основни времена има в български?", options: ["две", "три", "четири", "пет"], correctIndex: 1 },
+        { question: "Какво трябва да се съгласува по род със съществителното?", options: ["само глаголи", "само местоимения", "прилагателни и членове", "съюзи"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Cuántos géneros tienen los sustantivos búlgaros?", options: ["uno", "dos", "tres", "cuatro"], correctIndex: 2 },
+        { question: "¿Qué palabra describe a un sustantivo?", options: ["un verbo", "un adjetivo", "un pronombre", "una conjunción"], correctIndex: 1 },
+        { question: "¿Cuántos tiempos principales hay en búlgaro?", options: ["dos", "tres", "cuatro", "cinco"], correctIndex: 1 },
+        { question: "¿Qué debe concordar en género con un sustantivo?", options: ["solo verbos", "solo pronombres", "adjetivos y artículos", "conjunciones"], correctIndex: 2 },
+      ],
+    },
+    stories: {
+      en: [
+        { question: "What are the people in a story called?", options: ["settings", "plots", "characters", "themes"], correctIndex: 2 },
+        { question: "What is the problem in a story called?", options: ["resolution", "setting", "conflict", "theme"], correctIndex: 2 },
+        { question: "What are the beginning, middle, and end of a story called?", options: ["setting", "character", "plot", "theme"], correctIndex: 2 },
+        { question: "What is the lesson of a story called?", options: ["plot", "character", "setting", "theme or moral"], correctIndex: 3 },
+      ],
+      bg: [
+        { question: "Как се казват хората в разказа?", options: ["обстановка", "сюжет", "герои", "тема"], correctIndex: 2 },
+        { question: "Как се казва проблемът в разказа?", options: ["развръзка", "обстановка", "конфликт", "тема"], correctIndex: 2 },
+        { question: "Как се казват началото, средината и краят?", options: ["обстановка", "герой", "сюжет", "тема"], correctIndex: 2 },
+        { question: "Как се казва урокът на разказа?", options: ["сюжет", "герой", "обстановка", "тема или мораль"], correctIndex: 3 },
+      ],
+      es: [
+        { question: "¿Cómo se llaman las personas en una historia?", options: ["escenarios", "tramas", "personajes", "temas"], correctIndex: 2 },
+        { question: "¿Cómo se llama el problema en una historia?", options: ["resolución", "escenario", "conflicto", "tema"], correctIndex: 2 },
+        { question: "¿Cómo se llaman el principio, el medio y el final?", options: ["escenario", "personaje", "trama", "tema"], correctIndex: 2 },
+        { question: "¿Cómo se llama la lección de una historia?", options: ["trama", "personaje", "escenario", "tema o moraleja"], correctIndex: 3 },
+      ],
+    },
+    comprehension: {
+      en: [
+        { question: "What is understanding what you read called?", options: ["narration", "fiction", "comprehension", "inference"], correctIndex: 2 },
+        { question: "What is figuring out unstated information called?", options: ["copying", "inference", "summary", "recalling"], correctIndex: 1 },
+        { question: "What is the most important point in a text called?", options: ["a detail", "an example", "the main idea", "the conclusion"], correctIndex: 2 },
+        { question: "What questions help you understand a text?", options: ["Where, Why, How", "What, When, Where", "Who, What, Where, When, Why", "Only Why"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Как се казва разбирането на прочетеното?", options: ["разказване", "измислица", "разбиране", "извод"], correctIndex: 2 },
+        { question: "Как се казва разбирането на неказана пряко информация?", options: ["копиране", "интуиция/извод", "резюме", "припомняне"], correctIndex: 1 },
+        { question: "Как се казва най-важната точка в текста?", options: ["детайл", "пример", "главна идея", "заключение"], correctIndex: 2 },
+        { question: "Кои въпроси помагат да разбереш текст?", options: ["Където, Защо, Как", "Какво, Кога, Където", "Кой, Какво, Където, Кога, Защо", "Само Защо"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Cómo se llama entender lo que lees?", options: ["narración", "ficción", "comprensión", "inferencia"], correctIndex: 2 },
+        { question: "¿Cómo se llama deducir información no dicha?", options: ["copiar", "inferencia", "resumen", "recordar"], correctIndex: 1 },
+        { question: "¿Cómo se llama el punto más importante de un texto?", options: ["un detalle", "un ejemplo", "la idea principal", "la conclusión"], correctIndex: 2 },
+        { question: "¿Qué preguntas ayudan a entender un texto?", options: ["Dónde, Por qué, Cómo", "Qué, Cuándo, Dónde", "Quién, Qué, Dónde, Cuándo, Por qué", "Solo Por qué"], correctIndex: 2 },
+      ],
+    },
+    puzzles: {
+      en: [
+        { question: "I have 2 legs in the morning, 4 at noon, 3 in the evening. What am I?", options: ["a dog", "a person", "a chair", "a cat"], correctIndex: 1 },
+        { question: "Which is heavier: 1 kg of feathers or 1 kg of iron?", options: ["feathers", "iron", "they weigh the same", "impossible to say"], correctIndex: 2 },
+        { question: "All cats are animals. Whiskers is a cat. What is Whiskers?", options: ["a dog", "a fish", "an animal", "a human"], correctIndex: 2 },
+        { question: "Anna > Ben > Carla in age. Who is youngest?", options: ["Anna", "Ben", "Carla", "They're the same"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Сутринта — 2 крака, обед — 4, вечер — 3. Какво съм?", options: ["куче", "човек", "стол", "котка"], correctIndex: 1 },
+        { question: "Кое е по-тежко: 1 кг перушина или 1 кг желязо?", options: ["перушина", "желязо", "еднакво", "невъзможно"], correctIndex: 2 },
+        { question: "Всички котки са животни. Мишка е котка. Какво е Мишка?", options: ["куче", "риба", "животно", "човек"], correctIndex: 2 },
+        { question: "Анна > Бен > Карла по възраст. Кой е най-малък?", options: ["Анна", "Бен", "Карла", "Еднакви"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "Mañana 2 patas, mediodía 4, noche 3. ¿Qué soy?", options: ["un perro", "una persona", "una silla", "un gato"], correctIndex: 1 },
+        { question: "¿Qué pesa más: 1 kg de plumas o 1 kg de hierro?", options: ["plumas", "hierro", "pesan lo mismo", "imposible saber"], correctIndex: 2 },
+        { question: "Todos los gatos son animales. Bigotes es un gato. ¿Qué es Bigotes?", options: ["un perro", "un pez", "un animal", "un humano"], correctIndex: 2 },
+        { question: "Ana > Ben > Carla en edad. ¿Quién es el más joven?", options: ["Ana", "Ben", "Carla", "Todos iguales"], correctIndex: 2 },
+      ],
+    },
+    animals: {
+      en: [
+        { question: "What do herbivores eat?", options: ["only meat", "only plants", "meat and plants", "insects only"], correctIndex: 1 },
+        { question: "What makes mammals unique?", options: ["they lay eggs", "they are cold-blooded", "they feed young with milk", "they have scales"], correctIndex: 2 },
+        { question: "Are fish vertebrates or invertebrates?", options: ["invertebrates", "vertebrates", "both", "neither"], correctIndex: 1 },
+        { question: "Which is an invertebrate?", options: ["a dog", "a fish", "a bird", "a spider"], correctIndex: 3 },
+      ],
+      bg: [
+        { question: "Какво ядат тревопасните?", options: ["само месо", "само растения", "месо и растения", "само насекоми"], correctIndex: 1 },
+        { question: "Какво прави бозайниците уникални?", options: ["снасят яйца", "студенокръвни са", "кърмят малките", "имат люспи"], correctIndex: 2 },
+        { question: "Рибите гръбначни или безгръбначни?", options: ["безгръбначни", "гръбначни", "и двете", "нито едното"], correctIndex: 1 },
+        { question: "Кое е безгръбначно?", options: ["куче", "риба", "птица", "паяк"], correctIndex: 3 },
+      ],
+      es: [
+        { question: "¿Qué comen los herbívoros?", options: ["solo carne", "solo plantas", "carne y plantas", "solo insectos"], correctIndex: 1 },
+        { question: "¿Qué hace únicos a los mamíferos?", options: ["ponen huevos", "son de sangre fría", "alimentan crías con leche", "tienen escamas"], correctIndex: 2 },
+        { question: "¿Los peces son vertebrados o invertebrados?", options: ["invertebrados", "vertebrados", "ambos", "ninguno"], correctIndex: 1 },
+        { question: "¿Cuál es un invertebrado?", options: ["un perro", "un pez", "un pájaro", "una araña"], correctIndex: 3 },
+      ],
+    },
+    earth: {
+      en: [
+        { question: "What covers most of Earth's surface?", options: ["land", "ice", "water", "forest"], correctIndex: 2 },
+        { question: "What causes day and night?", options: ["Earth orbiting the Sun", "the Moon's shadow", "Earth rotating on its axis", "clouds blocking sunlight"], correctIndex: 2 },
+        { question: "What is the outermost layer of Earth?", options: ["mantle", "inner core", "outer core", "crust"], correctIndex: 3 },
+        { question: "What causes earthquakes?", options: ["heavy rain", "volcanic eruptions only", "tectonic plate movement", "the Moon's gravity"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Какво покрива по-голямата част от Земята?", options: ["суша", "лед", "вода", "гора"], correctIndex: 2 },
+        { question: "Какво причинява ден и нощ?", options: ["обиколката на Земята", "сянката на Луната", "въртенето на Земята", "облаци"], correctIndex: 2 },
+        { question: "Кой е най-горният слой на Земята?", options: ["мантия", "вътрешно ядро", "външно ядро", "земна кора"], correctIndex: 3 },
+        { question: "Какво причинява земетресенията?", options: ["силен дъжд", "само вулкани", "движение на тектонски плочи", "гравитацията на Луната"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Qué cubre la mayor parte de la Tierra?", options: ["tierra", "hielo", "agua", "bosque"], correctIndex: 2 },
+        { question: "¿Qué causa el día y la noche?", options: ["la órbita de la Tierra", "la sombra de la Luna", "la rotación de la Tierra", "nubes"], correctIndex: 2 },
+        { question: "¿Cuál es la capa más externa de la Tierra?", options: ["manto", "núcleo interno", "núcleo externo", "corteza"], correctIndex: 3 },
+        { question: "¿Qué causa los terremotos?", options: ["lluvias fuertes", "solo volcanes", "movimiento de placas tectónicas", "gravedad lunar"], correctIndex: 2 },
+      ],
+    },
+    "simple-sentences": {
+      en: [
+        { question: "What two parts does every sentence need?", options: ["noun and adjective", "subject and verb", "question and answer", "start and end"], correctIndex: 1 },
+        { question: "Which word joins with contrast: 'I was tired ___ I went out.'?", options: ["and", "or", "but", "so"], correctIndex: 2 },
+        { question: "What must the first word of a sentence be?", options: ["a verb", "capitalized", "a noun", "short"], correctIndex: 1 },
+        { question: "What punctuation ends a statement?", options: ["comma", "question mark", "exclamation mark", "full stop"], correctIndex: 3 },
+      ],
+      bg: [
+        { question: "От какви две части трябва да се състои всяко изречение?", options: ["съществително и прилагателно", "подлог и сказуемо", "въпрос и отговор", "начало и край"], correctIndex: 1 },
+        { question: "Коя дума свързва с контраст: 'Бях уморен ___ излязох.'?", options: ["и", "или", "но", "затова"], correctIndex: 2 },
+        { question: "Каква трябва да е първата дума на изречение?", options: ["глагол", "с главна буква", "съществително", "кратка"], correctIndex: 1 },
+        { question: "Каква пунктуация завършва изявително изречение?", options: ["запетая", "въпросителна", "удивителна", "точка"], correctIndex: 3 },
+      ],
+      es: [
+        { question: "¿Qué dos partes necesita cada oración?", options: ["sustantivo y adjetivo", "sujeto y verbo", "pregunta y respuesta", "inicio y fin"], correctIndex: 1 },
+        { question: "¿Qué palabra une con contraste: 'Estaba cansado ___ salí.'?", options: ["and", "or", "but", "so"], correctIndex: 2 },
+        { question: "¿Cómo debe ser la primera palabra de una oración?", options: ["un verbo", "con mayúscula", "un sustantivo", "corta"], correctIndex: 1 },
+        { question: "¿Qué signo de puntuación termina una afirmación?", options: ["coma", "signo de interrogación", "signo de exclamación", "punto final"], correctIndex: 3 },
       ],
     },
   };

@@ -538,7 +538,7 @@ function isQuickActionButton(m: string, lang: Lang): "math" | "reading" | "logic
     if (normalized === "задай ми логически въпрос") return "logic";
     if (normalized === "упражнявай с мен английски") return "english";
   } else if (lang === "en") {
-    if (normalized === "help with math") return "math";
+    if (normalized === "help me with math") return "math";
     if (normalized === "let's read together") return "reading";
     if (normalized === "ask me a logic question") return "logic";
     if (normalized === "practice english") return "english";
@@ -968,12 +968,27 @@ export async function handleJuniorChat(
   // be routed to OpenAI free-chat, never reaching the lesson evaluator.
   const bgLessonState = await readBulgarianLessonState(childId, module);
 
+  // ── QUICK ACTION CONTEXT SWITCH ───────────────────────────────────────────
+  // Quick action buttons ("Задай ми логически въпрос", "Помогни ми с математика",
+  // "Да четем заедно") must OVERRIDE any currently active lesson context.
+  // Without this check, the BG lesson evaluator below would intercept these
+  // messages and silently treat them as wrong answers to the active question.
+  const quickAction = isQuickActionButton(msg, lang);
+  if (quickAction && bgLessonState) {
+    console.log("[JUNIOR_CHAT] quick_action_context_switch", {
+      quickAction,
+      clearingBgLesson: true,
+      topicId: bgLessonState.topicId,
+    });
+    await clearBulgarianLesson(childId, module);
+  }
+
   // ── EARLY EXIT for conversational messages ────────────────────────────────
   // Greetings and unknown inputs must never be evaluated as lesson answers —
-  // UNLESS there is an active Bulgarian lesson (bgLessonState is set and no
-  // new subject was requested).  In that case, even a plain one-word answer
-  // must fall through to the evaluator below.
-  const hasActiveBgLesson = !!(bgLessonState && requestedSubject === null);
+  // UNLESS there is an active Bulgarian lesson (bgLessonState is set, no new
+  // subject was requested, and the message is NOT a quick action button).
+  // Plain one-word answers like "Котката" must fall through to the evaluator.
+  const hasActiveBgLesson = !!(bgLessonState && requestedSubject === null && !quickAction);
   if ((intent === "small_talk" || intent === "unknown") && !hasActiveBgLesson) {
     if (state.postSuccessId !== null) {
       await clearPostSuccess(childId, module);
@@ -999,7 +1014,9 @@ export async function handleJuniorChat(
 
   // ── BULGARIAN_LESSON_ANSWER ────────────────────────────────────────────────
   // bgLessonState is already populated above.
-  if (bgLessonState && requestedSubject === null) {
+  // quickAction guard: quick-action buttons must never be evaluated as lesson answers
+  // (the lesson was already cleared above when quickAction is set).
+  if (bgLessonState && requestedSubject === null && !quickAction) {
     const grade = bgLessonState.grade;
     const topicId = bgLessonState.topicId as any;
     const evaluation = evaluateBulgarianLessonAnswer(

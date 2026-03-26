@@ -1,0 +1,77 @@
+IMPORTANT: Investigate and fix a context-switch bug in AYA Panda chat.
+
+Current status:
+- Daily Plan subject tasks now open in the correct subject.
+- Typed answers work.
+- Voice answers work.
+- Empty/near-empty voice input is handled correctly.
+
+New bug:
+When the user clicks a quick action like:
+- "Задай ми логически въпрос"
+while currently inside a Bulgarian Language Daily Plan chat task,
+AYA stays in the previous Bulgarian task context instead of switching to Logic.
+
+Observed behavior:
+- the header/tab still shows Bulgarian Language
+- the previous Bulgarian task remains active
+- no new Logic question starts
+
+Expected behavior:
+When a quick action button is clicked, AYA must switch context immediately and start the newly requested subject/task flow.
+
+Examples:
+- "Задай ми логически въпрос" → switch to Logic and ask a logic question
+- "Помогни ми с математика" → switch to Math and ask a math question
+- "Да четем заедно" → switch to Reading and start reading-related content
+
+DO NOT:
+- redesign UI
+- change styling/layout
+- rebuild the whole chat system
+- create new files unless absolutely necessary
+- modify DB
+- create duplicate routing systems
+
+Goal:
+Find exactly why the quick action buttons do not override the currently active Daily Plan lesson/task context, and fix it with the smallest safe change.
+
+Tasks:
+
+1. Audit the quick action flow
+Trace:
+- the quick action button click handlers
+- how they send messages / intents
+- how subjectContext / taskContext / active lesson state is stored
+- whether current Daily Plan state remains locked after the first task starts
+
+2. Check likely root causes
+Investigate whether:
+- quick action buttons only send text but do not reset current subject/task state
+- active lesson context is pinned and overrides new intent
+- juniorChatHandler prioritizes current lesson mode over explicit new user request
+- subject header state is not updated after quick action
+- a conversation/session state machine blocks switching while inside active task mode
+
+3. Fix with minimal change
+Make the smallest safe fix so that:
+- quick action buttons explicitly switch subject/task context
+- current active task/lesson mode is cleared or replaced when appropriate
+- the header reflects the new subject
+- AYA starts the newly requested content immediately
+
+4. Validate these exact cases
+- Start Bulgarian Daily Plan task → then click "Задай ми логически въпрос" → AYA switches to Logic
+- Start Bulgarian Daily Plan task → then click "Помогни ми с математика" → AYA switches to Math
+- Start Bulgarian Daily Plan task → then click "Да четем заедно" → AYA switches to Reading
+- Normal Daily Plan flow still works if no quick action is clicked
+
+5. Return exactly:
+1. files audited
+2. exact root cause found
+3. exact file(s) changed
+4. how context switching was fixed
+5. confirmation that no UI redesign, DB changes, or duplicate systems were created
+6. manual Preview test steps
+
+Do not publish automatically.

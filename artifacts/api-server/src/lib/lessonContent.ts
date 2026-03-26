@@ -1407,6 +1407,775 @@ function getTopicText(subjectId: string, topicId: string, grade: number, lang: L
         },
       },
     },
+    /* ── MATHEMATICS / FRACTIONS ── */
+    "mathematics/fractions": {
+      en: {
+        low: {
+          title: "Fractions",
+          explanation: "A fraction is a part of a whole. When we cut a pizza into 4 equal slices, each slice is one quarter (1/4). The bottom number (denominator) tells us how many equal parts the whole is cut into. The top number (numerator) tells us how many parts we have.",
+          examples: [
+            { problem: "A pizza is cut into 2 equal halves. You eat 1 piece. What fraction did you eat?", solution: "1/2 (one half)", hint: "Top number = parts you have. Bottom number = total equal parts." },
+            { problem: "A chocolate bar has 4 equal squares. You eat 1. What fraction remains?", solution: "3/4 (three quarters)", hint: "4 total − 1 eaten = 3 remaining. 3 out of 4 → 3/4." },
+            { problem: "Which is bigger: 1/2 or 1/4?", solution: "1/2 is bigger — halves are larger pieces than quarters.", hint: "The bigger the denominator, the smaller each piece." },
+          ],
+          tip: "🍕 Think of fractions as pizza slices — the denominator is how many slices the pizza was cut into!",
+        },
+        high: {
+          title: "Fractions and Equivalents",
+          explanation: "Fractions show parts of a whole. Equivalent fractions are different fractions that represent the same value: 1/2 = 2/4 = 4/8. To compare fractions, it helps to find a common denominator. You can also add and subtract fractions that share the same denominator.",
+          examples: [
+            { problem: "Are 2/4 and 1/2 equivalent?", solution: "Yes — 2/4 = 1/2 because 2 ÷ 2 = 1 and 4 ÷ 2 = 2.", hint: "Divide numerator and denominator by the same number to simplify." },
+            { problem: "Add: 1/5 + 2/5 = ?", solution: "3/5 — add numerators, keep denominator: 1+2=3, denominator stays 5.", hint: "Only add numerators when denominators are the same!" },
+            { problem: "Which is larger: 3/8 or 5/8?", solution: "5/8 — same denominator, compare numerators: 5 > 3.", hint: "Same denominator? The fraction with the larger numerator is bigger." },
+          ],
+          tip: "📐 Equivalent fractions: multiply or divide both numerator AND denominator by the same number.",
+        },
+      },
+      bg: {
+        low: {
+          title: "Дроби",
+          explanation: "Дробта е част от цяло. Когато разрежем пица на 4 равни части, всяка парче е една четвърт (1/4). Долното число (знаменател) казва на колко равни части е разделено цялото. Горното число (числител) казва колко части имаме.",
+          examples: [
+            { problem: "Пица е разрязана на 2 равни половини. Изяждаш 1 парче. Каква дроб изяде?", solution: "1/2 (една втора)", hint: "Горно число = части, които имаш. Долно число = общо равни части." },
+            { problem: "Шоколад има 4 равни квадратчета. Изяждаш 1. Каква дроб остава?", solution: "3/4 (три четвърти)", hint: "4 общо − 1 изядено = 3 останало. 3 от 4 → 3/4." },
+            { problem: "Кое е по-голямо: 1/2 или 1/4?", solution: "1/2 е по-голямо — половините са по-големи парчета от четвъртините.", hint: "Колкото по-голям е знаменателят, толкова по-малко е всяко парче." },
+          ],
+          tip: "🍕 Мисли за дробите като парчета пица — знаменателят показва на колко парчета е разрязана!",
+        },
+        high: {
+          title: "Дроби и равностойни дроби",
+          explanation: "Дробите показват части от цяло. Равностойните дроби са различни дроби с еднаква стойност: 1/2 = 2/4 = 4/8. За да сравним дроби, помага да намерим общ знаменател. Можем да събираме и изваждаме дроби с еднакъв знаменател.",
+          examples: [
+            { problem: "Равностойни ли са 2/4 и 1/2?", solution: "Да — 2/4 = 1/2, защото 2 ÷ 2 = 1 и 4 ÷ 2 = 2.", hint: "Раздели числителя и знаменателя на едно и също число, за да съкратиш." },
+            { problem: "Събери: 1/5 + 2/5 = ?", solution: "3/5 — събери числителите, запази знаменателя: 1+2=3, знаменателят е 5.", hint: "Събирай само числителите, когато знаменателите са еднакви!" },
+            { problem: "Кое е по-голямо: 3/8 или 5/8?", solution: "5/8 — еднакъв знаменател, сравни числителите: 5 > 3.", hint: "Еднакъв знаменател? Дробта с по-голям числител е по-голяма." },
+          ],
+          tip: "📐 Равностойни дроби: умножи или раздели ЕДНОВРЕМЕННО числителя И знаменателя на едно и също число.",
+        },
+      },
+      es: {
+        low: {
+          title: "Fracciones",
+          explanation: "Una fracción es una parte de un todo. Cuando cortamos una pizza en 4 partes iguales, cada trozo es un cuarto (1/4). El número de abajo (denominador) dice en cuántas partes iguales está dividido el todo. El número de arriba (numerador) dice cuántas partes tenemos.",
+          examples: [
+            { problem: "Una pizza se corta en 2 mitades iguales. Comes 1 trozo. ¿Qué fracción comiste?", solution: "1/2 (una mitad)", hint: "Número de arriba = partes que tienes. Número de abajo = total de partes iguales." },
+            { problem: "Una tableta de chocolate tiene 4 cuadraditos iguales. Comes 1. ¿Qué fracción queda?", solution: "3/4 (tres cuartos)", hint: "4 total − 1 comido = 3 restante. 3 de 4 → 3/4." },
+            { problem: "¿Cuál es mayor: 1/2 o 1/4?", solution: "1/2 es mayor — los medios son trozos más grandes que los cuartos.", hint: "Cuanto mayor es el denominador, más pequeño es cada trozo." },
+          ],
+          tip: "🍕 ¡Piensa en las fracciones como trozos de pizza — el denominador es en cuántos trozos se cortó!",
+        },
+        high: {
+          title: "Fracciones equivalentes",
+          explanation: "Las fracciones muestran partes de un todo. Las fracciones equivalentes son diferentes fracciones que representan el mismo valor: 1/2 = 2/4 = 4/8. Para comparar fracciones, ayuda encontrar un denominador común. También puedes sumar y restar fracciones con el mismo denominador.",
+          examples: [
+            { problem: "¿Son equivalentes 2/4 y 1/2?", solution: "Sí — 2/4 = 1/2 porque 2 ÷ 2 = 1 y 4 ÷ 2 = 2.", hint: "Divide numerador y denominador por el mismo número para simplificar." },
+            { problem: "Suma: 1/5 + 2/5 = ?", solution: "3/5 — suma los numeradores, mantén el denominador: 1+2=3, denominador sigue siendo 5.", hint: "¡Solo suma los numeradores cuando los denominadores son iguales!" },
+            { problem: "¿Cuál es mayor: 3/8 o 5/8?", solution: "5/8 — mismo denominador, compara numeradores: 5 > 3.", hint: "¿Mismo denominador? La fracción con mayor numerador es más grande." },
+          ],
+          tip: "📐 Fracciones equivalentes: multiplica o divide TANTO el numerador COMO el denominador por el mismo número.",
+        },
+      },
+    },
+
+    /* ── MATHEMATICS / GEOMETRY ── */
+    "mathematics/geometry": {
+      en: {
+        low: {
+          title: "Shapes and Geometry",
+          explanation: "Geometry is the study of shapes, sizes, and positions. Basic 2D shapes include circles, squares, rectangles, and triangles. A circle has no corners. A square has 4 equal sides and 4 corners. A triangle has 3 sides and 3 corners.",
+          examples: [
+            { problem: "How many sides does a rectangle have?", solution: "4 sides — 2 long sides and 2 short sides (opposite sides are equal).", hint: "A square is a special rectangle where ALL 4 sides are equal." },
+            { problem: "What shape has 3 sides and 3 corners?", solution: "A triangle!", hint: "Tri- means three. Triangle = 3 angles." },
+            { problem: "How are a square and rectangle different?", solution: "A square has 4 equal sides; a rectangle has 2 long and 2 short sides.", hint: "Every square is a rectangle, but not every rectangle is a square." },
+          ],
+          tip: "🔷 Count the sides and corners to identify any shape!",
+        },
+        high: {
+          title: "2D and 3D Shapes",
+          explanation: "2D shapes are flat (circle, square, triangle, pentagon). 3D shapes have depth (cube, sphere, cylinder, cone, pyramid). Perimeter is the total distance around a 2D shape. Area is the space inside a shape, measured in square units.",
+          examples: [
+            { problem: "Find the perimeter of a square with sides 5 cm.", solution: "20 cm — perimeter = 4 × side = 4 × 5 = 20 cm.", hint: "Perimeter = sum of ALL sides." },
+            { problem: "What 3D shape is a ball?", solution: "A sphere — it is perfectly round in all directions.", hint: "A sphere has no edges or corners." },
+            { problem: "A rectangle is 6 cm long and 3 cm wide. Find its area.", solution: "18 cm² — area = length × width = 6 × 3 = 18.", hint: "Area = length × width. Measured in square units (cm²)." },
+          ],
+          tip: "📐 Perimeter = add all sides. Area = length × width (for rectangles).",
+        },
+      },
+      bg: {
+        low: {
+          title: "Фигури и геометрия",
+          explanation: "Геометрията изучава фигури, размери и положения. Основните 2D фигури включват: окръжност, квадрат, правоъгълник и триъгълник. Окръжността няма ъгли. Квадратът има 4 равни страни и 4 ъгъла. Триъгълникът има 3 страни и 3 ъгъла.",
+          examples: [
+            { problem: "Колко страни има правоъгълникът?", solution: "4 страни — 2 дълги и 2 къси (срещуположните страни са равни).", hint: "Квадратът е специален правоъгълник, при който ВСИЧКИТЕ 4 страни са равни." },
+            { problem: "Коя фигура има 3 страни и 3 ъгъла?", solution: "Триъгълник!", hint: "Три страни → триъгълник." },
+            { problem: "С какво се различават квадратът и правоъгълникът?", solution: "Квадратът има 4 равни страни; правоъгълникът има 2 дълги и 2 къси страни.", hint: "Всеки квадрат е правоъгълник, но не всеки правоъгълник е квадрат." },
+          ],
+          tip: "🔷 Брой страните и ъглите, за да разпознаеш всяка фигура!",
+        },
+        high: {
+          title: "2D и 3D фигури",
+          explanation: "2D фигурите са плоски (окръжност, квадрат, триъгълник, петоъгълник). 3D фигурите имат дълбочина (куб, сфера, цилиндър, конус, пирамида). Периметърът е общото разстояние около 2D фигура. Лицето е пространството вътре в фигурата, измерено в квадратни единици.",
+          examples: [
+            { problem: "Намери периметъра на квадрат със страна 5 см.", solution: "20 см — периметър = 4 × страна = 4 × 5 = 20 см.", hint: "Периметърът = сбор на ВСИЧКИ страни." },
+            { problem: "Каква 3D фигура е топката?", solution: "Сфера — тя е напълно кръгла във всички посоки.", hint: "Сферата няма ребра или ъгли." },
+            { problem: "Правоъгълник е 6 см дълъг и 3 см широк. Намери лицето му.", solution: "18 см² — лице = дължина × ширина = 6 × 3 = 18.", hint: "Лице = дължина × ширина. Измерва се в квадратни единици (см²)." },
+          ],
+          tip: "📐 Периметър = сбор на всички страни. Лице = дължина × ширина (за правоъгълници).",
+        },
+      },
+      es: {
+        low: {
+          title: "Figuras y geometría",
+          explanation: "La geometría estudia figuras, tamaños y posiciones. Las figuras 2D básicas incluyen: círculo, cuadrado, rectángulo y triángulo. El círculo no tiene esquinas. El cuadrado tiene 4 lados iguales y 4 esquinas. El triángulo tiene 3 lados y 3 esquinas.",
+          examples: [
+            { problem: "¿Cuántos lados tiene un rectángulo?", solution: "4 lados — 2 lados largos y 2 cortos (los lados opuestos son iguales).", hint: "Un cuadrado es un rectángulo especial donde TODOS los 4 lados son iguales." },
+            { problem: "¿Qué figura tiene 3 lados y 3 esquinas?", solution: "¡Un triángulo!", hint: "Tri- significa tres. Triángulo = 3 ángulos." },
+            { problem: "¿En qué se diferencian el cuadrado y el rectángulo?", solution: "El cuadrado tiene 4 lados iguales; el rectángulo tiene 2 lados largos y 2 cortos.", hint: "Todo cuadrado es un rectángulo, pero no todo rectángulo es un cuadrado." },
+          ],
+          tip: "🔷 ¡Cuenta los lados y las esquinas para identificar cualquier figura!",
+        },
+        high: {
+          title: "Figuras 2D y 3D",
+          explanation: "Las figuras 2D son planas (círculo, cuadrado, triángulo, pentágono). Las figuras 3D tienen profundidad (cubo, esfera, cilindro, cono, pirámide). El perímetro es la distancia total alrededor de una figura 2D. El área es el espacio dentro de una figura, medida en unidades cuadradas.",
+          examples: [
+            { problem: "Halla el perímetro de un cuadrado con lados de 5 cm.", solution: "20 cm — perímetro = 4 × lado = 4 × 5 = 20 cm.", hint: "Perímetro = suma de TODOS los lados." },
+            { problem: "¿Qué figura 3D es una pelota?", solution: "Una esfera — es perfectamente redonda en todas las direcciones.", hint: "Una esfera no tiene aristas ni esquinas." },
+            { problem: "Un rectángulo mide 6 cm de largo y 3 cm de ancho. Halla su área.", solution: "18 cm² — área = largo × ancho = 6 × 3 = 18.", hint: "Área = largo × ancho. Se mide en unidades cuadradas (cm²)." },
+          ],
+          tip: "📐 Perímetro = suma todos los lados. Área = largo × ancho (para rectángulos).",
+        },
+      },
+    },
+
+    /* ── MATHEMATICS / MEASUREMENT ── */
+    "mathematics/measurement": {
+      en: {
+        low: {
+          title: "Measurement",
+          explanation: "We measure things to find out how long, heavy, or how much time has passed. Length uses centimetres (cm) and metres (m). Weight uses grams (g) and kilograms (kg). Time uses seconds, minutes, and hours. 100 cm = 1 metre. 1000 g = 1 kilogram.",
+          examples: [
+            { problem: "A pencil is 15 cm long. A ruler is 30 cm long. How much longer is the ruler?", solution: "15 cm longer — 30 − 15 = 15 cm.", hint: "Subtract the shorter length from the longer one." },
+            { problem: "A bag of flour weighs 2 kg. How many grams is that?", solution: "2000 g — because 1 kg = 1000 g, so 2 kg = 2 × 1000 = 2000 g.", hint: "Multiply kg by 1000 to get grams." },
+            { problem: "A lesson starts at 9:00 and lasts 45 minutes. When does it end?", solution: "9:45 — 9:00 + 45 minutes = 9:45.", hint: "Add the minutes to the starting time." },
+          ],
+          tip: "📏 Remember: 100 cm = 1 m and 1000 g = 1 kg!",
+        },
+        high: {
+          title: "Units and Conversions",
+          explanation: "Measurement involves choosing the right unit and converting between them. Length: mm, cm, m, km (10 mm=1 cm, 100 cm=1 m, 1000 m=1 km). Weight: g, kg (1000 g=1 kg). Capacity: ml, L (1000 ml=1 L). Time: seconds, minutes, hours, days.",
+          examples: [
+            { problem: "Convert 3.5 km to metres.", solution: "3500 m — 3.5 × 1000 = 3500 m.", hint: "Multiply km by 1000 to get metres." },
+            { problem: "A bottle holds 1.5 litres. How many ml is that?", solution: "1500 ml — 1.5 × 1000 = 1500 ml.", hint: "1 litre = 1000 millilitres." },
+            { problem: "A journey takes 2 hours and 30 minutes. How many minutes total?", solution: "150 minutes — 2 × 60 = 120 minutes + 30 = 150 minutes.", hint: "Convert hours to minutes (×60) then add extra minutes." },
+          ],
+          tip: "🔢 Conversion trick: ×1000 to go smaller (km→m, kg→g, L→ml). ÷1000 to go bigger.",
+        },
+      },
+      bg: {
+        low: {
+          title: "Мерене",
+          explanation: "Измерваме нещата, за да разберем колко са дълги, тежки или колко време е минало. Дължината се измерва в сантиметри (см) и метри (м). Теглото — в грамове (г) и килограми (кг). Времето — в секунди, минути и часове. 100 см = 1 метър. 1000 г = 1 килограм.",
+          examples: [
+            { problem: "Молив е 15 см дълъг. Линийка е 30 см дълга. С колко е по-дълга линийката?", solution: "С 15 см — 30 − 15 = 15 см.", hint: "Извади по-краткото от по-дългото." },
+            { problem: "Торба брашно тежи 2 кг. Колко грама е това?", solution: "2000 г — защото 1 кг = 1000 г, затова 2 кг = 2 × 1000 = 2000 г.", hint: "Умножи кг по 1000, за да получиш грамовете." },
+            { problem: "Урок започва в 9:00 и трае 45 минути. Кога свършва?", solution: "В 9:45 — 9:00 + 45 минути = 9:45.", hint: "Прибави минутите към началния час." },
+          ],
+          tip: "📏 Помни: 100 см = 1 м и 1000 г = 1 кг!",
+        },
+        high: {
+          title: "Мерни единици и преобразуване",
+          explanation: "Измерването включва избор на правилна единица и преобразуване между тях. Дължина: мм, см, м, км (10 мм=1 см, 100 см=1 м, 1000 м=1 км). Тегло: г, кг (1000 г=1 кг). Обем: мл, л (1000 мл=1 л). Време: секунди, минути, часове, дни.",
+          examples: [
+            { problem: "Преобразувай 3,5 км в метри.", solution: "3500 м — 3,5 × 1000 = 3500 м.", hint: "Умножи км по 1000, за да получиш метри." },
+            { problem: "Бутилка побира 1,5 литра. Колко мл е това?", solution: "1500 мл — 1,5 × 1000 = 1500 мл.", hint: "1 литър = 1000 милилитра." },
+            { problem: "Пътуване трае 2 часа и 30 минути. Колко минути са общо?", solution: "150 минути — 2 × 60 = 120 минути + 30 = 150 минути.", hint: "Преобразувай часовете в минути (×60) и добави допълнителните." },
+          ],
+          tip: "🔢 Трик за преобразуване: ×1000 за по-малки единици (км→м, кг→г, л→мл). ÷1000 за по-големи.",
+        },
+      },
+      es: {
+        low: {
+          title: "Medición",
+          explanation: "Medimos cosas para saber cuánto miden, pesan o cuánto tiempo ha pasado. La longitud usa centímetros (cm) y metros (m). El peso usa gramos (g) y kilogramos (kg). El tiempo usa segundos, minutos y horas. 100 cm = 1 metro. 1000 g = 1 kilogramo.",
+          examples: [
+            { problem: "Un lápiz mide 15 cm. Una regla mide 30 cm. ¿Cuánto más larga es la regla?", solution: "15 cm más — 30 − 15 = 15 cm.", hint: "Resta la longitud más corta de la más larga." },
+            { problem: "Una bolsa de harina pesa 2 kg. ¿Cuántos gramos son?", solution: "2000 g — porque 1 kg = 1000 g, entonces 2 kg = 2 × 1000 = 2000 g.", hint: "Multiplica los kg por 1000 para obtener gramos." },
+            { problem: "Una clase empieza a las 9:00 y dura 45 minutos. ¿Cuándo termina?", solution: "A las 9:45 — 9:00 + 45 minutos = 9:45.", hint: "Suma los minutos a la hora de inicio." },
+          ],
+          tip: "📏 ¡Recuerda: 100 cm = 1 m y 1000 g = 1 kg!",
+        },
+        high: {
+          title: "Unidades y conversiones",
+          explanation: "Medir implica elegir la unidad correcta y convertir entre ellas. Longitud: mm, cm, m, km (10 mm=1 cm, 100 cm=1 m, 1000 m=1 km). Peso: g, kg (1000 g=1 kg). Capacidad: ml, L (1000 ml=1 L). Tiempo: segundos, minutos, horas, días.",
+          examples: [
+            { problem: "Convierte 3,5 km en metros.", solution: "3500 m — 3,5 × 1000 = 3500 m.", hint: "Multiplica km por 1000 para obtener metros." },
+            { problem: "Una botella contiene 1,5 litros. ¿Cuántos ml son?", solution: "1500 ml — 1,5 × 1000 = 1500 ml.", hint: "1 litro = 1000 mililitros." },
+            { problem: "Un viaje dura 2 horas y 30 minutos. ¿Cuántos minutos son en total?", solution: "150 minutos — 2 × 60 = 120 minutos + 30 = 150 minutos.", hint: "Convierte las horas en minutos (×60) y suma los minutos extra." },
+          ],
+          tip: "🔢 Truco de conversión: ×1000 para ir a unidades más pequeñas (km→m, kg→g, L→ml). ÷1000 para unidades más grandes.",
+        },
+      },
+    },
+
+    /* ── BULGARIAN LANGUAGE / SPELLING ── */
+    "bulgarian-language/spelling": {
+      en: {
+        low: {
+          title: "Spelling",
+          explanation: "Spelling means writing words with the correct letters in the correct order. In Bulgarian, every letter has one sound, which makes spelling predictable. Key rules: always capitalize the first word of a sentence and proper names. Double-check words with 'ъ' and 'я' sounds.",
+          examples: [
+            { problem: "Which is correct: 'ябалка' or 'ябълка'?", solution: "'ябълка' — the middle sound is 'ъ' not 'а'.", hint: "Say the word slowly: я-БЪЛ-ка. Listen for each sound." },
+            { problem: "Should 'мария' be written with a capital M?", solution: "Yes — 'Мария' — it is a proper name (person's name).", hint: "Names of people and places always start with a capital letter." },
+            { problem: "Complete the word: 'ч_ша' (meaning 'cup')", solution: "чаша — the missing letter is 'а'.", hint: "Pronounce it: ча-ша." },
+          ],
+          tip: "✏️ Read your writing aloud — you will catch many spelling mistakes by ear!",
+        },
+        high: {
+          title: "Spelling Rules",
+          explanation: "Advanced spelling involves rules for 'ь' (soft sign), double letters, and correct use of 'я/а' after soft consonants. The soft sign 'ь' appears in words like 'пясък', 'любов'. Proper nouns, the first word in a sentence, and the pronoun 'Аз' (in formal contexts) use capital letters.",
+          examples: [
+            { problem: "Correct the spelling: 'любов' or 'лубов'?", solution: "'любов' — contains 'ю' (soft 'u' sound), not 'у'.", hint: "Listen for soft vowel sounds: ю, я, ьо." },
+            { problem: "When do we use capital letters in Bulgarian?", solution: "At the start of a sentence, for names of people, cities, countries, and rivers.", hint: "Sofia, Дунав, Иван, България — all start with capitals." },
+            { problem: "Correct: 'слонъ' or 'слон'?", solution: "'слон' — the old letter 'ъ' at the end of masculine nouns was dropped in modern Bulgarian.", hint: "Modern Bulgarian doesn't use 'ъ' at the end of masculine nouns." },
+          ],
+          tip: "📖 When in doubt, say the word aloud slowly and write each sound you hear.",
+        },
+      },
+      bg: {
+        low: {
+          title: "Правопис",
+          explanation: "Правописът означава писане на думите с правилните букви в правилния ред. В българския всяка буква има един звук, което прави правописа предвидим. Основни правила: главна буква в началото на изречение и за собствени имена. Внимавай с думите с 'ъ' и 'я'.",
+          examples: [
+            { problem: "Кое е правилно: 'ябалка' или 'ябълка'?", solution: "'ябълка' — средният звук е 'ъ', не 'а'.", hint: "Кажи думата бавно: я-БЪЛ-ка. Чуй всеки звук." },
+            { problem: "Трябва ли 'мария' да се пише с главна М?", solution: "Да — 'Мария' — това е собствено име (лично).", hint: "Имената на хора и места се пишат с главна буква." },
+            { problem: "Допълни думата: 'ч_ша' (значи 'cup')", solution: "чаша — липсващата буква е 'а'.", hint: "Произнеси: ча-ша." },
+          ],
+          tip: "✏️ Прочети написаното на глас — ще чуеш много правописни грешки!",
+        },
+        high: {
+          title: "Правописни правила",
+          explanation: "Напредналият правопис включва правила за 'ь' (мека гласна), удвоени букви и правилна употреба на 'я/а' след меки съгласни. Меката гласна 'ь' се появява в думи като 'пясък', 'любов'. Собствените имена, първата дума на изречение и местоимението 'Аз' (в официален контекст) се пишат с главна буква.",
+          examples: [
+            { problem: "Правилно ли е: 'любов' или 'лубов'?", solution: "'любов' — съдържа 'ю' (мек звук), не 'у'.", hint: "Чувай меките гласни: ю, я, ьо." },
+            { problem: "Кога в български се пишат главни букви?", solution: "В началото на изречение, за имена на хора, градове, страни и реки.", hint: "София, Дунав, Иван, България — всички с главна буква." },
+            { problem: "Правилно: 'слонъ' или 'слон'?", solution: "'слон' — старата буква 'ъ' в края на мъжки съществителни беше премахната от съвременния български.", hint: "Съвременният български не ползва 'ъ' в края на мъжки съществителни." },
+          ],
+          tip: "📖 При съмнение кажи думата на глас бавно и запиши всеки звук, който чуваш.",
+        },
+      },
+      es: {
+        low: {
+          title: "Ortografía",
+          explanation: "La ortografía significa escribir palabras con las letras correctas en el orden correcto. En búlgaro, cada letra tiene un sonido, lo que hace la ortografía predecible. Reglas clave: siempre usa mayúscula al inicio de una oración y para nombres propios. Ten cuidado con las palabras con 'ъ' y 'я'.",
+          examples: [
+            { problem: "¿Cuál es correcta: 'ябалка' o 'ябълка'?", solution: "'ябълка' — el sonido del medio es 'ъ', no 'а'.", hint: "Di la palabra despacio: я-БЪЛ-ка. Escucha cada sonido." },
+            { problem: "¿Debe 'мария' escribirse con M mayúscula?", solution: "Sí — 'Мария' — es un nombre propio (nombre de persona).", hint: "Los nombres de personas y lugares siempre empiezan con mayúscula." },
+            { problem: "Completa la palabra: 'ч_ша' (significa 'taza')", solution: "чаша — la letra que falta es 'а'.", hint: "Pronúnciala: ча-ша." },
+          ],
+          tip: "✏️ ¡Lee lo que escribiste en voz alta — escucharás muchos errores ortográficos!",
+        },
+        high: {
+          title: "Reglas ortográficas",
+          explanation: "La ortografía avanzada incluye reglas para la 'ь' (signo suave), letras dobles y el uso correcto de 'я/а' después de consonantes suaves. La señal suave 'ь' aparece en palabras como 'пясък', 'любов'. Los nombres propios, la primera palabra de una oración usan mayúscula.",
+          examples: [
+            { problem: "¿Es correcto: 'любов' o 'лубов'?", solution: "'любов' — contiene 'ю' (sonido suave), no 'у'.", hint: "Escucha los sonidos vocálicos suaves: ю, я, ьо." },
+            { problem: "¿Cuándo se usan mayúsculas en búlgaro?", solution: "Al inicio de oración, para nombres de personas, ciudades, países y ríos.", hint: "София, Дунав, Иван, България — todos con mayúscula." },
+            { problem: "¿Correcto: 'слонъ' o 'слон'?", solution: "'слон' — la antigua letra 'ъ' al final de sustantivos masculinos fue eliminada del búlgaro moderno.", hint: "El búlgaro moderno no usa 'ъ' al final de sustantivos masculinos." },
+          ],
+          tip: "📖 Cuando dudes, di la palabra en voz alta despacio y escribe cada sonido que oigas.",
+        },
+      },
+    },
+
+    /* ── BULGARIAN LANGUAGE / WORD STUDY ── */
+    "bulgarian-language/word-study": {
+      en: {
+        low: {
+          title: "Vocabulary",
+          explanation: "Vocabulary is all the words we know and use. Learning new words helps us read, write, and understand better. Synonyms are words with similar meanings (big/large). Antonyms are opposite-meaning words (big/small). Context clues help us guess the meaning of unknown words.",
+          examples: [
+            { problem: "What does 'слон' mean? Use the hint: it is a large grey animal with a trunk.", solution: "Elephant (слон)", hint: "Use the description to picture the animal." },
+            { problem: "Give a synonym for 'голям' (big).", solution: "огромен (huge), едър (large), грамаден (enormous)", hint: "A synonym means almost the same thing." },
+            { problem: "What is the opposite (antonym) of 'топъл' (warm)?", solution: "студен (cold)", hint: "An antonym means the opposite." },
+          ],
+          tip: "📚 Read every day — new words stick best when you see them in a story!",
+        },
+        high: {
+          title: "Word Families and Context",
+          explanation: "Word families share the same root: учи (learns), учител (teacher), ученик (student), учебник (textbook). Prefixes and suffixes change word meaning: пре- (re-), без- (without), -ен/-на (adjective ending). Use context — the words around an unknown word — to guess its meaning.",
+          examples: [
+            { problem: "What word family does 'пишa' (write) belong to? Give 2 related words.", solution: "писател (writer), писмо (letter/writing), писалка (pen)", hint: "Think of people, objects, or actions connected to 'writing'." },
+            { problem: "What does the prefix 'пре-' mean? Example: 'превеждам' (translate)", solution: "'пре-' means 'across, over, re-' — translate = carry meaning across languages.", hint: "Other examples: преписвам (copy/rewrite), прекарвам (spend time)." },
+            { problem: "Guess the meaning of 'непознат' using parts: не- (not) + познат (known).", solution: "Unknown / unfamiliar / stranger", hint: "не- = not, познат = known → not known." },
+          ],
+          tip: "🔍 When you see an unknown word, break it into parts: root + prefix + suffix.",
+        },
+      },
+      bg: {
+        low: {
+          title: "Речник",
+          explanation: "Речникът са всички думи, които знаем и използваме. Научаването на нови думи ни помага да четем, пишем и разбираме по-добре. Синонимите са думи с близко значение (голям/едър). Антонимите са думи с противоположно значение (голям/малък). Контекстът ни помага да отгатнем значението на непознати думи.",
+          examples: [
+            { problem: "Какво означава 'слон'? Подсказка: голямо сиво животно с хобот.", solution: "Elephant (слон)", hint: "Използвай описанието, за да си представиш животното." },
+            { problem: "Дай синоним на 'голям'.", solution: "огромен, едър, грамаден", hint: "Синонимът означава почти същото." },
+            { problem: "Какво е антонимът на 'топъл'?", solution: "студен", hint: "Антонимът означава противоположното." },
+          ],
+          tip: "📚 Чети всеки ден — новите думи се запомнят най-добре в история!",
+        },
+        high: {
+          title: "Словообразуване и контекст",
+          explanation: "Словните семейства споделят един корен: учи, учител, ученик, учебник. Представките и наставките променят значението: пре-, без-, -ен/-на. Използвай контекста — думите около непознатата дума — за да отгатнеш значението й.",
+          examples: [
+            { problem: "Към кое словно семейство спада 'пиша'? Дай 2 свързани думи.", solution: "писател, писмо, писалка", hint: "Мисли за хора, предмети или действия, свързани с 'писане'." },
+            { problem: "Какво означава представката 'пре-'? Пример: 'превеждам'", solution: "'пре-' означава 'от едната страна на другата' — превеждам = пренасяш значение между езици.", hint: "Примери: преписвам, прекарвам." },
+            { problem: "Отгатни значението на 'непознат' по частите: не- + познат.", solution: "Непознат / чужд / непреставен", hint: "не- = отрицание, познат = известен → не е известен." },
+          ],
+          tip: "🔍 Когато срещнеш непозната дума, раздели я на части: корен + представка + наставка.",
+        },
+      },
+      es: {
+        low: {
+          title: "Vocabulario",
+          explanation: "El vocabulario son todas las palabras que conocemos y usamos. Aprender palabras nuevas nos ayuda a leer, escribir y comprender mejor. Los sinónimos son palabras con significados similares (grande/enorme). Los antónimos son palabras de significado opuesto (grande/pequeño). El contexto nos ayuda a adivinar el significado de palabras desconocidas.",
+          examples: [
+            { problem: "¿Qué significa 'слон'? Pista: es un gran animal gris con trompa.", solution: "Elefante (слон)", hint: "Usa la descripción para imaginar el animal." },
+            { problem: "Da un sinónimo de 'голям' (grande).", solution: "огромен (enorme), едър (grande), грамаден (gigantesco)", hint: "Un sinónimo significa casi lo mismo." },
+            { problem: "¿Cuál es el antónimo de 'топъл' (cálido)?", solution: "студен (frío)", hint: "Un antónimo significa lo opuesto." },
+          ],
+          tip: "📚 ¡Lee todos los días — las palabras nuevas se fijan mejor cuando las ves en una historia!",
+        },
+        high: {
+          title: "Familias de palabras y contexto",
+          explanation: "Las familias de palabras comparten la misma raíz: учи (aprende), учител (maestro), ученик (alumno), учебник (libro de texto). Los prefijos y sufijos cambian el significado: пре- (re-), без- (sin), -ен/-на (terminación adjetiva). Usa el contexto para adivinar el significado de palabras desconocidas.",
+          examples: [
+            { problem: "¿A qué familia de palabras pertenece 'пишa' (escribir)? Da 2 palabras relacionadas.", solution: "писател (escritor), писмо (carta/escrito), писалка (bolígrafo)", hint: "Piensa en personas, objetos o acciones relacionadas con 'escribir'." },
+            { problem: "¿Qué significa el prefijo 'пре-'? Ejemplo: 'превеждам' (traducir)", solution: "'пре-' significa 'a través, re-' — traducir = llevar el significado a otro idioma.", hint: "Otros ejemplos: преписвам (copiar/reescribir)." },
+            { problem: "Adivina el significado de 'непознат' usando sus partes: не- (no) + познат (conocido).", solution: "Desconocido / extraño", hint: "не- = no, познат = conocido → no conocido." },
+          ],
+          tip: "🔍 Cuando veas una palabra desconocida, divídela en partes: raíz + prefijo + sufijo.",
+        },
+      },
+    },
+
+    /* ── BULGARIAN LANGUAGE / PUNCTUATION ── */
+    "bulgarian-language/punctuation": {
+      en: {
+        low: {
+          title: "Punctuation",
+          explanation: "Punctuation marks help us read correctly by showing where sentences start and end. A full stop (.) ends a statement. A question mark (?) ends a question. An exclamation mark (!) shows strong feeling. A comma (,) is a short pause inside a sentence.",
+          examples: [
+            { problem: "Add the correct punctuation: 'What is your name'", solution: "What is your name? (question mark because it is a question)", hint: "If the sentence asks something, it ends with ?" },
+            { problem: "Add punctuation: 'I love football'", solution: "I love football! or I love football. (exclamation for strong feeling; full stop for plain statement)", hint: "Exclamation = strong feeling. Full stop = calm statement." },
+            { problem: "Where does the comma go? 'I like apples oranges and bananas.'", solution: "I like apples, oranges, and bananas.", hint: "Use commas to separate items in a list." },
+          ],
+          tip: "🛑 Think of a full stop as a red light (stop!), a comma as a yellow light (pause).",
+        },
+        high: {
+          title: "Punctuation and Clauses",
+          explanation: "Punctuation controls meaning. Commas separate clauses, list items, and direct speech markers. A colon (:) introduces a list or explanation. A semicolon (;) links two related independent clauses. Quotation marks show direct speech. An apostrophe (') shows possession or missing letters.",
+          examples: [
+            { problem: "Punctuate: 'Maria said I am happy'", solution: "Maria said, \"I am happy.\" — comma before speech, quotes around spoken words.", hint: "Direct speech: name + said, + \"speech marks around words spoken.\"" },
+            { problem: "When do you use a colon?", solution: "Before a list or explanation: 'I need three things: bread, milk, and eggs.'", hint: "Colon = 'here comes the list or explanation'." },
+            { problem: "Correct: 'Its raining' vs 'It's raining'", solution: "'It's raining' — apostrophe replaces the missing letter 'i' in 'it is'.", hint: "It's = it is. Its = belonging to it (no apostrophe)." },
+          ],
+          tip: "💬 Punctuation is like a road map for the reader — it tells them where to stop, pause, and turn.",
+        },
+      },
+      bg: {
+        low: {
+          title: "Пунктуация",
+          explanation: "Препинателните знаци ни помагат да четем правилно, като показват къде започват и свършват изреченията. Точката (.) завършва изявително изречение. Въпросителният знак (?) завършва въпрос. Удивителният знак (!) показва силно чувство. Запетаята (,) е кратка пауза вътре в изречение.",
+          examples: [
+            { problem: "Добави правилния знак: 'Как се казваш'", solution: "Как се казваш? (въпросителен знак — това е въпрос)", hint: "Ако изречението пита нещо, завършва с ?" },
+            { problem: "Добави препинателен знак: 'Обичам футбол'", solution: "Обичам футбол! или Обичам футбол. (удивителна за силно чувство; точка за спокойно изявление)", hint: "Удивителна = силно чувство. Точка = спокойно изявление." },
+            { problem: "Къде отива запетаята? 'Обичам ябълки портокали и банани.'", solution: "Обичам ябълки, портокали и банани.", hint: "Употребявай запетаи за разделяне на елементи в изброяване." },
+          ],
+          tip: "🛑 Мисли за точката като червена светлина (спри!), за запетаята — жълта (пауза).",
+        },
+        high: {
+          title: "Пунктуация и изречения",
+          explanation: "Пунктуацията управлява смисъла. Запетаите разделят части на изречения, изброявания и реч. Двоеточието (:) въвежда изброяване или обяснение. Точката и запетаята (;) свързва две самостоятелни части. Кавичките показват пряка реч. Апострофът (') показва притежание или изпусната буква.",
+          examples: [
+            { problem: "Препинателни знаци: 'Мария каза радвам се'", solution: "Мария каза: <<Радвам се.>> — двоеточие преди речта, кавички около казаното.", hint: "Пряка реч: Кой каза: <<Думи в кавички.>>" },
+            { problem: "Кога се употребява двоеточие?", solution: "Преди изброяване или обяснение: 'Имам нужда от три неща: хляб, мляко и яйца.'", hint: "Двоеточие = 'следва изброяване или обяснение'." },
+            { problem: "Каква е разликата между 'Ивановата' и 'Ивановата'?", solution: "Притежателните форми в bulgarian се образуват с наставки, не с апостроф, за разлика от английски.", hint: "В Bulgarian: Иванов + ата = Ивановата книга (Ivan's book)." },
+          ],
+          tip: "💬 Пунктуацията е като пътна карта за читателя — показва къде да спре, да направи пауза.",
+        },
+      },
+      es: {
+        low: {
+          title: "Puntuación",
+          explanation: "Los signos de puntuación nos ayudan a leer correctamente al mostrar dónde empiezan y terminan las oraciones. El punto (.) termina una afirmación. El signo de interrogación (¿?) termina una pregunta. El signo de exclamación (¡!) muestra sentimientos fuertes. La coma (,) es una pausa breve dentro de una oración.",
+          examples: [
+            { problem: "Añade la puntuación correcta: '¿Cómo te llamas'", solution: "¿Cómo te llamas? (signo de interrogación — es una pregunta)", hint: "Si la oración pregunta algo, termina con ?" },
+            { problem: "Añade puntuación: 'Me encanta el fútbol'", solution: "¡Me encanta el fútbol! o Me encanta el fútbol. (exclamación para sentimiento fuerte; punto para afirmación sencilla)", hint: "Exclamación = sentimiento fuerte. Punto = afirmación tranquila." },
+            { problem: "¿Dónde va la coma? 'Me gustan las manzanas las naranjas y los plátanos.'", solution: "Me gustan las manzanas, las naranjas y los plátanos.", hint: "Usa comas para separar elementos de una lista." },
+          ],
+          tip: "🛑 Piensa en el punto como un semáforo rojo (¡stop!), y en la coma como uno amarillo (pausa).",
+        },
+        high: {
+          title: "Puntuación y cláusulas",
+          explanation: "La puntuación controla el significado. Las comas separan cláusulas, elementos de listas y el estilo directo. Los dos puntos (:) introducen una lista o explicación. El punto y coma (;) une dos cláusulas independientes relacionadas. Las comillas muestran el discurso directo.",
+          examples: [
+            { problem: "Puntúa: 'María dijo estoy feliz'", solution: "María dijo: «Estoy feliz.» — dos puntos antes del discurso, comillas alrededor de las palabras dichas.", hint: "Discurso directo: nombre + dijo: + «palabras entre comillas.»" },
+            { problem: "¿Cuándo se usan los dos puntos?", solution: "Antes de una lista o explicación: 'Necesito tres cosas: pan, leche y huevos.'", hint: "Dos puntos = 'aquí viene la lista o explicación'." },
+            { problem: "¿Cuándo se usa el punto y coma?", solution: "Para unir dos ideas independientes relacionadas: 'Estudié mucho; aprobé el examen.'", hint: "Punto y coma = dos ideas completas pero relacionadas." },
+          ],
+          tip: "💬 La puntuación es como un mapa de carreteras para el lector — le dice dónde parar, hacer pausa y girar.",
+        },
+      },
+    },
+
+    /* ── BULGARIAN LANGUAGE / NOUNS-VERBS ── */
+    "bulgarian-language/nouns-verbs": {
+      en: {
+        low: {
+          title: "Nouns and Verbs",
+          explanation: "Nouns are words for people, places, animals, or things: dog, school, Maria, book. Verbs are action or state words: run, eat, sleep, is. Every sentence needs at least one noun and one verb. Nouns answer 'Who?' or 'What?'. Verbs answer 'What does it do?'",
+          examples: [
+            { problem: "Identify the noun and verb: 'The cat sleeps.'", solution: "Noun: cat. Verb: sleeps.", hint: "Cat = thing (noun). Sleeps = action (verb)." },
+            { problem: "Is 'beautiful' a noun or verb?", solution: "Neither — 'beautiful' is an adjective (it describes a noun).", hint: "Nouns = things. Verbs = actions. Adjectives = descriptions." },
+            { problem: "Give the verb for: 'The child ___ in the park.' (plays/book/big)", solution: "plays — it is an action word.", hint: "Choose the word that shows what the child is doing." },
+          ],
+          tip: "🏃 Verbs = action words! Nouns = name words! Every sentence needs both.",
+        },
+        high: {
+          title: "Nouns, Verbs, and Tenses",
+          explanation: "Nouns can be singular (one) or plural (many): child/children, leaf/leaves. Verbs change with tense: I walk (present), I walked (past), I will walk (future). Subject-verb agreement: 'She walks' ✅, 'She walk' ❌. In Bulgarian, verb endings change depending on the subject.",
+          examples: [
+            { problem: "Change to past tense: 'The dog barks.'", solution: "The dog barked. (add -ed for regular verbs)", hint: "Present → Past: bark→barked, walk→walked, play→played." },
+            { problem: "Make plural: 'The child runs in the park.'", solution: "The children run in the park. (child→children; run agrees with plural)", hint: "child → children (irregular plural). Plural subjects use 'run' not 'runs'." },
+            { problem: "Fix the agreement: 'She eat an apple every day.'", solution: "'She eats an apple every day.' — 3rd person singular needs -s.", hint: "He/She/It: add -s to the verb. I/You/We/They: no -s." },
+          ],
+          tip: "📝 Subject + Verb must always agree in number (singular/plural).",
+        },
+      },
+      bg: {
+        low: {
+          title: "Съществителни и глаголи",
+          explanation: "Съществителните имена са думи за хора, места, животни или предмети: куче, училище, Мария, книга. Глаголите са думи за действие или състояние: тичам, ям, спя, съм. Всяко изречение се нуждае от поне едно съществително и един глагол. Съществителните отговарят на 'Кой?' или 'Какво?'. Глаголите — на 'Какво прави?'",
+          examples: [
+            { problem: "Намери съществителното и глагола: 'Котката спи.'", solution: "Съществително: котката. Глагол: спи.", hint: "Котка = нещо (съществително). Спи = действие (глагол)." },
+            { problem: "Прилагателно ли е, съществително ли е или глагол е 'красива'?", solution: "Нито едното — 'красива' е прилагателно (описва съществително).", hint: "Съществителни = неща. Глаголи = действия. Прилагателни = описания." },
+            { problem: "Избери глагола: 'Детето ___ в парка.' (играе/книга/голяма)", solution: "играе — действие.", hint: "Избери думата, която показва какво прави детето." },
+          ],
+          tip: "🏃 Глаголите = думи за действие! Съществителните = имена! Всяко изречение се нуждае от двете.",
+        },
+        high: {
+          title: "Съществителни, глаголи и глаголни времена",
+          explanation: "Съществителните могат да са в единствено или множествено число: дете/деца, лист/листа. Глаголите се изменят по време: вървя (сегашно), вървях (минало), ще вървя (бъдеще). Глаголното окончание в българския се мени според лицето: аз вървя, той върви.",
+          examples: [
+            { problem: "Поставете в минало: 'Кучето лае.'", solution: "Кучето лаеше. (или: изла) — глаголна форма за минало несвършено.", hint: "Сегашно → Минало несвършено: тичам → тичах, играя → играех." },
+            { problem: "Направи множествено: 'Детето тича в парка.'", solution: "Децата тичат в парка. (дете→деца; тичат за мн.ч.)", hint: "дете → деца (неправилно мн.ч.). Мн.ч. изисква 'тичат'." },
+            { problem: "Разпознай времето: 'Тя пееше цяло лято.'", solution: "Минало несвършено — описва продължително минало действие.", hint: "Минало несвършено = -еше/-аше/-яше: пееше, говореше, тичаше." },
+          ],
+          tip: "📝 Глаголното лице и число трябва да съвпадат с подлога.",
+        },
+      },
+      es: {
+        low: {
+          title: "Sustantivos y verbos",
+          explanation: "Los sustantivos son palabras para personas, lugares, animales o cosas: perro, escuela, María, libro. Los verbos son palabras de acción o estado: correr, comer, dormir, ser. Cada oración necesita al menos un sustantivo y un verbo. Los sustantivos responden '¿Quién?' o '¿Qué?'. Los verbos responden '¿Qué hace?'",
+          examples: [
+            { problem: "Identifica el sustantivo y el verbo: 'El gato duerme.'", solution: "Sustantivo: gato. Verbo: duerme.", hint: "Gato = cosa (sustantivo). Duerme = acción (verbo)." },
+            { problem: "¿Es 'hermoso' un sustantivo o un verbo?", solution: "Ninguno — 'hermoso' es un adjetivo (describe a un sustantivo).", hint: "Sustantivos = cosas. Verbos = acciones. Adjetivos = descripciones." },
+            { problem: "Elige el verbo: 'El niño ___ en el parque.' (juega/libro/grande)", solution: "juega — es una palabra de acción.", hint: "Elige la palabra que muestra qué hace el niño." },
+          ],
+          tip: "🏃 ¡Los verbos = palabras de acción! ¡Los sustantivos = palabras de nombre! Toda oración necesita ambos.",
+        },
+        high: {
+          title: "Sustantivos, verbos y tiempos",
+          explanation: "Los sustantivos pueden ser singulares (uno) o plurales (muchos): niño/niños, hoja/hojas. Los verbos cambian con el tiempo: camino (presente), caminé (pasado), caminaré (futuro). Concordancia sujeto-verbo: 'Ella camina' ✅, 'Ella caminan' ❌.",
+          examples: [
+            { problem: "Cambia al pasado: 'El perro ladra.'", solution: "El perro ladró. (pretérito indefinido para acción completa)", hint: "Presente → Pasado: ladra→ladró, corre→corrió, juega→jugó." },
+            { problem: "Pon en plural: 'El niño corre en el parque.'", solution: "Los niños corren en el parque.", hint: "niño → niños. El verbo también cambia: corre → corren." },
+            { problem: "Corrige la concordancia: 'Ella comen una manzana.'", solution: "'Ella come una manzana.' — 3ª persona singular termina en -e/-a.", hint: "Ella/Él → comer: come. Ellos → comen." },
+          ],
+          tip: "📝 El sujeto y el verbo siempre deben concordar en número (singular/plural).",
+        },
+      },
+    },
+
+    /* ── READING LITERATURE / POETRY ── */
+    "reading-literature/poetry": {
+      en: {
+        low: {
+          title: "Poetry",
+          explanation: "A poem is a special kind of writing that uses beautiful language, rhythm, and sometimes rhyme. Poems are arranged in stanzas (groups of lines). Rhyme is when the ends of lines sound the same (cat/hat, run/fun). Rhythm is the musical beat you feel when you read a poem aloud.",
+          examples: [
+            { problem: "In the poem: 'The cat sat on a mat / It was wearing a tiny hat' — what words rhyme?", solution: "mat / hat — both end in the same '-at' sound.", hint: "Rhyming words sound the same at the end." },
+            { problem: "What is a stanza?", solution: "A group of lines in a poem, like a paragraph in a story.", hint: "Poems are divided into stanzas; stories are divided into paragraphs." },
+            { problem: "Read aloud: 'One, two, buckle my shoe / Three, four, knock at the door.' — can you feel the rhythm?", solution: "Yes — the strong and weak beats create a regular pattern, like music.", hint: "Clap along as you read — clap on the strong beats." },
+          ],
+          tip: "🎵 Read poetry aloud — the rhythm and rhyme come alive with your voice!",
+        },
+        high: {
+          title: "Poetry: Form and Language",
+          explanation: "Poets use special techniques: simile (comparing using 'like' or 'as': 'brave as a lion'), metaphor (saying one thing IS another: 'life is a journey'), personification (giving human qualities to objects: 'the wind whispered'). Free verse poems have no fixed rhyme or rhythm. Haiku has 3 lines: 5, 7, 5 syllables.",
+          examples: [
+            { problem: "Identify the technique: 'The moon is a silver coin.'", solution: "Metaphor — the moon is compared to a silver coin without using 'like' or 'as'.", hint: "Metaphor = A IS B (no 'like' or 'as')." },
+            { problem: "Write a simile about the sun.", solution: "Example: 'The sun is as warm as a hug.' or 'The sun shines like a golden lamp.'", hint: "Simile = A is LIKE B, or A is AS [adjective] AS B." },
+            { problem: "A haiku: 'An old silent pond / A frog jumps into the pond / Splash! Silence again.' Count the syllables.", solution: "Line 1: An-old-si-lent-pond = 5. Line 2: A-frog-jumps-in-to-the-pond = 7. Line 3: Splash-si-lence-a-gain = 5. ✅", hint: "Count each syllable carefully by clapping." },
+          ],
+          tip: "🌟 Simile uses 'like/as'. Metaphor says one thing IS another. Personification gives objects human qualities.",
+        },
+      },
+      bg: {
+        low: {
+          title: "Поезия",
+          explanation: "Стихотворението е особен вид текст, който използва красив език, ритъм и понякога рима. Стихотворенията са наредени в строфи (групи от редове). Римата е когато краищата на редовете звучат еднакво (котка/бостан). Ритъмът е музикалният такт, който усещаш, когато четеш стихотворение на глас.",
+          examples: [
+            { problem: "В стихотворението: 'Котката седна на рогозка / Тя носеше малка шапка' — кои думи се римуват?", solution: "рогозка / шапка — завършват на подобен звук (в оригинала: mat/hat).", hint: "Думите, които се римуват, звучат еднакво в края." },
+            { problem: "Какво е строфа?", solution: "Група от редове в стихотворение, като абзац в разказ.", hint: "Стихотворенията са разделени на строфи; разказите — на абзаци." },
+            { problem: "Можеш ли да усетиш ритъма в: 'Дойде пролет весела / С цветя и с песни'?", solution: "Да — силните и слабите срички се редуват в правилен ритъм.", hint: "Пляскай в такт с четенето — пляскай на силните срички." },
+          ],
+          tip: "🎵 Чети поезия на глас — ритъмът и римата оживяват с гласа ти!",
+        },
+        high: {
+          title: "Поезия: форма и изразни средства",
+          explanation: "Поетите използват специални похвати: сравнение (с 'като': 'храбър като лъв'), метафора (едно нещо е друго: 'животът е пътешествие'), олицетворение (давам човешки качества на предмети: 'вятърът шептеше'). Свободният стих няма фиксирана рима или ритъм.",
+          examples: [
+            { problem: "Определи похвата: 'Луната е сребърна монета.'", solution: "Метафора — луната се сравнява с монета без да се ползва 'като'.", hint: "Метафора = А е Б (без 'като')." },
+            { problem: "Напиши сравнение за слънцето.", solution: "Пример: 'Слънцето е топло като прегръдка.' или 'Слънцето свети като златна лампа.'", hint: "Сравнение = А е КАТО Б." },
+            { problem: "Намери олицетворението: 'Реката пее сред камъните.'", solution: "Олицетворение — реката 'пее', сякаш е жива. Пеенето е човешко/животинско действие.", hint: "Олицетворение = предмет извършва човешко действие." },
+          ],
+          tip: "🌟 Сравнение = 'като'. Метафора = едното е другото. Олицетворение = предметът е жив.",
+        },
+      },
+      es: {
+        low: {
+          title: "Poesía",
+          explanation: "Un poema es un tipo especial de escritura que usa lenguaje hermoso, ritmo y a veces rima. Los poemas se organizan en estrofas (grupos de versos). La rima es cuando el final de los versos suena igual (gato/pato). El ritmo es el compás musical que sientes al leer un poema en voz alta.",
+          examples: [
+            { problem: "En el poema: 'El gato se sentó en la alfombra / Llevaba un sombrero con sombra' — ¿qué palabras riman?", solution: "alfombra / sombra — terminan con el mismo sonido.", hint: "Las palabras que riman suenan igual al final." },
+            { problem: "¿Qué es una estrofa?", solution: "Un grupo de versos en un poema, como un párrafo en una historia.", hint: "Los poemas se dividen en estrofas; las historias en párrafos." },
+            { problem: "¿Puedes sentir el ritmo en: 'Uno, dos, tres, / pisé un ciempiés'?", solution: "Sí — los acentos fuertes y débiles se alternan en un patrón regular.", hint: "Aplaude al leer — aplaude en los acentos fuertes." },
+          ],
+          tip: "🎵 ¡Lee poesía en voz alta — el ritmo y la rima cobran vida con tu voz!",
+        },
+        high: {
+          title: "Poesía: forma y lenguaje",
+          explanation: "Los poetas usan técnicas especiales: símil (comparar con 'como': 'valiente como un león'), metáfora (decir que algo ES otra cosa: 'la vida es un viaje'), personificación (dar cualidades humanas a objetos: 'el viento susurró'). El verso libre no tiene rima ni ritmo fijo.",
+          examples: [
+            { problem: "Identifica la técnica: 'La luna es una moneda de plata.'", solution: "Metáfora — la luna se compara con una moneda sin usar 'como'.", hint: "Metáfora = A ES B (sin 'como')." },
+            { problem: "Escribe un símil sobre el sol.", solution: "Ejemplo: 'El sol es tan cálido como un abrazo.' o 'El sol brilla como una lámpara dorada.'", hint: "Símil = A es COMO B." },
+            { problem: "Encuentra la personificación: 'El río canta entre las piedras.'", solution: "Personificación — el río 'canta', como si estuviera vivo. Cantar es una acción humana.", hint: "Personificación = un objeto hace algo humano." },
+          ],
+          tip: "🌟 Símil usa 'como'. Metáfora dice que algo ES otra cosa. Personificación da vida a los objetos.",
+        },
+      },
+    },
+
+    /* ── READING LITERATURE / MAIN-IDEA ── */
+    "reading-literature/main-idea": {
+      en: {
+        low: {
+          title: "Finding the Main Idea",
+          explanation: "The main idea is what a text is mostly about. Every paragraph or passage has one main idea. Supporting details are facts or examples that explain or prove the main idea. Ask yourself: 'What is the author mainly talking about?' The main idea is often in the first or last sentence of a paragraph.",
+          examples: [
+            { problem: "Read: 'Dogs make great pets. They are loyal, fun to play with, and they protect their owners.' What is the main idea?", solution: "Dogs make great pets — the other sentences are supporting details.", hint: "The first sentence often states the main idea. The rest explain it." },
+            { problem: "What is a 'supporting detail'?", solution: "A fact or example that gives more information about the main idea.", hint: "Supporting details answer: Why? How? What evidence?" },
+            { problem: "Read: 'Lions live in Africa. They hunt in groups called prides. They are the kings of the savanna.' What is the main idea?", solution: "Lions are powerful animals that live and hunt in groups in Africa.", hint: "Combine the ideas: Where do they live? How do they behave?" },
+          ],
+          tip: "🔍 Ask: 'What is this MOSTLY about?' — that is the main idea!",
+        },
+        high: {
+          title: "Main Idea and Theme",
+          explanation: "The main idea is the central point of a non-fiction text. The theme is the underlying message of a story or poem (e.g., friendship, courage, honesty). To find the theme, ask: 'What lesson does the character learn?' or 'What message does the author want to share?' Main idea is stated; theme is implied.",
+          examples: [
+            { problem: "A story: A fox tries many times to reach grapes but fails and says 'They were probably sour anyway.' What is the theme?", solution: "People sometimes make excuses when they fail instead of accepting failure honestly.", hint: "What lesson or truth does this story show about human behaviour?" },
+            { problem: "Difference between main idea and theme?", solution: "Main idea: what the text says (topic + what about it). Theme: what the text means (life lesson or message).", hint: "Main idea is explicit; theme is the lesson you infer." },
+            { problem: "Find the theme: A story where a tortoise beats a rabbit in a race by being slow and steady.", solution: "Theme: persistence and consistency beat speed and overconfidence.", hint: "What life lesson does this familiar story teach?" },
+          ],
+          tip: "🌟 Main idea = what it says. Theme = what it means (the deeper lesson).",
+        },
+      },
+      bg: {
+        low: {
+          title: "Намиране на основната идея",
+          explanation: "Основната идея е за какво най-вече говори текстът. Всеки абзац или текст има по една основна идея. Допълнителните детайли са факти или примери, обясняващи основната идея. Питай се: 'За какво говори авторът основно?' Основната идея често е в първото или последното изречение.",
+          examples: [
+            { problem: "Прочети: 'Кучетата са чудесни домашни любимци. Те са верни, забавни и пазят стопаните си.' Коя е основната идея?", solution: "Кучетата са чудесни домашни любимци — останалите изречения са допълнителни детайли.", hint: "Първото изречение обикновено съдържа основната идея." },
+            { problem: "Какво е 'допълнителен детайл'?", solution: "Факт или пример, даващ повече информация за основната идея.", hint: "Допълнителните детайли отговарят на: Защо? Как? Какви доказателства?" },
+            { problem: "Прочети: 'Лъвовете живеят в Африка. Те ловуват в групи. Те са царете на саваната.' Коя е основната идея?", solution: "Лъвовете са мощни животни, живеещи и ловуващи заедно в Африка.", hint: "Комбинирай идеите: Където живеят? Как се държат?" },
+          ],
+          tip: "🔍 Питай се: 'За какво е ОСНОВНО текстът?' — това е основната идея!",
+        },
+        high: {
+          title: "Основна идея и тема",
+          explanation: "Основната идея е централната мисъл на нехудожествен текст. Темата е скритото послание на разказ или стихотворение (например: приятелство, смелост, честност). За да намериш темата, питай: 'Какъв урок научава героят?' или 'Какво послание иска да сподели авторът?'",
+          examples: [
+            { problem: "Разказ: Лисица се опитва многократно да стигне грозде, не успява и казва 'Те вероятно са кисели.' Коя е темата?", solution: "Хората понякога намират оправдания при провал вместо честно да го признаят.", hint: "Какъв урок/истина показва тази история за човешкото поведение?" },
+            { problem: "Разлика между основна идея и тема?", solution: "Основна идея: какво казва текстът. Тема: какво означава текстът (житейски урок или послание).", hint: "Основната идея е явна; темата е урокът, до който стигаш сам." },
+            { problem: "Намери темата: Костенурка побеждава заек в надбягване, като върви бавно и упорито.", solution: "Тема: постоянството и усърдието побеждават скоростта и самоувереността.", hint: "Какъв житейски урок преподава тази позната история?" },
+          ],
+          tip: "🌟 Основна идея = какво казва текстът. Тема = какво означава (по-дълбокото послание).",
+        },
+      },
+      es: {
+        low: {
+          title: "Encontrar la idea principal",
+          explanation: "La idea principal es de qué trata principalmente un texto. Cada párrafo o pasaje tiene una idea principal. Los detalles de apoyo son hechos o ejemplos que explican o prueban la idea principal. Pregúntate: '¿De qué habla principalmente el autor?' La idea principal suele estar en la primera o última oración.",
+          examples: [
+            { problem: "Lee: 'Los perros son mascotas estupendas. Son leales, divertidos y protegen a sus dueños.' ¿Cuál es la idea principal?", solution: "Los perros son mascotas estupendas — las demás oraciones son detalles de apoyo.", hint: "La primera oración a menudo indica la idea principal. Las demás la explican." },
+            { problem: "¿Qué es un 'detalle de apoyo'?", solution: "Un hecho o ejemplo que da más información sobre la idea principal.", hint: "Los detalles de apoyo responden: ¿Por qué? ¿Cómo? ¿Qué evidencia?" },
+            { problem: "Lee: 'Los leones viven en África. Cazan en grupos llamados manadas. Son los reyes de la sabana.' ¿Cuál es la idea principal?", solution: "Los leones son animales poderosos que viven y cazan en grupos en África.", hint: "Combina las ideas: ¿Dónde viven? ¿Cómo se comportan?" },
+          ],
+          tip: "🔍 ¡Pregunta: '¿De qué trata PRINCIPALMENTE?' — ¡esa es la idea principal!",
+        },
+        high: {
+          title: "Idea principal y tema",
+          explanation: "La idea principal es el punto central de un texto no ficticio. El tema es el mensaje subyacente de una historia o poema (p. ej.: amistad, valentía, honestidad). Para encontrar el tema, pregunta: '¿Qué aprende el personaje?' o '¿Qué mensaje quiere transmitir el autor?'",
+          examples: [
+            { problem: "Una historia: Un zorro intenta alcanzar unas uvas muchas veces pero falla y dice 'Probablemente estaban agrias.' ¿Cuál es el tema?", solution: "Las personas a veces buscan excusas cuando fracasan en lugar de aceptar el fracaso honestamente.", hint: "¿Qué lección o verdad muestra esta historia sobre el comportamiento humano?" },
+            { problem: "¿Diferencia entre idea principal y tema?", solution: "Idea principal: lo que dice el texto. Tema: lo que significa el texto (lección de vida o mensaje).", hint: "La idea principal es explícita; el tema es la lección que infières." },
+            { problem: "Encuentra el tema: Una tortuga gana una carrera a un conejo siendo lenta y constante.", solution: "Tema: la perseverancia y constancia vencen a la velocidad y a la soberbia.", hint: "¿Qué lección de vida enseña esta historia tan conocida?" },
+          ],
+          tip: "🌟 Idea principal = lo que dice. Tema = lo que significa (la lección más profunda).",
+        },
+      },
+    },
+
+    /* ── READING LITERATURE / CHARACTERS ── */
+    "reading-literature/characters": {
+      en: {
+        low: {
+          title: "Story Characters",
+          explanation: "Characters are the people or animals in a story. The main character (protagonist) is the one the story is mostly about. Characters have traits — qualities that describe what they are like: brave, kind, selfish, clever. We learn about characters from what they say, do, and think.",
+          examples: [
+            { problem: "In 'Little Red Riding Hood', who is the protagonist?", solution: "Little Red Riding Hood — the story is mostly about her journey.", hint: "The protagonist is the main character the story follows." },
+            { problem: "Read: 'Tom always helped his classmates with homework and shared his lunch.' What character trait does Tom show?", solution: "Kindness / generosity — he helps others and shares.", hint: "Character traits: what does the character DO that tells you what they're LIKE?" },
+            { problem: "How do we learn about a character's personality?", solution: "From what they say (dialogue), what they do (actions), and what they think (thoughts).", hint: "Author's method: show, don't tell — actions reveal character." },
+          ],
+          tip: "👀 Watch what characters DO — actions reveal personality better than words!",
+        },
+        high: {
+          title: "Character Development",
+          explanation: "Characters change as a story progresses — this is called character development. A round character is complex and realistic (has strengths and flaws). A flat character has only one or two traits and does not change. The protagonist faces a conflict; how they respond reveals their character. Characters can be compared using Venn diagrams.",
+          examples: [
+            { problem: "What is the difference between a round and flat character?", solution: "Round: complex, changes, has many traits (like a real person). Flat: simple, unchanging, one-dimensional (often a minor character).", hint: "Round = 3D person. Flat = cardboard cutout." },
+            { problem: "In a story, a shy girl speaks up to stop bullying. What type of character change is this?", solution: "Positive character development — she overcomes her shyness to show courage.", hint: "How does the character CHANGE from beginning to end?" },
+            { problem: "Compare two characters: Hero A is brave but reckless; Hero B is cautious but lacks confidence. What do they have in common?", solution: "Both have a strength paired with a weakness — both are round/complex characters.", hint: "Round characters have both strengths AND flaws." },
+          ],
+          tip: "📊 Compare characters with: How are they alike? How are they different? How do they change?",
+        },
+      },
+      bg: {
+        low: {
+          title: "Герои в разказа",
+          explanation: "Героите са хората или животните в разказа. Главният герой (протагонист) е този, за когото разказът е основно. Героите имат черти — качества, описващи какви са: смел, добър, егоистичен, умен. Научаваме за героите от това, което казват, правят и мислят.",
+          examples: [
+            { problem: "В 'Червената шапчица' кой е протагонистът?", solution: "Червената шапчица — разказът е основно за нейното пътуване.", hint: "Протагонистът е главният герой, когото следваме." },
+            { problem: "Прочети: 'Том винаги помагаше на съучениците си и споделяше обяда си.' Каква черта показва Том?", solution: "Доброта/щедрост — помага на другите и споделя.", hint: "Черти на характера: Какво ПРАВИ героят, което ни казва какъв е?" },
+            { problem: "Как научаваме за личността на героя?", solution: "От това, което казва (диалог), прави (действия) и мисли.", hint: "Методът на автора: показвай, а не казвай — действията разкриват характера." },
+          ],
+          tip: "👀 Гледай какво ПРАВЯТ героите — действията разкриват личността по-добре от думите!",
+        },
+        high: {
+          title: "Развитие на героя",
+          explanation: "Героите се променят в хода на разказа — това се нарича развитие на образа. Обемният образ е сложен и реалистичен (има силни страни и слабости). Плоският образ има само една-две черти и не се променя. Протагонистът среща конфликт; начинът му на реакция разкрива характера му.",
+          examples: [
+            { problem: "Каква е разликата между обемен и плосък образ?", solution: "Обемен: сложен, променя се, има много черти (като истински човек). Плосък: прост, непроменящ се, еднопластов.", hint: "Обемен = 3D личност. Плосък = картонена фигура." },
+            { problem: "В разказ, срамежливо момиче проговаря, за да спре тормоза. Какъв вид развитие е това?", solution: "Положително развитие на характера — тя преодолява срамежливостта, за да прояви смелост.", hint: "Как героят се ИЗМЕНЯ от началото до края?" },
+            { problem: "Сравни двама герои: Герой А е смел, но безразсъден; Герой Б е внимателен, но не му достига увереност. Какво е общото им?", solution: "И двамата имат силна страна плюс слабост — и двамата са обемни/сложни образи.", hint: "Обемните образи имат и предимства, И недостатъци." },
+          ],
+          tip: "📊 Сравни героите: По какво си приличат? По какво се различават? Как се променят?",
+        },
+      },
+      es: {
+        low: {
+          title: "Personajes de la historia",
+          explanation: "Los personajes son las personas o animales de una historia. El personaje principal (protagonista) es aquel sobre quien trata principalmente la historia. Los personajes tienen rasgos — cualidades que describen cómo son: valiente, amable, egoísta, inteligente. Aprendemos sobre los personajes por lo que dicen, hacen y piensan.",
+          examples: [
+            { problem: "En 'Caperucita Roja', ¿quién es el protagonista?", solution: "Caperucita Roja — la historia trata principalmente sobre su viaje.", hint: "El protagonista es el personaje principal que seguimos." },
+            { problem: "Lee: 'Tomás siempre ayudaba a sus compañeros con los deberes y compartía su almuerzo.' ¿Qué rasgo muestra Tomás?", solution: "Bondad / generosidad — ayuda a los demás y comparte.", hint: "Rasgos de carácter: ¿Qué HACE el personaje que nos dice cómo ES?" },
+            { problem: "¿Cómo aprendemos sobre la personalidad de un personaje?", solution: "Por lo que dice (diálogo), hace (acciones) y piensa (pensamientos).", hint: "Método del autor: mostrar, no contar — las acciones revelan el carácter." },
+          ],
+          tip: "👀 ¡Observa lo que HACEN los personajes — las acciones revelan la personalidad mejor que las palabras!",
+        },
+        high: {
+          title: "Desarrollo del personaje",
+          explanation: "Los personajes cambian a medida que avanza la historia — esto se llama desarrollo del personaje. Un personaje redondo es complejo y realista (tiene fortalezas y defectos). Un personaje plano tiene uno o dos rasgos y no cambia. El protagonista enfrenta un conflicto; su respuesta revela su carácter.",
+          examples: [
+            { problem: "¿Cuál es la diferencia entre un personaje redondo y uno plano?", solution: "Redondo: complejo, cambia, tiene muchos rasgos (como una persona real). Plano: simple, no cambia, unidimensional.", hint: "Redondo = persona 3D. Plano = recorte de cartón." },
+            { problem: "En una historia, una niña tímida habla para detener el acoso. ¿Qué tipo de cambio es este?", solution: "Desarrollo positivo del personaje — supera su timidez para mostrar valentía.", hint: "¿Cómo CAMBIA el personaje del principio al final?" },
+            { problem: "Compara dos personajes: Héroe A es valiente pero imprudente; Héroe B es cauteloso pero le falta confianza. ¿Qué tienen en común?", solution: "Ambos tienen una fortaleza junto con una debilidad — ambos son personajes redondos/complejos.", hint: "Los personajes redondos tienen tanto fortalezas COMO defectos." },
+          ],
+          tip: "📊 Compara personajes con: ¿En qué se parecen? ¿En qué se diferencian? ¿Cómo cambian?",
+        },
+      },
+    },
+
+    /* ── READING LITERATURE / RETELLING ── */
+    "reading-literature/retelling": {
+      en: {
+        low: {
+          title: "Retelling a Story",
+          explanation: "Retelling means telling a story again in your own words. A good retelling includes: who the characters are, where and when the story happens (setting), what the problem is (conflict), what happens (events in order), and how the problem is solved (resolution). Use sequence words: first, then, next, after that, finally.",
+          examples: [
+            { problem: "What are the 5 key elements to include in a story retelling?", solution: "1. Characters 2. Setting 3. Problem/conflict 4. Events in order 5. Resolution/ending", hint: "Think: Who? Where/When? Problem? What happened? How did it end?" },
+            { problem: "Use 'first, then, finally' to retell: Goldilocks enters the house, eats porridge, and falls asleep.", solution: "First, Goldilocks entered the house. Then she ate the porridge. Finally, she fell asleep.", hint: "Sequence words: first, next, then, after that, finally." },
+            { problem: "What is the 'resolution' of a story?", solution: "The resolution is how the problem is solved at the end of the story.", hint: "Resolution = the ending where things are sorted out." },
+          ],
+          tip: "📖 Use 5 fingers: Who? Where? Problem? Events? How did it end? — one finger per retelling element!",
+        },
+        high: {
+          title: "Retelling and Summarising",
+          explanation: "Retelling includes all key details; summarising focuses only on the most important points. A summary answers: What happened? Why did it matter? A good retelling uses sequence words and own language (not copied sentences). When retelling non-fiction, focus on main idea + 3 key facts.",
+          examples: [
+            { problem: "Difference between retelling and summarising?", solution: "Retelling: includes characters, setting, events, resolution in detail. Summarising: shorter — only the most important points, no small details.", hint: "Retell = full story. Summarise = key points only." },
+            { problem: "Summarise in 2 sentences: 'The tortoise challenged the hare to a race. The hare was faster but napped. The tortoise kept going and won.'", solution: "A tortoise and hare raced. The hare lost because he napped, while the slow tortoise kept going and won.", hint: "Keep: who, what happened, result. Remove: small details." },
+            { problem: "Retell a non-fiction text about bees in 3 sentences.", solution: "Example: Bees are insects that live in hives and make honey. Worker bees collect nectar from flowers and bring it back to the hive. Bees are important because they pollinate plants.", hint: "Main idea + 2 supporting facts." },
+          ],
+          tip: "✂️ Summarise = cut the story to its skeleton: main characters + main event + result.",
+        },
+      },
+      bg: {
+        low: {
+          title: "Преразказ",
+          explanation: "Преразказът означава разказване на история отново със свои думи. Добрият преразказ включва: кои са героите, къде и кога се развива (обстановка), какъв е проблемът (конфликт), какво се случва (събитията по ред) и как проблемът се решава (развръзка). Ползвай думи за последователност: първо, после, накрая.",
+          examples: [
+            { problem: "Кои са 5-те ключови елемента на преразказа?", solution: "1. Герои 2. Обстановка 3. Проблем/конфликт 4. Събития по ред 5. Развръзка/край", hint: "Мисли: Кой? Къде/Кога? Проблем? Какво стана? Как свърши?" },
+            { problem: "Ползвай 'първо, после, накрая' за преразказ: Жълтокосата влиза в къщата, яде каша, заспива.", solution: "Първо, Жълтокосата влезе в къщата. После изяде кашата. Накрая заспа.", hint: "Думи за последователност: първо, после, тогава, накрая." },
+            { problem: "Какво е 'развръзка' на разказ?", solution: "Развръзката е как проблемът се решава в края на разказа.", hint: "Развръзка = краят, в който нещата се наредват." },
+          ],
+          tip: "📖 Ползвай 5 пръста: Кой? Къде? Проблем? Събития? Как свърши? — по един пръст за всеки елемент!",
+        },
+        high: {
+          title: "Преразказ и резюме",
+          explanation: "Преразказът включва всички ключови детайли; резюмето се фокусира само върху най-важните моменти. Резюмето отговаря: Какво стана? Защо е важно? Добрият преразказ ползва думи за последователност и собствен език.",
+          examples: [
+            { problem: "Разлика между преразказ и резюме?", solution: "Преразказ: включва герои, обстановка, събития, развръзка в детайли. Резюме: по-кратко — само най-важните моменти, без малки детайли.", hint: "Преразказ = пълна история. Резюме = само ключовите моменти." },
+            { problem: "Резюмирай в 2 изречения: 'Костенурката предизвика заека. Заекът беше по-бърз, но задряма. Костенурката вървеше и спечели.'", solution: "Костенурка и заек се надбягаха. Заекът загуби, защото задряма, а бавната костенурка продължи и спечели.", hint: "Запази: кой, какво стана, резултат. Извади: малките детайли." },
+            { problem: "Преразкажи нехудожествен текст за пчелите в 3 изречения.", solution: "Пчелите са насекоми, живеещи в кошери и произвеждащи мед. Работничките събират нектар от цветя и го донасят в кошера. Пчелите са важни, защото опрашват растенията.", hint: "Основна идея + 2 допълнителни факта." },
+          ],
+          tip: "✂️ Резюме = съкрати историята до скелета: главни герои + главно събитие + резултат.",
+        },
+      },
+      es: {
+        low: {
+          title: "Resumen oral",
+          explanation: "Hacer un resumen oral significa contar una historia otra vez con tus propias palabras. Un buen resumen incluye: quiénes son los personajes, dónde y cuándo ocurre (escenario), cuál es el problema (conflicto), qué sucede (eventos en orden) y cómo se resuelve el problema (resolución). Usa palabras de secuencia: primero, luego, después, finalmente.",
+          examples: [
+            { problem: "¿Cuáles son los 5 elementos clave de un resumen oral?", solution: "1. Personajes 2. Escenario 3. Problema/conflicto 4. Eventos en orden 5. Resolución/final", hint: "Piensa: ¿Quién? ¿Dónde/Cuándo? ¿Problema? ¿Qué pasó? ¿Cómo terminó?" },
+            { problem: "Usa 'primero, luego, finalmente' para resumir: Rizos de Oro entra en la casa, come papilla y se queda dormida.", solution: "Primero, Rizos de Oro entró en la casa. Luego comió la papilla. Finalmente, se quedó dormida.", hint: "Palabras de secuencia: primero, luego, después, por último, finalmente." },
+            { problem: "¿Qué es la 'resolución' de una historia?", solution: "La resolución es cómo se resuelve el problema al final de la historia.", hint: "Resolución = el final donde todo se arregla." },
+          ],
+          tip: "📖 ¡Usa 5 dedos: ¿Quién? ¿Dónde? ¿Problema? ¿Eventos? ¿Cómo terminó? — ¡un dedo por elemento!",
+        },
+        high: {
+          title: "Resumen oral y escrito",
+          explanation: "El resumen oral incluye todos los detalles clave; el resumen escrito se centra solo en los puntos más importantes. Un resumen responde: ¿Qué pasó? ¿Por qué importó? Un buen resumen usa palabras de secuencia y lenguaje propio.",
+          examples: [
+            { problem: "¿Diferencia entre resumen oral y resumen escrito?", solution: "Resumen oral: incluye personajes, escenario, eventos, resolución en detalle. Resumen escrito: más corto — solo los puntos más importantes.", hint: "Oral = historia completa. Escrito = puntos clave." },
+            { problem: "Resume en 2 oraciones: 'La tortuga desafió a la liebre a una carrera. La liebre era más rápida pero se echó una siesta. La tortuga siguió y ganó.'", solution: "Una tortuga y una liebre compitieron en una carrera. La liebre perdió porque se durmió, mientras la lenta tortuga siguió adelante y ganó.", hint: "Conserva: quién, qué pasó, resultado. Elimina: detalles menores." },
+            { problem: "Resume un texto de no ficción sobre las abejas en 3 oraciones.", solution: "Las abejas son insectos que viven en colmenas y hacen miel. Las abejas obreras recogen néctar de flores y lo traen a la colmena. Las abejas son importantes porque polinizan las plantas.", hint: "Idea principal + 2 hechos de apoyo." },
+          ],
+          tip: "✂️ Resumir = reducir la historia a su esqueleto: personajes principales + evento principal + resultado.",
+        },
+      },
+    },
   };
 
   // Fallback for topics not fully authored
@@ -1769,6 +2538,259 @@ function textPractice(topicId: string, lang: LangCode, grade: number): Array<{ q
         { question: "Nombra una conjunción subordinante.", answer: "because / when / although / before / after / if" },
       ],
     },
+    fractions: {
+      en: [
+        { question: "What does the denominator (bottom number) of a fraction tell us?", answer: "how many equal parts the whole is divided into" },
+        { question: "Write 'one half' as a fraction.", answer: "1/2" },
+        { question: "Which is bigger: 1/2 or 1/4?", answer: "1/2 — the more parts, the smaller each piece" },
+        { question: "A pizza is cut into 4 slices and you eat 2. What fraction did you eat?", answer: "2/4 (or simplified: 1/2)" },
+        { question: "What is the numerator in 3/5?", answer: "3 — the top number, showing how many parts you have" },
+      ],
+      bg: [
+        { question: "Какво показва знаменателят (долното число) на дробта?", answer: "на колко равни части е разделено цялото" },
+        { question: "Запиши 'една втора' като дроб.", answer: "1/2" },
+        { question: "Кое е по-голямо: 1/2 или 1/4?", answer: "1/2 — колкото повече части, толкова по-малко е всяко парче" },
+        { question: "Пица е разрязана на 4 парчета и изяждаш 2. Каква дроб изяде?", answer: "2/4 (или съкратено: 1/2)" },
+        { question: "Какъв е числителят на 3/5?", answer: "3 — горното число, показващо колко части имаш" },
+      ],
+      es: [
+        { question: "¿Qué nos dice el denominador (número de abajo) de una fracción?", answer: "en cuántas partes iguales está dividido el todo" },
+        { question: "Escribe 'una mitad' como fracción.", answer: "1/2" },
+        { question: "¿Cuál es mayor: 1/2 o 1/4?", answer: "1/2 — cuantas más partes, más pequeña es cada una" },
+        { question: "Una pizza se corta en 4 trozos y comes 2. ¿Qué fracción comiste?", answer: "2/4 (o simplificado: 1/2)" },
+        { question: "¿Cuál es el numerador en 3/5?", answer: "3 — el número de arriba, que muestra cuántas partes tienes" },
+      ],
+    },
+    geometry: {
+      en: [
+        { question: "How many sides does a triangle have?", answer: "3 sides" },
+        { question: "What shape has 4 equal sides and 4 right angles?", answer: "a square" },
+        { question: "What is the perimeter of a square with sides 6 cm?", answer: "24 cm (4 × 6 = 24)" },
+        { question: "Name a 3D shape that is perfectly round.", answer: "a sphere" },
+        { question: "How is a square different from a rectangle?", answer: "all 4 sides are equal in a square; rectangles have 2 long and 2 short sides" },
+      ],
+      bg: [
+        { question: "Колко страни има триъгълникът?", answer: "3 страни" },
+        { question: "Коя фигура има 4 равни страни и 4 прави ъгъла?", answer: "квадрат" },
+        { question: "Какъв е периметърът на квадрат със страна 6 см?", answer: "24 см (4 × 6 = 24)" },
+        { question: "Назови 3D фигура, която е напълно кръгла.", answer: "сфера" },
+        { question: "С какво се различава квадратът от правоъгълника?", answer: "в квадрата всичките 4 страни са равни; правоъгълникът има 2 дълги и 2 къси страни" },
+      ],
+      es: [
+        { question: "¿Cuántos lados tiene un triángulo?", answer: "3 lados" },
+        { question: "¿Qué figura tiene 4 lados iguales y 4 ángulos rectos?", answer: "un cuadrado" },
+        { question: "¿Cuál es el perímetro de un cuadrado con lados de 6 cm?", answer: "24 cm (4 × 6 = 24)" },
+        { question: "Nombra una figura 3D que sea perfectamente redonda.", answer: "una esfera" },
+        { question: "¿En qué se diferencia un cuadrado de un rectángulo?", answer: "en un cuadrado todos los lados son iguales; un rectángulo tiene 2 lados largos y 2 cortos" },
+      ],
+    },
+    measurement: {
+      en: [
+        { question: "How many centimetres are in 1 metre?", answer: "100 cm" },
+        { question: "How many grams are in 1 kilogram?", answer: "1000 g" },
+        { question: "A pencil is 18 cm. A pen is 14 cm. How much longer is the pencil?", answer: "4 cm (18 − 14 = 4)" },
+        { question: "Convert 2 kg into grams.", answer: "2000 g (2 × 1000)" },
+        { question: "A film starts at 3:00 and lasts 90 minutes. When does it end?", answer: "4:30 (3:00 + 90 min = 4:30)" },
+      ],
+      bg: [
+        { question: "Колко сантиметра има в 1 метър?", answer: "100 см" },
+        { question: "Колко грама има в 1 килограм?", answer: "1000 г" },
+        { question: "Молив е 18 см, писалка е 14 см. С колко е по-дълъг моливът?", answer: "4 см (18 − 14 = 4)" },
+        { question: "Преобразувай 2 кг в грамове.", answer: "2000 г (2 × 1000)" },
+        { question: "Филм започва в 15:00 и трае 90 минути. Кога свършва?", answer: "16:30 (15:00 + 90 мин = 16:30)" },
+      ],
+      es: [
+        { question: "¿Cuántos centímetros hay en 1 metro?", answer: "100 cm" },
+        { question: "¿Cuántos gramos hay en 1 kilogramo?", answer: "1000 g" },
+        { question: "Un lápiz mide 18 cm. Un bolígrafo mide 14 cm. ¿Cuánto más largo es el lápiz?", answer: "4 cm (18 − 14 = 4)" },
+        { question: "Convierte 2 kg en gramos.", answer: "2000 g (2 × 1000)" },
+        { question: "Una película empieza a las 15:00 y dura 90 minutos. ¿Cuándo termina?", answer: "16:30 (15:00 + 90 min = 16:30)" },
+      ],
+    },
+    spelling: {
+      en: [
+        { question: "Should a person's name start with a capital or lowercase letter?", answer: "capital letter — e.g. 'Maria', not 'maria'" },
+        { question: "Correct the spelling: 'ябалка'", answer: "'ябълка' — the middle vowel is 'ъ'" },
+        { question: "Which letter is missing? 'ч_ша' (cup)", answer: "'а' → 'чаша'" },
+        { question: "Should the first word of a sentence be capitalized?", answer: "Yes — always capitalize the first word of a sentence." },
+        { question: "How do you check your spelling?", answer: "Read aloud slowly and listen to each sound; check a dictionary." },
+      ],
+      bg: [
+        { question: "Трябва ли собственото лично име да е с главна или малка буква?", answer: "главна буква — напр. 'Мария', не 'мария'" },
+        { question: "Поправи правописа: 'ябалка'", answer: "'ябълка' — средната гласна е 'ъ'" },
+        { question: "Коя буква липсва? 'ч_ша' (cup)", answer: "'а' → 'чаша'" },
+        { question: "Трябва ли първата дума на изречение да е с главна буква?", answer: "Да — винаги с главна." },
+        { question: "Как проверяваш правописа?", answer: "Четеш на глас бавно и слушаш всеки звук; проверяваш в речник." },
+      ],
+      es: [
+        { question: "¿El nombre de una persona empieza con mayúscula o minúscula?", answer: "mayúscula — p. ej. 'María', no 'maría'" },
+        { question: "Corrige la ortografía: 'ябалка'", answer: "'ябълка' — la vocal del medio es 'ъ'" },
+        { question: "¿Qué letra falta? 'ч_ша' (taza)", answer: "'а' → 'чаша'" },
+        { question: "¿Debe la primera palabra de una oración llevar mayúscula?", answer: "Sí — siempre se escribe con mayúscula." },
+        { question: "¿Cómo revisas tu ortografía?", answer: "Lee en voz alta despacio y escucha cada sonido; consulta un diccionario." },
+      ],
+    },
+    "word-study": {
+      en: [
+        { question: "What is a synonym?", answer: "a word with a similar meaning (e.g. big / large / huge)" },
+        { question: "What is an antonym?", answer: "a word with the opposite meaning (e.g. hot / cold)" },
+        { question: "Give a synonym for 'happy'.", answer: "joyful, glad, cheerful, pleased, delighted" },
+        { question: "Give an antonym for 'fast'.", answer: "slow" },
+        { question: "How can you find the meaning of an unknown word?", answer: "use context clues, a dictionary, or ask someone" },
+      ],
+      bg: [
+        { question: "Какво е синоним?", answer: "дума с близко значение (напр. голям / едър / огромен)" },
+        { question: "Какво е антоним?", answer: "дума с противоположно значение (напр. топъл / студен)" },
+        { question: "Дай синоним на 'щастлив'.", answer: "радостен, весел, доволен, щастлив" },
+        { question: "Дай антоним на 'бърз'.", answer: "бавен" },
+        { question: "Как можеш да намериш значението на непозната дума?", answer: "контекстни подсказки, речник или попитай някой" },
+      ],
+      es: [
+        { question: "¿Qué es un sinónimo?", answer: "una palabra con significado similar (p. ej. grande / enorme / gigante)" },
+        { question: "¿Qué es un antónimo?", answer: "una palabra con significado opuesto (p. ej. caliente / frío)" },
+        { question: "Da un sinónimo de 'feliz'.", answer: "alegre, contento, dichoso, satisfecho" },
+        { question: "Da un antónimo de 'rápido'.", answer: "lento" },
+        { question: "¿Cómo puedes encontrar el significado de una palabra desconocida?", answer: "pistas del contexto, diccionario o preguntarle a alguien" },
+      ],
+    },
+    punctuation: {
+      en: [
+        { question: "What punctuation ends a question?", answer: "a question mark (?)" },
+        { question: "What punctuation ends a strong feeling or exclamation?", answer: "an exclamation mark (!)" },
+        { question: "What do commas separate in a list?", answer: "items in a list (e.g. apples, oranges, and bananas)" },
+        { question: "Punctuate this sentence: 'What is your name'", answer: "What is your name?" },
+        { question: "What does a full stop signal to the reader?", answer: "the sentence has ended — a full stop (pause / stop)" },
+      ],
+      bg: [
+        { question: "Каква пунктуация завършва въпрос?", answer: "въпросителен знак (?)" },
+        { question: "Каква пунктуация завършва силно чувство?", answer: "удивителен знак (!)" },
+        { question: "Какво разделят запетаите в изброяване?", answer: "елементите в изброяването (напр. ябълки, портокали и банани)" },
+        { question: "Постави пунктуацията: 'Как се казваш'", answer: "Как се казваш?" },
+        { question: "Какво означава точката за читателя?", answer: "изречението е свършило — пауза / спиране" },
+      ],
+      es: [
+        { question: "¿Qué signo de puntuación termina una pregunta?", answer: "un signo de interrogación (?)" },
+        { question: "¿Qué signo termina una exclamación o sentimiento fuerte?", answer: "un signo de exclamación (!)" },
+        { question: "¿Qué separan las comas en una lista?", answer: "los elementos de la lista (p. ej. manzanas, naranjas y plátanos)" },
+        { question: "Puntúa esta oración: '¿Cómo te llamas'", answer: "¿Cómo te llamas?" },
+        { question: "¿Qué indica el punto al lector?", answer: "la oración ha terminado — una pausa / stop" },
+      ],
+    },
+    "nouns-verbs": {
+      en: [
+        { question: "What is a noun?", answer: "a word for a person, place, animal, or thing (e.g. dog, school, Maria)" },
+        { question: "What is a verb?", answer: "an action or state word (e.g. run, eat, sleep, is)" },
+        { question: "Identify the noun: 'The cat sleeps.'", answer: "cat (it is a thing/animal)" },
+        { question: "Identify the verb: 'The child runs.'", answer: "runs (it is an action)" },
+        { question: "Is 'beautiful' a noun, verb, or adjective?", answer: "adjective — it describes a noun" },
+      ],
+      bg: [
+        { question: "Какво е съществително?", answer: "дума за лице, място, животно или предмет (напр. куче, училище, Мария)" },
+        { question: "Какво е глагол?", answer: "дума за действие или състояние (напр. тичам, ям, спя, съм)" },
+        { question: "Намери съществителното: 'Котката спи.'", answer: "котката (животно/предмет)" },
+        { question: "Намери глагола: 'Детето тича.'", answer: "тича (действие)" },
+        { question: "Прилагателно, съществително или глагол ли е 'красива'?", answer: "прилагателно — описва съществително" },
+      ],
+      es: [
+        { question: "¿Qué es un sustantivo?", answer: "una palabra para persona, lugar, animal o cosa (p. ej. perro, escuela, María)" },
+        { question: "¿Qué es un verbo?", answer: "una palabra de acción o estado (p. ej. correr, comer, dormir, ser)" },
+        { question: "Identifica el sustantivo: 'El gato duerme.'", answer: "gato (es un animal/cosa)" },
+        { question: "Identifica el verbo: 'El niño corre.'", answer: "corre (es una acción)" },
+        { question: "¿Es 'hermoso' un sustantivo, verbo o adjetivo?", answer: "adjetivo — describe a un sustantivo" },
+      ],
+    },
+    poetry: {
+      en: [
+        { question: "What is rhyme in poetry?", answer: "when the end sounds of two lines match (e.g. cat/hat, moon/spoon)" },
+        { question: "What is a stanza?", answer: "a group of lines in a poem (like a paragraph in a story)" },
+        { question: "What is rhythm in a poem?", answer: "the musical beat pattern you feel when reading aloud" },
+        { question: "Name a poetic technique that compares using 'like' or 'as'.", answer: "simile — e.g. 'brave as a lion'" },
+        { question: "What is personification?", answer: "giving human qualities to objects — e.g. 'the wind whispered'" },
+      ],
+      bg: [
+        { question: "Какво е рима в поезията?", answer: "когато краищата на два реда звучат еднакво (напр. котка/лодка)" },
+        { question: "Какво е строфа?", answer: "група от редове в стихотворение (като абзац в разказ)" },
+        { question: "Какво е ритъм в стихотворение?", answer: "музикалният такт, усещан при четене на глас" },
+        { question: "Назови поетичен похват, сравняващ с 'като'.", answer: "сравнение — напр. 'храбър като лъв'" },
+        { question: "Какво е олицетворение?", answer: "давам човешки качества на предмети — напр. 'вятърът шептеше'" },
+      ],
+      es: [
+        { question: "¿Qué es la rima en poesía?", answer: "cuando el final de dos versos suena igual (p. ej. gato/pato, luna/cuna)" },
+        { question: "¿Qué es una estrofa?", answer: "un grupo de versos en un poema (como un párrafo en una historia)" },
+        { question: "¿Qué es el ritmo en un poema?", answer: "el patrón musical que sientes al leer en voz alta" },
+        { question: "Nombra una figura poética que compara usando 'como'.", answer: "símil — p. ej. 'valiente como un león'" },
+        { question: "¿Qué es la personificación?", answer: "dar cualidades humanas a objetos — p. ej. 'el viento susurró'" },
+      ],
+    },
+    "main-idea": {
+      en: [
+        { question: "What is the main idea of a text?", answer: "what the text is mostly about — the central point" },
+        { question: "What is a supporting detail?", answer: "a fact or example that explains or proves the main idea" },
+        { question: "Where is the main idea often found in a paragraph?", answer: "in the first or last sentence" },
+        { question: "What is the difference between main idea and theme?", answer: "main idea = what the text says (topic); theme = the deeper lesson or message" },
+        { question: "How do you find the main idea? Ask yourself:", answer: "'What is this MOSTLY about?' — that is the main idea." },
+      ],
+      bg: [
+        { question: "Какво е основната идея на текст?", answer: "за какво е основно текстът — централната мисъл" },
+        { question: "Какво е допълнителен детайл?", answer: "факт или пример, обясняващ или доказващ основната идея" },
+        { question: "Където обикновено се намира основната идея в абзац?", answer: "в първото или последното изречение" },
+        { question: "Каква е разликата между основна идея и тема?", answer: "основна идея = какво казва текстът; тема = по-дълбокото послание или урок" },
+        { question: "Как намираш основната идея? Питай:", answer: "'За какво е ОСНОВНО текстът?' — това е основната идея." },
+      ],
+      es: [
+        { question: "¿Qué es la idea principal de un texto?", answer: "de qué trata principalmente el texto — el punto central" },
+        { question: "¿Qué es un detalle de apoyo?", answer: "un hecho o ejemplo que explica o prueba la idea principal" },
+        { question: "¿Dónde suele encontrarse la idea principal en un párrafo?", answer: "en la primera o última oración" },
+        { question: "¿Cuál es la diferencia entre idea principal y tema?", answer: "idea principal = lo que dice el texto; tema = la lección o mensaje más profundo" },
+        { question: "¿Cómo encuentras la idea principal? Pregúntate:", answer: "'¿De qué trata PRINCIPALMENTE?' — esa es la idea principal." },
+      ],
+    },
+    characters: {
+      en: [
+        { question: "What is the protagonist?", answer: "the main character the story is mostly about" },
+        { question: "How do we learn about a character's personality?", answer: "from what they say, do, and think" },
+        { question: "What is a character trait?", answer: "a quality that describes what a character is like (e.g. brave, kind, selfish)" },
+        { question: "What is the difference between a round and flat character?", answer: "round: complex and changes; flat: simple and doesn't change" },
+        { question: "Name a character trait shown by someone who shares their lunch.", answer: "kindness / generosity" },
+      ],
+      bg: [
+        { question: "Какво е протагонист?", answer: "главният герой, за когото е основно разказът" },
+        { question: "Как научаваме за личността на героя?", answer: "от това, което казва, прави и мисли" },
+        { question: "Какво е черта на характера?", answer: "качество, описващо какъв е героят (напр. смел, добър, егоистичен)" },
+        { question: "Каква е разликата между обемен и плосък образ?", answer: "обемен: сложен и се изменя; плосък: прост и не се изменя" },
+        { question: "Назови черта на характера, показана от някой, споделящ обяда си.", answer: "доброта / щедрост" },
+      ],
+      es: [
+        { question: "¿Qué es el protagonista?", answer: "el personaje principal sobre quien trata principalmente la historia" },
+        { question: "¿Cómo aprendemos sobre la personalidad de un personaje?", answer: "por lo que dice, hace y piensa" },
+        { question: "¿Qué es un rasgo de carácter?", answer: "una cualidad que describe cómo es un personaje (p. ej. valiente, amable, egoísta)" },
+        { question: "¿Cuál es la diferencia entre personaje redondo y plano?", answer: "redondo: complejo y cambia; plano: simple y no cambia" },
+        { question: "Nombra un rasgo de carácter mostrado por alguien que comparte su almuerzo.", answer: "bondad / generosidad" },
+      ],
+    },
+    retelling: {
+      en: [
+        { question: "What are the 5 elements of a story retelling?", answer: "characters, setting, problem, events in order, resolution" },
+        { question: "What is the 'resolution' of a story?", answer: "how the problem is solved at the end" },
+        { question: "What sequence word means 'at the end'?", answer: "finally / at last / in the end" },
+        { question: "Difference between retelling and summarising?", answer: "retelling = full story in detail; summarising = only the most important points" },
+        { question: "What question helps you find the setting?", answer: "'Where and when does the story take place?'" },
+      ],
+      bg: [
+        { question: "Кои са 5-те елемента на преразказа?", answer: "герои, обстановка, проблем, събития по ред, развръзка" },
+        { question: "Какво е 'развръзка' на разказ?", answer: "как проблемът се решава в края" },
+        { question: "Коя дума за последователност означава 'накрая'?", answer: "накрая / в края на краищата" },
+        { question: "Разлика между преразказ и резюме?", answer: "преразказ = пълна история с детайли; резюме = само най-важните моменти" },
+        { question: "Какъв въпрос помага за намиране на обстановката?", answer: "'Къде и кога се развива историята?'" },
+      ],
+      es: [
+        { question: "¿Cuáles son los 5 elementos de un resumen oral?", answer: "personajes, escenario, problema, eventos en orden, resolución" },
+        { question: "¿Qué es la 'resolución' de una historia?", answer: "cómo se resuelve el problema al final" },
+        { question: "¿Qué palabra de secuencia significa 'al final'?", answer: "finalmente / por último / al final" },
+        { question: "¿Diferencia entre resumen oral y resumen escrito?", answer: "oral = historia completa con detalles; escrito = solo los puntos más importantes" },
+        { question: "¿Qué pregunta ayuda a encontrar el escenario?", answer: "'¿Dónde y cuándo ocurre la historia?'" },
+      ],
+    },
   };
 
   // Grade-band-sensitive: add harder items for high band
@@ -2026,6 +3048,226 @@ function textQuiz(topicId: string, lang: LangCode): QuizQuestion[] {
         { question: "¿Qué palabra une con contraste: 'Estaba cansado ___ salí.'?", options: ["and", "or", "but", "so"], correctIndex: 2 },
         { question: "¿Cómo debe ser la primera palabra de una oración?", options: ["un verbo", "con mayúscula", "un sustantivo", "corta"], correctIndex: 1 },
         { question: "¿Qué signo de puntuación termina una afirmación?", options: ["coma", "signo de interrogación", "signo de exclamación", "punto final"], correctIndex: 3 },
+      ],
+    },
+    fractions: {
+      en: [
+        { question: "What does the denominator tell us?", options: ["total parts you have", "how many equal parts the whole is divided into", "the value of the fraction", "the number on top"], correctIndex: 1 },
+        { question: "Which fraction is bigger?", options: ["1/4", "1/8", "1/2", "1/6"], correctIndex: 2 },
+        { question: "A pizza cut into 4 slices — you eat 1. What fraction is left?", options: ["1/4", "2/4", "3/4", "4/4"], correctIndex: 2 },
+        { question: "What is the numerator in 3/5?", options: ["5", "3", "8", "2"], correctIndex: 1 },
+      ],
+      bg: [
+        { question: "Какво ни казва знаменателят?", options: ["колко части имаш", "на колко равни части е разделено цялото", "стойността на дробта", "горното число"], correctIndex: 1 },
+        { question: "Коя дроб е по-голяма?", options: ["1/4", "1/8", "1/2", "1/6"], correctIndex: 2 },
+        { question: "Пица е разрязана на 4 парчета — изяждаш 1. Каква дроб остава?", options: ["1/4", "2/4", "3/4", "4/4"], correctIndex: 2 },
+        { question: "Какъв е числителят на 3/5?", options: ["5", "3", "8", "2"], correctIndex: 1 },
+      ],
+      es: [
+        { question: "¿Qué nos dice el denominador?", options: ["cuántas partes tienes", "en cuántas partes iguales está dividido el todo", "el valor de la fracción", "el número de arriba"], correctIndex: 1 },
+        { question: "¿Qué fracción es mayor?", options: ["1/4", "1/8", "1/2", "1/6"], correctIndex: 2 },
+        { question: "Una pizza cortada en 4 trozos — comes 1. ¿Qué fracción queda?", options: ["1/4", "2/4", "3/4", "4/4"], correctIndex: 2 },
+        { question: "¿Cuál es el numerador en 3/5?", options: ["5", "3", "8", "2"], correctIndex: 1 },
+      ],
+    },
+    geometry: {
+      en: [
+        { question: "How many sides does a triangle have?", options: ["2", "3", "4", "5"], correctIndex: 1 },
+        { question: "What shape has 4 equal sides and 4 right angles?", options: ["rectangle", "rhombus", "square", "triangle"], correctIndex: 2 },
+        { question: "What is the perimeter of a square with sides of 5 cm?", options: ["10 cm", "15 cm", "20 cm", "25 cm"], correctIndex: 2 },
+        { question: "Which 3D shape is perfectly round in all directions?", options: ["cube", "cylinder", "cone", "sphere"], correctIndex: 3 },
+      ],
+      bg: [
+        { question: "Колко страни има триъгълникът?", options: ["2", "3", "4", "5"], correctIndex: 1 },
+        { question: "Коя фигура има 4 равни страни и 4 прави ъгъла?", options: ["правоъгълник", "ромб", "квадрат", "триъгълник"], correctIndex: 2 },
+        { question: "Какъв е периметърът на квадрат със страна 5 см?", options: ["10 см", "15 см", "20 см", "25 см"], correctIndex: 2 },
+        { question: "Коя 3D фигура е напълно кръгла?", options: ["куб", "цилиндър", "конус", "сфера"], correctIndex: 3 },
+      ],
+      es: [
+        { question: "¿Cuántos lados tiene un triángulo?", options: ["2", "3", "4", "5"], correctIndex: 1 },
+        { question: "¿Qué figura tiene 4 lados iguales y 4 ángulos rectos?", options: ["rectángulo", "rombo", "cuadrado", "triángulo"], correctIndex: 2 },
+        { question: "¿Cuál es el perímetro de un cuadrado con lados de 5 cm?", options: ["10 cm", "15 cm", "20 cm", "25 cm"], correctIndex: 2 },
+        { question: "¿Qué figura 3D es perfectamente redonda en todas las direcciones?", options: ["cubo", "cilindro", "cono", "esfera"], correctIndex: 3 },
+      ],
+    },
+    measurement: {
+      en: [
+        { question: "How many centimetres are in 1 metre?", options: ["10", "100", "1000", "50"], correctIndex: 1 },
+        { question: "How many grams are in 1 kilogram?", options: ["100", "500", "1000", "10"], correctIndex: 2 },
+        { question: "Convert 3 kg to grams.", options: ["300 g", "3000 g", "30 g", "300 kg"], correctIndex: 1 },
+        { question: "A class starts at 9:00 and lasts 45 minutes. When does it end?", options: ["9:30", "9:45", "10:00", "10:15"], correctIndex: 1 },
+      ],
+      bg: [
+        { question: "Колко сантиметра има в 1 метър?", options: ["10", "100", "1000", "50"], correctIndex: 1 },
+        { question: "Колко грама има в 1 килограм?", options: ["100", "500", "1000", "10"], correctIndex: 2 },
+        { question: "Преобразувай 3 кг в грамове.", options: ["300 г", "3000 г", "30 г", "300 кг"], correctIndex: 1 },
+        { question: "Урок започва в 9:00 и трае 45 минути. Кога свършва?", options: ["9:30", "9:45", "10:00", "10:15"], correctIndex: 1 },
+      ],
+      es: [
+        { question: "¿Cuántos centímetros hay en 1 metro?", options: ["10", "100", "1000", "50"], correctIndex: 1 },
+        { question: "¿Cuántos gramos hay en 1 kilogramo?", options: ["100", "500", "1000", "10"], correctIndex: 2 },
+        { question: "Convierte 3 kg en gramos.", options: ["300 g", "3000 g", "30 g", "300 kg"], correctIndex: 1 },
+        { question: "Una clase empieza a las 9:00 y dura 45 minutos. ¿Cuándo termina?", options: ["9:30", "9:45", "10:00", "10:15"], correctIndex: 1 },
+      ],
+    },
+    spelling: {
+      en: [
+        { question: "Which letter do Bulgarian names start with?", options: ["lowercase", "capital", "any letter", "a vowel"], correctIndex: 1 },
+        { question: "Which is the correct spelling?", options: ["ябалка", "ябълка", "ябулка", "ябeлка"], correctIndex: 1 },
+        { question: "What should you do to check your spelling?", options: ["guess randomly", "read aloud slowly", "skip difficult words", "copy a friend"], correctIndex: 1 },
+        { question: "The first word of a sentence must be:", options: ["a noun", "a verb", "capitalised", "short"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "С каква буква се пишат имената в Bulgarian?", options: ["малка", "главна", "произволна", "гласна"], correctIndex: 1 },
+        { question: "Кое е правилното изписване?", options: ["ябалка", "ябълка", "ябулка", "ябeлка"], correctIndex: 1 },
+        { question: "Какво да направиш, за да провериш правописа си?", options: ["познай на случаен принцип", "чети на глас бавно", "пропусни трудните думи", "копирай от съсед"], correctIndex: 1 },
+        { question: "Първата дума на изречение трябва да е:", options: ["съществително", "глагол", "с главна буква", "кратка"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Con qué letra se escriben los nombres en búlgaro?", options: ["minúscula", "mayúscula", "cualquier letra", "vocal"], correctIndex: 1 },
+        { question: "¿Cuál es la ortografía correcta?", options: ["ябалка", "ябълка", "ябулка", "ябeлка"], correctIndex: 1 },
+        { question: "¿Qué debes hacer para revisar tu ortografía?", options: ["adivinar al azar", "leer en voz alta despacio", "saltarte las palabras difíciles", "copiar de un compañero"], correctIndex: 1 },
+        { question: "La primera palabra de una oración debe estar:", options: ["en sustantivo", "en verbo", "en mayúscula", "corta"], correctIndex: 2 },
+      ],
+    },
+    "word-study": {
+      en: [
+        { question: "What is a synonym?", options: ["opposite word", "similar word", "rhyming word", "longer word"], correctIndex: 1 },
+        { question: "What is an antonym?", options: ["similar word", "opposite word", "rhyming word", "compound word"], correctIndex: 1 },
+        { question: "Which is an antonym of 'fast'?", options: ["quick", "speedy", "slow", "rapid"], correctIndex: 2 },
+        { question: "Which is a synonym of 'happy'?", options: ["sad", "angry", "joyful", "tired"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Какво е синоним?", options: ["противоположна дума", "дума с близко значение", "римуваща дума", "по-дълга дума"], correctIndex: 1 },
+        { question: "Какво е антоним?", options: ["дума с близко значение", "дума с противоположно значение", "римуваща дума", "сложна дума"], correctIndex: 1 },
+        { question: "Кое е антонимът на 'бърз'?", options: ["бързоходен", "скоростен", "бавен", "пъргав"], correctIndex: 2 },
+        { question: "Кое е синонимът на 'щастлив'?", options: ["тъжен", "ядосан", "радостен", "уморен"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Qué es un sinónimo?", options: ["palabra opuesta", "palabra similar", "palabra que rima", "palabra más larga"], correctIndex: 1 },
+        { question: "¿Qué es un antónimo?", options: ["palabra similar", "palabra opuesta", "palabra que rima", "palabra compuesta"], correctIndex: 1 },
+        { question: "¿Cuál es el antónimo de 'rápido'?", options: ["veloz", "veloz", "lento", "ágil"], correctIndex: 2 },
+        { question: "¿Cuál es el sinónimo de 'feliz'?", options: ["triste", "enojado", "alegre", "cansado"], correctIndex: 2 },
+      ],
+    },
+    punctuation: {
+      en: [
+        { question: "Which punctuation ends a question?", options: ["full stop", "comma", "question mark", "exclamation mark"], correctIndex: 2 },
+        { question: "Which punctuation shows strong feeling?", options: ["comma", "full stop", "question mark", "exclamation mark"], correctIndex: 3 },
+        { question: "Commas are used to separate items in a:", options: ["question", "list", "title", "name"], correctIndex: 1 },
+        { question: "Which is correct: 'What is your name_'", options: [".", ",", "?", "!"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Кой препинателен знак завършва въпрос?", options: ["точка", "запетая", "въпросителен знак", "удивителен знак"], correctIndex: 2 },
+        { question: "Кой знак показва силно чувство?", options: ["запетая", "точка", "въпросителен знак", "удивителен знак"], correctIndex: 3 },
+        { question: "Запетаите се използват за разделяне на елементи в:", options: ["въпрос", "изброяване", "заглавие", "лично име"], correctIndex: 1 },
+        { question: "Кое е правилно: 'Как се казваш_'", options: [".", ",", "?", "!"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Qué signo de puntuación termina una pregunta?", options: ["punto", "coma", "signo de interrogación", "signo de exclamación"], correctIndex: 2 },
+        { question: "¿Qué signo muestra un sentimiento fuerte?", options: ["coma", "punto", "signo de interrogación", "signo de exclamación"], correctIndex: 3 },
+        { question: "Las comas se usan para separar elementos en una:", options: ["pregunta", "lista", "título", "nombre"], correctIndex: 1 },
+        { question: "¿Cuál es correcto: '¿Cómo te llamas_'", options: [".", ",", "?", "!"], correctIndex: 2 },
+      ],
+    },
+    "nouns-verbs": {
+      en: [
+        { question: "Which word is a noun?", options: ["run", "quickly", "cat", "beautiful"], correctIndex: 2 },
+        { question: "Which word is a verb?", options: ["house", "slowly", "blue", "jump"], correctIndex: 3 },
+        { question: "In 'The dog barks', what is the verb?", options: ["the", "dog", "barks", "none"], correctIndex: 2 },
+        { question: "Nouns are words for:", options: ["actions", "feelings only", "people, places, animals, or things", "descriptions"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Коя дума е съществително?", options: ["тичам", "бързо", "котка", "красива"], correctIndex: 2 },
+        { question: "Коя дума е глагол?", options: ["къща", "бавно", "синьо", "скачам"], correctIndex: 3 },
+        { question: "В 'Кучето лае' кое е сказуемото (глагол)?", options: ["кучето", "лае", "нито едно", "the"], correctIndex: 1 },
+        { question: "Съществителните са думи за:", options: ["действия", "само чувства", "хора, места, животни или предмети", "описания"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Qué palabra es un sustantivo?", options: ["correr", "rápidamente", "gato", "hermoso"], correctIndex: 2 },
+        { question: "¿Qué palabra es un verbo?", options: ["casa", "lentamente", "azul", "saltar"], correctIndex: 3 },
+        { question: "En 'El perro ladra', ¿cuál es el verbo?", options: ["el", "perro", "ladra", "ninguno"], correctIndex: 2 },
+        { question: "Los sustantivos son palabras para:", options: ["acciones", "solo sentimientos", "personas, lugares, animales o cosas", "descripciones"], correctIndex: 2 },
+      ],
+    },
+    poetry: {
+      en: [
+        { question: "What is rhyme in a poem?", options: ["when lines are long", "when line endings sound the same", "when words are repeated", "when stanzas are equal"], correctIndex: 1 },
+        { question: "What is a stanza?", options: ["a type of rhyme", "a group of lines in a poem", "the title of a poem", "a poetic technique"], correctIndex: 1 },
+        { question: "Which technique compares using 'like' or 'as'?", options: ["metaphor", "personification", "simile", "rhyme"], correctIndex: 2 },
+        { question: "'The wind whispered through the trees' — which technique is used?", options: ["simile", "metaphor", "personification", "stanza"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Какво е рима в стихотворение?", options: ["когато редовете са дълги", "когато краищата на редовете звучат еднакво", "когато думите се повтарят", "когато строфите са равни"], correctIndex: 1 },
+        { question: "Какво е строфа?", options: ["вид рима", "група от редове в стихотворение", "заглавие на стихотворение", "поетичен похват"], correctIndex: 1 },
+        { question: "Кой похват сравнява с 'като'?", options: ["метафора", "олицетворение", "сравнение", "рима"], correctIndex: 2 },
+        { question: "'Вятърът шептеше сред дърветата' — кой похват е използван?", options: ["сравнение", "метафора", "олицетворение", "строфа"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Qué es la rima en un poema?", options: ["cuando los versos son largos", "cuando el final de los versos suena igual", "cuando las palabras se repiten", "cuando las estrofas son iguales"], correctIndex: 1 },
+        { question: "¿Qué es una estrofa?", options: ["un tipo de rima", "un grupo de versos en un poema", "el título de un poema", "una técnica poética"], correctIndex: 1 },
+        { question: "¿Qué técnica compara usando 'como'?", options: ["metáfora", "personificación", "símil", "rima"], correctIndex: 2 },
+        { question: "'El viento susurró entre los árboles' — ¿qué técnica se usa?", options: ["símil", "metáfora", "personificación", "estrofa"], correctIndex: 2 },
+      ],
+    },
+    "main-idea": {
+      en: [
+        { question: "The main idea is:", options: ["a supporting detail", "what the text is mostly about", "the last sentence always", "a character in the story"], correctIndex: 1 },
+        { question: "Supporting details:", options: ["are the main idea", "explain or prove the main idea", "are always in the first sentence", "replace the main idea"], correctIndex: 1 },
+        { question: "Where is the main idea often found?", options: ["in the middle of a paragraph", "in the first or last sentence", "always at the end", "never in the text"], correctIndex: 1 },
+        { question: "The theme of a story is:", options: ["the main character's name", "the setting of the story", "the deeper lesson or message", "the first event"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Основната идея е:", options: ["допълнителен детайл", "за какво основно е текстът", "винаги последното изречение", "герой от историята"], correctIndex: 1 },
+        { question: "Допълнителните детайли:", options: ["са основната идея", "обясняват или доказват основната идея", "винаги са в първото изречение", "заменят основната идея"], correctIndex: 1 },
+        { question: "Където обикновено се намира основната идея?", options: ["в средата на абзаца", "в първото или последното изречение", "винаги в края", "никога не е в текста"], correctIndex: 1 },
+        { question: "Темата на разказ е:", options: ["името на главния герой", "обстановката на историята", "по-дълбокото послание или урок", "първото събитие"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "La idea principal es:", options: ["un detalle de apoyo", "de qué trata principalmente el texto", "siempre la última oración", "un personaje de la historia"], correctIndex: 1 },
+        { question: "Los detalles de apoyo:", options: ["son la idea principal", "explican o prueban la idea principal", "siempre están en la primera oración", "reemplazan la idea principal"], correctIndex: 1 },
+        { question: "¿Dónde suele encontrarse la idea principal?", options: ["en el centro del párrafo", "en la primera o última oración", "siempre al final", "nunca en el texto"], correctIndex: 1 },
+        { question: "El tema de una historia es:", options: ["el nombre del personaje principal", "el escenario de la historia", "la lección o mensaje más profundo", "el primer evento"], correctIndex: 2 },
+      ],
+    },
+    characters: {
+      en: [
+        { question: "The protagonist is:", options: ["the villain", "the main character the story follows", "any animal in the story", "the narrator"], correctIndex: 1 },
+        { question: "We learn about characters through:", options: ["only their appearance", "what they say, do, and think", "only the author's description", "only dialogue"], correctIndex: 1 },
+        { question: "A round character is:", options: ["shaped like a circle", "simple with one trait", "complex, realistic, and changes", "always the hero"], correctIndex: 2 },
+        { question: "What is a character trait?", options: ["a character's appearance", "a quality describing what a character is like", "the character's goal", "the plot twist"], correctIndex: 1 },
+      ],
+      bg: [
+        { question: "Протагонистът е:", options: ["злодеят", "главният герой, когото следваме", "всяко животно в историята", "разказвачът"], correctIndex: 1 },
+        { question: "Научаваме за героите чрез:", options: ["само външния им вид", "какво казват, правят и мислят", "само описанието на автора", "само диалога"], correctIndex: 1 },
+        { question: "Обемният образ е:", options: ["кръгла форма", "прост с една черта", "сложен, реалистичен и се изменя", "винаги героят"], correctIndex: 2 },
+        { question: "Какво е черта на характера?", options: ["외видът на героя", "качество, описващо какъв е героят", "целта на героя", "обрата в сюжета"], correctIndex: 1 },
+      ],
+      es: [
+        { question: "El protagonista es:", options: ["el villano", "el personaje principal que seguimos", "cualquier animal de la historia", "el narrador"], correctIndex: 1 },
+        { question: "Aprendemos sobre los personajes a través de:", options: ["solo su apariencia", "lo que dicen, hacen y piensan", "solo la descripción del autor", "solo el diálogo"], correctIndex: 1 },
+        { question: "Un personaje redondo es:", options: ["con forma de círculo", "simple con un solo rasgo", "complejo, realista y que cambia", "siempre el héroe"], correctIndex: 2 },
+        { question: "¿Qué es un rasgo de carácter?", options: ["la apariencia del personaje", "una cualidad que describe cómo es el personaje", "el objetivo del personaje", "el giro del argumento"], correctIndex: 1 },
+      ],
+    },
+    retelling: {
+      en: [
+        { question: "Which is NOT one of the 5 story retelling elements?", options: ["characters", "setting", "the author's name", "resolution"], correctIndex: 2 },
+        { question: "What sequence word means 'at the end'?", options: ["first", "then", "next", "finally"], correctIndex: 3 },
+        { question: "The resolution of a story is:", options: ["the opening scene", "where the story takes place", "how the problem is solved", "the main character's name"], correctIndex: 2 },
+        { question: "Summarising differs from retelling because a summary:", options: ["is longer", "includes all details", "only covers the most important points", "retells from a different character's view"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Кое НЕ е от 5-те елемента на преразказа?", options: ["герои", "обстановка", "името на автора", "развръзка"], correctIndex: 2 },
+        { question: "Коя дума за последователност означава 'в края'?", options: ["първо", "после", "след това", "накрая"], correctIndex: 3 },
+        { question: "Развръзката на разказ е:", options: ["началната сцена", "където се развива историята", "как проблемът се решава", "името на главния герой"], correctIndex: 2 },
+        { question: "Резюмето се различава от преразказа, защото резюмето:", options: ["е по-дълго", "включва всички детайли", "съдържа само най-важните моменти", "преразказва от гледна точка на друг герой"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Cuál NO es uno de los 5 elementos del resumen oral?", options: ["personajes", "escenario", "el nombre del autor", "resolución"], correctIndex: 2 },
+        { question: "¿Qué palabra de secuencia significa 'al final'?", options: ["primero", "luego", "después", "finalmente"], correctIndex: 3 },
+        { question: "La resolución de una historia es:", options: ["la escena inicial", "dónde ocurre la historia", "cómo se resuelve el problema", "el nombre del personaje principal"], correctIndex: 2 },
+        { question: "El resumen escrito se diferencia del oral porque el escrito:", options: ["es más largo", "incluye todos los detalles", "solo cubre los puntos más importantes", "narra desde el punto de vista de otro personaje"], correctIndex: 2 },
       ],
     },
   };

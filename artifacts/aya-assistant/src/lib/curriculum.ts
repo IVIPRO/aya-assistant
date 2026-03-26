@@ -29,6 +29,9 @@ export const elementarySubjects: Subject[] = [
       { id: "multiplication", label: { en: "Multiplication", bg: "Умножение",         es: "Multiplicación",    de: "Multiplikation",   fr: "Multiplication" } },
       { id: "division",       label: { en: "Division",       bg: "Деление",           es: "División",          de: "Division",         fr: "Division" } },
       { id: "word-problems",  label: { en: "Word problems",  bg: "Текстови задачи",   es: "Problemas escritos", de: "Textaufgaben",    fr: "Problèmes écrits" } },
+      { id: "fractions",      label: { en: "Fractions",      bg: "Дроби",             es: "Fracciones",         de: "Brüche",           fr: "Fractions" } },
+      { id: "geometry",       label: { en: "Geometry",       bg: "Геометрия",         es: "Geometría",          de: "Geometrie",        fr: "Géométrie" } },
+      { id: "measurement",    label: { en: "Measurement",    bg: "Мерене",            es: "Medición",           de: "Messen",           fr: "Mesure" } },
     ],
   },
   {
@@ -39,10 +42,14 @@ export const elementarySubjects: Subject[] = [
     bgClass: "bg-gradient-to-br from-blue-50 to-sky-50",
     borderClass: "border-blue-200",
     topics: [
-      { id: "alphabet", label: { en: "Alphabet",       bg: "Азбука",              es: "Alfabeto",         de: "Alphabet",         fr: "Alphabet" } },
-      { id: "reading",  label: { en: "Reading",         bg: "Четене",              es: "Lectura",          de: "Lesen",            fr: "Lecture" } },
-      { id: "writing",  label: { en: "Writing",         bg: "Писане",              es: "Escritura",        de: "Schreiben",        fr: "Écriture" } },
-      { id: "grammar",  label: { en: "Grammar basics",  bg: "Основна граматика",   es: "Gramática básica", de: "Grundgrammatik",  fr: "Grammaire de base" } },
+      { id: "alphabet",    label: { en: "Alphabet",       bg: "Азбука",              es: "Alfabeto",         de: "Alphabet",           fr: "Alphabet" } },
+      { id: "reading",     label: { en: "Reading",         bg: "Четене",              es: "Lectura",          de: "Lesen",              fr: "Lecture" } },
+      { id: "writing",     label: { en: "Writing",         bg: "Писане",              es: "Escritura",        de: "Schreiben",          fr: "Écriture" } },
+      { id: "grammar",     label: { en: "Grammar basics",  bg: "Основна граматика",   es: "Gramática básica", de: "Grundgrammatik",     fr: "Grammaire de base" } },
+      { id: "spelling",    label: { en: "Spelling",        bg: "Правопис",            es: "Ortografía",       de: "Rechtschreibung",    fr: "Orthographe" } },
+      { id: "word-study",  label: { en: "Word Study",       bg: "Речников запас",      es: "Estudio de palabras", de: "Wortschatz",        fr: "Étude du vocabulaire" } },
+      { id: "punctuation", label: { en: "Punctuation",     bg: "Пунктуация",          es: "Puntuación",       de: "Zeichensetzung",     fr: "Ponctuation" } },
+      { id: "nouns-verbs", label: { en: "Nouns & Verbs",   bg: "Съществителни и глаголи", es: "Nombres y verbos", de: "Nomen & Verben",  fr: "Noms et verbes" } },
     ],
   },
   {
@@ -55,6 +62,10 @@ export const elementarySubjects: Subject[] = [
     topics: [
       { id: "stories",        label: { en: "Stories",              bg: "Разкази",              es: "Cuentos",              de: "Geschichten",       fr: "Histoires" } },
       { id: "comprehension",  label: { en: "Reading comprehension", bg: "Разбиране на текст",   es: "Comprensión lectora", de: "Leseverständnis",   fr: "Compréhension" } },
+      { id: "poetry",         label: { en: "Poetry",               bg: "Поезия",               es: "Poesía",               de: "Gedichte",          fr: "Poésie" } },
+      { id: "main-idea",      label: { en: "Main idea",            bg: "Основна идея",         es: "Idea principal",       de: "Hauptidee",         fr: "Idée principale" } },
+      { id: "characters",     label: { en: "Characters",           bg: "Герои",                es: "Personajes",           de: "Charaktere",        fr: "Personnages" } },
+      { id: "retelling",      label: { en: "Retelling",            bg: "Преразказ",            es: "Resumen oral",         de: "Nacherzählen",      fr: "Résumé oral" } },
     ],
   },
   {

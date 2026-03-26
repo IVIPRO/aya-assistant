@@ -1,0 +1,70 @@
+IMPORTANT: This task is NOT about adding more lesson text inside existing topics.
+
+The UI still shows the same numbers because those are topic counts, not lesson counts.
+
+Goal:
+Increase the visible number of topics for Grade 2 subjects in the Junior subject cards by adding NEW topic registrations to the existing subject/topic mapping system.
+
+Do NOT:
+- change UI
+- change routes
+- change DB
+- create new schemas
+- create duplicate systems
+- create new lesson architecture
+
+Project facts already confirmed:
+- existing topic counts come from elementarySubjects (or the current subject/topic mapping source)
+- lessonContent.ts already contains more content for some existing topics
+- the visible subject cards show topic counts, not lesson counts
+
+Task 1 — Audit the exact mapping source
+Find the exact file(s) that define the visible Grade 2 subject topic lists/counts, especially the source used for:
+- mathematics
+- bulgarian-language
+- reading
+
+This is likely elementarySubjects or an equivalent subject registry. Confirm the exact source.
+
+Task 2 — Expand Grade 2 topic registrations
+Add NEW Grade 2 topic registrations only for:
+- mathematics
+- bulgarian-language
+- reading
+
+Target:
+- Mathematics: increase to at least 8 topics
+- Bulgarian Language: increase to at least 8 topics
+- Reading: increase to at least 6 topics
+
+Only use topic IDs that are valid in the existing architecture.
+If a topic does not yet exist in lessonContent.ts, add matching lesson content minimally and only as needed.
+
+Task 3 — Keep architecture unchanged
+Rules:
+- do not touch frontend components
+- do not touch dashboard/world map/lesson viewer
+- do not touch DB
+- do not create new files unless absolutely necessary
+- do not duplicate topic IDs
+- reuse existing content system
+- keep all changes inside the current curriculum/subject mapping + lesson content system
+
+Task 4 — Validation
+After changes:
+- the Grade 2 subject cards should show higher visible topic counts
+- opening the subjects should show the newly added topics
+- each newly added topic must resolve to valid lesson/practice/quiz content
+- existing topics must still work
+
+Task 5 — Return format
+Return exactly:
+1. exact mapping file audited
+2. exact files changed
+3. new topic counts expected for Grade 2
+4. exact topic IDs added for mathematics
+5. exact topic IDs added for bulgarian-language
+6. exact topic IDs added for reading
+7. confirmation that no UI, no DB, and no duplicate systems were created
+
+Do not publish automatically.

@@ -58,8 +58,9 @@ Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` 
 - App setup: `src/app.ts` — mounts CORS, JSON/urlencoded parsing, routes at `/api`
 - Routes: `src/routes/index.ts` mounts sub-routers; `src/routes/health.ts` exposes `GET /health` (full path: `/api/health`)
 - Depends on: `@workspace/db`, `@workspace/api-zod`
-- `pnpm --filter @workspace/api-server run dev` — run the dev server
-- `pnpm --filter @workspace/api-server run build` — production esbuild bundle (`dist/index.cjs`)
+- `pnpm --filter @workspace/api-server run build` — esbuild bundle to `dist/index.cjs` (required after source changes)
+- Dev runtime: the **`api-server-live`** workflow runs `node dist/index.cjs` directly (compiled bundle). After any source code change, rebuild with the build command above, then restart the `api-server-live` workflow.
+- Note: the artifact-managed workflow (`artifacts/api-server: API Server`) has a persistent Replit port-detection bug and always shows "failed" — ignore it. Use `api-server-live` instead.
 - Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
 
 ### `lib/db` (`@workspace/db`)

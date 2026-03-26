@@ -10,7 +10,7 @@ name = "API Server"
 paths = ["/api"]
 
 [services.development]
-run = "pnpm --filter @workspace/api-server run dev"
+run = "echo \"API server is managed by the api-server-live workflow. Run: pnpm --filter @workspace/api-server run build, then restart api-server-live.\""
 
 [services.production]
 build = "pnpm --filter @workspace/api-server run build"

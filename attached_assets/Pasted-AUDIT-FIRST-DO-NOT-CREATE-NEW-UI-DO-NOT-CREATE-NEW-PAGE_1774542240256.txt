@@ -1,0 +1,102 @@
+AUDIT FIRST. DO NOT CREATE NEW UI. DO NOT CREATE NEW PAGES. DO NOT DUPLICATE EXISTING LESSON, MAP, SUBJECT, OR DASHBOARD SYSTEMS.
+
+Goal:
+Speed up AYA Junior by removing unnecessary AI/OpenAI calls from the normal lesson flow and using local preloaded lesson content instead.
+
+Current product state:
+AYA Junior already has working UI in Preview:
+- dashboard
+- XP / level / streak
+- badges
+- daily learning plan
+- world map
+- subject selection
+- lesson entry flow
+
+Important constraints:
+- Preserve current UI exactly
+- Preview is the only source of truth for testing
+- Do not publish automatically
+- Do not touch Android/mobile work
+- Do not rebuild curriculum
+- Do not create duplicate lesson systems
+- Do not create a second registry if one already exists
+- Make only minimal surgical changes
+
+Task 1 — Audit current lesson flow
+Find the exact files responsible for:
+1. subject card click handling
+2. world map mission entry
+3. daily plan lesson start
+4. lesson loader / lesson resolver
+5. AI/OpenAI calls used during normal lesson loading
+6. AI/OpenAI calls used during free chat/help/explanation
+7. existing lesson content source files
+8. existing curriculum/registry files
+
+Task 2 — Identify performance bottlenecks
+Determine whether normal lesson loading currently depends on:
+- OpenAI calls
+- backend generation
+- dynamic chat generation
+- repeated lesson resolution on every click
+- duplicate API calls
+
+List exact files and call paths causing slowness.
+
+Task 3 — Refactor to fast lesson loading
+For the EXISTING Junior lesson flow:
+- use local/static/predefined lesson content for standard lessons and missions
+- keep current UI unchanged
+- keep current routes unchanged
+- keep XP/badges/progress unchanged
+
+Requirements:
+- subject -> topic -> lesson should load from local pre-defined content/registry/database whenever possible
+- no OpenAI call should be required for normal lesson opening
+- no OpenAI call should be required for normal mission opening
+- no OpenAI call should be required for daily plan lesson opening
+
+Task 4 — Keep AI only where needed
+AI/OpenAI should remain only for:
+- free conversation
+- explain/help mode
+- child asks for extra explanation
+- fallback if specific content truly does not exist
+
+If a local explanation exists, use it before AI.
+
+Task 5 — Add minimal caching if needed
+If the app still uses backend lesson resolution:
+- add the smallest safe cache layer possible
+- avoid duplicate lesson fetches on repeated navigation
+- do not introduce a second state system
+- do not cache auth/session in unsafe ways
+
+Task 6 — Do not invent new content architecture
+Before adding any new file:
+- check if equivalent lesson registry/content file already exists
+- extend existing files instead of creating parallel ones
+- if a new file is absolutely necessary, keep it single-purpose and clearly named
+
+Task 7 — Grade 2 focus only
+Optimize only the Grade 2 existing lesson flow first:
+- Mathematics
+- Bulgarian Language
+- Reading
+- Logic
+- Environment/Nature
+- English
+
+Do not expand to other grades in this task.
+
+Task 8 — Output format
+Return:
+1. exact files audited
+2. exact bottlenecks found
+3. exact files changed
+4. exact AI calls removed from normal lesson flow
+5. exact places where AI remains enabled
+6. whether a cache was added
+7. Preview test steps
+8. confirmation that no duplicate UI/pages/systems were created

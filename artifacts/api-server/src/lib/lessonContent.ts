@@ -707,6 +707,426 @@ function getTopicText(subjectId: string, topicId: string, grade: number, lang: L
         },
       },
     },
+
+    /* ── MATHEMATICS / WORD PROBLEMS ── */
+    "mathematics/word-problems": {
+      en: {
+        low: {
+          title: "Word Problems",
+          explanation: "Word problems tell a story with numbers. Read carefully to find what you need to add, subtract, multiply, or divide. Look for key words like 'altogether', 'left', 'each', and 'how many'.",
+          examples: [
+            { problem: "Maria has 8 apples. She gives 3 to her friend. How many does she have left?", solution: "5 apples", hint: "The key word is 'left' — this means subtract: 8 − 3 = 5" },
+            { problem: "There are 4 children. Each child gets 2 cookies. How many cookies in total?", solution: "8 cookies", hint: "The key word is 'each' — this means multiply: 4 × 2 = 8" },
+            { problem: "Jon has 15 stickers. He buys 5 more. How many does he have now?", solution: "20 stickers", hint: "The key word is 'more' — this means add: 15 + 5 = 20" },
+          ],
+          tip: "🔑 Read the problem twice. Circle the numbers. Underline the question. Then solve!",
+        },
+        high: {
+          title: "Word Problems",
+          explanation: "Solve real-world problems by identifying what operation you need (add, subtract, multiply, divide). Two-step problems require two operations. Always check your answer makes sense.",
+          examples: [
+            { problem: "A store has 48 apples in 6 baskets equally. How many apples per basket?", solution: "8 apples per basket", hint: "Divide 48 ÷ 6 = 8. Check: 8 × 6 = 48 ✓" },
+            { problem: "Tom reads 12 pages a day for 5 days, then 3 more pages. Total?", solution: "63 pages", hint: "Two steps: 12 × 5 = 60, then 60 + 3 = 63" },
+            { problem: "A farmer plants 25 rows of carrots with 8 plants per row. How many total?", solution: "200 plants", hint: "Multiply: 25 × 8 = 200" },
+          ],
+          tip: "✅ Always reread the question to make sure your answer answers it!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Текстови задачи",
+          explanation: "Текстовите задачи разказват история с числа. Прочети внимателно, за да намериш какво трябва да събереш, извадиш, умножиш или разделиш. Потърси ключови думи като 'общо', 'останаха', 'всяко' и 'колко'.",
+          examples: [
+            { problem: "Мария има 8 ябълки. Дава 3 на приятелка. Колко й останаха?", solution: "5 ябълки", hint: "Ключовата дума е 'останаха' — това е изваждане: 8 − 3 = 5" },
+            { problem: "Има 4 деца. Всяко дете получава 2 бисквитки. Колко бисквитки общо?", solution: "8 бисквитки", hint: "Ключовата дума е 'всяко' — това е умножение: 4 × 2 = 8" },
+            { problem: "Йон има 15 стикера. Купува 5 повече. Колко има сега?", solution: "20 стикера", hint: "Ключовата дума е 'повече' — това е събиране: 15 + 5 = 20" },
+          ],
+          tip: "🔑 Прочети задачата два пъти. Оградиоnúmeros. Подчертай въпроса. После реши!",
+        },
+        high: {
+          title: "Текстови задачи",
+          explanation: "Решавай задачи от реалния свят, като определиш кое действие трябва (събиране, изваждане, умножение, деление). Двойните задачи нуждаят се от два операции. Винаги проверявай, че отговорът има смисъл.",
+          examples: [
+            { problem: "Магазин има 48 ябълки в 6 кошници поравно. По колко ябълки в кошница?", solution: "8 ябълки в кошница", hint: "Дели: 48 ÷ 6 = 8. Проверка: 8 × 6 = 48 ✓" },
+            { problem: "Том чита 12 страни в ден за 5 дни, после 3 страни повече. Общо?", solution: "63 страни", hint: "Два стъпа: 12 × 5 = 60, после 60 + 3 = 63" },
+            { problem: "Фермер засява 25 реда моркови с по 8 растения. Колко общо?", solution: "200 растения", hint: "Умножи: 25 × 8 = 200" },
+          ],
+          tip: "✅ Винаги прочети отново въпроса, за да проверишче отговорът го отговаря!",
+        },
+      },
+      es: {
+        low: {
+          title: "Problemas de palabras",
+          explanation: "Los problemas de palabras cuentan una historia con números. Lee con cuidado para encontrar qué debes sumar, restar, multiplicar o dividir. Busca palabras clave como 'total', 'quedan', 'cada' y 'cuántos'.",
+          examples: [
+            { problem: "María tiene 8 manzanas. Le da 3 a su amiga. ¿Cuántas le quedan?", solution: "5 manzanas", hint: "La palabra clave es 'quedan' — esto es resta: 8 − 3 = 5" },
+            { problem: "Hay 4 niños. Cada niño recibe 2 galletas. ¿Cuántas galletas en total?", solution: "8 galletas", hint: "La palabra clave es 'cada' — esto es multiplicación: 4 × 2 = 8" },
+            { problem: "Jon tiene 15 pegatinas. Compra 5 más. ¿Cuántas tiene ahora?", solution: "20 pegatinas", hint: "La palabra clave es 'más' — esto es suma: 15 + 5 = 20" },
+          ],
+          tip: "🔑 ¡Lee el problema dos veces! Rodea los números. Subraya la pregunta. ¡Luego resuelve!",
+        },
+        high: {
+          title: "Problemas de palabras",
+          explanation: "Resuelve problemas del mundo real identificando qué operación necesitas (suma, resta, multiplicación, división). Los problemas de dos pasos requieren dos operaciones. ¡Siempre verifica que tu respuesta tenga sentido!",
+          examples: [
+            { problem: "Una tienda tiene 48 manzanas en 6 canastas iguales. ¿Cuántas por canasta?", solution: "8 manzanas por canasta", hint: "Divide: 48 ÷ 6 = 8. Comprobación: 8 × 6 = 48 ✓" },
+            { problem: "Tom lee 12 páginas al día durante 5 días, luego 3 páginas más. ¿Total?", solution: "63 páginas", hint: "Dos pasos: 12 × 5 = 60, luego 60 + 3 = 63" },
+            { problem: "Un granjero planta 25 filas de zanahorias con 8 plantas por fila. ¿Cuántas?", solution: "200 plantas", hint: "Multiplica: 25 × 8 = 200" },
+          ],
+          tip: "✅ ¡Siempre relee la pregunta para asegurarte de que tu respuesta la responde!",
+        },
+      },
+    },
+
+    /* ── BULGARIAN LANGUAGE / READING ── */
+    "bulgarian-language/reading": {
+      en: {
+        low: {
+          title: "Reading in Bulgarian",
+          explanation: "Reading Bulgarian texts helps you learn the language naturally. Start with short, simple stories and focus on finding new words. Read once for the main idea, then again for details.",
+          examples: [
+            { problem: "Прочети: 'На поляна живее малко мече.'", solution: "Main idea: A small bear lives in a meadow.", hint: "'На поляна' = in a meadow, 'мече' = bear, 'живее' = lives" },
+            { problem: "Прочети: 'Момичето чете книга в училище.'", solution: "Main idea: The girl reads a book at school.", hint: "'Момичето' = girl, 'чете' = reads, 'книга' = book, 'училище' = school" },
+            { problem: "Прочети: 'Котето е гладно и иска храна.'", solution: "Main idea: The kitten is hungry and wants food.", hint: "'Котето' = kitten, 'гладно' = hungry, 'иска' = wants, 'храна' = food" },
+          ],
+          tip: "📖 After reading, close the book and retell the story in your own words!",
+        },
+        high: {
+          title: "Reading in Bulgarian",
+          explanation: "Read longer Bulgarian texts with different sentence structures. Look for the main idea and supporting details. Make predictions about what happens next and ask questions.",
+          examples: [
+            { problem: "Прочети: 'Момчето отиде в гора и видя красива птица. Птицата пееше прелестно.'", solution: "The boy went to the forest, saw a beautiful bird singing.", hint: "Sequence: отиде (went) → видя (saw) → пееше (sang)" },
+            { problem: "Прочети: 'На село живеят интересни животни. Всяко животно е различно.'", solution: "Different animals live in the village, each is unique.", hint: "Focus on 'интересни' (interesting) and 'различно' (different)" },
+            { problem: "Прочети: 'Децата играха в парка целия ден.'", solution: "The children played in the park all day.", hint: "'Целия ден' = all day — shows how long" },
+          ],
+          tip: "❓ Ask yourself: Who? What? When? Where? Why? after every paragraph!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Четене на български",
+          explanation: "Четенето на български текстове те помага да научиш езика естествено. Начни с кратки, прости разкази и се фокусирай да намираш нови думи. Прочети един път за основната идея, после отново за подробности.",
+          examples: [
+            { problem: "Прочети: 'На поляна живее малко мече.'", solution: "Основна идея: Малко мече живее на поляна.", hint: "'На поляна' = поле, 'мече' = животно, 'живее' = е там" },
+            { problem: "Прочети: 'Момичето чете книга в училище.'", solution: "Момичето чита вкъщи книга в класната стая.", hint: "'Момичето' = дете, 'чете' = чита, 'книга' = текст, 'училище' = школа" },
+            { problem: "Прочети: 'Котето е гладно и иска храна.'", solution: "Котката е гладна и иска да яде.", hint: "'Котето' = малко коте, 'гладно' = има нужда от храна, 'иска' = желае" },
+          ],
+          tip: "📖 След четенето затвори книгата и преразкажи историята със своите думи!",
+        },
+        high: {
+          title: "Четене на български",
+          explanation: "Чети по-дълги български текстове с различни структури на изреченията. Потърси основната идея и подробностите. Прависпрогнози какво ще се случи после и задавай въпроси.",
+          examples: [
+            { problem: "Прочети: 'Момчето отиде в гора и видя красива птица. Птицата пееше прелестно.'", solution: "Момчето видя птица в гората, която пееше красиво.", hint: "Последователност: отиде (першо) → видя (второ) → пееше (третьо)" },
+            { problem: "Прочети: 'На село живеят интересни животни. Всяко животно е различно.'", solution: "Интересни животни живеят на село, всяко е уникално.", hint: "'Интересни' = привлекателни, 'различно' = неодинаково" },
+            { problem: "Прочети: 'Децата играха в парка целия ден.'", solution: "Децата прекараха целия ден играещи в парка.", hint: "'Целия ден' = от сутрин до вечер — показва времето" },
+          ],
+          tip: "❓ Попросебе: Кой? Какво? Кога? Къде? Защо? след всеки абзац!",
+        },
+      },
+      es: {
+        low: {
+          title: "Lectura en búlgaro",
+          explanation: "Leer textos en búlgaro te ayuda a aprender el idioma naturalmente. Comienza con historias cortas y simples, enfocándote en encontrar palabras nuevas. Lee una vez para la idea principal, luego nuevamente para detalles.",
+          examples: [
+            { problem: "Lee: 'На поляна живее малко мече.'", solution: "Idea principal: Un pequeño oso vive en un prado.", hint: "'На поляна' = en un prado, 'мече' = oso, 'живее' = vive" },
+            { problem: "Lee: 'Момичето чете книга в училище.'", solution: "Idea principal: La niña lee un libro en la escuela.", hint: "'Момичето' = niña, 'чете' = lee, 'книга' = libro, 'училище' = escuela" },
+            { problem: "Lee: 'Котето е гладно и иска храна.'", solution: "Idea principal: El gatito tiene hambre y quiere comida.", hint: "'Котето' = gatito, 'гладно' = hambriento, 'иска' = quiere, 'храна' = comida" },
+          ],
+          tip: "📖 ¡Después de leer, cierra el libro y recontar la historia con tus propias palabras!",
+        },
+        high: {
+          title: "Lectura en búlgaro",
+          explanation: "Lee textos búlgaros más largos con diferentes estructuras de oraciones. Busca la idea principal y los detalles de apoyo. Haz predicciones sobre qué sucede después y formula preguntas.",
+          examples: [
+            { problem: "Lee: 'Момчето отиде в гора и видя красива птица. Птицата пееше прелестно.'", solution: "El niño fue al bosque, vio un pájaro hermoso cantando.", hint: "Secuencia: отиде (fue) → видя (vio) → пееше (cantaba)" },
+            { problem: "Lee: 'На село живеят интересни животни. Всяко животно е различно.'", solution: "Animales interesantes viven en el pueblo, cada uno es diferente.", hint: "Enfoque en 'интересни' (interesantes) y 'различно' (diferente)" },
+            { problem: "Lee: 'Децата играха в парка целия ден.'", solution: "Los niños jugaron en el parque todo el día.", hint: "'Целия ден' = todo el día — muestra la duración" },
+          ],
+          tip: "❓ ¡Pregúntate: ¿Quién? ¿Qué? ¿Cuándo? ¿Dónde? ¿Por qué? después de cada párrafo!",
+        },
+      },
+    },
+
+    /* ── BULGARIAN LANGUAGE / WRITING ── */
+    "bulgarian-language/writing": {
+      en: {
+        low: {
+          title: "Writing in Bulgarian",
+          explanation: "Writing in Bulgarian means forming sentences from ideas. Start with simple sentences: subject + verb + object. Remember Bulgarian word order. Use capital letters at the start and periods at the end.",
+          examples: [
+            { problem: "Write a simple sentence: 'I am happy.'", solution: "Аз съм щастлив/щастлива.", hint: "'Аз' = I, 'съм' = am, 'щастлив/а' = happy. Word order: subject-verb-adjective" },
+            { problem: "Write: 'The cat drinks milk.'", solution: "Котката пие мляко.", hint: "'Котката' = the cat, 'пие' = drinks, 'мляко' = milk. Bulgarian uses definite article 'та'" },
+            { problem: "Write: 'I play in the park.'", solution: "Аз играя в парка.", hint: "'Играя' = I play, 'в' = in, 'парка' = the park" },
+          ],
+          tip: "✍️ Write 3 simple sentences every day. Start with: 'Аз съм...', 'Мен нравя...', 'Днес...'",
+        },
+        high: {
+          title: "Writing in Bulgarian",
+          explanation: "Write longer sentences and combine them with 'и' (and), 'защото' (because), 'но' (but). Focus on using correct verb forms and adjective agreement. Check spelling and punctuation.",
+          examples: [
+            { problem: "Write a compound sentence: 'I am happy and I play.'", solution: "Аз съм щастлив/а и играя.", hint: "'И' = and — joins two ideas. Keep verb tense consistent" },
+            { problem: "Write: 'The girl reads because she likes books.'", solution: "Момичето чета защото й харесват книгите.", hint: "'Защото' = because — explains why. 'Харесват' agrees with 'книгите' (plural)" },
+            { problem: "Write: 'The day is beautiful but cold.'", solution: "Денят е прекрасен но студен.", hint: "'Но' = but — shows contrast. Both adjectives agree with 'денят' (masculine)" },
+          ],
+          tip: "📝 Write a short paragraph (5 sentences) about your favorite animal or day!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Писане на български",
+          explanation: "Писането на български означава да формираш изречения от идеи. Началото е с прости изречения: подлог + глагол + предлог. Помни редоледа на думите. Използвай главни букви в началото и точка в края.",
+          examples: [
+            { problem: "Напиши просто изречение: 'I am happy.'", solution: "Аз съм щастлив/щастлива.", hint: "'Аз' = аз, 'съм' = е, 'щастлив' = доволен. Ред: подлог-глагол-прилагателно" },
+            { problem: "Напиши: 'The cat drinks milk.'", solution: "Котката пие мляко.", hint: "'Котката' = животното, 'пие' = пиче, 'мляко' = течност. Ползваме артикъл 'та'" },
+            { problem: "Напиши: 'I play in the park.'", solution: "Аз играя в парка.", hint: "'Играя' = реша се, 'в' = вътре, 'парка' = място" },
+          ],
+          tip: "✍️ Напиши 3 прости изречения всеки ден. Начни с: 'Аз съм...', 'На мен харесва...', 'Днес...'",
+        },
+        high: {
+          title: "Писане на български",
+          explanation: "Пишеи по-дълги изречения и ги съединяй със 'и' (и), 'защото' (защото), 'но' (но). Внимавай на правилното използване на глаголи и съгласуване на прилагателни. Проверявай правопис и пунктуация.",
+          examples: [
+            { problem: "Напиши сложно изречение: 'I am happy and I play.'", solution: "Аз съм щастлив/а и играя.", hint: "'И' = съединител — свързва две идеи. Глаголите са в един вид време" },
+            { problem: "Напиши: 'The girl reads because she likes books.'", solution: "Момичето чета защото й харесват книгите.", hint: "'Защото' = причина — обяснява защо. 'Харесват' се съгласува с 'книгите' (множество)" },
+            { problem: "Напиши: 'The day is beautiful but cold.'", solution: "Денят е прекрасен но студен.", hint: "'Но' = противопоставяне — показва контраст. Двете прилагателни се съгласуват с 'денят'" },
+          ],
+          tip: "📝 Напиши кратък абзац (5 изречения) за твоето любимо животно или ден!",
+        },
+      },
+      es: {
+        low: {
+          title: "Escritura en búlgaro",
+          explanation: "Escribir en búlgaro significa formar oraciones a partir de ideas. Comienza con oraciones simples: sujeto + verbo + objeto. Recuerda el orden de palabras búlgaro. Usa letras mayúsculas al inicio y puntos al final.",
+          examples: [
+            { problem: "Escribe una oración simple: 'I am happy.'", solution: "Аз съм щастлив/щастлива.", hint: "'Аз' = yo, 'съм' = soy, 'щастлив' = feliz. Orden: sujeto-verbo-adjetivo" },
+            { problem: "Escribe: 'The cat drinks milk.'", solution: "Котката пие мляко.", hint: "'Котката' = el gato, 'пие' = bebe, 'мляко' = leche. El búlgaro usa artículo 'та'" },
+            { problem: "Escribe: 'I play in the park.'", solution: "Аз играя в парка.", hint: "'Играя' = juego, 'в' = en, 'парка' = el parque" },
+          ],
+          tip: "✍️ ¡Escribe 3 oraciones simples cada día! Comienza con: 'Аз съм...', 'На мен харесва...', 'Днес...'",
+        },
+        high: {
+          title: "Escritura en búlgaro",
+          explanation: "Escribe oraciones más largas y combínalas con 'и' (y), 'защото' (porque), 'но' (pero). Enfócate en usar formas verbales correctas y acuerdo de adjetivos. Verifica ortografía y puntuación.",
+          examples: [
+            { problem: "Escribe una oración compuesta: 'I am happy and I play.'", solution: "Аз съм щастлив/а и играя.", hint: "'И' = y — une dos ideas. Mantén el tiempo verbal consistente" },
+            { problem: "Escribe: 'The girl reads because she likes books.'", solution: "Момичето чета защото й харесват книгите.", hint: "'Защото' = porque — explica por qué. 'Харесват' concuerda con 'книгите' (plural)" },
+            { problem: "Escribe: 'The day is beautiful but cold.'", solution: "Денят е прекрасен но студен.", hint: "'Но' = pero — muestra contraste. Ambos adjetivos concuerdan con 'денят'" },
+          ],
+          tip: "📝 ¡Escribe un párrafo corto (5 oraciones) sobre tu animal o día favorito!",
+        },
+      },
+    },
+
+    /* ── BULGARIAN LANGUAGE / GRAMMAR ── */
+    "bulgarian-language/grammar": {
+      en: {
+        low: {
+          title: "Grammar Basics",
+          explanation: "Bulgarian grammar includes nouns (people, places, things), verbs (actions), and adjectives (descriptions). Every noun has a gender: masculine, feminine, or neuter. Articles change based on gender.",
+          examples: [
+            { problem: "Identify the noun: 'Момче playing.'", solution: "'Момче' = noun (boy). Gender: neuter (doesn't change in nominative)", hint: "Nouns name people, places, or things. This is a boy." },
+            { problem: "Identify the verb: 'Момче ЧЕТЕ.'", solution: "'Чете' = verb (reads). It's an action word.", hint: "Verbs show what someone does. Reading is an action." },
+            { problem: "Identify the adjective: 'ПРЕКРАСЕН ден'", solution: "'Прекрасен' = adjective (beautiful). It describes the noun 'ден' (day).", hint: "Adjectives describe nouns. Beautiful describes the day." },
+          ],
+          tip: "🔤 Parts of speech: Nouns (people/places/things), Verbs (actions), Adjectives (descriptions)",
+        },
+        high: {
+          title: "Grammar Basics",
+          explanation: "Learn about gender agreement (masculine, feminine, neuter), case endings, and verb conjugation. Bulgarian has three verb tenses: present, past, future. Adjectives must agree with their nouns.",
+          examples: [
+            { problem: "Make agreement: 'ПРЕКРАСЕН ден' (beautiful day, masculine)", solution: "'Прекрасна жена' (beautiful woman, feminine). Gender changes the adjective form.", hint: "Adjectives agree with noun gender: -ен/-на/-но" },
+            { problem: "Conjugate: 'Аз ИГРАЯ' (I play)", solution: "'Той ИГРАЕ' (He plays). Different subject = different verb form.", hint: "Present tense: -ам/-аш/-а/-ем/-ете/-ят" },
+            { problem: "Form past: 'Аз чета' (I read, present)", solution: "'Аз четох' (I read, past). Add suffix -х for past.", hint: "Past tense often adds -х or -л to the root" },
+          ],
+          tip: "📚 Key rule: Adjectives must AGREE with nouns in gender, number, and case!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Основна граматика",
+          explanation: "Българската граматика включва съществителни (хора, места, неща), глаголи (действия) и прилагателни (описания). Всяко съществително има род: мъжки, женски или среден. Артиклите се променят в зависимост от рода.",
+          examples: [
+            { problem: "Идентифицирай съществително: 'Момче ЖИВЕЕ.'", solution: "'Момче' = съществително (дете). Род: среден (не се променя в именителен падеж)", hint: "Съществителни означават хора, места или неща. Това е дете." },
+            { problem: "Идентифицирай глагол: 'Момче ЧЕТЕ.'", solution: "'Чете' = глагол (чита). То е действие.", hint: "Глаголите показват какво прави някой. Четенето е действие." },
+            { problem: "Идентифицирай прилагателно: 'ПРЕКРАСЕН ден'", solution: "'Прекрасен' = прилагателно (хубав). Описва съществително 'ден'.", hint: "Прилагателни описват съществителни. Хубав описва денят." },
+          ],
+          tip: "🔤 Части на реч: Съществителни (хора/места/неща), Глаголи (действия), Прилагателни (описания)",
+        },
+        high: {
+          title: "Основна граматика",
+          explanation: "Научи се на съгласуване по род (мъжки, женски, среден), падежни окончания и спрежение на глаголи. Българският има три време: настояще, минало, бъдеще. Прилагателните трябва да се съгласуват със съществителните.",
+          examples: [
+            { problem: "Направи съгласуване: 'ПРЕКРАСЕН ден' (мъжки род)", solution: "'Прекрасна жена' (женски род). Род променя формата на прилагателното.", hint: "Прилагателни се съгласуват по род: -ен/-на/-но" },
+            { problem: "Спрегни: 'Аз ИГРАЯ' (правя се, настояще)", solution: "'Той ИГРАЕ' (той прави се). Различен подлог = различна форма на глагол.", hint: "Настояще: -ам/-аш/-а/-ем/-ете/-ят" },
+            { problem: "Образуй минало: 'Аз чета' (четя, настояще)", solution: "'Аз четох' (четях, минало). Добави наставка -х за минало.", hint: "Минало често добавя -х или -л към корена" },
+          ],
+          tip: "📚 Ключово правило: Прилагателни трябва да се СЪГЛАСУВАТ със съществителни по род, число и падеж!",
+        },
+      },
+      es: {
+        low: {
+          title: "Gramática básica",
+          explanation: "La gramática búlgara incluye sustantivos (personas, lugares, cosas), verbos (acciones) y adjetivos (descripciones). Todo sustantivo tiene un género: masculino, femenino o neutro. Los artículos cambian según el género.",
+          examples: [
+            { problem: "Identifica el sustantivo: 'Момче VIVE.'", solution: "'Момче' = sustantivo (niño). Género: neutro (no cambia en nominativo)", hint: "Los sustantivos nombran personas, lugares o cosas. Este es un niño." },
+            { problem: "Identifica el verbo: 'Момче ЧЕТЕ.'", solution: "'Чете' = verbo (lee). Es una palabra de acción.", hint: "Los verbos muestran lo que alguien hace. Leer es una acción." },
+            { problem: "Identifica el adjetivo: 'ПРЕКРАСЕН ден'", solution: "'Прекрасен' = adjetivo (hermoso). Describe el sustantivo 'ден' (día).", hint: "Los adjetivos describen sustantivos. Hermoso describe el día." },
+          ],
+          tip: "🔤 Partes del habla: Sustantivos (personas/lugares/cosas), Verbos (acciones), Adjetivos (descripciones)",
+        },
+        high: {
+          title: "Gramática básica",
+          explanation: "Aprende sobre la concordancia de género (masculino, femenino, neutro), terminaciones de caso y conjugación de verbos. El búlgaro tiene tres tiempos: presente, pasado, futuro. Los adjetivos deben concordar con sus sustantivos.",
+          examples: [
+            { problem: "Haz concordancia: 'ПРЕКРАСЕН ден' (día hermoso, masculino)", solution: "'Прекрасна жена' (mujer hermosa, femenino). El género cambia la forma del adjetivo.", hint: "Los adjetivos concuerdan con el género del sustantivo: -ен/-на/-но" },
+            { problem: "Conjuga: 'Аз ИГРАЯ' (Juego, presente)", solution: "'Той ИГРАЕ' (Él juega). Sujeto diferente = forma verbal diferente.", hint: "Presente: -ам/-аш/-а/-ем/-ете/-ят" },
+            { problem: "Forma pasado: 'Аз чета' (leo, presente)", solution: "'Аз четох' (leí, pasado). Añade -х para pasado.", hint: "El pasado a menudo añade -х o -л a la raíz" },
+          ],
+          tip: "📚 ¡Regla clave: Los adjetivos deben CONCORDAR con sustantivos en género, número y caso!",
+        },
+      },
+    },
+
+    /* ── READING LITERATURE / STORIES ── */
+    "reading-literature/stories": {
+      en: {
+        low: {
+          title: "Stories",
+          explanation: "A story has characters (people), a setting (place and time), and a plot (what happens). Good stories have a beginning, middle, and end. They teach lessons and make us feel things.",
+          examples: [
+            { problem: "Identify the character: 'Little Red Riding Hood'", solution: "Character: Little Red Riding Hood (a girl). Setting: Forest. Plot: She visits grandmother.", hint: "Characters are the people or animals in the story." },
+            { problem: "Identify the setting: 'The three little pigs built houses'", solution: "Setting: Outside/field where pigs built homes. When: Once upon a time.", hint: "Setting tells WHERE and WHEN the story happens." },
+            { problem: "Identify the plot: 'Goldilocks enters a house, tries porridge, and escapes'", solution: "Plot: Goldilocks explores, eats, sleeps, then flees. Beginning→Middle→End.", hint: "Plot is the SEQUENCE of events — what happens first, then, finally." },
+          ],
+          tip: "📖 Remember: Character (WHO), Setting (WHERE/WHEN), Plot (WHAT HAPPENS)",
+        },
+        high: {
+          title: "Stories",
+          explanation: "Analyze story elements: conflict (problem), resolution (solution), and theme (lesson). Compare characters and settings across different stories. Predict what happens based on clues.",
+          examples: [
+            { problem: "What's the conflict in 'Cinderella'?", solution: "Conflict: Poor Cinderella is mistreated by her stepfamily. She wants to go to the ball.", hint: "Conflict is the PROBLEM the character faces." },
+            { problem: "What's the theme in 'The Boy Who Cried Wolf'?", solution: "Theme: Honesty matters; lying loses trust. Lesson learned.", hint: "Theme is the MAIN LESSON or message of the story." },
+            { problem: "Why does the wolf come at the end of 'Cry Wolf'?", solution: "BECAUSE the boy lied before, no one believed him when danger was real.", hint: "Connect events: Earlier lies → No trust → Danger → Consequence" },
+          ],
+          tip: "💡 Stories teach lessons! Ask: What is the character learning? What should I learn?",
+        },
+      },
+      bg: {
+        low: {
+          title: "Разкази",
+          explanation: "Един разказ има герои (хора), обстановка (място и време) и сюжет (какво се случава). Добрите разкази имат начало, средина и край. Те учат уроци и ни карат да чувстваме.",
+          examples: [
+            { problem: "Идентифицирай героя: 'Червената шапчица'", solution: "Герой: Червената шапчица (момиче). Място: Гора. Сюжет: Нейната баба живее в гората.", hint: "Героите са хора или животни в разказа." },
+            { problem: "Идентифицирай обстановката: 'Трите малки прасенца построиха къщи'", solution: "Място: На поле, където прасенцата строят. Време: Веднъж давно.", hint: "Обстановката казва КЪД и КОГА се случва разказа." },
+            { problem: "Идентифицирай сюжета: 'Злато влезе, опита каша, спа и избяга'", solution: "Сюжет: Злато изследва, яде, спи, слиза. Начало→Средина→Край.", hint: "Сюжетът е ПОСЛЕДОВАТЕЛНОСТТА на събитията — какво се случва първо, после, накрая." },
+          ],
+          tip: "📖 Помни: Герой (КОЙ), Обстановка (КЪД/КОГА), Сюжет (КАКВО)",
+        },
+        high: {
+          title: "Разкази",
+          explanation: "Анализирай елементи на разказа: конфликт (проблем), разрешение (решение) и тема (урок). Сравнявай героите и местата в различни разкази. Прави прогнози какво ще се случи на основата на улики.",
+          examples: [
+            { problem: "Какъв е конфликтът в 'Пепеляшка'?", solution: "Конфликт: Бедна Пепеляшка е зле третирана от мачехата. Иска да отиде на бала.", hint: "Конфликтът е ПРОБЛЕМЪТ, с който се сблъсква героя." },
+            { problem: "Какво е темата в 'Момчето, което креща вълк'?", solution: "Тема: Честността е важна; лъжата загубва доверието. Урок научен.", hint: "Темата е ГЛАВНИЯТ УРОК или съобщение на разказа." },
+            { problem: "Защо дохожда вълк в края на 'Крещи вълк'?", solution: "ЗАЩОТО момчето лъжа преди, никой не му вярва когато опасността е реална.", hint: "Свързуй събитията: Преди лъжи → Няма доверие → Опасност → Последица" },
+          ],
+          tip: "💡 Разказите учат уроци! Попросебе: Какво научава героя? Какво трябва да науча?",
+        },
+      },
+      es: {
+        low: {
+          title: "Historias",
+          explanation: "Una historia tiene personajes (personas), un escenario (lugar y tiempo) y una trama (qué sucede). Las buenas historias tienen un comienzo, un medio y un final. Enseñan lecciones y nos hacen sentir cosas.",
+          examples: [
+            { problem: "Identifica al personaje: 'Caperucita Roja'", solution: "Personaje: Caperucita Roja (una niña). Lugar: Bosque. Trama: Visita a su abuela.", hint: "Los personajes son las personas o animales en la historia." },
+            { problem: "Identifica el escenario: 'Los tres cerditos construyeron casas'", solution: "Lugar: Campo/exterior donde los cerditos construyen. Cuándo: Érase una vez.", hint: "El escenario dice DÓNDE y CUÁNDO sucede la historia." },
+            { problem: "Identifica la trama: 'Ricitos de Oro entra, prueba la papilla, duerme'", solution: "Trama: Ricitos explora, come, duerme, huye. Comienzo→Medio→Final.", hint: "La trama es la SECUENCIA de eventos — qué pasa primero, luego, finalmente." },
+          ],
+          tip: "📖 Recuerda: Personaje (QUIÉN), Escenario (DÓNDE/CUÁNDO), Trama (QUÉ OCURRE)",
+        },
+        high: {
+          title: "Historias",
+          explanation: "Analiza elementos de la historia: conflicto (problema), resolución (solución) y tema (lección). Compara personajes y escenarios en diferentes historias. Predice lo que sucede según las pistas.",
+          examples: [
+            { problem: "¿Cuál es el conflicto en 'Cenicienta'?", solution: "Conflicto: Cenicienta pobre es maltratada por su madrastra. Quiere ir al baile.", hint: "El conflicto es el PROBLEMA que enfrenta el personaje." },
+            { problem: "¿Cuál es el tema en 'El niño que gritó lobo'?", solution: "Tema: La honestidad importa; mentir pierde confianza. Lección aprendida.", hint: "El tema es la LECCIÓN PRINCIPAL o mensaje de la historia." },
+            { problem: "¿Por qué viene el lobo al final de 'Gritó lobo'?", solution: "PORQUE el niño mintió antes, nadie le creyó cuando el peligro era real.", hint: "Conecta eventos: Mentiras anteriores → Sin confianza → Peligro → Consecuencia" },
+          ],
+          tip: "💡 ¡Las historias enseñan lecciones! Pregúntate: ¿Qué aprende el personaje? ¿Qué debo aprender?",
+        },
+      },
+    },
+
+    /* ── READING LITERATURE / COMPREHENSION ── */
+    "reading-literature/comprehension": {
+      en: {
+        low: {
+          title: "Reading Comprehension",
+          explanation: "Comprehension means understanding what you read. Ask questions WHILE reading: Who? What? Where? When? Why? Reread sentences that confuse you. Draw pictures of what happens.",
+          examples: [
+            { problem: "Read: 'The cat sat on the mat.'  Question: Where did the cat sit?", solution: "Answer: On the mat.", hint: "Look for WHERE: 'on the mat' tells the location." },
+            { problem: "Read: 'Maya ate an apple before school.' Question: When did Maya eat?", solution: "Answer: Before school.", hint: "Look for WHEN: 'before school' tells the time." },
+            { problem: "Read: 'Tom ran because he was late.' Question: Why did Tom run?", solution: "Answer: Because he was late.", hint: "Look for WHY: 'because' explains the reason." },
+          ],
+          tip: "❓ Ask yourself these questions: Who? What? Where? When? Why? How?",
+        },
+        high: {
+          title: "Reading Comprehension",
+          explanation: "Deep comprehension includes finding the main idea, supporting details, and author's purpose. Infer (figure out) information not directly stated. Compare and contrast characters and events.",
+          examples: [
+            { problem: "Text: 'Birds have wings. Some birds fly. Some birds swim.' Main idea?", solution: "Main idea: Not all birds fly; different birds have different abilities.", hint: "Main idea is the BIGGEST, most important point." },
+            { problem: "Text: 'Jack was sad. His dog ran away. He looked everywhere.' Inference?", solution: "Inference: Jack loves his dog and misses him.", hint: "Inference = reading between the lines. Not stated directly, but strongly suggested." },
+            { problem: "Compare: Tiger swims well. Lion hunts on land. Similarity?", solution: "Both are big cats that are good hunters.", hint: "Find what's the SAME (similarity) and DIFFERENT (contrast)." },
+          ],
+          tip: "🧠 Deep reading: Find the main idea, understand reasons, and infer hidden meaning!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Разбиране при четене",
+          explanation: "Разбирането означава да разбереш какво четеш. Задавай въпроси ДОКхатом четеш: Кой? Какво? Къде? Кога? Защо? Преread изречения, които те объркват. Рисувай картинки на това, което се случва.",
+          examples: [
+            { problem: "Прочети: 'Котката седи на мат.' Въпрос: Къде седи котката?", solution: "Отговор: На мат.", hint: "Потърси КЪД: 'на мат' казва местоположението." },
+            { problem: "Прочети: 'Мая яде ябълка преди училище.' Въпрос: Кога яде Мая?", solution: "Отговор: Преди училище.", hint: "Потърси КОГА: 'преди училище' казва времето." },
+            { problem: "Прочети: 'Том тича защото закъснява.' Въпрос: Защо тича Том?", solution: "Отговор: Защото закъснява.", hint: "Потърси ЗАЩО: 'защото' обяснява причината." },
+          ],
+          tip: "❓ Попросебе на тези въпроси: Кой? Какво? Къде? Кога? Защо? Как?",
+        },
+        high: {
+          title: "Разбиране при четене",
+          explanation: "Дълбокото разбиране включва намиране на главната идея, поддържащи детайли и цел на автора. Интуирай (разбери) информация, която не е пряко казана. Сравнявай и противопоставяй героите и събитията.",
+          examples: [
+            { problem: "Текст: 'Птиците имат крила. Някои птици летят. Някои птици плуват.' Главна идея?", solution: "Главна идея: Не всички птици летят; различни птици имат различни способности.", hint: "Главната идея е НАЙ-ГОЛЯМАТА, най-важна точка." },
+            { problem: "Текст: 'Джак е тъжен. Неговото куче избяга. Той ги потърсихсър.' Интуиция?", solution: "Интуиция: Джак обича своето куче и го пропуска.", hint: "Интуиция = четене между редовете. Не е казано пряко, но силно намекнато." },
+            { problem: "Сравни: Тигър плува добре. Лъв ловува на суша. Сходство?", solution: "И двамата са големи котки, които са добри ловци.", hint: "Намери какво е СЪЩОТО (сходство) и РАЗЛИЧНО (противопоставяние)." },
+          ],
+          tip: "🧠 Дълбоко четене: Намери главната идея, разбери причините и интуирай скритото значение!",
+        },
+      },
+      es: {
+        low: {
+          title: "Comprensión de lectura",
+          explanation: "Comprensión significa entender lo que lees. Haz preguntas MIENTRAS lees: ¿Quién? ¿Qué? ¿Dónde? ¿Cuándo? ¿Por qué? Relee oraciones que te confundan. Dibuja lo que sucede.",
+          examples: [
+            { problem: "Lee: 'El gato se sentó en la alfombra.' Pregunta: ¿Dónde se sentó el gato?", solution: "Respuesta: En la alfombra.", hint: "Busca DÓNDE: 'en la alfombra' dice la ubicación." },
+            { problem: "Lee: 'Maya comió una manzana antes de la escuela.' Pregunta: ¿Cuándo comió Maya?", solution: "Respuesta: Antes de la escuela.", hint: "Busca CUÁNDO: 'antes de la escuela' dice la hora." },
+            { problem: "Lee: 'Tom corrió porque llegaba tarde.' Pregunta: ¿Por qué corrió Tom?", solution: "Respuesta: Porque llegaba tarde.", hint: "Busca POR QUÉ: 'porque' explica la razón." },
+          ],
+          tip: "❓ Pregúntate: ¿Quién? ¿Qué? ¿Dónde? ¿Cuándo? ¿Por qué? ¿Cómo?",
+        },
+        high: {
+          title: "Comprensión de lectura",
+          explanation: "La comprensión profunda incluye encontrar la idea principal, detalles de apoyo y propósito del autor. Infiere (deduce) información no declarada directamente. Compara y contrasta personajes y eventos.",
+          examples: [
+            { problem: "Texto: 'Los pájaros tienen alas. Algunos pájaros vuelan. Algunos pájaros nadan.' ¿Idea principal?", solution: "Idea principal: No todos los pájaros vuelan; diferentes pájaros tienen diferentes habilidades.", hint: "La idea principal es el punto MÁS GRANDE y más importante." },
+            { problem: "Texto: 'Jack estaba triste. Su perro desapareció. Buscó en todas partes.' ¿Inferencia?", solution: "Inferencia: Jack ama a su perro y lo extraña.", hint: "Inferencia = leer entre líneas. No se dice directamente, pero se sugiere fuertemente." },
+            { problem: "Compara: El tigre nada bien. El león caza en tierra. ¿Similitud?", solution: "Ambos son felinos grandes que son buenos cazadores.", hint: "Encuentra qué es IGUAL (similitud) y DIFERENTE (contraste)." },
+          ],
+          tip: "🧠 ¡Lectura profunda: encuentra la idea principal, entiende razones e infiere significados ocultos!",
+        },
+      },
+    },
   };
 
   // Fallback for topics not fully authored
@@ -837,6 +1257,144 @@ function textPractice(topicId: string, lang: LangCode, grade: number): Array<{ q
         { question: "¿Qué significa 'learn'?", answer: "aprender" },
         { question: "¿Qué significa el prefijo 'un-'?", answer: "no" },
         { question: "¿Qué significa la raíz 'graph'?", answer: "escribir" },
+      ],
+    },
+    "word-problems": {
+      en: [
+        { question: "Maria has 8 apples. She gives 3 away. How many left?", answer: "5" },
+        { question: "There are 4 children. Each gets 2 cookies. Total?", answer: "8" },
+        { question: "Jon has 15 stickers and buys 5 more. Total?", answer: "20" },
+        { question: "A store has 48 apples in 6 baskets. Per basket?", answer: "8" },
+        { question: "Tom reads 12 pages daily for 5 days, then 3 more. Total?", answer: "63" },
+      ],
+      bg: [
+        { question: "Мария има 8 ябълки. Дава 3 на приятелка. Колко остават?", answer: "5" },
+        { question: "Има 4 деца. Всяко получава 2 бисквитки. Общо?", answer: "8" },
+        { question: "Йон има 15 стикера и купува 5 повече. Общо?", answer: "20" },
+        { question: "Магазин има 48 ябълки в 6 кошници. По колко в кошница?", answer: "8" },
+        { question: "Том чита 12 страни дневно за 5 дни, после 3 повече. Общо?", answer: "63" },
+      ],
+      es: [
+        { question: "María tiene 8 manzanas. Le da 3. ¿Cuántas le quedan?", answer: "5" },
+        { question: "Hay 4 niños. Cada uno recibe 2 galletas. ¿Total?", answer: "8" },
+        { question: "Jon tiene 15 pegatinas y compra 5 más. ¿Total?", answer: "20" },
+        { question: "Una tienda tiene 48 manzanas en 6 canastas. ¿Por canasta?", answer: "8" },
+        { question: "Tom lee 12 páginas diarias durante 5 días, luego 3 más. ¿Total?", answer: "63" },
+      ],
+    },
+    reading: {
+      en: [
+        { question: "What is the main topic of a story called?", answer: "the main idea or theme" },
+        { question: "Who are the people in a story called?", answer: "characters" },
+        { question: "Where and when a story happens is called?", answer: "the setting" },
+        { question: "What happens in a story is called?", answer: "the plot" },
+        { question: "What should you do if you don't understand a sentence?", answer: "reread it" },
+      ],
+      bg: [
+        { question: "Как се казва основната идея на разказ?", answer: "тема или главна идея" },
+        { question: "Как се казват хората в разказа?", answer: "герои" },
+        { question: "Как се казва къде и кога се случва разказа?", answer: "обстановка" },
+        { question: "Как се казва това, което се случва в разказа?", answer: "сюжет" },
+        { question: "Какво трябва да направиш, ако не разбираш изречение?", answer: "прочети го отново" },
+      ],
+      es: [
+        { question: "¿Cómo se llama la idea principal de una historia?", answer: "el tema o la idea principal" },
+        { question: "¿Cómo se llaman las personas en una historia?", answer: "personajes" },
+        { question: "¿Cómo se llama dónde y cuándo sucede una historia?", answer: "el escenario" },
+        { question: "¿Cómo se llama lo que sucede en una historia?", answer: "la trama" },
+        { question: "¿Qué deberías hacer si no entiendes una oración?", answer: "releerla" },
+      ],
+    },
+    writing: {
+      en: [
+        { question: "What is a group of words that expresses a complete thought?", answer: "a sentence" },
+        { question: "What comes at the end of a sentence?", answer: "a period (.) or punctuation" },
+        { question: "What is a noun?", answer: "a person, place, or thing" },
+        { question: "What is a verb?", answer: "an action word" },
+        { question: "What is the first word of a sentence supposed to be?", answer: "capitalized" },
+      ],
+      bg: [
+        { question: "Какво е група думи, която изразява пълна мисъл?", answer: "изречение" },
+        { question: "Какво идва в края на изречението?", answer: "точка или пунктуация" },
+        { question: "Какво е съществително?", answer: "човек, място или нещо" },
+        { question: "Какво е глагол?", answer: "дейност или действие" },
+        { question: "Първата дума на изречението трябва ли да бъде главна буква?", answer: "да" },
+      ],
+      es: [
+        { question: "¿Qué es un grupo de palabras que expresa un pensamiento completo?", answer: "una oración" },
+        { question: "¿Qué va al final de una oración?", answer: "un punto (.) o puntuación" },
+        { question: "¿Qué es un sustantivo?", answer: "una persona, lugar o cosa" },
+        { question: "¿Qué es un verbo?", answer: "una palabra de acción" },
+        { question: "¿Se debe capitalizar la primera palabra de una oración?", answer: "sí" },
+      ],
+    },
+    grammar: {
+      en: [
+        { question: "How many genders are in Bulgarian nouns?", answer: "three: masculine, feminine, neuter" },
+        { question: "What must agree with a noun in gender?", answer: "adjectives and articles" },
+        { question: "What is a word that describes a noun called?", answer: "an adjective" },
+        { question: "How many main tenses are in Bulgarian?", answer: "three: present, past, future" },
+        { question: "When a sentence begins, what must you use?", answer: "a capital letter" },
+      ],
+      bg: [
+        { question: "Колко рода имат българските съществителни?", answer: "три: мъжки, женски, среден" },
+        { question: "Какво трябва да се съгласува със съществително по род?", answer: "прилагателни и артикли" },
+        { question: "Как се казва дума, която описва съществително?", answer: "прилагателно" },
+        { question: "Колко основни времена има в български?", answer: "три: настояще, минало, бъдеще" },
+        { question: "Какво използваш в началото на изречение?", answer: "главна буква" },
+      ],
+      es: [
+        { question: "¿Cuántos géneros tienen los sustantivos búlgaros?", answer: "tres: masculino, femenino, neutro" },
+        { question: "¿Qué debe concordar con un sustantivo en género?", answer: "adjetivos y artículos" },
+        { question: "¿Cómo se llama una palabra que describe un sustantivo?", answer: "un adjetivo" },
+        { question: "¿Cuántos tiempos principales hay en búlgaro?", answer: "tres: presente, pasado, futuro" },
+        { question: "¿Qué debes usar al comenzar una oración?", answer: "una letra mayúscula" },
+      ],
+    },
+    stories: {
+      en: [
+        { question: "What are the people in a story called?", answer: "characters" },
+        { question: "What is the problem in a story called?", answer: "conflict" },
+        { question: "What is the lesson in a story called?", answer: "theme or moral" },
+        { question: "What are the beginning, middle, and end called?", answer: "plot" },
+        { question: "What do you call where and when a story happens?", answer: "setting" },
+      ],
+      bg: [
+        { question: "Как се казват хората в разказа?", answer: "герои" },
+        { question: "Как се казва проблемът в разказа?", answer: "конфликт" },
+        { question: "Как се казва урокът в разказа?", answer: "тема или мораль" },
+        { question: "Как се казва началото, средината и краят?", answer: "сюжет" },
+        { question: "Как се казва къде и кога се случва разказа?", answer: "обстановка" },
+      ],
+      es: [
+        { question: "¿Cómo se llaman las personas en una historia?", answer: "personajes" },
+        { question: "¿Cómo se llama el problema en una historia?", answer: "conflicto" },
+        { question: "¿Cómo se llama la lección en una historia?", answer: "tema o moraleja" },
+        { question: "¿Cómo se llaman el principio, el medio y el final?", answer: "trama" },
+        { question: "¿Cómo se llama dónde y cuándo sucede una historia?", answer: "escenario" },
+      ],
+    },
+    comprehension: {
+      en: [
+        { question: "What should you ask while reading a text?", answer: "Who, What, Where, When, Why" },
+        { question: "What is understanding what you read called?", answer: "comprehension" },
+        { question: "What is figuring out information not directly stated called?", answer: "inference" },
+        { question: "What is the biggest, most important point in a text called?", answer: "the main idea" },
+        { question: "What should you do if you don't understand a sentence?", answer: "reread it" },
+      ],
+      bg: [
+        { question: "Какво трябва да задаваш докато четеш?", answer: "Кой, Какво, Къде, Кога, Защо" },
+        { question: "Как се казва разбирането на това, което четеш?", answer: "разбиране" },
+        { question: "Как се казва разбиране на информация, която не е казана пряко?", answer: "интуиция" },
+        { question: "Как се казва най-голямата, най-важна точка в текста?", answer: "главна идея" },
+        { question: "Какво трябва да направиш, ако не разбираш изречение?", answer: "прочети го отново" },
+      ],
+      es: [
+        { question: "¿Qué deberías preguntar mientras lees?", answer: "Quién, Qué, Dónde, Cuándo, Por qué" },
+        { question: "¿Cómo se llama entender lo que lees?", answer: "comprensión" },
+        { question: "¿Cómo se llama deducir información no dicha directamente?", answer: "inferencia" },
+        { question: "¿Cómo se llama el punto más grande e importante de un texto?", answer: "la idea principal" },
+        { question: "¿Qué deberías hacer si no entiendes una oración?", answer: "releerla" },
       ],
     },
   };

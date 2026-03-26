@@ -1,0 +1,100 @@
+IMPORTANT: Investigate and fix a subject routing bug in the Daily Learning Plan flow.
+
+Observed bug in Preview:
+When clicking Start on a Daily Plan task for Bulgarian Language, the app opens the AYA Panda chat but asks a Math question instead (example: "Колко е 2 + 6?").
+
+Expected behavior:
+- Bulgarian Language daily task → Bulgarian language / reading related task
+- Math daily task → Math task
+- Reading daily task → Reading task
+- Logic daily task → Logic task
+
+This is a logic / routing / mapping bug, NOT a UI bug.
+
+DO NOT:
+- change layout
+- change styling
+- redesign Daily Plan UI
+- change dashboard visuals
+- create new pages
+- create new schemas
+- modify DB
+- modify unrelated systems
+- create duplicate task routing systems
+
+Goal:
+Find exactly where the Daily Learning Plan Start button passes the wrong subject/topic context into AYA Panda chat, and fix it with the smallest safe change.
+
+Tasks:
+
+1. Audit the full Daily Plan subject flow
+Trace the exact execution path from:
+- Daily Plan card rendering
+- Start button click handler
+- any navigation helper
+- any chat/session/task creation function
+- first assistant message generation
+
+Check files related to:
+- DailyPlanCard
+- junior dashboard / daily plan components
+- any startDailyTask / openTask / openCompanion / startCompanionTask function
+- AYA Panda chat initialization
+- subject/topic prompt generation
+
+2. Identify the true source of subject context
+Find which value is used as the authoritative subject/topic source when the user clicks Start on a Daily Plan task.
+
+Verify:
+- what subject is displayed in the UI
+- what subject ID is stored in the task data
+- what subject/topic is actually passed into the Panda assistant
+- whether the code defaults incorrectly to math
+
+3. Check for these likely root causes
+Audit whether the bug comes from:
+- hardcoded subject = "math"
+- fallback subject = "math"
+- wrong mapping between Bulgarian Language and Reading
+- wrong topicId → subject conversion
+- stale cached task payload
+- incorrect switch/case or enum mapping
+- incorrect first-message generator using a generic math starter
+
+4. Fix with minimal change
+Make the smallest safe fix so that the Daily Plan Start button passes the correct subject/topic into the Panda assistant.
+
+Required correct behavior:
+- Bulgarian Language task starts Bulgarian Language content
+- Reading task starts Reading content
+- Math task starts Math content
+- Logic task starts Logic content
+- Environment task starts Environment content
+- English task starts English content
+
+5. Validate after fix
+After fixing, test at least these cases in Preview:
+- Bulgarian Language daily task
+- Math daily task
+- Reading daily task
+
+Confirm the first Panda message/question matches the selected task subject.
+
+6. Safety constraints
+Do NOT:
+- rebuild the chat system
+- rewrite the lesson engine
+- rewrite Daily Plan architecture
+- touch missions, badges, weakness detection, or parent dashboard unless directly required for the fix
+- add a second subject-routing layer
+
+7. Return format
+When complete, return exactly:
+1. files audited
+2. exact root cause found
+3. exact file(s) changed
+4. exact code path fixed
+5. which subjects were tested
+6. confirmation that no UI, DB, or duplicate systems were changed
+
+Do not publish automatically.

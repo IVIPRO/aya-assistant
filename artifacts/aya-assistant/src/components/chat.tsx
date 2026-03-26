@@ -231,6 +231,10 @@ export function Chat({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const autoStartSentRef = useRef(false);
+  // Once the auto-start fires the prefix is in the backend session state;
+  // subsequent child answers must NOT include it or detectSubjectRequest
+  // will always re-start the lesson instead of evaluating the answer.
+  const subjectStartedRef = useRef(false);
 
   const hwLang: "en" | "bg" | "es" = lang === "bg" ? "bg" : lang === "es" ? "es" : "en";
   const hwLabels = HOMEWORK_LABELS[hwLang];
@@ -253,8 +257,29 @@ export function Chat({
       console.log("[VOICE_TRANSCRIPT_RAW]", text);
       console.log("[VOICE_TRANSCRIPT_FINAL]", text.trim());
       
-      if (!text.trim()) {
+      const trimmed = text.trim();
+
+      if (!trimmed) {
         console.log("[VOICE_SEND_ERROR] Empty transcript");
+        toast({ 
+          title: hwLang === "bg" ? "Не успях да чуя. Опитай отново." : 
+                 hwLang === "es" ? "No pude escuchar. Intenta de nuevo." : 
+                 "I couldn't hear you. Please try again.",
+          variant: "destructive" 
+        });
+        return;
+      }
+
+      // Reject transcripts that are clearly the BG voice-hint prompt leaking
+      // through (happens when audio blob is near-empty and the transcription
+      // model echoes back the prompt parameter instead of actual speech).
+      // The hint always starts with "Разпознавай" and is > 300 chars.
+      const looksLikePromptLeak =
+        trimmed.length > 300 ||
+        trimmed.startsWith("Разпознавай") ||
+        trimmed.startsWith("Recognize");
+      if (looksLikePromptLeak) {
+        console.log("[VOICE_SEND_ERROR] Transcript looks like prompt-hint leak, discarding", { len: trimmed.length });
         toast({ 
           title: hwLang === "bg" ? "Не успях да чуя. Опитай отново." : 
                  hwLang === "es" ? "No pude escuchar. Intenta de nuevo." : 
@@ -265,8 +290,8 @@ export function Chat({
       }
       
       // Auto-send recognized voice input as a real message
-      console.log("[VOICE_SEND_PAYLOAD]", { module, content: text.trim(), childId: activeChildId });
-      doSend(text);
+      console.log("[VOICE_SEND_PAYLOAD]", { module, content: trimmed, childId: activeChildId });
+      doSend(trimmed);
     },
     onError: (msg) => {
       console.log("[VOICE_SEND_ERROR]", msg);
@@ -410,7 +435,14 @@ export function Chat({
       hwLang === "bg" ? "Нека започнем" :
       hwLang === "es" ? "Empecemos" :
       "Let's start";
-    const timer = setTimeout(() => doSend(phrase), 300);
+    const timer = setTimeout(() => {
+      doSend(phrase);
+      // After the one-time start message is sent the backend has stored the
+      // lesson state.  Mark the subject as started so subsequent child answers
+      // are sent WITHOUT the subject prefix — the prefix always triggers
+      // detectSubjectRequest → "new lesson" and would prevent answer evaluation.
+      subjectStartedRef.current = true;
+    }, 300);
     return () => clearTimeout(timer);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -420,7 +452,11 @@ export function Chat({
       console.log("[CHAT_SEND_ERROR] Content empty or already sending", { content: content.trim(), isPending: sendMutation.isPending });
       return;
     }
-    const fullContent = subjectContext
+    // Only prepend the subject prefix for the first (auto-start) message.
+    // After that, subjectStartedRef.current = true and we send the plain answer
+    // so detectSubjectRequest returns null and the backend evaluates the answer
+    // via the stored bgLessonState / activeQuestion rather than restarting.
+    const fullContent = (subjectContext && !subjectStartedRef.current)
       ? `${metaLbl.subjectPrefix}: ${subjectContext.subjectLabel}${subjectContext.topicLabel ? ` | ${metaLbl.topicPrefix}: ${subjectContext.topicLabel}` : ""}\n${content}`
       : content;
     const sendMode = freeConversationMode ? "free_conversation" : undefined;

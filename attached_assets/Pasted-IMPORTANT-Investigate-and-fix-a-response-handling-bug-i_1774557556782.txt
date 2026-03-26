@@ -1,0 +1,86 @@
+IMPORTANT: Investigate and fix a response-handling bug in AYA Panda chat for Daily Plan subject tasks.
+
+Current status:
+- The previous bug was fixed: Daily Plan now opens the correct subject context.
+- Example: clicking Bulgarian Language in Daily Plan now opens Bulgarian Language chat correctly.
+- However, the new bug is:
+  Panda asks a subject question (example: "Как се казва котката?"),
+  but the child’s answer is not processed.
+- This fails both:
+  1. typed answer in chat input
+  2. voice answer through microphone
+
+Expected behavior:
+When AYA Panda asks a subject question inside Daily Plan chat mode, the user should be able to answer by typing or by voice, and the system should process that answer and continue the learning flow.
+
+DO NOT:
+- redesign the UI
+- change layout or styling
+- rebuild the chat system from scratch
+- create new pages
+- create new DB schema
+- create duplicate routing systems
+- modify unrelated lesson systems
+
+Goal:
+Find exactly why typed and voice answers are not being processed after Panda asks a Daily Plan subject question, and fix it with the smallest safe change.
+
+Tasks:
+
+1. Audit the full answer flow after Panda asks a question
+Trace:
+- chat input submit handler
+- send button handler
+- microphone / speech input flow
+- doSend call path
+- any logic that blocks sending while in Daily Plan / subject mode
+- backend handler that receives the child answer
+- state machine / message mode that determines whether Panda is waiting for an answer
+
+2. Check these likely root causes
+Investigate whether:
+- the input submit is disabled in this mode
+- send button is not calling doSend
+- voice transcript is not forwarded to doSend
+- a pending/loading state never resets
+- Daily Plan mode sets subjectContext but not answerContext
+- the backend expects a structured reply but receives plain text
+- the question is shown visually, but no "awaiting answer" state is stored
+- the chat message is sent but ignored by juniorChatHandler
+- the UI clears or blocks outgoing messages when auto-start message was used
+
+3. Verify both input methods
+Specifically test:
+- typed answer to a Bulgarian Language question
+- voice answer to a Bulgarian Language question
+
+4. Fix with minimal change
+Make the smallest safe fix so that:
+- typed answer works
+- voice answer works
+- Panda receives and processes the child’s answer
+- the conversation continues naturally after the answer
+- normal chat behavior outside Daily Plan still works
+
+5. Validation cases
+After the fix, verify at least:
+- Bulgarian Language Daily Plan task:
+  Panda asks a Bulgarian question → child types an answer → Panda responds
+- Bulgarian Language Daily Plan task:
+  Panda asks a Bulgarian question → child answers by voice → Panda responds
+- Math Daily Plan task:
+  Panda asks a math question → child answers → Panda responds
+- Normal Chat with AYA (outside Daily Plan):
+  still works normally
+
+6. Return format
+When complete, return exactly:
+1. files audited
+2. exact root cause found
+3. exact file(s) changed
+4. what was fixed for typed input
+5. what was fixed for voice input
+6. confirmation that no UI redesign, DB changes, or duplicate systems were created
+7. manual Preview test steps
+
+Do not publish automatically.

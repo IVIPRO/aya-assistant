@@ -962,11 +962,19 @@ export async function handleJuniorChat(
     return getMathHint(a, b, operation, childName, lang);
   }
 
+  // ── READ BG LESSON STATE ─────────────────────────────────────────────────
+  // Must happen BEFORE the early-exit so we can decide whether to bypass it.
+  // Short answers like "Котката" would otherwise return "unknown" intent and
+  // be routed to OpenAI free-chat, never reaching the lesson evaluator.
+  const bgLessonState = await readBulgarianLessonState(childId, module);
+
   // ── EARLY EXIT for conversational messages ────────────────────────────────
-  // Greetings and unknown inputs must never be evaluated as lesson answers.
-  // Note: "free_question" is handled above with an early return.
-  // Return the AI fallback immediately and skip everything below.
-  if (intent === "small_talk" || intent === "unknown") {
+  // Greetings and unknown inputs must never be evaluated as lesson answers —
+  // UNLESS there is an active Bulgarian lesson (bgLessonState is set and no
+  // new subject was requested).  In that case, even a plain one-word answer
+  // must fall through to the evaluator below.
+  const hasActiveBgLesson = !!(bgLessonState && requestedSubject === null);
+  if ((intent === "small_talk" || intent === "unknown") && !hasActiveBgLesson) {
     if (state.postSuccessId !== null) {
       await clearPostSuccess(childId, module);
     }
@@ -990,9 +998,7 @@ export async function handleJuniorChat(
   }
 
   // ── BULGARIAN_LESSON_ANSWER ────────────────────────────────────────────────
-  // Reached only when intent is structural (not small_talk / free_question / unknown).
-  // Evaluates the message as an answer to the active lesson prompt.
-  const bgLessonState = await readBulgarianLessonState(childId, module);
+  // bgLessonState is already populated above.
   if (bgLessonState && requestedSubject === null) {
     const grade = bgLessonState.grade;
     const topicId = bgLessonState.topicId as any;

@@ -1,0 +1,87 @@
+The latest logs show the real remaining bug clearly.
+
+Current behavior:
+
+"Помогни ми с математика" works correctly:
+- QUICK_ACTION is detected
+- it starts a real structured math task
+- the user gets an actual math question
+
+But the following buttons do NOT start real tasks:
+
+"Да четем заедно"  
+"Задай ми логически въпрос"  
+"Упражнявай с мен английски"
+
+From the logs we see:
+
+QUICK_ACTION is detected  
+then intent becomes "unknown"  
+then free_chat / early_return happens  
+then LOCAL_SMALL_TALK_MATCH is used
+
+So the lesson context is being cleared correctly, but Reading / Logic / English quick actions are only routing into free chat or local small talk instead of starting real structured task flows like Math.
+
+This is the remaining bug.
+
+Goal:
+
+Make Reading, Logic, and English quick actions behave like Math.
+
+They must start real structured subject tasks immediately, not small-talk fallback.
+
+Required behavior:
+
+1. "Помогни ми с математика"
+Keep current correct behavior.
+
+2. "Да четем заедно"
+Immediately start a reading task or reading prompt.  
+Do NOT ask "Каква тема искаш да четем?"  
+Do NOT fall back to local small talk.
+
+3. "Задай ми логически въпрос"
+Immediately ask a real logic question.  
+Do NOT start with "Готов ли си..."
+
+4. "Упражнявай с мен английски"
+Immediately start an English practice question or exercise.  
+Do NOT start with general conversation.
+
+Also important:
+
+After one of these tasks starts, the next user message must continue inside that task context, not fall back to free_chat.
+
+Focus ONLY on application logic:
+
+- juniorChatHandler  
+- detectIntent  
+- quick action handlers  
+- task/session start logic  
+- reading / logic / english generators  
+
+Do NOT:
+
+- investigate ports  
+- modify workflows  
+- change infrastructure  
+- rebuild the server  
+- redesign UI  
+
+Math behavior must remain exactly as it currently works.
+
+Find how the Math task is started and implement the same type of structured start for:
+
+reading  
+logic  
+english
+
+Return exactly:
+
+1. the root cause  
+2. files changed  
+3. what was changed for reading  
+4. what was changed for logic  
+5. what was changed for english  
+6. confirmation that Math behavior stayed unchanged  
+7. manual Preview test steps

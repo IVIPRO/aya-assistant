@@ -63,6 +63,16 @@ Express 5 API server. Routes live in `src/routes/` and use `@workspace/api-zod` 
 - Note: the artifact-managed workflow (`artifacts/api-server: API Server`) has a persistent Replit port-detection bug and always shows "failed" — ignore it. Use `api-server-live` instead.
 - Build bundles an allowlist of deps (express, cors, pg, drizzle-orm, zod, etc.) and externalizes the rest
 
+### Junior Chat Handler (`src/lib/juniorChatHandler.ts`)
+
+Key system for the Junior module. Intent-based routing:
+- **Quick action buttons** (BG: "Помогни ми с математика", "Да четем заедно", "Задай ми логически въпрос", "Упражнявай с мен английски") → `isQuickActionButton()` returns "math" | "reading" | "logic" | "english"
+- **Math**: `new_math_task` intent → `generateMathTask()`, persists via `active_question` memory
+- **Reading**: `new_reading_task` → `storeBulgarianLesson(reading_comprehension_basic/extended)` → reuses full BG evaluator pipeline
+- **Logic / English**: `new_logic_task` / `new_english_task` → OpenAI generates task via `generateSubjectQuestion()`, stores in `open_subject_session` memory so next message is evaluated via `evaluateSubjectAnswer()` (not free-chat)
+- **Context persistence**: `memoriesTable` types used: `active_question`, `post_success_followup`, `bulgarian_lesson_active`, `open_subject_session`
+- **New helper functions**: `getAIResponseWithSystemPrompt()` (in aiResponses.ts), `getCharacterName()`, `generateSubjectQuestion()`, `evaluateSubjectAnswer()`
+
 ### `lib/db` (`@workspace/db`)
 
 Database layer using Drizzle ORM with PostgreSQL. Exports a Drizzle client instance and schema models.

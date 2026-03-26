@@ -1063,3 +1063,31 @@ export async function getAIResponse(module: string, userMessage: string, context
   console.log("[OPENAI_RESPONSE_RECEIVED]");
   return moduleResponses[Math.floor(Math.random() * moduleResponses.length)];
 }
+
+/**
+ * Call OpenAI with a fully custom system prompt.
+ * Used by logic/english task generators and answer evaluators.
+ * Falls back to the fallback string on error.
+ */
+export async function getAIResponseWithSystemPrompt(
+  systemPrompt: string,
+  userMessage: string,
+  fallback: string,
+  maxTokens = 200,
+): Promise<string> {
+  try {
+    const completion = await openaiClient.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userMessage },
+      ],
+      max_tokens: maxTokens,
+    });
+    const reply = completion.choices[0]?.message?.content?.trim() ?? "";
+    if (reply) return reply;
+  } catch (err) {
+    console.log("[OPENAI_TARGETED_CALL_ERROR]", String(err));
+  }
+  return fallback;
+}

@@ -27,6 +27,7 @@ import {
   getMathTaskPrompt,
   detectMathOperationSwitch,
   getAIResponse,
+  getAIResponseWithSystemPrompt,
   getLang,
 } from "./aiResponses";
 import { getLocalSmallTalkReply } from "./localSmallTalk";
@@ -63,6 +64,9 @@ type Intent =
   | "change_operation"
   | "explain_current_task"
   | "free_question"
+  | "new_reading_task"
+  | "new_logic_task"
+  | "new_english_task"
   | "small_talk"
   | "unknown";
 
@@ -243,6 +247,87 @@ async function clearBulgarianLesson(childId: number, module: string): Promise<vo
     .catch(() => {});
 }
 
+// ─── Open Subject Session (Logic / English) ───────────────────────────────────
+// A single-question session for logic or english tasks. The question is stored
+// so that the child's NEXT message can be evaluated in context, preventing fallback
+// to free-chat on the very first answer.
+
+interface OpenSubjectSession {
+  id: number;
+  subject: "logic" | "english";
+  question: string;
+  grade: number;
+}
+
+async function readOpenSubjectSession(
+  childId: number,
+  module: string,
+): Promise<OpenSubjectSession | null> {
+  const [row] = await db
+    .select()
+    .from(memoriesTable)
+    .where(
+      and(
+        eq(memoriesTable.childId, childId),
+        eq(memoriesTable.type, "open_subject_session"),
+        eq(memoriesTable.module, module),
+      ),
+    )
+    .orderBy(desc(memoriesTable.createdAt))
+    .limit(1);
+  if (!row) return null;
+  try {
+    const data = JSON.parse(row.content);
+    return { id: row.id, subject: data.subject, question: data.question, grade: data.grade };
+  } catch {
+    return null;
+  }
+}
+
+async function storeOpenSubjectSession(
+  userId: number,
+  childId: number,
+  module: string,
+  subject: "logic" | "english",
+  question: string,
+  grade: number,
+): Promise<void> {
+  // Remove any prior session first
+  await db
+    .delete(memoriesTable)
+    .where(
+      and(
+        eq(memoriesTable.childId, childId),
+        eq(memoriesTable.type, "open_subject_session"),
+        eq(memoriesTable.module, module),
+      ),
+    )
+    .catch(() => {});
+  await db
+    .insert(memoriesTable)
+    .values({
+      userId,
+      childId,
+      type: "open_subject_session",
+      content: JSON.stringify({ subject, question, grade }),
+      module,
+    })
+    .catch(() => {});
+}
+
+async function clearOpenSubjectSession(childId: number, module: string): Promise<void> {
+  await db
+    .delete(memoriesTable)
+    .where(
+      and(
+        eq(memoriesTable.childId, childId),
+        eq(memoriesTable.type, "open_subject_session"),
+        eq(memoriesTable.module, module),
+      ),
+    )
+    .catch(() => {});
+}
+
 // ─── Intent Router ───────────────────────────────────────────────────────────
 
 function detectIntent(
@@ -265,10 +350,15 @@ function detectIntent(
     if (quickAction === "math") {
       console.log("[QUICK_ACTION] detected: math button");
       return "new_math_task";
-    } else {
-      // reading, logic, english → safe placeholder reply via OpenAI
-      console.log("[QUICK_ACTION] detected:", quickAction, "→ routing to OpenAI");
-      return "unknown";
+    } else if (quickAction === "reading") {
+      console.log("[QUICK_ACTION] detected: reading → new_reading_task");
+      return "new_reading_task";
+    } else if (quickAction === "logic") {
+      console.log("[QUICK_ACTION] detected: logic → new_logic_task");
+      return "new_logic_task";
+    } else if (quickAction === "english") {
+      console.log("[QUICK_ACTION] detected: english → new_english_task");
+      return "new_english_task";
     }
   }
 
@@ -531,12 +621,17 @@ function getCharEmoji(aiCharacter?: string): string {
 function isQuickActionButton(m: string, lang: Lang): "math" | "reading" | "logic" | "english" | null {
   // Detect quick-action buttons from Junior chat UI
   const normalized = m.toLowerCase().trim();
-  
+
   if (lang === "bg") {
     if (normalized === "помогни ми с математика") return "math";
     if (normalized === "да четем заедно") return "reading";
     if (normalized === "задай ми логически въпрос") return "logic";
     if (normalized === "упражнявай с мен английски") return "english";
+    // .includes() guards for minor whitespace/prefix variants
+    if (normalized.includes("помогни ми с математика")) return "math";
+    if (normalized.includes("да четем заедно")) return "reading";
+    if (normalized.includes("задай ми логически въпрос")) return "logic";
+    if (normalized.includes("упражнявай с мен английски")) return "english";
   } else if (lang === "en") {
     if (normalized === "help me with math") return "math";
     if (normalized === "let's read together") return "reading";
@@ -795,6 +890,60 @@ async function awardXp(
     .catch(() => {});
 }
 
+// ─── Subject Task Helpers ──────────────────────────────────────────────────────
+
+function getCharacterName(aiCharacter: string | undefined, lang: Lang): string {
+  const names: Record<string, Record<Lang, string>> = {
+    panda: { bg: "AYA Панда", en: "AYA Panda", es: "AYA Panda" },
+    robot: { bg: "AYA Робот", en: "AYA Robot", es: "AYA Robot" },
+    fox:   { bg: "AYA Лисица", en: "AYA Fox",   es: "AYA Zorro" },
+    owl:   { bg: "AYA Сова",   en: "AYA Owl",   es: "AYA Búho" },
+  };
+  return names[aiCharacter ?? "panda"]?.[lang] ?? "AYA Панда";
+}
+
+async function generateSubjectQuestion(
+  subject: "logic" | "english",
+  grade: number,
+  charName: string,
+  charEmoji: string,
+  lang: Lang,
+): Promise<string> {
+  if (subject === "logic") {
+    const systemPrompt = lang === "bg"
+      ? `Ти си ${charName} ${charEmoji}, приятелски учител за деца. Задай ВЕДНАГА една логическа гатанка или задача за мислене, подходяща за ${grade} клас. Пиши на чист съвременен БЪЛГАРСКИ. Задавай въпроса ДИРЕКТНО — без въведение, без "Готов ли си?". Гатанката трябва да е кратка и забавна.`
+      : `You are ${charName} ${charEmoji}, a friendly tutor. Ask ONE logical thinking puzzle for grade ${grade}. Ask DIRECTLY — no introduction, no "Are you ready?". Keep it short and fun.`;
+    const fallback = lang === "bg"
+      ? `${charEmoji} Колко крака имат 3 котки? Брой внимателно! 🐱`
+      : `${charEmoji} If 3 cats each have 4 legs, how many legs are there in total?`;
+    return getAIResponseWithSystemPrompt(systemPrompt, "generate", fallback, 150);
+  } else {
+    const systemPrompt = `Ти си ${charName} ${charEmoji}, приятелски учител. Дай ВЕДНАГА едно кратко упражнение по АНГЛИЙСКИ за дете от ${grade} клас. Инструкциите напиши на БЪЛГАРСКИ, но самото упражнение на АНГЛИЙСКИ. Започни ДИРЕКТНО с упражнението — без въведение. Примери: "Преведи на английски: котка", "Попълни: I ___ happy (am/is)", "Кажи на английски: синьо, червено, зелено".`;
+    const fallback = `${charEmoji} Преведи на английски: котка, куче, птица 🐱🐶🐦`;
+    return getAIResponseWithSystemPrompt(systemPrompt, "generate", fallback, 150);
+  }
+}
+
+async function evaluateSubjectAnswer(
+  subject: "logic" | "english",
+  question: string,
+  answer: string,
+  grade: number,
+  charName: string,
+  charEmoji: string,
+  lang: Lang,
+): Promise<string> {
+  const systemPrompt = subject === "logic"
+    ? (lang === "bg"
+        ? `Ти си ${charName} ${charEmoji}, приятелски учител. Зададе на детето тази гатанка: "${question}". Детето отговори: "${answer}". Оцени отговора кратко (1-3 изречения) на БЪЛГАРСКИ. Ако е вярно — похвали го топло. Ако е грешно — дай малък намек без да казваш отговора директно. Бъди окуражаващ и позитивен!`
+        : `You are ${charName} ${charEmoji}, a friendly tutor. You asked: "${question}". The child answered: "${answer}". Evaluate briefly (1-3 sentences). If correct — praise warmly. If wrong — give a hint without revealing the answer.`)
+    : `Ти си ${charName} ${charEmoji}, приятелски учител. Зададе това упражнение по английски: "${question}". Детето отговори: "${answer}". Оцени отговора кратко на БЪЛГАРСКИ (1-3 изречения). Ако е вярно — похвали топло. Ако е грешно — поправи с кратко обяснение. Бъди мил и окуражаващ!`;
+  const fallback = lang === "bg"
+    ? `${charEmoji} Добре се опита! Нека опитаме още веднъж заедно! 🌟`
+    : `${charEmoji} Good try! Let's work through it together! 🌟`;
+  return getAIResponseWithSystemPrompt(systemPrompt, answer, fallback, 150);
+}
+
 // ─── Main Handler ─────────────────────────────────────────────────────────────
 
 export async function handleJuniorChat(
@@ -968,28 +1117,70 @@ export async function handleJuniorChat(
   // be routed to OpenAI free-chat, never reaching the lesson evaluator.
   const bgLessonState = await readBulgarianLessonState(childId, module);
 
+  // Also read any active logic/english open session (parallel context)
+  const openSubjectSession = await readOpenSubjectSession(childId, module);
+
   // ── QUICK ACTION CONTEXT SWITCH ───────────────────────────────────────────
   // Quick action buttons ("Задай ми логически въпрос", "Помогни ми с математика",
-  // "Да четем заедно") must OVERRIDE any currently active lesson context.
-  // Without this check, the BG lesson evaluator below would intercept these
-  // messages and silently treat them as wrong answers to the active question.
+  // "Да четем заедно") must OVERRIDE any currently active lesson/session context.
   const quickAction = isQuickActionButton(msg, lang);
-  if (quickAction && bgLessonState) {
+  if (quickAction && (bgLessonState || openSubjectSession)) {
     console.log("[JUNIOR_CHAT] quick_action_context_switch", {
       quickAction,
-      clearingBgLesson: true,
-      topicId: bgLessonState.topicId,
+      clearingBgLesson: !!bgLessonState,
+      clearingOpenSession: !!openSubjectSession,
     });
     await clearBulgarianLesson(childId, module);
+    await clearOpenSubjectSession(childId, module);
+  }
+
+  // ── NEW READING TASK ───────────────────────────────────────────────────────
+  if (intent === "new_reading_task") {
+    const grade = context.grade ?? 1;
+    const topicId = grade <= 2 ? "reading_comprehension_basic" : "reading_comprehension_extended";
+    const charEmoji = getCharEmoji(context.aiCharacter);
+    await clearActiveQuestion(childId, module);
+    await clearOpenSubjectSession(childId, module);
+    await storeBulgarianLesson(userId, childId, module, topicId, grade);
+    console.log("[JUNIOR_CHAT] new_reading_task", { topicId, grade });
+    return getBulgarianLessonPrompt(grade, topicId as any, childName, charEmoji, 0);
+  }
+
+  // ── NEW LOGIC TASK ─────────────────────────────────────────────────────────
+  if (intent === "new_logic_task") {
+    const grade = context.grade ?? 1;
+    const charEmoji = getCharEmoji(context.aiCharacter);
+    const charName = getCharacterName(context.aiCharacter, lang);
+    await clearActiveQuestion(childId, module);
+    await clearBulgarianLesson(childId, module);
+    await clearOpenSubjectSession(childId, module);
+    const question = await generateSubjectQuestion("logic", grade, charName, charEmoji, lang);
+    await storeOpenSubjectSession(userId, childId, module, "logic", question, grade);
+    console.log("[JUNIOR_CHAT] new_logic_task", { grade, questionLen: question.length });
+    return question;
+  }
+
+  // ── NEW ENGLISH TASK ───────────────────────────────────────────────────────
+  if (intent === "new_english_task") {
+    const grade = context.grade ?? 1;
+    const charEmoji = getCharEmoji(context.aiCharacter);
+    const charName = getCharacterName(context.aiCharacter, lang);
+    await clearActiveQuestion(childId, module);
+    await clearBulgarianLesson(childId, module);
+    await clearOpenSubjectSession(childId, module);
+    const question = await generateSubjectQuestion("english", grade, charName, charEmoji, lang);
+    await storeOpenSubjectSession(userId, childId, module, "english", question, grade);
+    console.log("[JUNIOR_CHAT] new_english_task", { grade, questionLen: question.length });
+    return question;
   }
 
   // ── EARLY EXIT for conversational messages ────────────────────────────────
   // Greetings and unknown inputs must never be evaluated as lesson answers —
-  // UNLESS there is an active Bulgarian lesson (bgLessonState is set, no new
-  // subject was requested, and the message is NOT a quick action button).
-  // Plain one-word answers like "Котката" must fall through to the evaluator.
+  // UNLESS there is an active Bulgarian lesson OR an open subject session
+  // (the child's answer to a logic/english question must be evaluated in context).
   const hasActiveBgLesson = !!(bgLessonState && requestedSubject === null && !quickAction);
-  if ((intent === "small_talk" || intent === "unknown") && !hasActiveBgLesson) {
+  const hasOpenSession = !!(openSubjectSession && !quickAction);
+  if ((intent === "small_talk" || intent === "unknown") && !hasActiveBgLesson && !hasOpenSession) {
     if (state.postSuccessId !== null) {
       await clearPostSuccess(childId, module);
     }
@@ -1010,6 +1201,21 @@ export async function handleJuniorChat(
     console.log("[FREE_CHAT_REPLY_TEXT]", reply);
     console.log("[FREE_CHAT_FALLBACK_USED]", intent === "unknown");
     return reply;
+  }
+
+  // ── OPEN SUBJECT SESSION ANSWER (logic / english) ─────────────────────────
+  // When a logic or english session is active, evaluate the child's answer
+  // with the question as context, then clear the session.
+  if (openSubjectSession && !quickAction) {
+    const { subject, question, grade } = openSubjectSession;
+    const charName = getCharacterName(context.aiCharacter, lang);
+    const charEmoji = getCharEmoji(context.aiCharacter);
+    console.log("[JUNIOR_CHAT] open_subject_session_answer", { subject, grade });
+    const feedback = await evaluateSubjectAnswer(
+      subject, question, msg, grade, charName, charEmoji, lang,
+    );
+    await clearOpenSubjectSession(childId, module);
+    return feedback;
   }
 
   // ── BULGARIAN_LESSON_ANSWER ────────────────────────────────────────────────

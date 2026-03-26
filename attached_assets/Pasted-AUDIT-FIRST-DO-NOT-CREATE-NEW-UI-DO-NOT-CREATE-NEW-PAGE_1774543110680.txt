@@ -1,0 +1,96 @@
+AUDIT FIRST. DO NOT CREATE NEW UI. DO NOT CREATE NEW PAGES. DO NOT DUPLICATE EXISTING LESSON SYSTEMS.
+
+Goal:
+Generate initial real seed lesson content for the EXISTING AYA Junior architecture, using the already existing single-source-of-truth structure.
+
+Important constraints:
+- Reuse the existing content architecture
+- Do not rebuild curriculum
+- Do not create a second lesson system
+- Do not create a parallel registry
+- Do not touch dashboard, world map, badges, daily plan, subject cards, or chat UI
+- Do not touch auth
+- Do not touch voice/TTS
+- Preview remains the source of truth
+- Make the smallest content-only change possible
+
+Task 1 — Audit existing content files
+Find and confirm the exact existing files currently used for:
+1. curriculum registry
+2. lesson content
+3. missions
+4. Grade 2 subject/topic mapping
+
+Expected likely files:
+- curriculum.ts
+- lessonContent.ts
+- missions.ts
+
+Task 2 — Confirm exact Grade 2 subjects already present in UI
+Confirm the existing Grade 2 subjects already shown in Preview and map them to existing content structure:
+- Mathematics
+- Bulgarian Language
+- Reading
+- Logic
+- Environment / Nature
+- English
+
+Task 3 — Generate only seed content, not full-scale content
+Create only a small but real initial seed dataset for Grade 2:
+- Mathematics
+- Bulgarian Language
+- Reading
+
+Do NOT generate content yet for:
+- Logic
+- Environment / Nature
+- English
+unless these already have a clear existing content structure ready.
+
+Task 4 — Minimal content scope
+Generate:
+- 3 math topics
+- 3 Bulgarian topics
+- 2 reading topics
+
+For each topic generate only:
+- 5 lessons max
+- each lesson should include:
+  - id
+  - title
+  - short explanation
+  - one practice task/question
+  - answer / correct result
+  - XP value if existing system already supports it
+
+Important:
+- keep lesson format exactly aligned with the current existing lessonContent.ts structure
+- do not invent a new schema
+- do not duplicate fields that already exist elsewhere
+- do not add AI runtime generation
+- this is static seed content only
+
+Task 5 — Bulgarian curriculum style + game style
+Content should be:
+- aligned with Bulgarian primary school expectations for Grade 2
+- simple, warm, child-friendly
+- game-like and encouraging
+- short and fast-loading
+- suitable for AYA Panda tone
+
+Task 6 — Output safety
+If the current structure is unclear:
+- extend the smallest existing content structure
+- do not invent a second format
+
+Task 7 — Output format
+Return:
+1. files audited
+2. exact file(s) changed
+3. exact Grade 2 topics added
+4. number of lessons added
+5. whether schema was reused without duplication
+6. Preview test steps
+
+Do not publish automatically.
+Do not touch anything outside lesson content unless absolutely required for wiring.

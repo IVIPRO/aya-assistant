@@ -74,6 +74,14 @@ const AYA_KEYFRAMES = `
   15%            { transform: scaleY(0.87); }
 }
 
+/* Pulse: one-shot gentle pop when emotion changes — child-friendly, no jank */
+@keyframes aya-pulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.09) translateY(-3px); }
+  70%  { transform: scale(1.04) translateY(-1px); }
+  100% { transform: scale(1); }
+}
+
 /* Speaking mouth dots — staggered bounce */
 @keyframes aya-dot {
   0%, 100% { transform: translateY(0);   opacity: 0.35; }
@@ -95,6 +103,10 @@ const AYA_KEYFRAMES = `
 }
 .aya-blink {
   animation: aya-blink 0.16s ease-in-out !important;
+}
+.aya-pulse {
+  animation: aya-pulse 0.38s ease-out !important;
+  transform-origin: center bottom;
 }
 .aya-dot-1 { animation: aya-dot 0.8s ease-in-out infinite 0s;    }
 .aya-dot-2 { animation: aya-dot 0.8s ease-in-out infinite 0.15s; }
@@ -138,10 +150,13 @@ export function AyaAvatar({
   text,
   className = "",
 }: AyaAvatarProps) {
-  const [imgFailed,  setImgFailed]  = useState(false);
-  const [isBlinking, setIsBlinking] = useState(false);
-  const blinkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const blinkResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [imgFailed,        setImgFailed]        = useState(false);
+  const [isBlinking,       setIsBlinking]       = useState(false);
+  const [isEmotionChanged, setIsEmotionChanged] = useState(false);
+  const blinkTimerRef      = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const blinkResetRef      = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pulseTimerRef      = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const prevEmotionRef     = useRef<AyaEmotion>(emotion);
 
   /* Inject CSS keyframes once on first mount */
   useEffect(() => {
@@ -176,14 +191,34 @@ export function AyaAvatar({
     };
   }, [visible]);
 
+  /**
+   * Emotion-change pulse — fires a 380 ms one-shot pop whenever the
+   * emotion prop changes to something non-neutral and different from before.
+   * Skipped for idle/neutral changes to avoid noise.
+   */
+  useEffect(() => {
+    if (emotion === prevEmotionRef.current) return;
+    prevEmotionRef.current = emotion;
+    if (emotion === "neutral") return; // no pulse for going back to idle
+    if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current);
+    setIsEmotionChanged(true);
+    pulseTimerRef.current = setTimeout(() => setIsEmotionChanged(false), 400);
+    return () => {
+      if (pulseTimerRef.current) clearTimeout(pulseTimerRef.current);
+    };
+  }, [emotion]);
+
   if (!visible) return null;
 
-  /* Determine which animation class to apply to the image wrapper */
+  /* Determine which animation class to apply to the image wrapper.
+   * Priority (highest first): blink → celebrate → pulse → speaking → idle */
   const isCelebrating = emotion === "celebrate";
   const animClass = isBlinking
     ? "aya-blink"
     : isCelebrating
     ? "aya-celebrate"
+    : isEmotionChanged
+    ? "aya-pulse"
     : speaking
     ? "aya-speaking"
     : "aya-idle";

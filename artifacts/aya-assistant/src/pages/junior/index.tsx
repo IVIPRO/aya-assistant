@@ -444,16 +444,17 @@ type JuniorView = "welcome" | "map" | "subjects" | "chat";
  * AYA Junior Avatar — lesson state → avatar emotion mapping.
  * Reuses the existing teacher state signal; no new state logic.
  *   lesson_start  (talking)     → neutral
- *   correct_answer (happy)      → happy
- *   wrong_answer  (encouraging) → thinking
- *   retry_prompt  (thinking)    → encourage
- *   lesson_complete (happy, high celebrate flag) → celebrate
+ *   correct_answer (happy)      → happy      ✓
+ *   wrong_answer  (encouraging) → encourage  ✓ (was wrong: was "thinking")
+ *   AYA_processing (thinking)   → thinking   ✓ (was wrong: was "encourage")
+ *   celebration_active flag     → celebrate  (via celebrationActive)
  */
 function teacherStateToAyaEmotion(state: TeacherState): AyaEmotion {
   switch (state) {
-    case "happy":       return "happy";
-    case "encouraging": return "thinking";
-    case "thinking":    return "encourage";
+    case "happy":       return "happy";      // correct answer → happy face
+    case "encouraging": return "encourage";  // wrong answer, try again → encourage face
+    case "thinking":    return "thinking";   // AYA processing → thinking face
+    case "talking":     return "neutral";    // AYA speaking → calm face
     default:            return "neutral";
   }
 }
@@ -990,6 +991,9 @@ export function Junior() {
   const badges = (activeChild?.badgesEarned ?? []) as Badge[];
   const childXp = activeChild?.xp ?? 0;
 
+  /* Drive AYA Avatar "celebrate" emotion from badge/streak/level-up events */
+  const { active: celebrationActive } = useCelebration(badges, dailyStreak, level);
+
   const handleSelectCharacter = async (charId: UpdateChildBodyAiCharacter) => {
     if (!activeChildIdResolved) return;
     try {
@@ -1267,7 +1271,11 @@ export function Junior() {
             {/* ── AYA Junior Avatar ─────────────────────────────── */}
             <div className="flex items-center gap-3 mb-3 bg-white/60 border border-yellow-200 rounded-2xl px-4 py-2.5 shadow-sm">
               <AyaAvatar
-                emotion={teacherState === "happy" ? "happy" : teacherStateToAyaEmotion(teacherState)}
+                emotion={
+                  celebrationActive
+                    ? "celebrate"
+                    : teacherStateToAyaEmotion(teacherState)
+                }
                 visible={!!activeChild}
                 speaking={teacherState === "talking"}
               />
@@ -1276,10 +1284,12 @@ export function Junior() {
                   AYA Junior Guide
                 </div>
                 <div className="text-xs text-muted-foreground leading-snug">
-                  {teacherState === "happy"
-                    ? (juniorLang === "bg" ? "Браво! Отлична работа! ⭐" : juniorLang === "es" ? "¡Muy bien! ⭐" : "Great job! ⭐")
+                  {celebrationActive
+                    ? (juniorLang === "bg" ? "Страхотна работа! 🎉" : juniorLang === "es" ? "¡Trabajo increíble! 🎉" : "Amazing work! 🎉")
+                    : teacherState === "happy"
+                    ? (juniorLang === "bg" ? "Браво! ⭐" : juniorLang === "es" ? "¡Muy bien! ⭐" : "Well done! ⭐")
                     : teacherState === "encouraging"
-                    ? (juniorLang === "bg" ? "Хмм, опитай пак! 💭" : juniorLang === "es" ? "¡Inténtalo de nuevo! 💭" : "Hmm, try again! 💭")
+                    ? (juniorLang === "bg" ? "Хмм… опитай пак 🙂" : juniorLang === "es" ? "¡Inténtalo de nuevo! 🙂" : "Hmm, try again! 🙂")
                     : teacherState === "thinking"
                     ? (juniorLang === "bg" ? "Ти можеш! Продължавай! ✨" : juniorLang === "es" ? "¡Tú puedes! ✨" : "You can do it! ✨")
                     : teacherState === "talking"
@@ -1359,9 +1369,18 @@ export function Junior() {
       {activeChild && view !== "chat" && (
         <div className="fixed bottom-6 right-5 z-50">
           <AyaAvatar
-            emotion={teacherStateToAyaEmotion(teacherState)}
+            emotion={celebrationActive ? "celebrate" : teacherStateToAyaEmotion(teacherState)}
             visible={true}
             speaking={teacherState === "talking"}
+            text={
+              celebrationActive
+                ? (juniorLang === "bg" ? "Страхотна работа! 🎉" : "Amazing work! 🎉")
+                : teacherState === "happy"
+                ? (juniorLang === "bg" ? "Браво! ⭐" : "Well done! ⭐")
+                : teacherState === "encouraging"
+                ? (juniorLang === "bg" ? "Опитай пак 🙂" : "Try again! 🙂")
+                : undefined
+            }
           />
         </div>
       )}

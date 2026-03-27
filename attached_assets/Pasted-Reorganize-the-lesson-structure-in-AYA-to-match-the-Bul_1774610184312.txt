@@ -1,0 +1,166 @@
+Reorganize the lesson structure in AYA to match the Bulgarian education stages.
+
+Reference:
+Bulgarian Ministry of Education school stages.
+
+Important:
+Do NOT break existing lessons.
+Do NOT delete current lesson content.
+Only reorganize how lessons are grouped and displayed.
+
+------------------------------------------------
+
+Education stages
+
+Stage 1
+Начален етап
+
+Grades:
+1 class
+2 class
+3 class
+4 class
+
+Stage 2
+Прогимназия
+
+Grades:
+5 class
+6 class
+7 class
+
+------------------------------------------------
+
+1 Menu structure
+
+Update AYA navigation.
+
+Instead of showing all grades together, use two main sections.
+
+Main menu:
+
+Начален етап
+Прогимназия
+
+------------------------------------------------
+
+2 Начален етап section
+
+Inside "Начален етап" show grades:
+
+1 клас  
+2 клас  
+3 клас  
+4 клас
+
+Subjects inside each grade:
+
+Математика  
+Български език  
+Четене  
+
+Later optional:
+
+Околен свят  
+Логически задачи  
+
+------------------------------------------------
+
+3 Прогимназия section
+
+Inside "Прогимназия" show grades:
+
+5 клас  
+6 клас  
+7 клас
+
+Subjects:
+
+Математика  
+Български език  
+Литература  
+
+Later optional:
+
+История  
+География  
+Физика  
+Химия  
+
+------------------------------------------------
+
+4 Lesson structure
+
+Each subject contains lessons.
+
+Example:
+
+Начален етап
+3 клас
+Математика
+
+Урок 1
+Умножение
+
+Урок 2
+Деление
+
+Урок 3
+Текстови задачи
+
+------------------------------------------------
+
+5 Progress tracking
+
+Progress must be stored per grade.
+
+Example:
+
+3 клас
+Математика
+
+Урок 1
+Completed
+
+Урок 2
+In progress
+
+------------------------------------------------
+
+6 AI context
+
+When a child enters a lesson, pass grade context to AI.
+
+Example:
+
+grade = 3
+stage = начален етап
+subject = mathematics
+
+This ensures explanations are age appropriate.
+
+------------------------------------------------
+
+7 Preserve existing features
+
+Do not break:
+
+• homework photo solving
+• chat
+• voice mode
+• avatar reactions
+• reward system
+• interactive lessons
+
+------------------------------------------------
+
+Return after implementation:
+
+1 files modified
+2 updated navigation structure
+3 example lesson path
+4 preview test steps
+
+Feature name:
+
+AYA Education Stage Structure

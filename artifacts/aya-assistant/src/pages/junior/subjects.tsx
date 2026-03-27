@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, BookOpen, Pencil, Brain, MessageCircle, CheckCircle2, Circle, AlertTriangle } from "lucide-react";
-import { elementarySubjects, SUBJECT_ACTIONS_LABELS, type Subject, type Topic } from "@/lib/curriculum";
+import { EDUCATION_STAGES, SUBJECT_ACTIONS_LABELS, type Subject, type Topic } from "@/lib/curriculum";
 import type { LangCode } from "@/lib/i18n";
 import { cn } from "@/components/layout";
 import { LessonViewer } from "./lesson-viewer";
@@ -47,6 +47,11 @@ const WEAK_CHIP: Record<LangCode, string> = {
   de: "Wiederholung",
   fr: "Révision",
 };
+
+function getSubjectsForGrade(grade: number): Subject[] {
+  const stage = EDUCATION_STAGES.find(s => s.grades.includes(grade));
+  return stage?.subjects ?? [];
+}
 
 export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, onStart, onBack }: SubjectPanelProps) {
   const [selected, setSelected] = useState<Subject | null>(null);
@@ -142,7 +147,7 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
               </p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {elementarySubjects.map((subject, idx) => {
+              {getSubjectsForGrade(grade).map((subject, idx) => {
                 const subjectTopics = subject.topics;
                 const doneLessons = subjectTopics.filter(t => getTopicDone(subject.id, t.id)?.lessonDone).length;
                 const totalTopics = subjectTopics.length;

@@ -107,6 +107,29 @@ export const elementarySubjects: Subject[] = [
   },
 ];
 
+export interface EducationStage {
+  id: "stage1" | "stage2";
+  label: Record<LangCode, string>;
+  grades: number[];
+  subjects: Subject[];
+}
+
+export const STAGE_1: EducationStage = {
+  id: "stage1",
+  label: { en: "Elementary Stage", bg: "Начален етап", es: "Etapa Elemental", de: "Grundschule", fr: "Étape Élémentaire" },
+  grades: [1, 2, 3, 4],
+  subjects: elementarySubjects.filter(s => ["mathematics", "bulgarian-language", "reading-literature"].includes(s.id)),
+};
+
+export const STAGE_2: EducationStage = {
+  id: "stage2",
+  label: { en: "Lower Secondary Stage", bg: "Прогимназия", es: "Etapa Secundaria", de: "Sekundarstufe", fr: "Étape Secondaire" },
+  grades: [5, 6, 7],
+  subjects: elementarySubjects.filter(s => ["mathematics", "bulgarian-language", "reading-literature"].includes(s.id)),
+};
+
+export const EDUCATION_STAGES: EducationStage[] = [STAGE_1, STAGE_2];
+
 export const SUBJECT_ACTIONS_LABELS: Record<LangCode, { lessons: string; practice: string; quiz: string; askAya: string; comingSoon: string; chooseTopic: string; backToSubjects: string; noTopicNeeded: string }> = {
   en: { lessons: "Lessons", practice: "Practice", quiz: "Quiz", askAya: "Ask AYA", comingSoon: "Coming Soon", chooseTopic: "Choose a topic", backToSubjects: "← All subjects", noTopicNeeded: "Chat about any topic" },
   bg: { lessons: "Уроци", practice: "Упражнения", quiz: "Тест", askAya: "Питай AYA", comingSoon: "Скоро", chooseTopic: "Избери тема", backToSubjects: "← Всички предмети", noTopicNeeded: "Разговор без тема" },

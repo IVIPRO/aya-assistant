@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout";
 import { Chat } from "@/components/chat";
 import { SubjectPanel } from "./subjects";
+import { StageSelector } from "./stage-selector";
 import { DailyPlanCard } from "@/components/DailyPlanCard";
 import { VideoTeacher } from "@/components/VideoTeacher";
 import { AyaAvatar } from "@/components/AyaAvatar";
@@ -442,7 +443,7 @@ function getGradeLabel(grade: number, country: string): string {
   return `Grade ${grade}`;
 }
 
-type JuniorView = "welcome" | "map" | "subjects" | "chat";
+type JuniorView = "welcome" | "map" | "stages" | "subjects" | "chat";
 
 /**
  * AYA Junior Avatar — lesson state → avatar emotion mapping.
@@ -786,6 +787,7 @@ export function Junior() {
   const { toast } = useToast();
   const [showCharPicker, setShowCharPicker] = useState(false);
   const [view, setView] = useState<JuniorView>("welcome");
+  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [showListeningMode, setShowListeningMode] = useState(false);
@@ -944,6 +946,7 @@ export function Junior() {
   /* ── Sync view changes to teacher state ─────────────────────────── */
   useEffect(() => {
     if (view === "welcome")  handleTeacherStateChange("idle");
+    if (view === "stages")   handleTeacherStateChange("thinking");
     if (view === "subjects") handleTeacherStateChange("thinking");
     if (view === "map")      handleTeacherStateChange("encouraging");
     if (view === "chat")     handleTeacherStateChange("talking");
@@ -1092,7 +1095,7 @@ export function Junior() {
               streak={dailyStreak}
               onEnterWorld={() => setView("map")}
               onChat={() => { setSelectedSubject(null); setSelectedTopic(null); setView("chat"); }}
-              onLessons={() => setView("subjects")}
+              onLessons={() => { setSelectedGrade(activeChild.grade); setView("stages"); }}
               onChangeCompanion={() => setShowCharPicker(true)}
             />
             <div className="max-w-2xl mx-auto">
@@ -1119,10 +1122,20 @@ export function Junior() {
             <p className="text-lg font-medium">{lbl.noChildFound}</p>
             <p className="text-sm">{lbl.noChildFoundHint}</p>
           </motion.div>
+        ) : view === "stages" ? (
+          <StageSelector
+            lang={childLang}
+            currentGrade={selectedGrade ?? activeChild?.grade ?? 2}
+            onSelectGrade={(grade) => {
+              setSelectedGrade(grade);
+              setView("subjects");
+            }}
+            onBack={() => setView("welcome")}
+          />
         ) : view === "subjects" ? (
           <SubjectPanel
             lang={childLang}
-            grade={activeChild?.grade ?? 2}
+            grade={selectedGrade ?? activeChild?.grade ?? 2}
             childId={activeChildIdResolved ?? 0}
             childName={activeChild?.name ?? ""}
             characterEmoji={"👧"}
@@ -1131,7 +1144,7 @@ export function Junior() {
               setSelectedTopic(topic);
               setView("chat");
             }}
-            onBack={() => setView("welcome")}
+            onBack={() => { setSelectedGrade(null); setView("stages"); }}
           />
         ) : view === "map" ? (
           <motion.div key="map" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>

@@ -1220,7 +1220,7 @@ export function Junior() {
         ) : (
           <motion.div key="chat" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             {/* ── Chat view header ─────────────────────────────── */}
-            <div className="flex items-center justify-between mb-6 gap-2">
+            <div className="flex items-center justify-between mb-6 gap-4">
               <button onClick={() => setView("welcome")}
                 className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors flex-shrink-0">
                 <ArrowLeft className="w-4 h-4" /> {lbl.back}

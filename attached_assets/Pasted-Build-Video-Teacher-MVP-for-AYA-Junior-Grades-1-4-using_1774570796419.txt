@@ -1,0 +1,133 @@
+Build Video Teacher MVP for AYA Junior (Grades 1–4) using the EXISTING app architecture. Do not duplicate already-built learning logic.
+
+Context:
+- AYA Junior chat/lesson engine is already working.
+- Quick actions already work for Math, Reading, Logic, English.
+- Answer evaluation already works.
+- Voice input already works.
+- Do NOT rebuild lesson logic, routing, progress, or quick actions.
+
+Goal:
+Add a lightweight Video Teacher MVP layer on top of the existing AYA Junior experience.
+
+Important product requirement:
+This is NOT realtime AI avatar generation.
+This MVP must use PREDEFINED short teacher video clips mapped to lesson states.
+
+Use the cheapest, safest, most stable MVP architecture.
+
+What to build:
+
+1. Create a Video Teacher system that can display short pre-recorded clips based on lesson state.
+
+2. Add a small reusable frontend component for Video Teacher display in Junior mode.
+
+3. Add a simple mapping layer from lesson/chat state -> video clip key.
+
+4. Add graceful fallback:
+- if no video exists for a state, show existing text/chat/voice flow normally
+- app must continue working perfectly without video
+
+Do NOT:
+- redesign the whole UI
+- break current Junior chat
+- replace current chat engine
+- generate videos with AI
+- add heavy realtime streaming/video tech
+- add expensive infrastructure
+- rebuild database unnecessarily
+- duplicate lesson logic already implemented
+
+Preferred MVP architecture:
+
+Use a simple predefined state-based video system with keys such as:
+
+- greeting
+- lesson_start
+- correct_answer
+- wrong_answer
+- encouragement
+- try_again
+- next_task
+- lesson_complete
+- couldnt_hear
+- hint
+
+Optional subject-specific variants if easy:
+- math_start
+- reading_start
+- logic_start
+- english_start
+
+Implementation requirements:
+
+A. Frontend
+- Add a reusable VideoTeacher component in the existing frontend
+- It should accept:
+  - visible
+  - videoKey
+  - optional subtitle/text
+  - optional loop false by default
+- Use local/static assets path or existing asset structure
+- Do not hardcode one huge component for everything
+
+B. Video mapping
+Create a lightweight config/map such as:
+videoTeacherMap[stateKey] = assetPath
+
+Examples:
+- greeting -> /attached_assets/video-teacher/greeting.mp4
+- correct_answer -> /attached_assets/video-teacher/correct_answer.mp4
+- wrong_answer -> /attached_assets/video-teacher/wrong_answer.mp4
+
+If files do not exist yet, still implement the architecture with placeholder paths and safe fallback behavior.
+
+C. Trigger logic
+Find the existing Junior state flow and connect Video Teacher to major moments only:
+- entering Junior screen / greeting
+- starting a lesson/task
+- correct answer
+- incorrect answer
+- retry prompt
+- lesson complete
+- voice not heard
+
+Do this with MINIMAL intrusion into existing logic.
+
+D. No duplication
+Reuse current lesson/chat/evaluation results.
+Video Teacher must react to existing events/states, not reimplement them.
+
+E. Safe fallback
+If a video file is missing:
+- do not crash
+- hide video player or show placeholder state silently
+- keep chat/text/voice working
+
+F. Cost/performance
+- No new paid APIs
+- No streaming avatar APIs
+- No heavy animation frameworks unless already installed
+- Keep it lightweight for Replit Preview and mobile app migration later
+
+Deliverables required from you:
+1. Exact files created
+2. Exact files modified
+3. Where the Video Teacher component was inserted
+4. How lesson states map to video keys
+5. How fallback works when video is missing
+6. Confirmation that existing lesson/chat logic was NOT duplicated
+7. Manual Preview test steps
+
+Technical guidance:
+- Prefer a clean MVP implementation
+- Prefer static asset playback
+- Prefer composable code
+- Keep changes small and reversible
+
+If needed, create placeholder video paths but do not invent that real video assets already exist.
+
+Name this feature clearly as:
+AYA Junior Video Teacher MVP
+
+Do not publish automatically.

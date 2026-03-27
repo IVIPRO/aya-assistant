@@ -3,9 +3,12 @@ import { Chat } from "@/components/chat";
 import { SubjectPanel } from "./subjects";
 import { DailyPlanCard } from "@/components/DailyPlanCard";
 import { AnimatedTeacher } from "@/components/AnimatedTeacher";
+import { VideoTeacher } from "@/components/VideoTeacher";
 import { ListeningMode } from "@/components/ListeningMode";
 import { CelebrationCard } from "@/components/CelebrationCard";
 import type { TeacherState } from "@/components/AnimatedTeacher";
+import { teacherStateToVideoKey } from "@/lib/videoTeacherMap";
+import type { VideoKey } from "@/lib/videoTeacherMap";
 import { Link } from "wouter";
 import { Star, Trophy, Sparkles, Map, MessageCircle, Lock, CheckCircle2, Mic, Volume2, Video, ChevronRight, ArrowLeft, BookOpen } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -652,11 +655,15 @@ function VoiceReadySection({
   freeConversationMode,
   onTalkToggle,
   onOpenListening,
+  videoTeacherEnabled,
+  onToggleVideoTeacher,
 }: {
   lbl: typeof JUNIOR_LABELS["en"];
   freeConversationMode: boolean;
   onTalkToggle: () => void;
   onOpenListening: () => void;
+  videoTeacherEnabled: boolean;
+  onToggleVideoTeacher: () => void;
 }) {
   const voiceFeatures = [
     {
@@ -693,19 +700,27 @@ function VoiceReadySection({
       icon: Video,
       title: lbl.voiceVideoTitle,
       desc: lbl.voiceVideoDesc,
-      color: "from-purple-50 to-violet-50 border-purple-200",
-      iconColor: "text-purple-500 bg-purple-100",
-      isActive: false,
-      onClick: undefined,
-      badge: lbl.comingSoon,
-      badgeColor: "bg-white/60 text-muted-foreground border-border/30",
+      color: videoTeacherEnabled
+        ? "from-purple-100 to-violet-100 border-purple-400"
+        : "from-purple-50 to-violet-50 border-purple-200",
+      iconColor: videoTeacherEnabled
+        ? "text-white bg-purple-500"
+        : "text-purple-500 bg-purple-100",
+      isActive: true,
+      onClick: onToggleVideoTeacher,
+      badge: videoTeacherEnabled ? "🎬 ON" : "✨ Active",
+      badgeColor: videoTeacherEnabled
+        ? "bg-purple-500 text-white border-purple-600"
+        : "bg-purple-100 text-purple-700 border-purple-200",
     },
   ];
   return (
     <div className="mt-8">
       <div className="flex items-center gap-2 mb-4">
         <div className="h-px flex-1 bg-border/40" />
-        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-3">{lbl.comingSoon}</span>
+        <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest px-3">
+          {lbl.voiceTalkTitle}
+        </span>
         <div className="h-px flex-1 bg-border/40" />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -834,6 +849,66 @@ export function Junior() {
         setTeacherMsg(undefined);
       }, 6000);
     }
+  }, []);
+
+  /* ── Video Teacher MVP ──────────────────────────────────────────────── */
+  const [videoTeacherEnabled, setVideoTeacherEnabled] = useState(false);
+  const [activeVideoKey,      setActiveVideoKey]      = useState<VideoKey | null>(null);
+  const prevTeacherStateRef   = useRef<TeacherState>("idle");
+  const videoClearTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  /** Map selectedSubject id → video category for subject-specific clips */
+  function subjectToVideoCategory(subjectId: string | undefined): "math" | "reading" | "logic" | "english" | null {
+    if (!subjectId) return null;
+    if (subjectId.includes("math"))                              return "math";
+    if (subjectId.includes("reading") || subjectId.includes("bulgarian") || subjectId.includes("literat")) return "reading";
+    if (subjectId.includes("logic"))                            return "logic";
+    if (subjectId.includes("english"))                          return "english";
+    return null;
+  }
+
+  const triggerVideo = useCallback((key: VideoKey) => {
+    if (videoClearTimerRef.current) clearTimeout(videoClearTimerRef.current);
+    setActiveVideoKey(key);
+    /* Auto-dismiss after 8 s if the clip ends early or never loaded */
+    videoClearTimerRef.current = setTimeout(() => setActiveVideoKey(null), 8000);
+  }, []);
+
+  /* Map teacher state transitions → video keys */
+  useEffect(() => {
+    const prev = prevTeacherStateRef.current;
+    prevTeacherStateRef.current = teacherState;
+
+    if (!videoTeacherEnabled) return;
+    if (teacherState === prev) return;        // no real transition
+
+    const inChat   = view === "chat";
+    const subjCat  = subjectToVideoCategory(selectedSubject?.id);
+    const key      = teacherStateToVideoKey(teacherState, inChat, subjCat);
+    if (key) triggerVideo(key);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [teacherState, videoTeacherEnabled]);
+
+  /* Show greeting clip when user enters welcome screen with Video Teacher on */
+  useEffect(() => {
+    if (view !== "welcome" || !videoTeacherEnabled || !activeChildId) return;
+    let clearTimer: ReturnType<typeof setTimeout>;
+    const t = setTimeout(() => {
+      setActiveVideoKey("greeting");
+      clearTimer = setTimeout(() => setActiveVideoKey(null), 8000);
+    }, 800);
+    return () => {
+      clearTimeout(t);
+      clearTimeout(clearTimer);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, videoTeacherEnabled, activeChildId]);
+
+  const handleToggleVideoTeacher = useCallback(() => {
+    setVideoTeacherEnabled(prev => {
+      if (prev) setActiveVideoKey(null); // hide immediately when turning off
+      return !prev;
+    });
   }, []);
 
   const { data: children = [], isLoading: childrenLoading, refetch } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
@@ -1174,6 +1249,8 @@ export function Junior() {
               lbl={lbl}
               freeConversationMode={conversationMode === "free"}
               onTalkToggle={handleFreeConversationToggle}
+              videoTeacherEnabled={videoTeacherEnabled}
+              onToggleVideoTeacher={handleToggleVideoTeacher}
               onOpenListening={() => {
                 // Prepare content to read from current context
                 let contentToRead = "";
@@ -1213,6 +1290,14 @@ export function Junior() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* ── Video Teacher MVP ─────────────────────────────────── */}
+      <VideoTeacher
+        visible={videoTeacherEnabled && activeVideoKey !== null}
+        videoKey={activeVideoKey}
+        loop={false}
+        onEnded={() => setActiveVideoKey(null)}
+      />
 
       {activeChild && (
         <AnimatedTeacher

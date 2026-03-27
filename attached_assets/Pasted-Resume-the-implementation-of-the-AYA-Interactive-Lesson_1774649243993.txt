@@ -1,0 +1,117 @@
+Resume the implementation of the AYA Interactive Lesson Engine from the last checkpoint.
+
+IMPORTANT:
+Do NOT restart the implementation.
+Continue from the point where the previous task stopped.
+
+The project already began implementing the Interactive Lesson Engine but the process was interrupted.
+
+------------------------------------------------
+
+STEP 1 — DETECT CURRENT STATE
+
+Inspect the repository and detect what has already been implemented for the Interactive Lesson Engine.
+
+Check for:
+
+lesson state logic  
+lesson step flow  
+lesson intro logic  
+task prompt logic  
+feedback logic  
+hint logic  
+speech triggers  
+avatar interaction logic  
+
+Identify:
+
+1. completed parts
+2. partially implemented files
+3. unfinished TODO sections
+4. missing connections
+5. any duplicate logic that might have been created
+
+------------------------------------------------
+
+STEP 2 — CONTINUE IMPLEMENTATION
+
+Continue building the Interactive Lesson Engine without rewriting completed parts.
+
+Ensure the engine supports the full lesson flow:
+
+1. lesson intro
+2. explanation step
+3. guided example
+4. first task
+5. feedback
+6. hint if wrong
+7. retry step
+8. encouragement
+9. next task
+10. lesson completion
+
+AYA must guide the child through the lesson instead of only displaying tasks.
+
+------------------------------------------------
+
+STEP 3 — CONNECT AVATAR + VOICE
+
+Integrate the lesson states with:
+
+AYA avatar speaking animation  
+spoken explanations  
+task guidance speech  
+correct answer reactions  
+wrong answer encouragement  
+
+Speech must use Bulgarian suitable for grades 1–4.
+
+Example tone:
+
+"Нека го направим заедно."
+
+"Опитай ти."
+
+"Браво!"
+
+"Ще ти покажа по-лесен начин."
+
+------------------------------------------------
+
+STEP 4 — VERIFY INTEGRATION
+
+Ensure the engine works correctly with:
+
+existing lesson UI  
+daily plan system  
+adaptive learning logic if present  
+AYA avatar system  
+
+Do not break any existing lesson rendering.
+
+------------------------------------------------
+
+STEP 5 — TEST FLOW
+
+Simulate a full lesson flow to verify:
+
+lesson intro works  
+AYA explains tasks  
+speech triggers correctly  
+feedback works  
+retry logic works  
+lesson completion works  
+
+------------------------------------------------
+
+RETURN A REPORT
+
+1. files modified
+2. unfinished parts completed
+3. reused code
+4. duplicate logic avoided
+5. test steps to verify the lesson engine
+
+Feature name:
+
+AYA Interactive Lesson Engine (Resumed Implementation)

@@ -490,17 +490,19 @@ function AyaSpeech({ emotion, text, speaking }: { emotion: AyaEmotion; text: str
 
 /* ─── Action Button ─────────────────────────────────────────────── */
 
-function ActionBtn({ onClick, subject, children, disabled, variant = "primary" }: {
+function ActionBtn({ onClick, subject, children, disabled, variant = "primary", testId }: {
   onClick: () => void;
   subject: Subject;
   children: React.ReactNode;
   disabled?: boolean;
   variant?: "primary" | "ghost";
+  testId?: string;
 }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
+      data-testid={testId}
       className={cn(
         "w-full py-3.5 rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2",
         variant === "primary"
@@ -801,7 +803,7 @@ function InteractiveLessonEngine({
 
           {/* ── Greeting ── */}
           {phase.kind === "greeting" && (
-            <ActionBtn onClick={fromGreeting} subject={subject}>
+            <ActionBtn onClick={fromGreeting} subject={subject} testId="btn-ready">
               {l.ready} <ChevronRight className="w-5 h-5" />
             </ActionBtn>
           )}
@@ -819,7 +821,7 @@ function InteractiveLessonEngine({
                   <span>{data.lesson.tip}</span>
                 </div>
               )}
-              <ActionBtn onClick={fromExplanation} subject={subject}>
+              <ActionBtn onClick={fromExplanation} subject={subject} testId="btn-understood">
                 {l.understood} <ChevronRight className="w-5 h-5" />
               </ActionBtn>
               {topicContext === "strong" && ctxD.skipExplanationBtn && (
@@ -859,11 +861,11 @@ function InteractiveLessonEngine({
                   </AnimatePresence>
                 </div>
                 {!phase.revealed ? (
-                  <ActionBtn onClick={() => revealExample(phase.idx)} subject={subject}>
+                  <ActionBtn onClick={() => revealExample(phase.idx)} subject={subject} testId="btn-see-answer">
                     <Eye className="w-4 h-4" /> {l.seeAnswer}
                   </ActionBtn>
                 ) : (
-                  <ActionBtn onClick={() => fromExample(phase.idx)} subject={subject}>
+                  <ActionBtn onClick={() => fromExample(phase.idx)} subject={subject} testId="btn-next-example">
                     {l.nextExample} <ChevronRight className="w-4 h-4" />
                   </ActionBtn>
                 )}
@@ -900,6 +902,7 @@ function InteractiveLessonEngine({
                       key={phase.idx}
                       autoFocus
                       type="text"
+                      data-testid="practice-input"
                       value={answerInput}
                       onChange={e => setAnswerInput(e.target.value)}
                       placeholder={l.placeholder}
@@ -909,6 +912,7 @@ function InteractiveLessonEngine({
                     <button
                       onClick={() => checkPractice(phase.idx, attempts)}
                       disabled={!answerInput.trim()}
+                      data-testid="btn-check"
                       className={cn("px-5 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-40", subject.bgClass, subject.colorClass, "border-2", subject.borderClass, "hover:opacity-90")}
                     >
                       {l.check}
@@ -922,7 +926,7 @@ function InteractiveLessonEngine({
                       <CheckCircle2 className="w-5 h-5" />
                       <span>{lang === "bg" ? "Правилно!" : "Correct!"}</span>
                     </div>
-                    <ActionBtn onClick={() => fromPractice(phase.idx, feedback)} subject={subject}>
+                    <ActionBtn onClick={() => fromPractice(phase.idx, feedback)} subject={subject} testId="btn-next-problem">
                       {phase.idx + 1 < problems.length ? l.nextProblem : (lang === "bg" ? "Продължи →" : "Continue →")}
                       <ChevronRight className="w-4 h-4" />
                     </ActionBtn>
@@ -946,11 +950,12 @@ function InteractiveLessonEngine({
                         onClick={() => { go({ kind: "practice", idx: phase.idx, attempts: phase.attempts, feedback: "none" }, pick(d.practiceWrong)); }}
                         subject={subject}
                         variant={(topicContext === "weak" && attempts >= 1) || attempts >= 2 ? "ghost" : "primary"}
+                        testId="btn-retry"
                       >
                         <RotateCcw className="w-4 h-4" /> {l.retry}
                       </ActionBtn>
                       {attempts >= 1 && (
-                        <ActionBtn onClick={() => fromPractice(phase.idx, feedback)} subject={subject} variant="ghost">
+                        <ActionBtn onClick={() => fromPractice(phase.idx, feedback)} subject={subject} variant="ghost" testId="btn-skip-problem">
                           {l.nextProblem}
                         </ActionBtn>
                       )}
@@ -999,7 +1004,7 @@ function InteractiveLessonEngine({
                   </motion.div>
                 )}
 
-                <ActionBtn onClick={() => fromHinting(phase.practiceIdx, phase.attempts)} subject={subject}>
+                <ActionBtn onClick={() => fromHinting(phase.practiceIdx, phase.attempts)} subject={subject} testId="btn-retry-after-hint">
                   <RotateCcw className="w-4 h-4" />
                   {lang === "bg" ? "Разбрах! Опитвам пак →" : lang === "de" ? "Verstanden! Nochmal →" : lang === "fr" ? "Compris! Réessayer →" : lang === "es" ? "¡Entendido! Reintentar →" : "Got it! Try again →"}
                 </ActionBtn>
@@ -1030,7 +1035,7 @@ function InteractiveLessonEngine({
                   {lang === "bg" ? `${consecutiveCorrectRef.current} верни подред!` : lang === "de" ? `${consecutiveCorrectRef.current} richtig hintereinander!` : lang === "fr" ? `${consecutiveCorrectRef.current} corrects d'affilée!` : lang === "es" ? `¡${consecutiveCorrectRef.current} correctas seguidas!` : `${consecutiveCorrectRef.current} correct in a row!`}
                 </p>
               </motion.div>
-              <ActionBtn onClick={() => fromCelebrate(phase.nextPracticeIdx)} subject={subject}>
+              <ActionBtn onClick={() => fromCelebrate(phase.nextPracticeIdx)} subject={subject} testId="btn-celebrate-continue">
                 <Sparkles className="w-4 h-4" />
                 {lang === "bg" ? "Продължаваме! →" : lang === "de" ? "Weiter! →" : lang === "fr" ? "Continuer! →" : lang === "es" ? "¡Continuar! →" : "Keep going! →"}
               </ActionBtn>
@@ -1046,7 +1051,7 @@ function InteractiveLessonEngine({
                   {lang === "bg" ? `${questions.length} въпроса` : `${questions.length} questions`}
                 </p>
               </div>
-              <ActionBtn onClick={() => go({ kind: "quiz", idx: 0, selected: null }, pick(d.quizIntro))} subject={subject}>
+              <ActionBtn onClick={() => go({ kind: "quiz", idx: 0, selected: null }, pick(d.quizIntro))} subject={subject} testId="btn-start-quiz">
                 {l.startQuiz} <Sparkles className="w-4 h-4" />
               </ActionBtn>
             </div>
@@ -1080,6 +1085,7 @@ function InteractiveLessonEngine({
                     return (
                       <button
                         key={i}
+                        data-testid={`quiz-option-${i}`}
                         onClick={() => !revealed && selectQuiz(phase.idx, i)}
                         disabled={revealed}
                         className={cn(
@@ -1099,7 +1105,11 @@ function InteractiveLessonEngine({
                 </div>
                 {revealed && (
                   <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}>
-                    <ActionBtn onClick={() => fromQuiz(phase.idx)} subject={subject}>
+                    <ActionBtn
+                      onClick={() => fromQuiz(phase.idx)}
+                      subject={subject}
+                      testId={phase.idx + 1 < questions.length ? "btn-next-question" : "btn-finish"}
+                    >
                       {phase.idx + 1 < questions.length ? l.nextQuestion : (lang === "bg" ? "Финиш! 🏁" : "Finish! 🏁")}
                       <ChevronRight className="w-4 h-4" />
                     </ActionBtn>
@@ -1148,10 +1158,10 @@ function InteractiveLessonEngine({
                   </div>
                 </motion.div>
                 <CuriosityCardDisplay card={curiosityCard} lang={lang} />
-                <ActionBtn onClick={onBack} subject={subject}>
+                <ActionBtn onClick={onBack} subject={subject} testId="btn-continue-lesson">
                   <Star className="w-4 h-4" /> {d.continueLesson}
                 </ActionBtn>
-                <ActionBtn onClick={onAskAya} subject={subject} variant="ghost">
+                <ActionBtn onClick={onAskAya} subject={subject} variant="ghost" testId="btn-ask-aya">
                   <Sparkles className="w-4 h-4" /> {d.askAya}
                 </ActionBtn>
               </div>

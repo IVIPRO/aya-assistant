@@ -57,6 +57,8 @@ type Phase =
   | { kind: "explanation" }
   | { kind: "example"; idx: number; revealed: boolean }
   | { kind: "practice"; idx: number; attempts: number; feedback: "none" | "correct" | "wrong" }
+  | { kind: "hinting"; practiceIdx: number; attempts: number }
+  | { kind: "celebrate"; nextPracticeIdx: number }
   | { kind: "quiz-intro" }
   | { kind: "quiz"; idx: number; selected: number | null }
   | { kind: "completion"; practiceCorrect: number; quizCorrect: number; total: { practice: number; quiz: number } };
@@ -67,6 +69,8 @@ function phaseEmotion(p: Phase): AyaEmotion {
     case "explanation": return "neutral";
     case "example":     return p.revealed ? "encourage" : "thinking";
     case "practice":    return p.feedback === "correct" ? "happy" : p.feedback === "wrong" ? "encourage" : "neutral";
+    case "hinting":     return "thinking";
+    case "celebrate":   return "celebrate";
     case "quiz-intro":  return "happy";
     case "quiz":        return p.selected === null ? "thinking" : "neutral";
     case "completion":  return "celebrate";
@@ -163,13 +167,19 @@ const D: Record<LangCode, {
   practiceLead: string[];
   practiceCorrect: string[];
   practiceWrong: string[];
-  practiceWrong2: string[];       // 2nd attempt
+  practiceWrong2: string[];
+  hinting: string[];
+  retryAfterHint: string[];
+  celebrate: string[];
+  celebrateLead: string[];
   quizIntro: string[];
   quizCorrect: string[];
   quizWrong: string[];
   completionHigh: (topic: string) => string;
   completionMid: (topic: string) => string;
   completionLow: (topic: string) => string;
+  continueLesson: string;
+  askAya: string;
 }> = {
   bg: {
     greeting: ["Здравей! Готов ли си за нов урок? 🎉", "Хей! Днес ще научим нещо интересно!", "Здравей! Радвам се да те видя отново!"],
@@ -181,12 +191,18 @@ const D: Record<LangCode, {
     practiceCorrect: ["Браво! Правилно! 🌟", "Отлично! Ти го направи!", "Перфектно! Продължавай така!", "Супер! Знаех, че можеш!"],
     practiceWrong: ["Почти! Помисли малко повече.", "Не съвсем — хайде да опитаме пак.", "Близо си! Погледни отново условието."],
     practiceWrong2: ["Нека ти дам подсказка...", "Не се притеснявай — ето ти помощ:", "Заедно ще го намерим!"],
+    hinting: ["Нека помислим заедно — ето подсказка:", "Ще го разделим на малки стъпки.", "Първо ще ти покажа как се прави."],
+    retryAfterHint: ["Сега е твой ред! Опитай пак.", "Хайде, след подсказката ще успееш!", "Нека го опитаме отново заедно."],
+    celebrate: ["Невероятно! Два поредни верни отговора! 🌟🌟", "Ти се справяш страхотно! Продължавай! 🎉", "Чудесно! Ти го правиш перфектно! ⭐"],
+    celebrateLead: ["Продължаваме напред!", "Следваща задача!", "Браво — напред!"],
     quizIntro: ["Готов ли си за малък тест? 📝", "Хайде да видим какво научи!", "Нека проверим знанията ти — не се страхувай!"],
     quizCorrect: ["Браво!", "Правилно! 🌟", "Отлично!", "Верно!"],
     quizWrong: ["Не съвсем — но ничего!", "Близо! Ето верния отговор:", "Следващия път ще е по-лесно."],
     completionHigh: (t) => `🏆 Невероятно! Ти усвои „${t}" перфектно! Гордея се с теб!`,
     completionMid: (t) => `⭐ Браво! Научи „${t}". Практикувай още малко за пълно майсторство!`,
     completionLow: (t) => `💪 Добро начало с „${t}"! Прегледай урока и опитай пак — заедно ще успеем!`,
+    continueLesson: "Следващ урок →",
+    askAya: "Попитай АЯ",
   },
   en: {
     greeting: ["Hello! Ready for a new lesson? 🎉", "Hey! We're going to learn something cool today!", "Hi! I'm so glad to see you!"],
@@ -198,12 +214,18 @@ const D: Record<LangCode, {
     practiceCorrect: ["Great! Correct! 🌟", "Excellent! You did it!", "Perfect! Keep it up!", "Super! I knew you could!"],
     practiceWrong: ["Almost! Think a little more.", "Not quite — let's try again.", "You're close! Look at the problem again."],
     practiceWrong2: ["Let me give you a hint...", "Don't worry — here's some help:", "We'll find it together!"],
+    hinting: ["Let's think together — here's a hint:", "We'll break it into small steps.", "Let me show you how it's done first."],
+    retryAfterHint: ["Now it's your turn! Try again.", "Go for it — the hint will help!", "Let's try again together."],
+    celebrate: ["Amazing! Two correct answers in a row! 🌟🌟", "You're doing great! Keep going! 🎉", "Wonderful! You're doing it perfectly! ⭐"],
+    celebrateLead: ["Let's keep going!", "Next problem!", "Great — onward!"],
     quizIntro: ["Ready for a mini quiz? 📝", "Let's see what you learned!", "Let's check your knowledge — don't worry!"],
     quizCorrect: ["Great!", "Correct! 🌟", "Excellent!", "Right!"],
     quizWrong: ["Not quite — but no worries!", "Close! Here's the right answer:", "Next time will be easier."],
     completionHigh: (t) => `🏆 Amazing! You mastered "${t}" perfectly! I'm so proud of you!`,
     completionMid: (t) => `⭐ Well done! You learned "${t}". Practice a little more for full mastery!`,
     completionLow: (t) => `💪 Good start with "${t}"! Review the lesson and try again — we'll get there!`,
+    continueLesson: "Next lesson →",
+    askAya: "Ask AYA",
   },
   es: {
     greeting: ["¡Hola! ¿Lista para una nueva lección? 🎉", "¡Hola! ¡Aprenderemos algo genial hoy!", "¡Hola! ¡Me alegra verte!"],
@@ -215,12 +237,18 @@ const D: Record<LangCode, {
     practiceCorrect: ["¡Bien! ¡Correcto! 🌟", "¡Excelente! ¡Lo lograste!", "¡Perfecto! ¡Sigue así!", "¡Genial!"],
     practiceWrong: ["¡Casi! Piensa un poco más.", "No del todo — intentemos de nuevo.", "¡Estás cerca! Mira el problema otra vez."],
     practiceWrong2: ["Déjame darte una pista...", "No te preocupes — aquí va ayuda:", "¡Lo encontraremos juntos!"],
+    hinting: ["Pensemos juntos — aquí va una pista:", "Lo dividiremos en pequeños pasos.", "Primero te muestro cómo se hace."],
+    retryAfterHint: ["¡Ahora es tu turno! Inténtalo de nuevo.", "¡Vamos — la pista te ayudará!", "Intentémoslo juntos otra vez."],
+    celebrate: ["¡Increíble! ¡Dos respuestas correctas seguidas! 🌟🌟", "¡Lo estás haciendo genial! ¡Sigue! 🎉", "¡Maravilloso! ¡Lo haces perfectamente! ⭐"],
+    celebrateLead: ["¡Seguimos adelante!", "¡Siguiente problema!", "¡Bien — continuemos!"],
     quizIntro: ["¿Lista para un mini quiz? 📝", "¡Veamos qué aprendiste!", "¡Comprobemos tu conocimiento — sin miedo!"],
     quizCorrect: ["¡Bien!", "¡Correcto! 🌟", "¡Excelente!", "¡Acertaste!"],
     quizWrong: ["No del todo — ¡pero no te preocupes!", "¡Cerca! Aquí está la respuesta correcta:", "La próxima vez será más fácil."],
     completionHigh: (t) => `🏆 ¡Increíble! ¡Dominaste "${t}" perfectamente!`,
     completionMid: (t) => `⭐ ¡Bien hecho! Aprendiste "${t}". ¡Practica un poco más!`,
     completionLow: (t) => `💪 ¡Buen comienzo con "${t}"! Repasa y vuelve a intentarlo.`,
+    continueLesson: "Siguiente lección →",
+    askAya: "Preguntar a AYA",
   },
   de: {
     greeting: ["Hallo! Bereit für eine neue Lektion? 🎉", "Hey! Wir lernen heute etwas Tolles!", "Hallo! Schön, dich zu sehen!"],
@@ -232,12 +260,18 @@ const D: Record<LangCode, {
     practiceCorrect: ["Super! Richtig! 🌟", "Ausgezeichnet! Du hast es geschafft!", "Perfekt!", "Toll!"],
     practiceWrong: ["Fast! Denk noch etwas nach.", "Nicht ganz — versuchen wir es nochmal.", "Du bist nah dran! Schau nochmal."],
     practiceWrong2: ["Lass mich dir einen Hinweis geben...", "Keine Sorge — hier ist Hilfe:", "Wir finden es zusammen!"],
+    hinting: ["Lass uns zusammen denken — hier ist ein Hinweis:", "Wir teilen es in kleine Schritte.", "Lass mich dir zuerst zeigen, wie es geht."],
+    retryAfterHint: ["Jetzt bist du dran! Versuche es nochmal.", "Los — der Hinweis wird helfen!", "Versuchen wir es noch einmal zusammen."],
+    celebrate: ["Unglaublich! Zwei richtige Antworten hintereinander! 🌟🌟", "Du machst das großartig! Weiter so! 🎉", "Wunderbar! Du machst es perfekt! ⭐"],
+    celebrateLead: ["Weiter geht's!", "Nächste Aufgabe!", "Toll — vorwärts!"],
     quizIntro: ["Bereit für ein Mini-Quiz? 📝", "Mal sehen, was du gelernt hast!", "Lass uns dein Wissen testen!"],
     quizCorrect: ["Super!", "Richtig! 🌟", "Ausgezeichnet!", "Korrekt!"],
     quizWrong: ["Nicht ganz — aber kein Problem!", "Nah dran! Hier ist die richtige Antwort:", "Beim nächsten Mal wird's leichter."],
     completionHigh: (t) => `🏆 Fantastisch! Du hast „${t}" perfekt gemeistert!`,
     completionMid: (t) => `⭐ Gut gemacht! Du hast „${t}" gelernt. Üb noch ein bisschen!`,
     completionLow: (t) => `💪 Guter Anfang mit „${t}"! Wiederhol die Lektion und versuch es nochmal.`,
+    continueLesson: "Nächste Lektion →",
+    askAya: "AYA fragen",
   },
   fr: {
     greeting: ["Bonjour! Prêt pour une nouvelle leçon? 🎉", "Salut! On va apprendre quelque chose de super!", "Bonjour! Content de te voir!"],
@@ -249,12 +283,18 @@ const D: Record<LangCode, {
     practiceCorrect: ["Super! Correct! 🌟", "Excellent! Tu l'as fait!", "Parfait!", "Génial!"],
     practiceWrong: ["Presque! Réfléchis encore un peu.", "Pas tout à fait — réessayons.", "Tu es proche! Regarde encore."],
     practiceWrong2: ["Laisse-moi te donner un indice...", "Ne t'inquiète pas — voici de l'aide:", "On le trouvera ensemble!"],
+    hinting: ["Réfléchissons ensemble — voici un indice:", "On va le diviser en petites étapes.", "Laisse-moi d'abord te montrer comment faire."],
+    retryAfterHint: ["Maintenant c'est ton tour! Réessaie.", "Allez — l'indice va t'aider!", "Réessayons ensemble."],
+    celebrate: ["Incroyable! Deux bonnes réponses d'affilée! 🌟🌟", "Tu fais ça super bien! Continue! 🎉", "Merveilleux! Tu le fais parfaitement! ⭐"],
+    celebrateLead: ["On continue!", "Problème suivant!", "Super — en avant!"],
     quizIntro: ["Prêt pour un mini quiz? 📝", "Voyons ce que tu as appris!", "Testons tes connaissances!"],
     quizCorrect: ["Super!", "Correct! 🌟", "Excellent!", "Juste!"],
     quizWrong: ["Pas tout à fait — mais pas de souci!", "Proche! Voici la bonne réponse:", "La prochaine fois sera plus facile."],
     completionHigh: (t) => `🏆 Incroyable! Tu as maîtrisé "${t}" parfaitement!`,
     completionMid: (t) => `⭐ Bien joué! Tu as appris "${t}". Pratique encore un peu!`,
     completionLow: (t) => `💪 Bon début avec "${t}"! Relis la leçon et réessaie.`,
+    continueLesson: "Leçon suivante →",
+    askAya: "Demander à AYA",
   },
 };
 
@@ -548,12 +588,13 @@ interface EngineProps {
   onComplete: (practiceCorrect: number, quizCorrect: number, practiceTotal: number, quizTotal: number) => void;
   onRecordLesson: () => void;
   onBack: () => void;
+  onAskAya: () => void;
 }
 
 function InteractiveLessonEngine({
   data, topic, subject, lang, grade, topicContext,
   speak, isVoicePlaying,
-  onComplete, onRecordLesson, onBack,
+  onComplete, onRecordLesson, onBack, onAskAya,
 }: EngineProps) {
   const l = L[lang];
   const d = D[lang];
@@ -575,6 +616,7 @@ function InteractiveLessonEngine({
   const practiceCorrectRef = useRef(0);
   const quizCorrectRef = useRef(0);
   const lessonRecordedRef = useRef(false);
+  const consecutiveCorrectRef = useRef(0);
 
   /* ── voice: speak whenever dialogue changes ─────────────────── */
   useEffect(() => {
@@ -601,6 +643,8 @@ function InteractiveLessonEngine({
       case "explanation": return 1;
       case "example": return 2 + phase.idx;
       case "practice": return 2 + examples.length + phase.idx;
+      case "hinting": return 2 + examples.length + phase.practiceIdx;
+      case "celebrate": return 2 + examples.length + phase.nextPracticeIdx - 1;
       case "quiz-intro": return 2 + examples.length + problems.length;
       case "quiz": return 2 + examples.length + problems.length + 1 + phase.idx;
       case "completion": return totalSteps - 1;
@@ -656,30 +700,51 @@ function InteractiveLessonEngine({
     const given = answerInput.trim().toLowerCase();
     if (given === correct) {
       practiceCorrectRef.current += 1;
+      consecutiveCorrectRef.current += 1;
       setPhase({ kind: "practice", idx, attempts, feedback: "correct" });
       setDialogue(pick(d.practiceCorrect));
     } else {
+      consecutiveCorrectRef.current = 0;
       const nextAttempts = attempts + 1;
-      setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong" });
-      /* Weak topics: show supportive hint message from 1st wrong attempt onward.
-         Normal/strong topics: plain "almost" on 1st, hint on 2nd. */
-      const isFirstWrong = attempts === 0;
-      if (topicContext === "weak") {
-        setDialogue(isFirstWrong ? ctxD.practiceSupport : pick(d.practiceWrong2));
+      /* First wrong in primary grades (1-4): go to hinting phase. */
+      if (isPrimary && attempts === 0) {
+        go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts }, pick(d.hinting));
       } else {
-        setDialogue(isFirstWrong ? pick(d.practiceWrong) : pick(d.practiceWrong2));
+        setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong" });
+        if (topicContext === "weak") {
+          setDialogue(ctxD.practiceSupport);
+        } else {
+          setDialogue(pick(d.practiceWrong2));
+        }
       }
     }
   };
 
+  /* ── from hinting → back to retry */
+  const fromHinting = (practiceIdx: number, attempts: number) => {
+    go({ kind: "practice", idx: practiceIdx, attempts, feedback: "none" }, pick(d.retryAfterHint));
+  };
+
   /* ── advance from practice */
   const fromPractice = (idx: number, _feedback: "correct" | "wrong") => {
-    if (idx + 1 < problems.length) {
-      go({ kind: "practice", idx: idx + 1, attempts: 0, feedback: "none" }, pick(d.practiceLead));
+    const nextIdx = idx + 1;
+    if (nextIdx < problems.length) {
+      /* If 2+ consecutive correct → brief celebrate phase before next problem */
+      if (consecutiveCorrectRef.current >= 2) {
+        go({ kind: "celebrate", nextPracticeIdx: nextIdx }, pick(d.celebrate));
+      } else {
+        go({ kind: "practice", idx: nextIdx, attempts: 0, feedback: "none" }, pick(d.practiceLead));
+      }
     } else {
       onComplete(practiceCorrectRef.current, quizCorrectRef.current, problems.length, questions.length);
       go({ kind: "quiz-intro" }, pick(d.quizIntro));
     }
+  };
+
+  /* ── from celebrate → next practice problem */
+  const fromCelebrate = (nextIdx: number) => {
+    consecutiveCorrectRef.current = 0;
+    go({ kind: "practice", idx: nextIdx, attempts: 0, feedback: "none" }, pick(d.celebrateLead));
   };
 
   /* ── select quiz option */
@@ -724,7 +789,7 @@ function InteractiveLessonEngine({
 
       <AnimatePresence mode="wait">
         <motion.div
-          key={phase.kind + (phase.kind === "example" ? phase.idx : phase.kind === "practice" ? phase.idx : phase.kind === "quiz" ? phase.idx : "")}
+          key={phase.kind + (phase.kind === "example" ? phase.idx : phase.kind === "practice" ? phase.idx : phase.kind === "quiz" ? phase.idx : phase.kind === "hinting" ? phase.practiceIdx : phase.kind === "celebrate" ? phase.nextPracticeIdx : "")}
           initial={{ opacity: 0, x: 24 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -24 }}
@@ -896,6 +961,82 @@ function InteractiveLessonEngine({
             );
           })()}
 
+          {/* ── Hinting ── */}
+          {phase.kind === "hinting" && (() => {
+            const prob = problems[phase.practiceIdx];
+            /* Find the most relevant example hint to show */
+            const hintEx = examples.find(e => e.hint) ?? examples[0];
+            return (
+              <div className="space-y-4">
+                {/* Mini re-teach: show the problem again */}
+                <div className={cn("rounded-2xl border-2 p-4 text-center", subject.bgClass, subject.borderClass)}>
+                  <p className="text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wider">
+                    {lang === "bg" ? "Задачата" : lang === "de" ? "Die Aufgabe" : lang === "fr" ? "Le problème" : lang === "es" ? "El problema" : "The problem"}
+                  </p>
+                  <p className="font-mono text-xl font-bold">{prob.question}</p>
+                </div>
+
+                {/* Hint card from lesson examples */}
+                {hintEx && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15 }}
+                    className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 space-y-2"
+                  >
+                    <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
+                      <span>💡</span>
+                      <span>{ctxD.hintPrefix || (lang === "bg" ? "Подсказка" : "Hint")}</span>
+                    </div>
+                    {hintEx.hint && (
+                      <p className="text-sm text-amber-900 leading-relaxed">{hintEx.hint}</p>
+                    )}
+                    {hintEx.solution && (
+                      <p className="text-xs text-amber-700 font-mono">
+                        {lang === "bg" ? "Пример:" : "Example:"} {hintEx.problem} = {hintEx.solution}
+                      </p>
+                    )}
+                  </motion.div>
+                )}
+
+                <ActionBtn onClick={() => fromHinting(phase.practiceIdx, phase.attempts)} subject={subject}>
+                  <RotateCcw className="w-4 h-4" />
+                  {lang === "bg" ? "Разбрах! Опитвам пак →" : lang === "de" ? "Verstanden! Nochmal →" : lang === "fr" ? "Compris! Réessayer →" : lang === "es" ? "¡Entendido! Reintentar →" : "Got it! Try again →"}
+                </ActionBtn>
+              </div>
+            );
+          })()}
+
+          {/* ── Celebrate ── */}
+          {phase.kind === "celebrate" && (
+            <div className="space-y-4">
+              <motion.div
+                initial={{ scale: 0.85, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 18 }}
+                className={cn("rounded-3xl border-2 p-8 text-center", subject.bgClass, subject.borderClass)}
+              >
+                <motion.div
+                  animate={{ rotate: [0, -10, 10, -8, 8, 0], scale: [1, 1.15, 1.15, 1.1, 1.1, 1] }}
+                  transition={{ duration: 0.7, ease: "easeInOut" }}
+                  className="text-5xl mb-3"
+                >
+                  🌟
+                </motion.div>
+                <p className={cn("font-display font-bold text-lg", subject.colorClass)}>
+                  {lang === "bg" ? "Страхотно!" : lang === "de" ? "Großartig!" : lang === "fr" ? "Fantastique!" : lang === "es" ? "¡Fantástico!" : "Fantastic!"}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {lang === "bg" ? `${consecutiveCorrectRef.current} верни подред!` : lang === "de" ? `${consecutiveCorrectRef.current} richtig hintereinander!` : lang === "fr" ? `${consecutiveCorrectRef.current} corrects d'affilée!` : lang === "es" ? `¡${consecutiveCorrectRef.current} correctas seguidas!` : `${consecutiveCorrectRef.current} correct in a row!`}
+                </p>
+              </motion.div>
+              <ActionBtn onClick={() => fromCelebrate(phase.nextPracticeIdx)} subject={subject}>
+                <Sparkles className="w-4 h-4" />
+                {lang === "bg" ? "Продължаваме! →" : lang === "de" ? "Weiter! →" : lang === "fr" ? "Continuer! →" : lang === "es" ? "¡Continuar! →" : "Keep going! →"}
+              </ActionBtn>
+            </div>
+          )}
+
           {/* ── Quiz Intro ── */}
           {phase.kind === "quiz-intro" && (
             <div className="space-y-3">
@@ -1008,7 +1149,10 @@ function InteractiveLessonEngine({
                 </motion.div>
                 <CuriosityCardDisplay card={curiosityCard} lang={lang} />
                 <ActionBtn onClick={onBack} subject={subject}>
-                  <Star className="w-4 h-4" /> {l.backToLessons}
+                  <Star className="w-4 h-4" /> {d.continueLesson}
+                </ActionBtn>
+                <ActionBtn onClick={onAskAya} subject={subject} variant="ghost">
+                  <Sparkles className="w-4 h-4" /> {d.askAya}
                 </ActionBtn>
               </div>
             );
@@ -1035,7 +1179,7 @@ export interface LessonViewerProps {
   onAskAya: () => void;
 }
 
-export function LessonViewer({ subject, topic, initialMode, grade, lang, childId, onBack }: LessonViewerProps) {
+export function LessonViewer({ subject, topic, initialMode, grade, lang, childId, onBack, onAskAya }: LessonViewerProps) {
   const [reward, setReward] = useState<XpReward | null>(null);
   const l = L[lang];
   const queryClient = useQueryClient();
@@ -1194,6 +1338,7 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
           onComplete={handleComplete}
           onRecordLesson={handleRecordLesson}
           onBack={() => { stopVoice(); onBack(); }}
+          onAskAya={() => { stopVoice(); onAskAya(); }}
         />
       )}
     </motion.div>

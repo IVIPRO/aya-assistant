@@ -2,7 +2,6 @@ import { Layout } from "@/components/layout";
 import { Chat } from "@/components/chat";
 import { SubjectPanel } from "./subjects";
 import { DailyPlanCard } from "@/components/DailyPlanCard";
-import { AnimatedTeacher } from "@/components/AnimatedTeacher";
 import { VideoTeacher } from "@/components/VideoTeacher";
 import { AyaAvatar } from "@/components/AyaAvatar";
 import type { AyaEmotion } from "@/components/AyaAvatar";
@@ -28,7 +27,7 @@ import { getLevel, getLevelProgress as getLevelProgressObj, LEVEL_THRESHOLDS, LE
 const CHARACTERS = [
   {
     id: "panda",
-    name: "AYA Panda",
+    name: "Panda",
     emoji: "🐼",
     color: "bg-green-100 border-green-300",
     accentColor: "text-green-700",
@@ -38,7 +37,7 @@ const CHARACTERS = [
   },
   {
     id: "robot",
-    name: "AYA Robot",
+    name: "Robot",
     emoji: "🤖",
     color: "bg-blue-100 border-blue-300",
     accentColor: "text-blue-700",
@@ -48,7 +47,7 @@ const CHARACTERS = [
   },
   {
     id: "fox",
-    name: "AYA Fox",
+    name: "Fox",
     emoji: "🦊",
     color: "bg-orange-100 border-orange-300",
     accentColor: "text-orange-700",
@@ -58,7 +57,7 @@ const CHARACTERS = [
   },
   {
     id: "owl",
-    name: "AYA Owl",
+    name: "Owl",
     emoji: "🦉",
     color: "bg-purple-100 border-purple-300",
     accentColor: "text-purple-700",
@@ -157,9 +156,9 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     xpToNextLevel: (cur) => `${cur}/100 XP to next level`,
     starsLabel: "stars",
     xpTotalLabel: "XP total",
-    pickerTitle: "Choose Your Learning Companion!",
-    pickerSubtitle: "Your companion will guide you through every mission with their own special teaching style 🎓",
-    currentCompanion: "✓ Current companion",
+    pickerTitle: "Choose AYA's Teaching Style!",
+    pickerSubtitle: "AYA will guide all your lessons — pick the style that suits you best 🎓",
+    currentCompanion: "✓ Current style",
     cancel: "Cancel",
     back: "Back",
     openWorldMap: "Open Full World Map",
@@ -212,9 +211,9 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     xpToNextLevel: (cur) => `${cur}/100 XP до следващо ниво`,
     starsLabel: "звезди",
     xpTotalLabel: "XP общо",
-    pickerTitle: "Избери своя учебен компаньон!",
-    pickerSubtitle: "Твоят компаньон ще те води през всяка мисия с особен стил на преподаване 🎓",
-    currentCompanion: "✓ Текущ компаньон",
+    pickerTitle: "Избери стила на AYA!",
+    pickerSubtitle: "AYA ще води всички твои уроци — избери стила, който ти подхожда 🎓",
+    currentCompanion: "✓ Текущ стил",
     cancel: "Отказ",
     back: "Назад",
     openWorldMap: "Отвори пълната карта на света",
@@ -267,9 +266,9 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     xpToNextLevel: (cur) => `${cur}/100 XP al siguiente nivel`,
     starsLabel: "estrellas",
     xpTotalLabel: "XP total",
-    pickerTitle: "¡Elige tu compañero de aprendizaje!",
-    pickerSubtitle: "Tu compañero te guiará en cada misión con su propio estilo de enseñanza 🎓",
-    currentCompanion: "✓ Compañero actual",
+    pickerTitle: "¡Elige el estilo de AYA!",
+    pickerSubtitle: "AYA guiará todas tus lecciones — elige el estilo que mejor te convenga 🎓",
+    currentCompanion: "✓ Estilo actual",
     cancel: "Cancelar",
     back: "Atrás",
     openWorldMap: "Abrir el mapa completo",
@@ -514,9 +513,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
   // Trigger celebrations for new badges, streak milestones, and level-ups
   const { active: celebrationActive, celebration } = useCelebration(badges, streak, level);
 
-  const welcomeMsg = character
-    ? lbl.readyAdventure(character.name)
-    : lbl.readyAdventureNoChar;
+  const welcomeMsg = lbl.readyAdventureNoChar;
 
   const charFirstName = character?.name?.split(" ")[1] ?? "AYA";
 
@@ -527,8 +524,8 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
         <div className="bg-gradient-to-br from-yellow-50 via-orange-50 to-pink-50 rounded-[2.5rem] border-4 border-yellow-200 shadow-2xl overflow-hidden">
           <div className="bg-gradient-to-r from-junior/80 to-junior/60 px-8 pt-8 pb-6 text-center">
           <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}
-            className="text-8xl mb-4 drop-shadow-lg leading-none">
-            {character?.emoji ?? "🌟"}
+            className="mb-4 flex justify-center">
+            <img src="/aya-avatar/aya-neutral.svg" alt="AYA" className="w-28 h-32 object-contain drop-shadow-lg" />
           </motion.div>
           <h1 className="text-3xl font-display font-bold text-junior-foreground mb-1">
             {lbl.welcomeBack} {child.name}!
@@ -539,9 +536,14 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
         <div className="px-8 py-6 space-y-5">
           {character && (
             <div className={`flex items-start gap-4 p-4 rounded-2xl border-2 ${character.color}`}>
-              <div className="text-4xl">{character.emoji}</div>
+              <img src="/aya-avatar/aya-neutral.svg" alt="AYA" className="w-12 h-14 object-contain flex-shrink-0" />
               <div>
-                <div className="font-bold text-base">{character.name}</div>
+                <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                  <div className="font-bold text-base">AYA</div>
+                  <span className="text-xs font-bold bg-white/60 px-2 py-0.5 rounded-full border border-black/10">
+                    {character.emoji} {character.name}
+                  </span>
+                </div>
                 <div className={`text-xs font-semibold uppercase tracking-wider mb-1 ${character.accentColor}`}>
                   {lbl.toneBadge[character.tone] ?? lbl.toneLabel(charLbl?.tone ?? character.tone)}
                 </div>
@@ -1021,18 +1023,18 @@ export function Junior() {
     fallback: string;
   }> = {
     en: {
-      subjectGreeting: (name, subject, topic) => `${currentChar?.emoji ?? "🌟"} Hi ${name}! Let's explore ${subject}${topic ? ` — ${topic}` : ""}. What would you like to know? 🚀`,
-      mainGreeting: (name, charName) => `${currentChar?.emoji ?? "🌟"} Hi ${name}! I'm your ${charName} — using a Montessori teaching style to guide your learning adventure! What would you like to explore today? 🚀`,
+      subjectGreeting: (name, subject, topic) => `🌟 Hi ${name}! Let's explore ${subject}${topic ? ` — ${topic}` : ""}. What would you like to know? 🚀`,
+      mainGreeting: (name, _charName) => `🌟 Hi ${name}! I'm AYA — using a Montessori teaching style to guide your learning adventure! What would you like to explore today? 🚀`,
       fallback: "Hello! I'm AYA. Let's learn something wonderful together! 🌟",
     },
     bg: {
-      subjectGreeting: (name, subject, topic) => `${currentChar?.emoji ?? "🌟"} Здравей, ${name}! Да изследваме ${subject}${topic ? ` — ${topic}` : ""}. Какво искаш да научиш? 🚀`,
-      mainGreeting: (name, charName) => `${currentChar?.emoji ?? "🌟"} Здравей, ${name}! Аз съм твоят ${charName} — водя те в учебното приключение с Монтесори стил! Какво искаш да изследваме днес? 🚀`,
+      subjectGreeting: (name, subject, topic) => `🌟 Здравей, ${name}! Да изследваме ${subject}${topic ? ` — ${topic}` : ""}. Какво искаш да научиш? 🚀`,
+      mainGreeting: (name, _charName) => `🌟 Здравей, ${name}! Аз съм AYA — водя те в учебното приключение с Монтесори стил! Какво искаш да изследваме днес? 🚀`,
       fallback: "Здравей! Аз съм AYA. Нека научим нещо чудесно заедно! 🌟",
     },
     es: {
-      subjectGreeting: (name, subject, topic) => `${currentChar?.emoji ?? "🌟"} ¡Hola, ${name}! Exploremos ${subject}${topic ? ` — ${topic}` : ""}. ¿Qué quieres aprender? 🚀`,
-      mainGreeting: (name, charName) => `${currentChar?.emoji ?? "🌟"} ¡Hola, ${name}! Soy tu ${charName} — guiando tu aventura de aprendizaje con el estilo Montessori! ¿Qué quieres explorar hoy? 🚀`,
+      subjectGreeting: (name, subject, topic) => `🌟 ¡Hola, ${name}! Exploremos ${subject}${topic ? ` — ${topic}` : ""}. ¿Qué quieres aprender? 🚀`,
+      mainGreeting: (name, _charName) => `🌟 ¡Hola, ${name}! Soy AYA — guiando tu aventura de aprendizaje con el estilo Montessori! ¿Qué quieres explorar hoy? 🚀`,
       fallback: "¡Hola! Soy AYA. ¡Aprendamos algo maravilloso juntos! 🌟",
     },
   };
@@ -1115,7 +1117,7 @@ export function Junior() {
             grade={activeChild?.grade ?? 2}
             childId={activeChildIdResolved ?? 0}
             childName={activeChild?.name ?? ""}
-            characterEmoji={currentChar?.emoji ?? "🌟"}
+            characterEmoji={"👧"}
             onStart={(subject, topic) => {
               setSelectedSubject(subject);
               setSelectedTopic(topic);
@@ -1131,8 +1133,13 @@ export function Junior() {
                 <ArrowLeft className="w-4 h-4" /> {lbl.back}
               </button>
               <div className="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-xl border border-white/50">
-                <span className="text-lg">{currentChar?.emoji ?? "🌟"}</span>
-                <span className="font-bold text-sm text-junior-foreground">{currentChar?.name ?? "AYA"}</span>
+                <span className="text-lg">👧</span>
+                <span className="font-bold text-sm text-junior-foreground">AYA</span>
+                {currentChar && (
+                  <span className="text-xs font-semibold bg-junior/20 text-junior-foreground px-2 py-0.5 rounded-full">
+                    {currentChar.emoji} {currentChar.name}
+                  </span>
+                )}
                 <span className="text-xs text-muted-foreground">· {lbl.levelLabel} {level} · {childXp} XP</span>
               </div>
               <button onClick={() => setShowCharPicker(true)}
@@ -1211,8 +1218,13 @@ export function Junior() {
                 <ArrowLeft className="w-4 h-4" /> {lbl.back}
               </button>
               <div className="flex items-center gap-2 bg-white/60 px-3 py-2 rounded-xl border border-white/50 flex-1 min-w-0 justify-center">
-                <span className="text-lg flex-shrink-0">{currentChar?.emoji ?? "🌟"}</span>
-                <span className="font-bold text-sm text-junior-foreground truncate">{currentChar?.name ?? "AYA"}</span>
+                <span className="text-lg flex-shrink-0">👧</span>
+                <span className="font-bold text-sm text-junior-foreground flex-shrink-0">AYA</span>
+                {currentChar && (
+                  <span className="text-xs font-semibold bg-junior/20 text-junior-foreground px-2 py-0.5 rounded-full flex-shrink-0">
+                    {currentChar.emoji} {currentChar.name}
+                  </span>
+                )}
                 {!selectedSubject && <span className="text-xs text-muted-foreground hidden sm:inline">{lbl.freeChatLabel}</span>}
                 {selectedSubject && currentChar && <span className="text-xs text-muted-foreground hidden sm:inline">{lbl.toneStyle(CHAR_LABELS[currentChar.id]?.[juniorLang]?.tone ?? currentChar.tone)}</span>}
               </div>
@@ -1344,14 +1356,14 @@ export function Junior() {
         onEnded={() => setActiveVideoKey(null)}
       />
 
-      {activeChild && (
-        <AnimatedTeacher
-          characterEmoji={currentChar?.emoji ?? "🐼"}
-          characterName={currentChar?.name ?? "AYA Panda"}
-          lang={juniorLang}
-          state={teacherState}
-          message={teacherMsg}
-        />
+      {activeChild && view !== "chat" && (
+        <div className="fixed bottom-6 right-5 z-50">
+          <AyaAvatar
+            emotion={teacherStateToAyaEmotion(teacherState)}
+            visible={true}
+            speaking={teacherState === "talking"}
+          />
+        </div>
       )}
 
       {/* ── Listening Mode Modal ──────────────────────────── */}
@@ -1360,7 +1372,7 @@ export function Junior() {
         onClose={() => setShowListeningMode(false)}
         contentToRead={listeningContent}
         lang={getLang(activeChild?.language)}
-        characterEmoji={currentChar?.emoji ?? "🐼"}
+        characterEmoji={"👧"}
       />
     </Layout>
   );

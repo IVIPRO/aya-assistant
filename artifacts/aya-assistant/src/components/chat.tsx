@@ -46,17 +46,17 @@ function shouldVoiceReply(text: string): boolean {
 }
 
 const CHARACTER_EMOJIS: Record<string, string> = {
-  panda: "🐼",
-  robot: "🤖",
-  fox: "🦊",
-  owl: "🦉",
+  panda: "👧",
+  robot: "👧",
+  fox: "👧",
+  owl: "👧",
 };
 
 const CHARACTER_NAMES: Record<string, string> = {
-  panda: "AYA Panda",
-  robot: "AYA Robot",
-  fox: "AYA Fox",
-  owl: "AYA Owl",
+  panda: "AYA",
+  robot: "AYA",
+  fox: "AYA",
+  owl: "AYA",
 };
 
 const CHARACTER_TONES: Record<string, string> = {

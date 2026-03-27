@@ -522,7 +522,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
           <div className="bg-gradient-to-r from-junior/80 to-junior/60 px-8 pt-8 pb-6 text-center">
           <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}
             className="mb-4 flex justify-center">
-            <img src="/aya-avatar/aya-neutral.svg" alt="AYA" className="w-28 h-32 object-contain drop-shadow-lg" />
+            <AyaAvatar emotion="neutral" visible size="lg" />
           </motion.div>
           <h1 className="text-3xl font-display font-bold text-junior-foreground mb-1">
             {lbl.welcomeBack} {child.name}!
@@ -533,7 +533,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
         <div className="px-8 py-6 space-y-5">
           {character && (
             <div className={`flex items-start gap-4 p-4 rounded-2xl border-2 ${character.color}`}>
-              <img src="/aya-avatar/aya-neutral.svg" alt="AYA" className="w-12 h-14 object-contain flex-shrink-0" />
+              <AyaAvatar emotion="neutral" visible size="sm" />
               <div>
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
                   <div className="font-bold text-base">AYA</div>

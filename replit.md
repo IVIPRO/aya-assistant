@@ -110,7 +110,7 @@ Utility scripts package. Each script is a `.ts` file in `src/` with a correspond
 
 AYA is the single teacher identity across the entire app. All animal mascot references have been removed from both frontend and backend:
 
-- **`AyaAvatar.tsx`** — Inline SVG girl avatar with curly brown hair, red glasses, orange hoodie. Props: `emotion`, `visible`, `speaking?`, `text?`, `className?`. Used in lesson-viewer, story-engine, and chat.
+- **`AyaAvatar.tsx`** — Inline SVG girl avatar (v3). Design: curly brown hair (#5D3A1A), **dark rectangular glasses** (#444 stroke, #E3F2FD light-blue tint fill), warm skin tone, soft emotion-coloured background circle, orange hoodie body. Props: `emotion`, `visible`, `speaking?`, `text?`, `className?`, `size?: "sm"|"md"|"lg"`. Used in welcome card, lesson-viewer, story-engine, chat, and student pages. Welcome card uses `size="lg"`, style card uses `size="sm"`, lessons use default `size="md"`.
 - **`AnimatedTeacher.tsx`** — Stub file (type-only export: `TeacherState`). All rendering code removed.
 - **Corner avatar gate** — `junior/index.tsx` tracks `lessonActive` state. Corner AyaAvatar hidden (`&& !lessonActive`) during lessons so only the inline lesson avatar is visible.
 - **Style names** — Panda/Robot/Fox/Owl are teaching _style labels_ only (shown as text badge "Стил: Panda"). No animal emojis appear in any teaching or display context.

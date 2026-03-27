@@ -1,0 +1,155 @@
+7241"}
+Unify the entire AYA avatar system across the application.
+
+CRITICAL RULE:
+Do not create new avatar characters.
+Do not duplicate avatar systems.
+First audit the existing avatars and then unify them.
+
+------------------------------------------------
+
+GOAL
+
+AYA must have ONLY ONE avatar across the entire application.
+
+The ONLY avatar allowed is:
+
+the original avatar with curly hair.
+
+This avatar is currently visible on the welcome screen.
+
+This avatar must remain.
+
+------------------------------------------------
+
+REMOVE THESE AVATARS
+
+Completely remove the avatar with red glasses.
+
+This avatar appears in:
+
+lesson screens  
+progress cards  
+assistant messages  
+secondary UI elements  
+
+Remove every reference to this avatar.
+
+It must not exist anywhere in the UI.
+
+------------------------------------------------
+
+KEEP ONLY THIS AVATAR
+
+The correct avatar has these visual characteristics:
+
+curly hair  
+simple face  
+neutral glasses  
+round face  
+soft friendly expression  
+
+This is the avatar currently shown on the yellow welcome card.
+
+That avatar becomes the official AYA identity.
+
+------------------------------------------------
+
+PHASE 1 — AVATAR SYSTEM AUDIT
+
+Scan the entire codebase and find all avatar implementations.
+
+Search for:
+
+avatar components  
+assistant avatars  
+lesson avatars  
+helper avatars  
+style avatars (panda / robot / fox)  
+character images  
+profile images  
+
+Return list of files and components.
+
+------------------------------------------------
+
+PHASE 2 — CLEANUP
+
+Remove every avatar except the curly hair avatar.
+
+Delete:
+
+red glasses avatar  
+duplicate avatars  
+style avatars used as characters  
+
+Keep only the curly hair avatar asset.
+
+------------------------------------------------
+
+PHASE 3 — CREATE AYA AVATAR COMPONENT
+
+Create a reusable component:
+
+AYAAvatar
+
+This component will be used everywhere.
+
+------------------------------------------------
+
+PHASE 4 — ANIMATE THE AVATAR
+
+Add lightweight animations:
+
+idle breathing  
+eye blinking  
+speaking animation  
+happy reaction  
+
+Animations must be subtle and child friendly.
+
+------------------------------------------------
+
+PHASE 5 — APPLY THE AVATAR EVERYWHERE
+
+Replace all avatar references with AYAAvatar.
+
+Use it in:
+
+welcome screen  
+lessons  
+chat assistant  
+feedback messages  
+progress messages  
+daily plan  
+
+AYA must be the only character.
+
+There must never be two avatars on the same screen.
+
+------------------------------------------------
+
+PROTECTION RULES
+
+Do not modify:
+
+lesson engine  
+memory engine  
+adaptive learning logic  
+daily plan system  
+
+Only modify avatar components.
+
+------------------------------------------------
+
+RETURN IMPLEMENTATION REPORT
+
+1. avatars removed
+2. files modified
+3. avatar component created
+4. animation system added
+5. verification steps
+
+Feature name:
+
+AYA Unified Animated

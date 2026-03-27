@@ -473,13 +473,13 @@ function ProgressDots({ current, total, colorClass }: { current: number; total: 
 
 function AyaSpeech({ emotion, text, speaking }: { emotion: AyaEmotion; text: string; speaking?: boolean }) {
   return (
-    <div className="flex flex-col items-center gap-3 mb-2">
+    <div className="flex flex-col items-center gap-4 mb-4">
       <AyaAvatar emotion={emotion} visible={true} speaking={speaking} />
       <motion.div
         key={text}
         initial={{ opacity: 0, scale: 0.95, y: 4 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="relative bg-white border-2 border-blue-100 rounded-2xl px-5 py-3 text-center max-w-xs shadow-sm"
+        className="relative bg-white border-2 border-blue-100 rounded-2xl px-6 py-4 text-center max-w-sm shadow-sm"
       >
         <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-t-2 border-l-2 border-blue-100 rotate-45" />
         <p className="text-sm font-medium text-foreground leading-relaxed">{text}</p>
@@ -780,11 +780,11 @@ function InteractiveLessonEngine({
   const emotion = phaseEmotion(phase);
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-6 px-2 sm:px-4">
 
       {/* Progress dots */}
       {totalSteps > 2 && (
-        <div className="px-4">
+        <div className="flex justify-center">
           <ProgressDots current={currentStep} total={Math.min(totalSteps, 12)} colorClass={subject.colorClass} />
         </div>
       )}
@@ -796,7 +796,7 @@ function InteractiveLessonEngine({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -24 }}
           transition={{ duration: 0.25 }}
-          className="space-y-5"
+          className="space-y-6"
         >
           {/* AYA speech */}
           <AyaSpeech emotion={emotion} text={dialogue} speaking={isVoicePlaying} />
@@ -810,15 +810,15 @@ function InteractiveLessonEngine({
 
           {/* ── Explanation ── */}
           {phase.kind === "explanation" && (
-            <div className="space-y-4">
-              <div className={cn("rounded-3xl border-2 p-5", subject.bgClass, subject.borderClass)}>
-                <h3 className={cn("text-lg font-display font-bold mb-2", subject.colorClass)}>{data.lesson.title}</h3>
+            <div className="space-y-5">
+              <div className={cn("rounded-3xl border-2 p-6", subject.bgClass, subject.borderClass)}>
+                <h3 className={cn("text-lg font-display font-bold mb-3", subject.colorClass)}>{data.lesson.title}</h3>
                 <p className="text-sm text-foreground leading-relaxed">{data.lesson.explanation}</p>
               </div>
               {data.lesson.tip && (
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 text-sm text-amber-900 flex gap-2">
-                  <span>{ctxD.hintPrefix || "💡"}</span>
-                  <span>{data.lesson.tip}</span>
+                <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl px-5 py-4 text-sm text-amber-900 flex gap-3">
+                  <span className="text-lg flex-shrink-0">{ctxD.hintPrefix || "💡"}</span>
+                  <span className="leading-relaxed">{data.lesson.tip}</span>
                 </div>
               )}
               <ActionBtn onClick={fromExplanation} subject={subject} testId="btn-understood">
@@ -836,14 +836,14 @@ function InteractiveLessonEngine({
           {phase.kind === "example" && (() => {
             const ex = examples[phase.idx];
             return (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider px-1">
-                  <span className={cn("w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold", subject.bgClass, subject.colorClass)}>
+              <div className="space-y-5">
+                <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground uppercase tracking-wider px-1">
+                  <span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold", subject.bgClass, subject.colorClass)}>
                     {phase.idx + 1}
                   </span>
-                  {lang === "bg" ? `Пример ${phase.idx + 1} от ${examples.length}` : `Example ${phase.idx + 1} of ${examples.length}`}
+                  <span className="text-sm">{lang === "bg" ? `Пример ${phase.idx + 1} от ${examples.length}` : `Example ${phase.idx + 1} of ${examples.length}`}</span>
                 </div>
-                <div className={cn("rounded-2xl border-2 p-5", subject.bgClass, subject.borderClass)}>
+                <div className={cn("rounded-2xl border-2 p-6", subject.bgClass, subject.borderClass)}>
                   <p className="font-mono text-xl font-bold text-center">{ex.problem}</p>
                   <AnimatePresence>
                     {phase.revealed && (
@@ -879,25 +879,25 @@ function InteractiveLessonEngine({
             const feedback = phase.feedback;
             const attempts = phase.attempts;
             return (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider px-1">
-                  <span className={cn("w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold", subject.bgClass, subject.colorClass)}>
+              <div className="space-y-5">
+                <div className="flex items-center gap-3 text-xs font-bold text-muted-foreground uppercase tracking-wider px-1">
+                  <span className={cn("w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold", subject.bgClass, subject.colorClass)}>
                     {phase.idx + 1}
                   </span>
-                  {lang === "bg" ? `Задача ${phase.idx + 1} от ${problems.length}` : `Problem ${phase.idx + 1} of ${problems.length}`}
+                  <span className="text-sm">{lang === "bg" ? `Задача ${phase.idx + 1} от ${problems.length}` : `Problem ${phase.idx + 1} of ${problems.length}`}</span>
                 </div>
 
                 <div className={cn(
-                  "rounded-2xl border-2 p-5 transition-colors",
+                  "rounded-2xl border-2 p-6 transition-colors",
                   feedback === "correct" ? "border-green-300 bg-green-50"
                   : feedback === "wrong" ? "border-orange-200 bg-orange-50"
                   : cn(subject.bgClass, subject.borderClass),
                 )}>
-                  <p className="font-mono text-xl font-bold text-center">{prob.question}</p>
+                  <p className="font-mono text-lg font-bold text-center">{prob.question}</p>
                 </div>
 
                 {feedback === "none" && (
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <input
                       key={phase.idx}
                       autoFocus
@@ -907,7 +907,7 @@ function InteractiveLessonEngine({
                       onChange={e => setAnswerInput(e.target.value)}
                       placeholder={l.placeholder}
                       onKeyDown={e => e.key === "Enter" && answerInput.trim() && checkPractice(phase.idx, attempts)}
-                      className="flex-1 bg-white border-2 border-border/40 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
+                      className="flex-1 bg-white border-2 border-border/40 rounded-xl px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
                     />
                     <button
                       onClick={() => checkPractice(phase.idx, attempts)}
@@ -1075,10 +1075,10 @@ function InteractiveLessonEngine({
                     ))}
                   </div>
                 </div>
-                <div className={cn("rounded-2xl border-2 p-5", subject.bgClass, subject.borderClass)}>
-                  <p className="font-mono text-lg font-bold text-center">{q.question}</p>
+                <div className={cn("rounded-2xl border-2 p-6", subject.bgClass, subject.borderClass)}>
+                  <p className="font-mono text-lg font-bold text-center leading-relaxed">{q.question}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-4">
                   {q.options.map((opt, i) => {
                     const isSelected = phase.selected === i;
                     const isCorrect = i === q.correctIndex;
@@ -1089,7 +1089,7 @@ function InteractiveLessonEngine({
                         onClick={() => !revealed && selectQuiz(phase.idx, i)}
                         disabled={revealed}
                         className={cn(
-                          "p-4 rounded-2xl border-2 font-bold text-sm transition-all text-center",
+                          "p-5 rounded-2xl border-2 font-bold text-sm transition-all text-center leading-relaxed",
                           !revealed && "hover:scale-[1.02] cursor-pointer border-border/40 bg-card",
                           revealed && isCorrect && "border-green-400 bg-green-50 text-green-700",
                           revealed && isSelected && !isCorrect && "border-red-400 bg-red-50 text-red-600",

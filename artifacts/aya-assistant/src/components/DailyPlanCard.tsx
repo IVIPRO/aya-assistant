@@ -383,10 +383,10 @@ export function DailyPlanCard({ childId, lang, onStartTask, onPlanLoaded }: Dail
         )}
       </div>
 
-      {/* AYA Panda supportive message for weak topics */}
+      {/* AYA supportive message for weak topics */}
       {!isLoading && hasWeakTopic && (
         <div className="mx-3 mt-3 flex items-start gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
-          <span className="text-lg flex-shrink-0">🐼</span>
+          <span className="text-lg flex-shrink-0">👧</span>
           <p className="text-xs text-amber-800 leading-relaxed font-medium">{i18n.weakMessage}</p>
         </div>
       )}

@@ -33,7 +33,7 @@ const CHARACTERS = [
     accentColor: "text-green-700",
     desc: "Patient and gentle",
     tone: "gentle" as const,
-    personality: "Panda takes learning step by step with warmth and care. Perfect for children who love calm, patient guidance through every new idea.",
+    personality: "AYA uses a gentle, patient teaching style — step by step, with warmth and care. Great for children who love calm guidance through every new idea.",
   },
   {
     id: "robot",
@@ -43,7 +43,7 @@ const CHARACTERS = [
     accentColor: "text-blue-700",
     desc: "Logical and precise",
     tone: "encouraging" as const,
-    personality: "Robot celebrates every correct answer and keeps learning clear and organized. Great for children who love structure and being cheered on.",
+    personality: "AYA uses a structured, encouraging teaching style — celebrating every correct answer and keeping learning clear and organised. Great for children who love structure.",
   },
   {
     id: "fox",
@@ -53,7 +53,7 @@ const CHARACTERS = [
     accentColor: "text-orange-700",
     desc: "Creative and playful",
     tone: "playful" as const,
-    personality: "Fox turns every lesson into an adventure with games, stories, and surprises. Ideal for curious, energetic explorers who love discovering new things.",
+    personality: "AYA uses a playful, creative teaching style — turning every lesson into an adventure with games and surprises. Great for curious, energetic explorers.",
   },
   {
     id: "owl",
@@ -63,7 +63,7 @@ const CHARACTERS = [
     accentColor: "text-purple-700",
     desc: "Wise and thoughtful",
     tone: "calm" as const,
-    personality: "Owl guides deep thinking without rushing, encouraging reflection and curiosity. Best for children who love asking \"why?\" and thinking things through.",
+    personality: "AYA uses a calm, thoughtful teaching style — guiding deep thinking without rushing. Great for children who love asking \"why?\" and thinking things through.",
   },
 ];
 
@@ -134,6 +134,7 @@ const JUNIOR_LABELS: Record<JuniorLang, {
   voiceModeLabel: string;
   voiceModeActive: string;
   voiceModeStop: string;
+  styleLabel: string;
 }> = {
   en: {
     welcomeBack: "Welcome back,",
@@ -189,6 +190,7 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     voiceModeLabel: "Free Chat",
     voiceModeActive: "🎙️ Listening…",
     voiceModeStop: "Stop",
+    styleLabel: "Style",
   },
   bg: {
     welcomeBack: "Добре дошла,",
@@ -244,6 +246,7 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     voiceModeLabel: "Свободен разговор",
     voiceModeActive: "🎙️ Слушам…",
     voiceModeStop: "Спри",
+    styleLabel: "Стил",
   },
   es: {
     welcomeBack: "Bienvenida,",
@@ -299,29 +302,30 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     voiceModeLabel: "Chat libre",
     voiceModeActive: "🎙️ Escuchando…",
     voiceModeStop: "Parar",
+    styleLabel: "Estilo",
   },
 };
 
 const CHAR_LABELS: Record<string, Record<JuniorLang, { desc: string; personality: string; tone: string }>> = {
   panda: {
-    en: { desc: "Patient and gentle", tone: "gentle", personality: "Panda takes learning step by step with warmth and care. Perfect for children who love calm, patient guidance through every new idea." },
-    bg: { desc: "Търпелива и нежна", tone: "нежен", personality: "AYA Panda учи стъпка по стъпка с топлота и грижа. Перфектна за деца, обичащи спокойно и търпеливо ръководство при всяка нова идея." },
-    es: { desc: "Paciente y suave", tone: "suave", personality: "AYA Panda aprende paso a paso con calidez y cuidado. Perfecta para niños que aman la guía tranquila y paciente ante cada nueva idea." },
+    en: { desc: "Patient and gentle", tone: "gentle", personality: "AYA uses a gentle, patient teaching style — step by step, with warmth and care. Great for children who love calm guidance through every new idea." },
+    bg: { desc: "Търпелива и нежна", tone: "нежен", personality: "AYA използва нежен стил на учене — стъпка по стъпка, с топлота и грижа. Перфектна за деца, обичащи спокойно и търпеливо ръководство." },
+    es: { desc: "Paciente y suave", tone: "suave", personality: "AYA usa un estilo de aprendizaje suave — paso a paso, con calidez y cuidado. Perfecta para niños que aman la guía tranquila y paciente." },
   },
   robot: {
-    en: { desc: "Logical and precise", tone: "encouraging", personality: "Robot celebrates every correct answer and keeps learning clear and organized. Great for children who love structure and being cheered on." },
-    bg: { desc: "Логичен и точен", tone: "насърчаващ", personality: "AYA Robot отбелязва всеки верен отговор и прави ученето ясно и организирано. Страхотна за деца, обичащи структура и насърчение." },
-    es: { desc: "Lógico y preciso", tone: "motivador", personality: "AYA Robot celebra cada respuesta correcta y mantiene el aprendizaje claro y organizado. Ideal para niños que aman la estructura y el apoyo." },
+    en: { desc: "Logical and precise", tone: "encouraging", personality: "AYA uses a structured, encouraging teaching style — celebrating every correct answer and keeping learning clear. Great for children who love structure." },
+    bg: { desc: "Логичен и точен", tone: "насърчаващ", personality: "AYA използва структуриран стил на учене — отбелязва всеки верен отговор и поддържа ученето ясно. Страхотна за деца, обичащи ред и насърчение." },
+    es: { desc: "Lógico y preciso", tone: "motivador", personality: "AYA usa un estilo de aprendizaje estructurado — celebra cada respuesta correcta y mantiene el aprendizaje claro. Ideal para niños que aman la estructura." },
   },
   fox: {
-    en: { desc: "Creative and playful", tone: "playful", personality: "Fox turns every lesson into an adventure with games, stories, and surprises. Ideal for curious, energetic explorers who love discovering new things." },
-    bg: { desc: "Творческа и игрива", tone: "игрив", personality: "AYA Лисицата превръща всеки урок в приключение с игри, истории и изненади. Идеална за любопитни и пълни с енергия изследователи." },
-    es: { desc: "Creativa y lúdica", tone: "lúdico", personality: "AYA Zorro convierte cada lección en una aventura con juegos, historias y sorpresas. Ideal para exploradores curiosos y llenos de energía." },
+    en: { desc: "Creative and playful", tone: "playful", personality: "AYA uses a playful, creative teaching style — turning every lesson into an adventure with games and surprises. Great for curious, energetic explorers." },
+    bg: { desc: "Творческа и игрива", tone: "игрив", personality: "AYA използва игрив стил на учене — всеки урок е приключение с игри и изненади. Идеална за любопитни и пълни с енергия изследователи." },
+    es: { desc: "Creativa y lúdica", tone: "lúdico", personality: "AYA usa un estilo de aprendizaje lúdico — cada lección se convierte en una aventura con juegos y sorpresas. Ideal para exploradores curiosos y enérgicos." },
   },
   owl: {
-    en: { desc: "Wise and thoughtful", tone: "calm", personality: "Owl guides deep thinking without rushing, encouraging reflection and curiosity. Best for children who love asking \"why?\" and thinking things through." },
-    bg: { desc: "Мъдра и вдумчива", tone: "спокоен", personality: "AYA Бухалът насочва дълбокото мислене без бързане, насърчавайки размисъл и любопитство. Най-добра за деца, обичащи да питат \"защо?\"." },
-    es: { desc: "Sabia y reflexiva", tone: "tranquilo", personality: "AYA Búho guía el pensamiento profundo sin apresurarse, fomentando la reflexión y la curiosidad. Ideal para niños que aman preguntar \"¿por qué?\"." },
+    en: { desc: "Wise and thoughtful", tone: "calm", personality: "AYA uses a calm, thoughtful teaching style — guiding deep thinking without rushing. Great for children who love asking \"why?\" and thinking things through." },
+    bg: { desc: "Мъдра и вдумчива", tone: "спокоен", personality: "AYA използва спокоен стил на учене — насочва към дълбоко мислене без бързане. Най-добра за деца, обичащи да питат \"защо?\" и да разсъждават." },
+    es: { desc: "Sabia y reflexiva", tone: "tranquilo", personality: "AYA usa un estilo de aprendizaje tranquilo — guía el pensamiento profundo sin apresurarse. Ideal para niños que aman preguntar \"¿por qué?\"." },
   },
 };
 
@@ -542,7 +546,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
                   <div className="font-bold text-base">AYA</div>
                   <span className="text-xs font-bold bg-white/60 px-2 py-0.5 rounded-full border border-black/10">
-                    {character.emoji} {character.name}
+                    {lbl.styleLabel}: {character.emoji} {character.name}
                   </span>
                 </div>
                 <div className={`text-xs font-semibold uppercase tracking-wider mb-1 ${character.accentColor}`}>
@@ -1141,7 +1145,7 @@ export function Junior() {
                 <span className="font-bold text-sm text-junior-foreground">AYA</span>
                 {currentChar && (
                   <span className="text-xs font-semibold bg-junior/20 text-junior-foreground px-2 py-0.5 rounded-full">
-                    {currentChar.emoji} {currentChar.name}
+                    {lbl.styleLabel}: {currentChar.emoji} {currentChar.name}
                   </span>
                 )}
                 <span className="text-xs text-muted-foreground">· {lbl.levelLabel} {level} · {childXp} XP</span>
@@ -1226,7 +1230,7 @@ export function Junior() {
                 <span className="font-bold text-sm text-junior-foreground flex-shrink-0">AYA</span>
                 {currentChar && (
                   <span className="text-xs font-semibold bg-junior/20 text-junior-foreground px-2 py-0.5 rounded-full flex-shrink-0">
-                    {currentChar.emoji} {currentChar.name}
+                    {lbl.styleLabel}: {currentChar.emoji} {currentChar.name}
                   </span>
                 )}
                 {!selectedSubject && <span className="text-xs text-muted-foreground hidden sm:inline">{lbl.freeChatLabel}</span>}

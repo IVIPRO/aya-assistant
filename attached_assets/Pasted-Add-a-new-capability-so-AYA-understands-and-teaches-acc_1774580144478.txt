@@ -1,0 +1,216 @@
+Add a new capability so AYA understands and teaches according to the Bulgarian national school curriculum.
+
+Target:
+Bulgarian students in grades 1–7.
+
+Reference framework:
+Bulgarian Ministry of Education curriculum.
+
+Important:
+Do NOT add heavy databases yet.
+Do NOT rebuild the system architecture.
+Do NOT change the existing homework solver.
+This feature should extend AYA's teaching logic only.
+
+------------------------------------------------
+
+Goal
+
+AYA should explain lessons and solve homework according to how Bulgarian schools teach them.
+
+Subjects to support first:
+
+• Mathematics
+• Bulgarian language
+• Reading comprehension
+
+Grades:
+
+• 1 – 4 class (Primary)
+• 5 – 7 class (Progymnasium)
+
+------------------------------------------------
+
+1. Curriculum awareness
+
+AYA should recognize the grade level automatically when possible.
+
+Signals:
+
+• user profile (child age)
+• module selected (Junior / Progymnasium)
+• task difficulty
+
+Example:
+
+If task is:
+
+3 × 6
+
+AYA should explain using methods typical for grade 2–3.
+
+Example:
+
+"3 по 6 означава да повторим числото 6 три пъти."
+
+------------------------------------------------
+
+2. Bulgarian textbook style explanation
+
+AYA explanations should match typical Bulgarian textbook teaching style.
+
+Use phrases like:
+
+• "Нека помислим заедно"
+• "Да разгледаме задачата"
+• "Ще решим стъпка по стъпка"
+• "Проверяваме отговора"
+
+Avoid university-level explanations.
+
+------------------------------------------------
+
+3. Math topics mapping
+
+Primary school topics:
+
+Grade 1
+• numbers to 20
+• addition
+• subtraction
+
+Grade 2
+• numbers to 100
+• multiplication introduction
+
+Grade 3
+• multiplication table
+• division basics
+
+Grade 4
+• multi-digit operations
+• word problems
+
+Progymnasium topics:
+
+Grade 5–7
+
+• fractions
+• decimals
+• geometry basics
+• equations
+• ratios
+
+AYA should adjust explanations depending on topic complexity.
+
+------------------------------------------------
+
+4. Homework photo adaptation
+
+If homework image contains tasks from Bulgarian textbooks:
+
+AYA should:
+
+• detect the problem
+• explain using school-style logic
+• avoid skipping steps
+
+Example:
+
+Instead of:
+
+"Answer: 18"
+
+Use:
+
+"Ще решим задачата.
+
+3 по 6 означава шест да се повтори три пъти.
+
+6 + 6 + 6 = 18
+
+Значи:
+
+3 × 6 = 18
+
+Отговор: 18."
+
+------------------------------------------------
+
+5. Bulgarian language tasks
+
+AYA should support:
+
+• spelling
+• sentence construction
+• grammar basics
+• reading comprehension
+
+Example:
+
+If task asks:
+
+"Подчертай съществителните."
+
+AYA should explain what a noun is first.
+
+------------------------------------------------
+
+6. Reading comprehension
+
+AYA should help children understand texts.
+
+Steps:
+
+• read
+• explain unknown words
+• ask simple questions
+
+Example:
+
+"Кой е главният герой?"
+"Какво се случва в началото?"
+
+------------------------------------------------
+
+7. Encouraging teacher tone
+
+AYA should behave like a supportive Bulgarian teacher.
+
+Examples:
+
+• "Браво!"
+• "Добре се справяш."
+• "Нека опитаме още една."
+
+Avoid:
+
+• robotic tone
+• very long paragraphs
+
+------------------------------------------------
+
+8. Do not break existing systems
+
+Preserve:
+
+• homework photo solving
+• teacher mode
+• voice mode
+• avatar reactions
+• chat UI
+• quick actions
+
+------------------------------------------------
+
+Return after implementation:
+
+1. files modified
+2. how curriculum awareness works
+3. example math explanation
+4. example Bulgarian language explanation
+5. preview test steps
+
+Feature name:
+
+AYA Bulgarian Curriculum Mode

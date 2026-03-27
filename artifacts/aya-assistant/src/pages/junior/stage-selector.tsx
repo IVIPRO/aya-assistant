@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { EDUCATION_STAGES } from "@/lib/curriculum";
 import type { LangCode } from "@/lib/i18n";
 
@@ -8,6 +8,8 @@ interface StageSelectorProps {
   currentGrade: number;
   onSelectGrade: (grade: number, stageId: "stage1" | "stage2") => void;
   onBack: () => void;
+  /** Restrict which stages are visible. Omit to show all. */
+  allowedStageIds?: ("stage1" | "stage2")[];
 }
 
 const GRADE_LABELS: Record<LangCode, Record<number, string>> = {
@@ -18,37 +20,27 @@ const GRADE_LABELS: Record<LangCode, Record<number, string>> = {
   fr: { 1: "1ère année", 2: "2e année", 3: "3e année", 4: "4e année", 5: "5e année", 6: "6e année", 7: "7e année" },
 };
 
-export function StageSelector({ lang, currentGrade, onSelectGrade, onBack }: StageSelectorProps) {
-  const currentStage = EDUCATION_STAGES.find(s => s.grades.includes(currentGrade));
-  
+const BACK_LABEL: Record<LangCode, string> = {
+  bg: "Назад", es: "Atrás", de: "Zurück", fr: "Retour", en: "Back",
+};
+
+export function StageSelector({ lang, currentGrade, onSelectGrade, onBack, allowedStageIds }: StageSelectorProps) {
+  const visibleStages = allowedStageIds
+    ? EDUCATION_STAGES.filter(s => allowedStageIds.includes(s.id))
+    : EDUCATION_STAGES;
+
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
-      {/* Back button */}
       <button
         onClick={onBack}
         className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
       >
         <ArrowLeft className="w-4 h-4" />
-        {lang === "bg" ? "Назад" : lang === "es" ? "Atrás" : lang === "de" ? "Zurück" : lang === "fr" ? "Retour" : "Back"}
+        {BACK_LABEL[lang]}
       </button>
 
-      {/* Current stage indicator */}
-      {currentStage && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-6 p-4 rounded-2xl bg-blue-50 border-2 border-blue-200"
-        >
-          <p className="text-sm font-semibold text-blue-900">
-            {lang === "bg" ? "Избран етап: " : lang === "es" ? "Etapa seleccionada: " : "Selected stage: "}
-            <span className="text-blue-700">{currentStage.label[lang]}</span>
-          </p>
-        </motion.div>
-      )}
-
-      {/* Education stages */}
       <div className="space-y-6">
-        {EDUCATION_STAGES.map((stage, stageIdx) => (
+        {visibleStages.map((stage, stageIdx) => (
           <motion.div
             key={stage.id}
             initial={{ opacity: 0, y: 20 }}
@@ -56,14 +48,23 @@ export function StageSelector({ lang, currentGrade, onSelectGrade, onBack }: Sta
             transition={{ delay: stageIdx * 0.1 }}
             className="bg-gradient-to-br from-white to-slate-50 rounded-[2rem] border-2 border-slate-200 overflow-hidden shadow-lg"
           >
-            {/* Stage header */}
             <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-8 py-6">
               <h2 className="text-2xl font-display font-bold text-white">{stage.label[lang]}</h2>
+              <p className="text-blue-100 text-sm mt-1">
+                {lang === "bg"
+                  ? `Класове ${stage.grades[0]}–${stage.grades[stage.grades.length - 1]}`
+                  : lang === "es"
+                  ? `Grados ${stage.grades[0]}–${stage.grades[stage.grades.length - 1]}`
+                  : lang === "de"
+                  ? `Klassen ${stage.grades[0]}–${stage.grades[stage.grades.length - 1]}`
+                  : lang === "fr"
+                  ? `Classes ${stage.grades[0]}–${stage.grades[stage.grades.length - 1]}`
+                  : `Grades ${stage.grades[0]}–${stage.grades[stage.grades.length - 1]}`}
+              </p>
             </div>
 
-            {/* Grades grid */}
             <div className="p-8">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <div className={`grid gap-4 ${stage.grades.length <= 4 ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-2 sm:grid-cols-3"}`}>
                 {stage.grades.map((grade) => {
                   const isSelected = grade === currentGrade;
                   return (

@@ -1,0 +1,118 @@
+Fix the LEFT MAIN MENU education-stage routing in AYA.
+
+Important:
+The previous implementation misunderstood the task.
+
+This task is NOT about the center content cards.
+This task is specifically about the LEFT MAIN MENU navigation.
+
+Current problem:
+In the left sidebar, the app logic still behaves as if grades 5, 6, 7 are part of the "Начален етап" flow.
+"Прогимназия" does not have its own true separated grade flow in the left-side navigation.
+
+Goal:
+Make the left main menu truly split into two different education sections:
+
+1. Начален етап = ONLY grades 1, 2, 3, 4
+2. Прогимназия = ONLY grades 5, 6, 7
+
+------------------------------------------------
+REQUIRED BEHAVIOR
+
+LEFT MAIN MENU:
+
+Начален етап
+→ opens only the junior / primary flow
+→ only grades 1–4
+→ only lessons, subjects, routing, and navigation for 1–4
+
+Прогимназия
+→ opens only the student / lower-secondary flow
+→ only grades 5–7
+→ only lessons, subjects, routing, and navigation for 5–7
+
+------------------------------------------------
+EXACT TASK
+
+1. Audit the left sidebar click handlers and route targets
+Find where:
+- "Начален етап" click is wired
+- "Прогимназия" click is wired
+
+2. Fix routing so:
+- Начален етап points only to the 1–4 class experience
+- Прогимназия points only to the 5–7 class experience
+
+3. Remove any shared / mixed stage logic in the left main menu
+There must be no case where:
+- grade 5/6/7 content appears under Начален етап flow
+- grade 1/2/3/4 content appears under Прогимназия flow
+
+4. Ensure left menu selection controls the whole stage context
+When user clicks:
+- Начален етап → app context = primary stage
+- Прогимназия → app context = lower secondary stage
+
+This must affect:
+- sidebar state
+- route
+- subject list
+- lesson list
+- current screen context
+
+5. If needed, create explicit route separation
+Examples:
+- /junior for 1–4
+- /student for 5–7
+
+But only if the codebase already supports this structure cleanly.
+Do not invent unnecessary duplicate systems.
+
+------------------------------------------------
+VERY IMPORTANT
+
+Do NOT just visually relabel things.
+Do NOT just change headings.
+Do NOT leave hidden mixed logic behind.
+
+This must be a real navigation split in the LEFT MAIN MENU.
+
+------------------------------------------------
+PRESERVE
+
+Do NOT break:
+- dashboard
+- chat
+- voice mode
+- homework photo solving
+- avatar reactions
+- daily plan
+- rewards / XP
+- existing lessons
+
+------------------------------------------------
+SUCCESS CRITERIA
+
+After the fix:
+
+Clicking "Начален етап" in the LEFT MAIN MENU:
+- opens only 1–4 class flow
+
+Clicking "Прогимназия" in the LEFT MAIN MENU:
+- opens only 5–7 class flow
+
+No 5/6/7 logic remains inside Начален етап left-menu flow.
+
+------------------------------------------------
+RETURN FORMAT
+
+After implementation return:
+
+1. files modified
+2. exact left-menu click handlers / routes changed
+3. what was previously wrong
+4. preview test steps
+5. explicit confirmation that grades 5–7 are no longer inside the Начален етап left-menu flow
+
+Feature name:
+AYA Left Menu Stage Routing Fix

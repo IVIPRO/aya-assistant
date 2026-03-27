@@ -1127,6 +1127,7 @@ export function Junior() {
           <StageSelector
             lang={childLang}
             currentGrade={selectedGrade ?? activeChild?.grade ?? 2}
+            allowedStageIds={["stage1"]}
             onSelectGrade={(grade, stageId) => {
               setSelectedStage(stageId);
               setSelectedGrade(grade);

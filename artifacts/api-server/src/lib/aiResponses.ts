@@ -886,6 +886,117 @@ export function evaluateMathAnswer(a: number, b: number, operation: string, user
 /**
  * Generate feedback for any math operation
  */
+/**
+ * Build step-by-step explanation for a math operation (teacher mode)
+ */
+function getStepByStepExplanation(
+  a: number,
+  b: number,
+  operation: string,
+  result: number,
+  lang: "bg" | "es" | "en"
+): string {
+  const opSym = operation === "subtraction" ? "-"
+    : operation === "multiplication" ? "×"
+    : operation === "division" ? "÷"
+    : "+";
+
+  if (lang === "bg") {
+    if (operation === "multiplication") {
+      // Show repeated addition for multiplication
+      const addends = Array(a).fill(b).join(" + ");
+      return (
+        `Нека помислим заедно.\n\n` +
+        `${a} по ${b} означава да повторим числото ${b} ${a} пъти.\n\n` +
+        `${addends} = ${result}\n\n` +
+        `Значи:\n${a} × ${b} = ${result}`
+      );
+    } else if (operation === "division") {
+      // Show the reverse multiplication for division
+      return (
+        `Разделяме ${a} на ${b} равни части.\n\n` +
+        `Можем да попитаме: Кое число по ${b} дава ${a}?\n\n` +
+        `${result} × ${b} = ${a}\n\n` +
+        `Значи:\n${a} ÷ ${b} = ${result}`
+      );
+    } else if (operation === "subtraction") {
+      return (
+        `${a} минус ${b}.\n\n` +
+        `От ${a} вадим ${b}.\n\n` +
+        `${a} - ${b} = ${result}`
+      );
+    } else {
+      // Addition
+      return (
+        `${a} плюс ${b}.\n\n` +
+        `Събираме ${a} и ${b}.\n\n` +
+        `${a} + ${b} = ${result}`
+      );
+    }
+  }
+
+  if (lang === "es") {
+    if (operation === "multiplication") {
+      const addends = Array(a).fill(b).join(" + ");
+      return (
+        `Pensemos juntos.\n\n` +
+        `${a} × ${b} significa sumar ${b} repetido ${a} veces.\n\n` +
+        `${addends} = ${result}\n\n` +
+        `Entonces:\n${a} × ${b} = ${result}`
+      );
+    } else if (operation === "division") {
+      return (
+        `Dividimos ${a} en ${b} partes iguales.\n\n` +
+        `Preguntamos: ¿Qué número por ${b} da ${a}?\n\n` +
+        `${result} × ${b} = ${a}\n\n` +
+        `Entonces:\n${a} ÷ ${b} = ${result}`
+      );
+    } else if (operation === "subtraction") {
+      return (
+        `${a} menos ${b}.\n\n` +
+        `Restamos ${b} de ${a}.\n\n` +
+        `${a} - ${b} = ${result}`
+      );
+    } else {
+      return (
+        `${a} más ${b}.\n\n` +
+        `Sumamos ${a} y ${b}.\n\n` +
+        `${a} + ${b} = ${result}`
+      );
+    }
+  }
+
+  // English
+  if (operation === "multiplication") {
+    const addends = Array(a).fill(b).join(" + ");
+    return (
+      `Let's think together.\n\n` +
+      `${a} × ${b} means repeating the number ${b} exactly ${a} times.\n\n` +
+      `${addends} = ${result}\n\n` +
+      `So:\n${a} × ${b} = ${result}`
+    );
+  } else if (operation === "division") {
+    return (
+      `We divide ${a} into ${b} equal parts.\n\n` +
+      `We ask: What number times ${b} gives us ${a}?\n\n` +
+      `${result} × ${b} = ${a}\n\n` +
+      `So:\n${a} ÷ ${b} = ${result}`
+    );
+  } else if (operation === "subtraction") {
+    return (
+      `${a} minus ${b}.\n\n` +
+      `We subtract ${b} from ${a}.\n\n` +
+      `${a} - ${b} = ${result}`
+    );
+  } else {
+    return (
+      `${a} plus ${b}.\n\n` +
+      `We add ${a} and ${b}.\n\n` +
+      `${a} + ${b} = ${result}`
+    );
+  }
+}
+
 export function getMathFeedback(
   a: number,
   b: number,
@@ -906,28 +1017,35 @@ export function getMathFeedback(
   const equation = `${a} ${operationSymbol} ${b} = ${expected}`;
   
   if (isCorrect) {
+    // Show step-by-step explanation FIRST
+    const explanation = getStepByStepExplanation(a, b, operation, expected, lang);
+    
+    // Then show praise
+    let praise = "";
     if (lang === "bg") {
-      return [
-        `${charEmoji} Браво, ${childName}! ${equation} ⭐\nИскаш ли още една задача?`,
-        `${charEmoji} Точно! ${equation}! Прекрасна работа, ${childName}! 🌟\nПродължаваме ли?`,
-        `${charEmoji} Чудесно! ${expected} е верния отговор! Ты си чудесен математик, ${childName}! 🎉\nОще ли една?`
+      praise = [
+        `${charEmoji} Браво, ${childName}! ⭐`,
+        `${charEmoji} Точно! Прекрасна работа, ${childName}! 🌟`,
+        `${charEmoji} Чудесно! Ты си чудесен математик, ${childName}! 🎉`
+      ][Math.floor(Math.random() * 3)];
+    } else if (lang === "es") {
+      praise = [
+        `${charEmoji} ¡Bravo, ${childName}! ⭐`,
+        `${charEmoji} ¡Correcto! ¡Excelente trabajo, ${childName}! 🌟`,
+        `${charEmoji} ¡Fantástico! ¡Eres un excelente matemático, ${childName}! 🎉`
+      ][Math.floor(Math.random() * 3)];
+    } else {
+      praise = [
+        `${charEmoji} Great, ${childName}! ⭐`,
+        `${charEmoji} Correct! Excellent work, ${childName}! 🌟`,
+        `${charEmoji} Wonderful! You're a great mathematician, ${childName}! 🎉`
       ][Math.floor(Math.random() * 3)];
     }
-    if (lang === "es") {
-      return [
-        `${charEmoji} ¡Bravo, ${childName}! ${equation} ⭐\n¿Quieres otro?`,
-        `${charEmoji} ¡Correcto! ${equation}! ¡Excelente trabajo, ${childName}! 🌟\n¿Continuamos?`,
-        `${charEmoji} ¡Fantástico! ¡${expected} es la respuesta correcta! ¡Eres un excelente matemático, ${childName}! 🎉\n¿Otro más?`
-      ][Math.floor(Math.random() * 3)];
-    }
-    return [
-      `${charEmoji} Great, ${childName}! ${equation} ⭐\nWant another one?`,
-      `${charEmoji} Correct! ${equation}! Excellent work, ${childName}! 🌟\nShall we continue?`,
-      `${charEmoji} Wonderful! ${expected} is the right answer! You're a great mathematician, ${childName}! 🎉\nOne more?`
-    ][Math.floor(Math.random() * 3)];
+    
+    return `${explanation}\n\n${praise}`;
   }
   
-  // Incorrect - provide hint
+  // Incorrect - provide hint (unchanged)
   if (lang === "bg") {
     return [
       `${charEmoji} Добър опит! Помисли още малко: ${a} и ${b} заедно какво ще бъдат?`,

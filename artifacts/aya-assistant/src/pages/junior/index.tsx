@@ -787,6 +787,7 @@ export function Junior() {
   const { toast } = useToast();
   const [showCharPicker, setShowCharPicker] = useState(false);
   const [view, setView] = useState<JuniorView>("welcome");
+  const [selectedStage, setSelectedStage] = useState<"stage1" | "stage2" | null>(null);
   const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
@@ -1126,11 +1127,12 @@ export function Junior() {
           <StageSelector
             lang={childLang}
             currentGrade={selectedGrade ?? activeChild?.grade ?? 2}
-            onSelectGrade={(grade) => {
+            onSelectGrade={(grade, stageId) => {
+              setSelectedStage(stageId);
               setSelectedGrade(grade);
               setView("subjects");
             }}
-            onBack={() => setView("welcome")}
+            onBack={() => { setSelectedStage(null); setSelectedGrade(null); setView("welcome"); }}
           />
         ) : view === "subjects" ? (
           <SubjectPanel
@@ -1144,7 +1146,7 @@ export function Junior() {
               setSelectedTopic(topic);
               setView("chat");
             }}
-            onBack={() => { setSelectedGrade(null); setView("stages"); }}
+            onBack={() => { setSelectedGrade(null); setView("stages"); }} /* Stay in same stage, just clear grade */
           />
         ) : view === "map" ? (
           <motion.div key="map" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>

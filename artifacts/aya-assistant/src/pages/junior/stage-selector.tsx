@@ -6,7 +6,7 @@ import type { LangCode } from "@/lib/i18n";
 interface StageSelectorProps {
   lang: LangCode;
   currentGrade: number;
-  onSelectGrade: (grade: number) => void;
+  onSelectGrade: (grade: number, stageId: "stage1" | "stage2") => void;
   onBack: () => void;
 }
 
@@ -19,6 +19,8 @@ const GRADE_LABELS: Record<LangCode, Record<number, string>> = {
 };
 
 export function StageSelector({ lang, currentGrade, onSelectGrade, onBack }: StageSelectorProps) {
+  const currentStage = EDUCATION_STAGES.find(s => s.grades.includes(currentGrade));
+  
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl mx-auto">
       {/* Back button */}
@@ -29,6 +31,20 @@ export function StageSelector({ lang, currentGrade, onSelectGrade, onBack }: Sta
         <ArrowLeft className="w-4 h-4" />
         {lang === "bg" ? "Назад" : lang === "es" ? "Atrás" : lang === "de" ? "Zurück" : lang === "fr" ? "Retour" : "Back"}
       </button>
+
+      {/* Current stage indicator */}
+      {currentStage && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-6 p-4 rounded-2xl bg-blue-50 border-2 border-blue-200"
+        >
+          <p className="text-sm font-semibold text-blue-900">
+            {lang === "bg" ? "Избран етап: " : lang === "es" ? "Etapa seleccionada: " : "Selected stage: "}
+            <span className="text-blue-700">{currentStage.label[lang]}</span>
+          </p>
+        </motion.div>
+      )}
 
       {/* Education stages */}
       <div className="space-y-6">
@@ -53,7 +69,7 @@ export function StageSelector({ lang, currentGrade, onSelectGrade, onBack }: Sta
                   return (
                     <motion.button
                       key={grade}
-                      onClick={() => onSelectGrade(grade)}
+                      onClick={() => onSelectGrade(grade, stage.id)}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       className={`p-6 rounded-2xl border-2 transition-all font-bold text-lg flex items-center justify-center min-h-24 ${

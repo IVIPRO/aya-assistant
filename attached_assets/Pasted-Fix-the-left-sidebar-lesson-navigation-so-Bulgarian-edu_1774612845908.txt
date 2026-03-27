@@ -1,0 +1,81 @@
+Fix the left sidebar lesson navigation so Bulgarian education stages are fully separated.
+
+Problem:
+The center content already shows:
+- Начален етап = 1–4 class
+- Прогимназия = 5–7 class
+
+But the left-side lesson navigation is still mixed.
+Lessons for Прогимназия are appearing under Начален етап flow.
+
+Goal:
+Make the left sidebar fully stage-aware.
+
+Requirements:
+
+1. Left menu logic
+When the user is in "Начален етап":
+- show only grades 1, 2, 3, 4
+- show only subjects and lessons for grades 1–4
+- do NOT show any lessons from 5–7
+
+When the user is in "Прогимназия":
+- show only grades 5, 6, 7
+- show only subjects and lessons for grades 5–7
+- do NOT show any lessons from 1–4 unless explicitly switching stage
+
+2. Stage isolation
+The selected stage must control:
+- sidebar grade buttons
+- sidebar subject list
+- sidebar lesson list
+- current lesson filtering
+
+No shared mixed lesson list between Начален етап and Прогимназия.
+
+3. Navigation behavior
+Clicking "Начален етап" in the left menu must open only the primary stage lesson tree.
+Clicking "Прогимназия" in the left menu must open only the lower secondary lesson tree.
+
+4. Preserve existing features
+Do NOT break:
+- dashboard
+- daily plan
+- homework photo solving
+- quick actions
+- chat
+- voice mode
+- avatar reactions
+- progress / XP
+- existing lesson content
+
+5. Data / UI rule
+Do not duplicate lessons.
+Do not create fake lesson copies.
+Only fix the filtering, routing, and rendering logic so each stage shows its own lessons in the left sidebar.
+
+6. Expected result
+Correct behavior must be:
+
+Начален етап:
+1 клас
+2 клас
+3 клас
+4 клас
+
+Прогимназия:
+5 клас
+6 клас
+7 клас
+
+and each stage shows only its own subjects and lessons in the left sidebar.
+
+7. Return format
+After implementation return:
+1. files modified
+2. exact sidebar filtering logic changed
+3. preview test steps
+4. confirm that no mixed stage lessons remain
+
+Feature name:
+AYA Sidebar Stage Separation

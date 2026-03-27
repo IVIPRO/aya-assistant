@@ -75,6 +75,88 @@ const UI: Record<LangCode, {
   },
 };
 
+/* ─── AYA Dialogue Messages ─────────────────────────────────────────── */
+const AYA_DIALOGUE: Record<LangCode, {
+  greeting: string[];
+  lessonReady: string[];
+  practiceReady: string[];
+  encouragement: string[];
+  correctPraise: string[];
+  tryAgain: string[];
+  progress: (done: number, total: number) => string;
+  quizReady: string[];
+}> = {
+  en: {
+    greeting: ["Hello! Ready to learn today?", "Hi there! Let's learn something cool!", "Hello! I'm excited to teach you!"],
+    lessonReady: ["Great! Let me explain.", "Perfect! Here's what you need to know.", "Awesome! Let's dive in."],
+    practiceReady: ["Time to practice! You've got this.", "Let's try some problems together.", "Now your turn! Ready?"],
+    encouragement: ["You're doing great!", "Keep it up!", "I believe in you!", "You're getting better!"],
+    correctPraise: ["Excellent!", "Perfect!", "Amazing!", "Outstanding!", "You got it!"],
+    tryAgain: ["Good try! Let's think again.", "Close! Want to try once more?", "That's okay, let's work through it together."],
+    progress: (done, total) => `Nice work! You've done ${done} of ${total}.`,
+    quizReady: ["Time for the quiz! Show me what you learned.", "Let's test what you know!", "Ready to take the quiz?"],
+  },
+  bg: {
+    greeting: ["Здравей! Готов ли си да учиш днес?", "Хей! Имам интересна урок за теб.", "Здравей! Наслеждавам се да те учa!"],
+    lessonReady: ["Чудесно! Нека да обясня.", "Отлично! Ето какво трябва да знаеш.", "Супер! Хайде да начнем."],
+    practiceReady: ["Време е за упражнения! Справяш се отлично.", "Нека да опитаме заедно.", "Сега е твой ред! Готов ли си?"],
+    encouragement: ["Справяш се прекрасно!", "Продължи така!", "Вярвам в теб!", "Все по-добре се справяш!"],
+    correctPraise: ["Браво!", "Перфектно!", "Невероятно!", "Отлично!", "Правилно!"],
+    tryAgain: ["Добър опит! Нека помислим пак.", "Близо! Искаш ли да опиташ пак?", "Всичко е наред, нека да работим заедно."],
+    progress: (done, total) => `Хубаво! Направи си ${done} от ${total}.`,
+    quizReady: ["Време е за тест! Покажи какво се научи.", "Нека да видим какво знаеш!", "Готов ли си за теста?"],
+  },
+  es: {
+    greeting: ["¡Hola! ¿Listo para aprender hoy?", "¡Hola! ¡Tengo algo emocionante para ti!", "¡Hola! ¡Me encanta enseñarte!"],
+    lessonReady: ["¡Perfecto! Déjame explicar.", "¡Excelente! Aquí está lo que necesitas saber.", "¡Genial! Vamos."],
+    practiceReady: ["¡Hora de practicar! Tú puedes.", "Practiquemos juntos.", "¡Ahora tu turno! ¿Listo?"],
+    encouragement: ["¡Lo estás haciendo muy bien!", "¡Sigue así!", "¡Creo en ti!", "¡Te estás mejorando!"],
+    correctPraise: ["¡Excelente!", "¡Perfecto!", "¡Increíble!", "¡Fantástico!", "¡Acertaste!"],
+    tryAgain: ["¡Buen intento! Pensemos de nuevo.", "¡Cerca! ¿Quieres intentar una vez más?", "Está bien, trabajemos juntos."],
+    progress: (done, total) => `¡Buen trabajo! Has hecho ${done} de ${total}.`,
+    quizReady: ["¡Hora del quiz! Muéstrame lo que aprendiste.", "¡Veamos qué sabes!", "¿Listo para el quiz?"],
+  },
+  de: {
+    greeting: ["Hallo! Bist du bereit zu lernen?", "Hallo! Ich habe etwas Spannendes für dich!", "Hallo! Ich freue mich, dich zu unterrichten!"],
+    lessonReady: ["Großartig! Lass mich erklären.", "Ausgezeichnet! Hier ist, was du wissen musst.", "Toll! Lass uns anfangen."],
+    practiceReady: ["Zeit zum Üben! Du schaffst das.", "Üben wir zusammen.", "Jetzt bist du dran! Bereit?"],
+    encouragement: ["Du machst das großartig!", "Mach weiter so!", "Ich glaube an dich!", "Du wirst immer besser!"],
+    correctPraise: ["Ausgezeichnet!", "Perfekt!", "Fantastisch!", "Wunderbar!", "Richtig!"],
+    tryAgain: ["Guter Versuch! Lass uns nochmal nachdenken.", "Nah dran! Möchtest du es nochmal versuchen?", "Das ist okay, lass uns zusammen arbeiten."],
+    progress: (done, total) => `Gute Arbeit! Du hast ${done} von ${total} gemacht.`,
+    quizReady: ["Zeit für den Quiz! Zeig mir, was du gelernt hast.", "Lass uns sehen, was du weißt!", "Bist du bereit für den Quiz?"],
+  },
+  fr: {
+    greeting: ["Bonjour! Tu es prêt à apprendre?", "Bonjour! J'ai quelque chose d'excitant pour toi!", "Bonjour! J'adore t'enseigner!"],
+    lessonReady: ["Parfait! Laisse-moi expliquer.", "Excellent! Voici ce que tu dois savoir.", "Super! Commençons."],
+    practiceReady: ["C'est l'heure de pratiquer! Tu peux le faire.", "Pratiquons ensemble.", "À ton tour! Tu es prêt?"],
+    encouragement: ["Tu fais du très bon travail!", "Continue comme ça!", "Je crois en toi!", "Tu t'améliores!"],
+    correctPraise: ["Excellent!", "Parfait!", "Incroyable!", "Fantastique!", "C'est correct!"],
+    tryAgain: ["Bon essai! Réfléchissons à nouveau.", "Proche! Veux-tu réessayer?", "C'est d'accord, travaillons ensemble."],
+    progress: (done, total) => `Bon travail! Tu as fait ${done} sur ${total}.`,
+    quizReady: ["C'est l'heure du quiz! Montre-moi ce que tu as appris.", "Voyons ce que tu sais!", "Tu es prêt pour le quiz?"],
+  },
+};
+
+function getRandomPhrase(phrases: string[]): string {
+  return phrases[Math.floor(Math.random() * phrases.length)];
+}
+
+function AyaDialogue({ message, childName = "friend" }: { message: string; childName?: string }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-2xl px-5 py-4 mb-4 shadow-sm"
+    >
+      <div className="flex items-start gap-3">
+        <span className="text-2xl flex-shrink-0">👧</span>
+        <p className="text-sm text-foreground leading-relaxed font-medium">{message}</p>
+      </div>
+    </motion.div>
+  );
+}
+
 /* ─── Lesson Panel ─────────────────────────────────────────────── */
 interface LessonPanelProps {
   data: LessonContent;
@@ -85,6 +167,8 @@ interface LessonPanelProps {
 function LessonPanel({ data, lang, subject, onView }: LessonPanelProps) {
   const [showHints, setShowHints] = useState<boolean[]>(data.lesson.examples.map(() => false));
   const ui = UI[lang];
+  const dialogue = AYA_DIALOGUE[lang];
+  const [showGreeting, setShowGreeting] = useState(true);
   const firedRef = useRef(false);
 
   useEffect(() => {
@@ -96,6 +180,10 @@ function LessonPanel({ data, lang, subject, onView }: LessonPanelProps) {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+      {showGreeting && (
+        <AyaDialogue message={getRandomPhrase(dialogue.lessonReady)} />
+      )}
+      
       <div className={cn("rounded-3xl border-2 p-6", subject.bgClass, subject.borderClass)}>
         <h3 className={cn("text-xl font-display font-bold mb-3", subject.colorClass)}>{data.lesson.title}</h3>
         <p className="text-foreground leading-relaxed">{data.lesson.explanation}</p>
@@ -143,8 +231,10 @@ interface PracticePanelProps {
 }
 function PracticePanel({ data, lang, subject, onComplete }: PracticePanelProps) {
   const ui = UI[lang];
+  const dialogue = AYA_DIALOGUE[lang];
   const [answers, setAnswers] = useState<string[]>(data.practice.problems.map(() => ""));
   const [checked, setChecked] = useState<(boolean | null)[]>(data.practice.problems.map(() => null));
+  const [showIntroDialogue, setShowIntroDialogue] = useState(true);
   const firedRef = useRef(false);
 
   useEffect(() => {
@@ -168,16 +258,32 @@ function PracticePanel({ data, lang, subject, onComplete }: PracticePanelProps) 
     firedRef.current = false;
   };
 
+  const correctCount = checked.filter(c => c === true).length;
+  const doneCount = checked.filter(c => c !== null).length;
+
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+      {showIntroDialogue && (
+        <AyaDialogue message={getRandomPhrase(dialogue.practiceReady)} />
+      )}
+      
       <p className="text-sm text-muted-foreground">{data.practice.instructions}</p>
+      
+      {doneCount > 0 && (
+        <AyaDialogue message={dialogue.progress(doneCount, data.practice.problems.length)} />
+      )}
+      
       {data.practice.problems.map((prob, i) => {
         const state = checked[i];
         return (
-          <div key={i} className={cn(
+          <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={cn(
             "bg-card rounded-2xl border-2 shadow-sm p-5 transition-colors",
             state === true ? "border-green-300 bg-green-50" : state === false ? "border-red-300 bg-red-50" : "border-border/40",
           )}>
+            {state !== null && (
+              <AyaDialogue message={state ? getRandomPhrase(dialogue.correctPraise) : getRandomPhrase(dialogue.tryAgain)} />
+            )}
+            
             <div className="flex items-start gap-3 mb-3">
               <span className={cn("w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0", subject.bgClass, subject.colorClass)}>
                 {i + 1}
@@ -196,7 +302,7 @@ function PracticePanel({ data, lang, subject, onComplete }: PracticePanelProps) 
                   className="flex-1 bg-white/60 border border-border/50 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                 />
                 <button
-                  onClick={() => checkOne(i)}
+                  onClick={() => { checkOne(i); setShowIntroDialogue(false); }}
                   disabled={!answers[i].trim()}
                   className={cn("px-4 py-2 rounded-xl font-bold text-sm transition-all", subject.bgClass, subject.colorClass, "border", subject.borderClass, "hover:opacity-90 disabled:opacity-40")}
                 >
@@ -222,7 +328,7 @@ function PracticePanel({ data, lang, subject, onComplete }: PracticePanelProps) 
                 )}
               </div>
             )}
-          </div>
+          </motion.div>
         );
       })}
     </motion.div>
@@ -238,11 +344,13 @@ interface QuizPanelProps {
 }
 function QuizPanel({ data, lang, subject, onComplete }: QuizPanelProps) {
   const ui = UI[lang];
+  const dialogue = AYA_DIALOGUE[lang];
   const questions = data.quiz.questions;
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
+  const [showIntroDialogue, setShowIntroDialogue] = useState(true);
   const firedRef = useRef(false);
 
   useEffect(() => {
@@ -255,6 +363,7 @@ function QuizPanel({ data, lang, subject, onComplete }: QuizPanelProps) {
   const handleSelect = (idx: number) => {
     if (selected !== null) return;
     setSelected(idx);
+    setShowIntroDialogue(false);
     if (idx === questions[current].correctIndex) setScore(s => s + 1);
   };
 
@@ -295,8 +404,18 @@ function QuizPanel({ data, lang, subject, onComplete }: QuizPanelProps) {
   }
 
   const q = questions[current];
+  const isCorrect = selected === q.correctIndex;
+  
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+      {showIntroDialogue && selected === null && current === 0 && (
+        <AyaDialogue message={getRandomPhrase(dialogue.quizReady)} />
+      )}
+      
+      {selected !== null && (
+        <AyaDialogue message={isCorrect ? getRandomPhrase(dialogue.correctPraise) : getRandomPhrase(dialogue.tryAgain)} />
+      )}
+      
       <div className="flex items-center justify-between mb-1">
         <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
           {lang === "bg" ? `Въпрос ${current + 1} от ${questions.length}` : lang === "es" ? `Pregunta ${current + 1} de ${questions.length}` : `Question ${current + 1} of ${questions.length}`}

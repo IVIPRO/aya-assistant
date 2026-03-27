@@ -1,0 +1,143 @@
+Upgrade AYA lessons so that every lesson includes continuous conversation with the child.
+
+Goal:
+Children should feel that they are talking with AYA during the lesson, not just answering tasks.
+
+Important:
+Do NOT remove existing exercises.
+Do NOT break homework solving.
+Do NOT change the reward system.
+Only extend lesson flow with interactive dialogue.
+
+------------------------------------------------
+
+Lesson conversation structure
+
+Each lesson must include conversation between AYA and the child.
+
+Lesson flow:
+
+1 Greeting  
+2 Lesson introduction  
+3 Explanation  
+4 Interactive question  
+5 Exercise  
+6 Feedback  
+7 Encouragement  
+
+------------------------------------------------
+
+Example lesson interaction
+
+AYA:
+
+"Здравей! Днес ще учим умножение.
+
+Готов ли си?"
+
+Child interacts.
+
+AYA continues:
+
+"Чудесно!
+
+3 по 4 означава да повторим числото 4 три пъти."
+
+AYA asks:
+
+"Колко е 3 × 4?"
+
+Child answers.
+
+AYA response if correct:
+
+"Браво! Отлично се справи!"
+
+AYA response if incorrect:
+
+"Добър опит. Нека помислим още малко."
+
+------------------------------------------------
+
+AYA should frequently ask questions
+
+Examples:
+
+"Как мислиш?"
+"Можеш ли да опиташ?"
+"Искаш ли още една задача?"
+"Готов ли си за следващото?"
+
+------------------------------------------------
+
+Add micro conversations
+
+Between tasks AYA should speak briefly.
+
+Example:
+
+"Справяш се много добре!"
+"Остава ни още една задача."
+
+------------------------------------------------
+
+Encouragement system
+
+After correct answers AYA should use praise phrases:
+
+"Браво!"
+"Страхотно!"
+"Много добре!"
+"Ти се справяш отлично!"
+
+The avatar can react with positive animation.
+
+------------------------------------------------
+
+Mini choices
+
+Occasionally AYA should give options.
+
+Example:
+
+"Искаш ли по-лесна задача или по-трудна?"
+
+Options:
+
+Лесна  
+Нормална  
+Трудна  
+
+------------------------------------------------
+
+Voice friendliness
+
+If voice mode is active, AYA should speak in short sentences suitable for children.
+
+Avoid long paragraphs.
+
+------------------------------------------------
+
+Preserve existing features
+
+Do not break:
+
+• lesson structure
+• progress tracking
+• homework photo solving
+• avatar reactions
+• reward system
+• chat
+
+------------------------------------------------
+
+Return after implementation:
+
+1 files modified
+2 conversation logic
+3 example interactive lesson
+4 preview test steps
+
+Feature name:
+
+AYA Conversational Lesson Mode

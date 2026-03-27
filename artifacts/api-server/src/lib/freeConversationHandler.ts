@@ -17,6 +17,7 @@ import { db, chatMessagesTable } from "@workspace/db";
 import { and, eq, desc } from "drizzle-orm";
 import { handleJuniorChat } from "./juniorChatHandler";
 import { getLang } from "./aiResponses";
+import { buildCurriculumContext, detectBgLanguageTask, getBgLanguageExplanation } from "./bgCurriculumTeaching";
 
 type Lang = "bg" | "es" | "en";
 
@@ -39,44 +40,51 @@ function charName(lang: Lang, charKey: string): string {
   return map[charKey]?.[lang] ?? (lang === "bg" ? "AYA Сова" : "AYA Owl");
 }
 
-function buildSystemPrompt(lang: Lang, charKey: string, childName: string): string {
+function buildSystemPrompt(lang: Lang, charKey: string, childName: string, grade?: number): string {
   const name = charName(lang, charKey);
+  const curriculumCtx = grade ? `\n${buildCurriculumContext(grade, lang)}` : "";
+  const gradeLabel = grade ? (lang === "bg" ? `${grade} клас` : lang === "es" ? `grado ${grade}` : `grade ${grade}`) : "1–4";
 
   if (lang === "bg") {
     return (
-      `Ти си ${name} – приятелски учител на ${childName} (1–4 клас). ` +
+      `Ти си ${name} – приятелски учител на ${childName} (${gradeLabel}, България). ` +
       `Говори на чист съвременен български. Никога не използвай руски думи или руска граматика. ` +
       `ВАЖНО: Винаги ОБЯСНЯВАЙ ПРЕДИ да даш отговора. Структура: ` +
-      `1. Какво питаме? 2. Как да мислим? 3. Решаваме 4. Отговор. ` +
+      `1. Какво питаме? 2. Как да мислим? 3. Решаваме стъпка по стъпка 4. Отговор. ` +
       `Пример за 3 × 6: "Нека помислим заедно. 3 по 6 означава 6 + 6 + 6. ` +
       `6 + 6 + 6 = 18. Значи: 3 × 6 = 18. Отговор: 18." ` +
-      `Използвай топъл, насърчаващ тон. Кратки изречения. ` +
-      `Ако детето поиска задача по математика, добави [ACTION:math] в края на отговора. ` +
-      `Ако поиска урок по български език, добави [ACTION:bulgarian] в края.`
+      `Използвай топъл, насърчаващ тон — като добър учител от България. Кратки изречения. ` +
+      `При Български език — обяснявай какво е съществително/глагол/прилагателно ПРЕДИ задачата. ` +
+      `При четене с разбиране — питай "Кой е главният герой?" и "Какво се случва?". ` +
+      curriculumCtx +
+      `\nАко детето поиска задача по математика, добави [ACTION:math] в края на отговора. ` +
+      `Ако поиска урок по Български език, добави [ACTION:bulgarian] в края.`
     );
   }
 
   if (lang === "es") {
     return (
-      `Eres ${name}, profesor amigable de ${childName} (1.°–4.° grado). ` +
+      `Eres ${name}, profesor amigable de ${childName} (${gradeLabel}). ` +
       `Responde en español. IMPORTANTE: Siempre EXPLICA ANTES de dar la respuesta. ` +
-      `Estructura: 1. ¿Qué preguntamos? 2. ¿Cómo pensar? 3. Resolver 4. Respuesta. ` +
+      `Estructura: 1. ¿Qué preguntamos? 2. ¿Cómo pensar? 3. Resolver paso a paso 4. Respuesta. ` +
       `Ejemplo para 3 × 6: "Pensemos juntos. 3 × 6 significa sumar 6 tres veces. ` +
       `6 + 6 + 6 = 18. Entonces: 3 × 6 = 18. Respuesta: 18." ` +
-      `Usa tono cálido y animador. Oraciones cortas. ` +
-      `Si pide una tarea de matemáticas, añade [ACTION:math] al final. ` +
+      `Usa tono cálido y animador. Oraciones cortas.` +
+      (curriculumCtx ? `\n${curriculumCtx}` : "") +
+      `\nSi pide una tarea de matemáticas, añade [ACTION:math] al final. ` +
       `Si pide una lección de lengua, añade [ACTION:bulgarian] al final.`
     );
   }
 
   return (
-    `You are ${name}, a friendly teacher for ${childName} (grades 1–4). ` +
+    `You are ${name}, a friendly teacher for ${childName} (${gradeLabel}). ` +
     `IMPORTANT: Always EXPLAIN BEFORE giving the answer. ` +
-    `Structure: 1. What are we finding? 2. How should we think? 3. Solve 4. Answer. ` +
+    `Structure: 1. What are we finding? 2. How should we think? 3. Solve step by step 4. Answer. ` +
     `Example for 3 × 6: "Let's think together. 3 × 6 means adding 6 three times. ` +
     `6 + 6 + 6 = 18. So: 3 × 6 = 18. Answer: 18." ` +
-    `Use warm, encouraging tone. Keep sentences short. ` +
-    `If they want a math task, append [ACTION:math] at the end. ` +
+    `Use warm, encouraging tone. Keep sentences short.` +
+    (curriculumCtx ? `\n${curriculumCtx}` : "") +
+    `\nIf they want a math task, append [ACTION:math] at the end. ` +
     `If they want a Bulgarian language lesson, append [ACTION:bulgarian] at the end.`
   );
 }
@@ -115,14 +123,25 @@ export async function handleFreeConversationChat(
       content: r.content.slice(0, 300),
     }));
 
-  const systemPrompt = buildSystemPrompt(lang, charKey, name);
+  const grade = context.grade;
+  const systemPrompt = buildSystemPrompt(lang, charKey, name, grade);
 
-  // ── Single OpenAI call — compact, cost-optimised ─────────────────────────
-  console.log(`[FREE_CONV_AI] Calling OpenAI | lang=${lang} char=${charKey} historyLen=${history.length}`);
+  // ── Bulgarian language task — local shortcut (no AI needed) ─────────────
+  if (lang === "bg" && grade) {
+    const bgTask = detectBgLanguageTask(message);
+    if (bgTask) {
+      console.log(`[FREE_CONV_AI] BG language task detected: ${bgTask} — returning local explanation`);
+      const explanation = getBgLanguageExplanation(message, grade);
+      return explanation;
+    }
+  }
+
+  // ── Single OpenAI call — curriculum-enriched ──────────────────────────────
+  console.log(`[FREE_CONV_AI] Calling OpenAI | lang=${lang} char=${charKey} grade=${grade ?? "?"} historyLen=${history.length}`);
 
   const completion = await openai.chat.completions.create({
     model: "gpt-5.2",
-    max_completion_tokens: 300,
+    max_completion_tokens: 400,
     messages: [
       { role: "system", content: systemPrompt },
       ...history,

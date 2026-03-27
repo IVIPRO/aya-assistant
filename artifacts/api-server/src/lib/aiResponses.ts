@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { getGradeAwareMathExplanation } from "./bgCurriculumTeaching";
 
 interface JuniorContext {
   grade?: number;
@@ -894,8 +895,14 @@ function getStepByStepExplanation(
   b: number,
   operation: string,
   result: number,
-  lang: "bg" | "es" | "en"
+  lang: "bg" | "es" | "en",
+  grade?: number
 ): string {
+  // Use grade-aware curriculum engine when grade is known
+  if (grade) {
+    return getGradeAwareMathExplanation(a, b, operation, result, grade, lang);
+  }
+
   const opSym = operation === "subtraction" ? "-"
     : operation === "multiplication" ? "×"
     : operation === "division" ? "÷"
@@ -1004,7 +1011,8 @@ export function getMathFeedback(
   userAnswer: string,
   childName: string,
   lang: "bg" | "es" | "en",
-  isCorrect: boolean
+  isCorrect: boolean,
+  grade?: number
 ): string {
   const charEmoji = "🐼";
   const { expected } = evaluateMathAnswer(a, b, operation, userAnswer);
@@ -1017,8 +1025,8 @@ export function getMathFeedback(
   const equation = `${a} ${operationSymbol} ${b} = ${expected}`;
   
   if (isCorrect) {
-    // Show step-by-step explanation FIRST
-    const explanation = getStepByStepExplanation(a, b, operation, expected, lang);
+    // Show step-by-step explanation FIRST (grade-aware when grade is provided)
+    const explanation = getStepByStepExplanation(a, b, operation, expected, lang, grade);
     
     // Then show praise
     let praise = "";

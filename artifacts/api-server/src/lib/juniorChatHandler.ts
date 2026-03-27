@@ -1100,7 +1100,7 @@ export async function handleJuniorChat(
       await awardXp(childId, context.childXp ?? 0, 3);
     }
 
-    return getMathFeedback(a, b, operation, msg, childName, lang, correct);
+    return getMathFeedback(a, b, operation, msg, childName, lang, correct, context.grade);
   }
 
   // ── EXPLAIN_CURRENT_TASK ──────────────────────────────────────────────────

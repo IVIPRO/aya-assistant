@@ -105,3 +105,20 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
+
+## AYA Teaching Engine (api-server/src/lib)
+
+Key teaching files for the Junior (grades 1–7) learning module:
+
+| File | Purpose |
+|---|---|
+| `bgCurriculum.ts` | Bulgarian MoE curriculum data: topics, skills per grade/subject |
+| `bgCurriculumTeaching.ts` | **Teaching engine**: grade-aware math explanations, Bulgarian language explanations (nouns/verbs/adjectives/spelling/reading), curriculum context builder, BG task detector |
+| `freeConversationHandler.ts` | Free chat AI handler: injects curriculum context into system prompt, detects BG language tasks (local shortcut, no AI cost), grade-aware prompts |
+| `aiResponses.ts` | `getMathFeedback()` + `getStepByStepExplanation()` — grade-aware via `bgCurriculumTeaching.ts` |
+| `juniorChatHandler.ts` | Intent router for math tasks, BG lessons, homework |
+
+**Teaching flow for Bulgarian grade N child:**
+1. Free chat → `freeConversationHandler` detects BG grammar task → returns `getBgLanguageExplanation()` (no API call)
+2. Math answer → `getMathFeedback()` → `getStepByStepExplanation(grade)` → `getGradeAwareMathExplanation()` (grade-appropriate strategy)
+3. General conversation → OpenAI with system prompt enriched by `buildCurriculumContext(grade, "bg")`

@@ -2,17 +2,17 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft, BookOpen, Pencil, Brain, CheckCircle2, XCircle,
-  ChevronRight, RotateCcw, Loader2,
+  ArrowLeft, Eye, CheckCircle2, XCircle,
+  ChevronRight, RotateCcw, Loader2, Trophy, Star, Sparkles,
 } from "lucide-react";
 import { cn } from "@/components/layout";
 import { getListChildrenQueryKey } from "@workspace/api-client-react";
 import type { LangCode } from "@/lib/i18n";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { XpToast, type XpReward } from "@/components/xp-toast";
-import { AyaAvatar } from "@/components/AyaAvatar";
+import { AyaAvatar, type AyaEmotion } from "@/components/AyaAvatar";
 
-type LessonMode = "lesson" | "practice" | "quiz";
+/* ─── Data types ────────────────────────────────────────────────── */
 
 interface LessonContent {
   lesson: {
@@ -31,439 +31,738 @@ interface LessonContent {
   };
 }
 
-const TAB_LABELS: Record<LangCode, { lesson: string; practice: string; quiz: string }> = {
-  en: { lesson: "Lesson", practice: "Practice", quiz: "Quiz" },
-  bg: { lesson: "Урок", practice: "Упражнения", quiz: "Тест" },
-  es: { lesson: "Lección", practice: "Práctica", quiz: "Test" },
-  de: { lesson: "Lektion", practice: "Übung", quiz: "Quiz" },
-  fr: { lesson: "Leçon", practice: "Pratique", quiz: "Quiz" },
-};
+/* ─── Engine Phase state machine ────────────────────────────────── */
 
-const UI: Record<LangCode, {
-  check: string; correct: string; wrong: string; next: string; retry: string;
-  score: (n: number, t: number) => string; loading: string; back: string;
-  showHint: string; placeholder: string;
-}> = {
-  en: {
-    check: "Check", correct: "Correct! ✅", wrong: "Not quite ❌", next: "Next →",
-    retry: "Try again", score: (n, t) => `You got ${n} out of ${t} correct!`,
-    loading: "Loading lesson...", back: "← Back", showHint: "Show hint",
-    placeholder: "Type your answer…",
-  },
-  bg: {
-    check: "Провери", correct: "Правилно! ✅", wrong: "Не съвсем ❌", next: "Следващ →",
-    retry: "Опитай пак", score: (n, t) => `Верни отговори: ${n} от ${t}!`,
-    loading: "Зареждам урока...", back: "← Назад", showHint: "Покажи подсказка",
-    placeholder: "Напиши отговора си…",
-  },
-  es: {
-    check: "Comprobar", correct: "¡Correcto! ✅", wrong: "No del todo ❌", next: "Siguiente →",
-    retry: "Intentar de nuevo", score: (n, t) => `¡Acertaste ${n} de ${t}!`,
-    loading: "Cargando lección...", back: "← Atrás", showHint: "Mostrar pista",
-    placeholder: "Escribe tu respuesta…",
-  },
-  de: {
-    check: "Überprüfen", correct: "Richtig! ✅", wrong: "Nicht ganz ❌", next: "Nächste →",
-    retry: "Noch mal versuchen", score: (n, t) => `Du hast ${n} von ${t} richtig!`,
-    loading: "Lade Lektion...", back: "← Zurück", showHint: "Hinweis anzeigen",
-    placeholder: "Gib deine Antwort ein…",
-  },
-  fr: {
-    check: "Vérifier", correct: "Correct! ✅", wrong: "Pas tout à fait ❌", next: "Suivant →",
-    retry: "Réessayer", score: (n, t) => `Tu as eu ${n} sur ${t} correct!`,
-    loading: "Chargement de la leçon...", back: "← Retour", showHint: "Afficher l'indice",
-    placeholder: "Tape ta réponse…",
-  },
-};
+type Phase =
+  | { kind: "greeting" }
+  | { kind: "explanation" }
+  | { kind: "example"; idx: number; revealed: boolean }
+  | { kind: "practice"; idx: number; attempts: number; feedback: "none" | "correct" | "wrong" }
+  | { kind: "quiz-intro" }
+  | { kind: "quiz"; idx: number; selected: number | null }
+  | { kind: "completion"; practiceCorrect: number; quizCorrect: number; total: { practice: number; quiz: number } };
 
-/* ─── AYA Dialogue Messages ─────────────────────────────────────────── */
-const AYA_DIALOGUE: Record<LangCode, {
-  greeting: string[];
-  lessonReady: string[];
-  practiceReady: string[];
-  encouragement: string[];
-  correctPraise: string[];
-  tryAgain: string[];
-  progress: (done: number, total: number) => string;
-  quizReady: string[];
-}> = {
-  en: {
-    greeting: ["Hello! Ready to learn today?", "Hi there! Let's learn something cool!", "Hello! I'm excited to teach you!"],
-    lessonReady: ["Great! Let me explain.", "Perfect! Here's what you need to know.", "Awesome! Let's dive in."],
-    practiceReady: ["Time to practice! You've got this.", "Let's try some problems together.", "Now your turn! Ready?"],
-    encouragement: ["You're doing great!", "Keep it up!", "I believe in you!", "You're getting better!"],
-    correctPraise: ["Excellent!", "Perfect!", "Amazing!", "Outstanding!", "You got it!"],
-    tryAgain: ["Good try! Let's think again.", "Close! Want to try once more?", "That's okay, let's work through it together."],
-    progress: (done, total) => `Nice work! You've done ${done} of ${total}.`,
-    quizReady: ["Time for the quiz! Show me what you learned.", "Let's test what you know!", "Ready to take the quiz?"],
-  },
-  bg: {
-    greeting: ["Здравей! Готов ли си да учиш днес?", "Хей! Имам интересна урок за теб.", "Здравей! Наслеждавам се да те учa!"],
-    lessonReady: ["Чудесно! Нека да обясня.", "Отлично! Ето какво трябва да знаеш.", "Супер! Хайде да начнем."],
-    practiceReady: ["Време е за упражнения! Справяш се отлично.", "Нека да опитаме заедно.", "Сега е твой ред! Готов ли си?"],
-    encouragement: ["Справяш се прекрасно!", "Продължи така!", "Вярвам в теб!", "Все по-добре се справяш!"],
-    correctPraise: ["Браво!", "Перфектно!", "Невероятно!", "Отлично!", "Правилно!"],
-    tryAgain: ["Добър опит! Нека помислим пак.", "Близо! Искаш ли да опиташ пак?", "Всичко е наред, нека да работим заедно."],
-    progress: (done, total) => `Хубаво! Направи си ${done} от ${total}.`,
-    quizReady: ["Време е за тест! Покажи какво се научи.", "Нека да видим какво знаеш!", "Готов ли си за теста?"],
-  },
-  es: {
-    greeting: ["¡Hola! ¿Listo para aprender hoy?", "¡Hola! ¡Tengo algo emocionante para ti!", "¡Hola! ¡Me encanta enseñarte!"],
-    lessonReady: ["¡Perfecto! Déjame explicar.", "¡Excelente! Aquí está lo que necesitas saber.", "¡Genial! Vamos."],
-    practiceReady: ["¡Hora de practicar! Tú puedes.", "Practiquemos juntos.", "¡Ahora tu turno! ¿Listo?"],
-    encouragement: ["¡Lo estás haciendo muy bien!", "¡Sigue así!", "¡Creo en ti!", "¡Te estás mejorando!"],
-    correctPraise: ["¡Excelente!", "¡Perfecto!", "¡Increíble!", "¡Fantástico!", "¡Acertaste!"],
-    tryAgain: ["¡Buen intento! Pensemos de nuevo.", "¡Cerca! ¿Quieres intentar una vez más?", "Está bien, trabajemos juntos."],
-    progress: (done, total) => `¡Buen trabajo! Has hecho ${done} de ${total}.`,
-    quizReady: ["¡Hora del quiz! Muéstrame lo que aprendiste.", "¡Veamos qué sabes!", "¿Listo para el quiz?"],
-  },
-  de: {
-    greeting: ["Hallo! Bist du bereit zu lernen?", "Hallo! Ich habe etwas Spannendes für dich!", "Hallo! Ich freue mich, dich zu unterrichten!"],
-    lessonReady: ["Großartig! Lass mich erklären.", "Ausgezeichnet! Hier ist, was du wissen musst.", "Toll! Lass uns anfangen."],
-    practiceReady: ["Zeit zum Üben! Du schaffst das.", "Üben wir zusammen.", "Jetzt bist du dran! Bereit?"],
-    encouragement: ["Du machst das großartig!", "Mach weiter so!", "Ich glaube an dich!", "Du wirst immer besser!"],
-    correctPraise: ["Ausgezeichnet!", "Perfekt!", "Fantastisch!", "Wunderbar!", "Richtig!"],
-    tryAgain: ["Guter Versuch! Lass uns nochmal nachdenken.", "Nah dran! Möchtest du es nochmal versuchen?", "Das ist okay, lass uns zusammen arbeiten."],
-    progress: (done, total) => `Gute Arbeit! Du hast ${done} von ${total} gemacht.`,
-    quizReady: ["Zeit für den Quiz! Zeig mir, was du gelernt hast.", "Lass uns sehen, was du weißt!", "Bist du bereit für den Quiz?"],
-  },
-  fr: {
-    greeting: ["Bonjour! Tu es prêt à apprendre?", "Bonjour! J'ai quelque chose d'excitant pour toi!", "Bonjour! J'adore t'enseigner!"],
-    lessonReady: ["Parfait! Laisse-moi expliquer.", "Excellent! Voici ce que tu dois savoir.", "Super! Commençons."],
-    practiceReady: ["C'est l'heure de pratiquer! Tu peux le faire.", "Pratiquons ensemble.", "À ton tour! Tu es prêt?"],
-    encouragement: ["Tu fais du très bon travail!", "Continue comme ça!", "Je crois en toi!", "Tu t'améliores!"],
-    correctPraise: ["Excellent!", "Parfait!", "Incroyable!", "Fantastique!", "C'est correct!"],
-    tryAgain: ["Bon essai! Réfléchissons à nouveau.", "Proche! Veux-tu réessayer?", "C'est d'accord, travaillons ensemble."],
-    progress: (done, total) => `Bon travail! Tu as fait ${done} sur ${total}.`,
-    quizReady: ["C'est l'heure du quiz! Montre-moi ce que tu as appris.", "Voyons ce que tu sais!", "Tu es prêt pour le quiz?"],
-  },
-};
-
-function getRandomPhrase(phrases: string[]): string {
-  return phrases[Math.floor(Math.random() * phrases.length)];
+function phaseEmotion(p: Phase): AyaEmotion {
+  switch (p.kind) {
+    case "greeting":    return "happy";
+    case "explanation": return "neutral";
+    case "example":     return p.revealed ? "encourage" : "thinking";
+    case "practice":    return p.feedback === "correct" ? "happy" : p.feedback === "wrong" ? "encourage" : "neutral";
+    case "quiz-intro":  return "happy";
+    case "quiz":        return p.selected === null ? "thinking" : "neutral";
+    case "completion":  return "celebrate";
+  }
 }
 
-function AyaDialogue({ message, childName = "friend" }: { message: string; childName?: string }) {
+/* ─── Localized strings ─────────────────────────────────────────── */
+
+const L: Record<LangCode, {
+  back: string;
+  loading: string;
+  ready: string;
+  understood: string;
+  seeAnswer: string;
+  nextExample: string;
+  check: string;
+  retry: string;
+  nextProblem: string;
+  startQuiz: string;
+  nextQuestion: string;
+  backToLessons: string;
+  placeholder: string;
+  hint: string;
+  question: (c: number, t: number) => string;
+  step: (c: number, t: number) => string;
+  score: (c: number, t: number) => string;
+  showAnswer: string;
+}> = {
+  bg: {
+    back: "← Назад", loading: "Зареждам урока...",
+    ready: "Готов съм!", understood: "Разбрах!",
+    seeAnswer: "Виж решението", nextExample: "Следващ пример →",
+    check: "Провери", retry: "Опитай пак", nextProblem: "Следваща задача →",
+    startQuiz: "Да, готов съм!", nextQuestion: "Следващ →",
+    backToLessons: "Назад към уроците", placeholder: "Напиши отговора си…",
+    hint: "Подсказка", question: (c, t) => `Въпрос ${c} от ${t}`,
+    step: (c, t) => `Стъпка ${c} от ${t}`, score: (c, t) => `${c} от ${t} верни`,
+    showAnswer: "Покажи верния отговор",
+  },
+  en: {
+    back: "← Back", loading: "Loading lesson...",
+    ready: "I'm ready!", understood: "Got it!",
+    seeAnswer: "See answer", nextExample: "Next example →",
+    check: "Check", retry: "Try again", nextProblem: "Next problem →",
+    startQuiz: "Yes, let's go!", nextQuestion: "Next →",
+    backToLessons: "Back to lessons", placeholder: "Type your answer…",
+    hint: "Hint", question: (c, t) => `Question ${c} of ${t}`,
+    step: (c, t) => `Step ${c} of ${t}`, score: (c, t) => `${c} of ${t} correct`,
+    showAnswer: "Show correct answer",
+  },
+  es: {
+    back: "← Atrás", loading: "Cargando lección...",
+    ready: "¡Estoy listo!", understood: "¡Entendido!",
+    seeAnswer: "Ver respuesta", nextExample: "Siguiente ejemplo →",
+    check: "Comprobar", retry: "Intentar de nuevo", nextProblem: "Siguiente problema →",
+    startQuiz: "¡Sí, vamos!", nextQuestion: "Siguiente →",
+    backToLessons: "Volver a las lecciones", placeholder: "Escribe tu respuesta…",
+    hint: "Pista", question: (c, t) => `Pregunta ${c} de ${t}`,
+    step: (c, t) => `Paso ${c} de ${t}`, score: (c, t) => `${c} de ${t} correctas`,
+    showAnswer: "Mostrar respuesta",
+  },
+  de: {
+    back: "← Zurück", loading: "Lade Lektion...",
+    ready: "Ich bin bereit!", understood: "Verstanden!",
+    seeAnswer: "Antwort anzeigen", nextExample: "Nächstes Beispiel →",
+    check: "Überprüfen", retry: "Nochmal", nextProblem: "Nächste Aufgabe →",
+    startQuiz: "Ja, los geht's!", nextQuestion: "Weiter →",
+    backToLessons: "Zurück zu den Lektionen", placeholder: "Gib deine Antwort ein…",
+    hint: "Hinweis", question: (c, t) => `Frage ${c} von ${t}`,
+    step: (c, t) => `Schritt ${c} von ${t}`, score: (c, t) => `${c} von ${t} richtig`,
+    showAnswer: "Richtige Antwort zeigen",
+  },
+  fr: {
+    back: "← Retour", loading: "Chargement de la leçon...",
+    ready: "Je suis prêt!", understood: "Compris!",
+    seeAnswer: "Voir la réponse", nextExample: "Exemple suivant →",
+    check: "Vérifier", retry: "Réessayer", nextProblem: "Problème suivant →",
+    startQuiz: "Oui, allons-y!", nextQuestion: "Suivant →",
+    backToLessons: "Retour aux leçons", placeholder: "Tape ta réponse…",
+    hint: "Indice", question: (c, t) => `Question ${c} sur ${t}`,
+    step: (c, t) => `Étape ${c} sur ${t}`, score: (c, t) => `${c} sur ${t} correctes`,
+    showAnswer: "Afficher la bonne réponse",
+  },
+};
+
+/* ─── AYA Dialogues ─────────────────────────────────────────────── */
+
+const D: Record<LangCode, {
+  greeting: string[];
+  topicIntro: (topic: string) => string[];
+  explanationLead: string[];
+  exampleLead: string[];
+  exampleReveal: string[];
+  practiceLead: string[];
+  practiceCorrect: string[];
+  practiceWrong: string[];
+  practiceWrong2: string[];       // 2nd attempt
+  quizIntro: string[];
+  quizCorrect: string[];
+  quizWrong: string[];
+  completionHigh: (topic: string) => string;
+  completionMid: (topic: string) => string;
+  completionLow: (topic: string) => string;
+}> = {
+  bg: {
+    greeting: ["Здравей! Готов ли си за нов урок? 🎉", "Хей! Днес ще научим нещо интересно!", "Здравей! Радвам се да те видя отново!"],
+    topicIntro: (t) => [`Днес ще учим: „${t}". Хайде да начнем!`, `Темата ни е „${t}". Ще е интересно!`, `Ще разберем заедно „${t}"!`],
+    explanationLead: ["Нека ти обясня как работи това:", "Ето как стои нещата:", "Слушай внимателно — ще ти обясня:"],
+    exampleLead: ["Нека разгледаме пример заедно:", "Ето един пример:", "Виж как изглежда на практика:"],
+    exampleReveal: ["Ето решението! Забеляза ли как го намерих?", "Готово! Разбра ли логиката?", "Така се решава! Лесно, нали?"],
+    practiceLead: ["Сега ти опитай! Вярвам в теб. 💪", "Твой ред! Покажи какво знаеш.", "Упражнение! Помоги ми да видя как ти се справяш."],
+    practiceCorrect: ["Браво! Правилно! 🌟", "Отлично! Ти го направи!", "Перфектно! Продължавай така!", "Супер! Знаех, че можеш!"],
+    practiceWrong: ["Почти! Помисли малко повече.", "Не съвсем — хайде да опитаме пак.", "Близо си! Погледни отново условието."],
+    practiceWrong2: ["Нека ти дам подсказка...", "Не се притеснявай — ето ти помощ:", "Заедно ще го намерим!"],
+    quizIntro: ["Готов ли си за малък тест? 📝", "Хайде да видим какво научи!", "Нека проверим знанията ти — не се страхувай!"],
+    quizCorrect: ["Браво!", "Правилно! 🌟", "Отлично!", "Верно!"],
+    quizWrong: ["Не съвсем — но ничего!", "Близо! Ето верния отговор:", "Следващия път ще е по-лесно."],
+    completionHigh: (t) => `🏆 Невероятно! Ти усвои „${t}" перфектно! Гордея се с теб!`,
+    completionMid: (t) => `⭐ Браво! Научи „${t}". Практикувай още малко за пълно майсторство!`,
+    completionLow: (t) => `💪 Добро начало с „${t}"! Прегледай урока и опитай пак — заедно ще успеем!`,
+  },
+  en: {
+    greeting: ["Hello! Ready for a new lesson? 🎉", "Hey! We're going to learn something cool today!", "Hi! I'm so glad to see you!"],
+    topicIntro: (t) => [`Today we'll learn: "${t}". Let's go!`, `Our topic is "${t}". It'll be fun!`, `We'll figure out "${t}" together!`],
+    explanationLead: ["Let me explain how this works:", "Here's how it is:", "Listen carefully — I'll explain:"],
+    exampleLead: ["Let's look at an example together:", "Here's an example:", "See how it looks in practice:"],
+    exampleReveal: ["Here's the solution! Did you see how I found it?", "Done! Do you understand the logic?", "That's how it's done! Easy, right?"],
+    practiceLead: ["Now you try! I believe in you. 💪", "Your turn! Show me what you know.", "Practice time! Let me see how you do."],
+    practiceCorrect: ["Great! Correct! 🌟", "Excellent! You did it!", "Perfect! Keep it up!", "Super! I knew you could!"],
+    practiceWrong: ["Almost! Think a little more.", "Not quite — let's try again.", "You're close! Look at the problem again."],
+    practiceWrong2: ["Let me give you a hint...", "Don't worry — here's some help:", "We'll find it together!"],
+    quizIntro: ["Ready for a mini quiz? 📝", "Let's see what you learned!", "Let's check your knowledge — don't worry!"],
+    quizCorrect: ["Great!", "Correct! 🌟", "Excellent!", "Right!"],
+    quizWrong: ["Not quite — but no worries!", "Close! Here's the right answer:", "Next time will be easier."],
+    completionHigh: (t) => `🏆 Amazing! You mastered "${t}" perfectly! I'm so proud of you!`,
+    completionMid: (t) => `⭐ Well done! You learned "${t}". Practice a little more for full mastery!`,
+    completionLow: (t) => `💪 Good start with "${t}"! Review the lesson and try again — we'll get there!`,
+  },
+  es: {
+    greeting: ["¡Hola! ¿Lista para una nueva lección? 🎉", "¡Hola! ¡Aprenderemos algo genial hoy!", "¡Hola! ¡Me alegra verte!"],
+    topicIntro: (t) => [`Hoy aprenderemos: "${t}". ¡Vamos!`, `Nuestro tema es "${t}". ¡Será divertido!`, `¡Descubriremos "${t}" juntos!`],
+    explanationLead: ["Déjame explicarte cómo funciona:", "Así es como está:", "Escucha — te explicaré:"],
+    exampleLead: ["Veamos un ejemplo juntos:", "Aquí hay un ejemplo:", "Mira cómo se ve en práctica:"],
+    exampleReveal: ["¡Aquí está la solución! ¿Viste cómo la encontré?", "¡Listo! ¿Entiendes la lógica?", "¡Así se hace! Fácil, ¿verdad?"],
+    practiceLead: ["¡Ahora tú intenta! Creo en ti. 💪", "¡Tu turno! Muéstrame lo que sabes.", "¡Hora de practicar!"],
+    practiceCorrect: ["¡Bien! ¡Correcto! 🌟", "¡Excelente! ¡Lo lograste!", "¡Perfecto! ¡Sigue así!", "¡Genial!"],
+    practiceWrong: ["¡Casi! Piensa un poco más.", "No del todo — intentemos de nuevo.", "¡Estás cerca! Mira el problema otra vez."],
+    practiceWrong2: ["Déjame darte una pista...", "No te preocupes — aquí va ayuda:", "¡Lo encontraremos juntos!"],
+    quizIntro: ["¿Lista para un mini quiz? 📝", "¡Veamos qué aprendiste!", "¡Comprobemos tu conocimiento — sin miedo!"],
+    quizCorrect: ["¡Bien!", "¡Correcto! 🌟", "¡Excelente!", "¡Acertaste!"],
+    quizWrong: ["No del todo — ¡pero no te preocupes!", "¡Cerca! Aquí está la respuesta correcta:", "La próxima vez será más fácil."],
+    completionHigh: (t) => `🏆 ¡Increíble! ¡Dominaste "${t}" perfectamente!`,
+    completionMid: (t) => `⭐ ¡Bien hecho! Aprendiste "${t}". ¡Practica un poco más!`,
+    completionLow: (t) => `💪 ¡Buen comienzo con "${t}"! Repasa y vuelve a intentarlo.`,
+  },
+  de: {
+    greeting: ["Hallo! Bereit für eine neue Lektion? 🎉", "Hey! Wir lernen heute etwas Tolles!", "Hallo! Schön, dich zu sehen!"],
+    topicIntro: (t) => [`Heute lernen wir: „${t}". Los geht's!`, `Unser Thema ist „${t}". Es wird spannend!`, `Wir entdecken „${t}" gemeinsam!`],
+    explanationLead: ["Lass mich erklären, wie das funktioniert:", "So ist es:", "Hör zu — ich erkläre:"],
+    exampleLead: ["Schauen wir uns ein Beispiel an:", "Hier ist ein Beispiel:", "Sieh, wie es in der Praxis aussieht:"],
+    exampleReveal: ["Hier ist die Lösung! Hast du gesehen, wie ich sie gefunden habe?", "Fertig! Verstehst du die Logik?", "So macht man es! Einfach, oder?"],
+    practiceLead: ["Jetzt bist du dran! Ich glaube an dich. 💪", "Dein Turn! Zeig, was du kannst.", "Übungszeit!"],
+    practiceCorrect: ["Super! Richtig! 🌟", "Ausgezeichnet! Du hast es geschafft!", "Perfekt!", "Toll!"],
+    practiceWrong: ["Fast! Denk noch etwas nach.", "Nicht ganz — versuchen wir es nochmal.", "Du bist nah dran! Schau nochmal."],
+    practiceWrong2: ["Lass mich dir einen Hinweis geben...", "Keine Sorge — hier ist Hilfe:", "Wir finden es zusammen!"],
+    quizIntro: ["Bereit für ein Mini-Quiz? 📝", "Mal sehen, was du gelernt hast!", "Lass uns dein Wissen testen!"],
+    quizCorrect: ["Super!", "Richtig! 🌟", "Ausgezeichnet!", "Korrekt!"],
+    quizWrong: ["Nicht ganz — aber kein Problem!", "Nah dran! Hier ist die richtige Antwort:", "Beim nächsten Mal wird's leichter."],
+    completionHigh: (t) => `🏆 Fantastisch! Du hast „${t}" perfekt gemeistert!`,
+    completionMid: (t) => `⭐ Gut gemacht! Du hast „${t}" gelernt. Üb noch ein bisschen!`,
+    completionLow: (t) => `💪 Guter Anfang mit „${t}"! Wiederhol die Lektion und versuch es nochmal.`,
+  },
+  fr: {
+    greeting: ["Bonjour! Prêt pour une nouvelle leçon? 🎉", "Salut! On va apprendre quelque chose de super!", "Bonjour! Content de te voir!"],
+    topicIntro: (t) => [`Aujourd'hui on apprend: "${t}". C'est parti!`, `Notre sujet est "${t}". Ce sera amusant!`, `On découvrira "${t}" ensemble!`],
+    explanationLead: ["Laisse-moi t'expliquer comment ça marche:", "Voilà comment c'est:", "Écoute — je vais t'expliquer:"],
+    exampleLead: ["Regardons un exemple ensemble:", "Voici un exemple:", "Vois comment ça se passe en pratique:"],
+    exampleReveal: ["Voilà la solution! Tu as vu comment je l'ai trouvée?", "Voilà! Tu comprends la logique?", "C'est comme ça! Facile, non?"],
+    practiceLead: ["Maintenant à toi! Je crois en toi. 💪", "Ton tour! Montre ce que tu sais.", "C'est l'heure de pratiquer!"],
+    practiceCorrect: ["Super! Correct! 🌟", "Excellent! Tu l'as fait!", "Parfait!", "Génial!"],
+    practiceWrong: ["Presque! Réfléchis encore un peu.", "Pas tout à fait — réessayons.", "Tu es proche! Regarde encore."],
+    practiceWrong2: ["Laisse-moi te donner un indice...", "Ne t'inquiète pas — voici de l'aide:", "On le trouvera ensemble!"],
+    quizIntro: ["Prêt pour un mini quiz? 📝", "Voyons ce que tu as appris!", "Testons tes connaissances!"],
+    quizCorrect: ["Super!", "Correct! 🌟", "Excellent!", "Juste!"],
+    quizWrong: ["Pas tout à fait — mais pas de souci!", "Proche! Voici la bonne réponse:", "La prochaine fois sera plus facile."],
+    completionHigh: (t) => `🏆 Incroyable! Tu as maîtrisé "${t}" parfaitement!`,
+    completionMid: (t) => `⭐ Bien joué! Tu as appris "${t}". Pratique encore un peu!`,
+    completionLow: (t) => `💪 Bon début avec "${t}"! Relis la leçon et réessaie.`,
+  },
+};
+
+function pick(arr: string[]): string {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+/* ─── Step Progress Bar ─────────────────────────────────────────── */
+
+function ProgressDots({ current, total, colorClass }: { current: number; total: number; colorClass: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-2xl px-5 py-4 mb-4 shadow-sm"
-    >
-      <div className="flex items-start gap-3">
-        <AyaAvatar emotion="encourage" visible={true} className="flex-shrink-0 scale-75 -my-1" />
-        <p className="text-sm text-foreground leading-relaxed font-medium">{message}</p>
-      </div>
-    </motion.div>
+    <div className="flex items-center gap-1.5 justify-center">
+      {Array.from({ length: total }).map((_, i) => (
+        <div key={i} className={cn(
+          "rounded-full transition-all duration-300",
+          i < current ? cn("w-2 h-2", colorClass.replace("text-", "bg-"))
+          : i === current ? cn("w-3 h-3 border-2", colorClass.replace("text-", "border-"), colorClass.replace("text-", "bg-"), "opacity-60")
+          : "w-2 h-2 bg-muted",
+        )} />
+      ))}
+    </div>
   );
 }
 
-/* ─── Lesson Panel ─────────────────────────────────────────────── */
-interface LessonPanelProps {
-  data: LessonContent;
-  lang: LangCode;
-  subject: Subject;
-  onView: () => void;
-}
-function LessonPanel({ data, lang, subject, onView }: LessonPanelProps) {
-  const [showHints, setShowHints] = useState<boolean[]>(data.lesson.examples.map(() => false));
-  const ui = UI[lang];
-  const dialogue = AYA_DIALOGUE[lang];
-  const [showGreeting, setShowGreeting] = useState(true);
-  const firedRef = useRef(false);
+/* ─── AYA Speech Bubble ─────────────────────────────────────────── */
 
-  useEffect(() => {
-    if (!firedRef.current) {
-      firedRef.current = true;
-      onView();
+function AyaSpeech({ emotion, text, speaking }: { emotion: AyaEmotion; text: string; speaking?: boolean }) {
+  return (
+    <div className="flex flex-col items-center gap-3 mb-2">
+      <AyaAvatar emotion={emotion} visible={true} speaking={speaking} />
+      <motion.div
+        key={text}
+        initial={{ opacity: 0, scale: 0.95, y: 4 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="relative bg-white border-2 border-blue-100 rounded-2xl px-5 py-3 text-center max-w-xs shadow-sm"
+      >
+        <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-t-2 border-l-2 border-blue-100 rotate-45" />
+        <p className="text-sm font-medium text-foreground leading-relaxed">{text}</p>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─── Action Button ─────────────────────────────────────────────── */
+
+function ActionBtn({ onClick, subject, children, disabled, variant = "primary" }: {
+  onClick: () => void;
+  subject: Subject;
+  children: React.ReactNode;
+  disabled?: boolean;
+  variant?: "primary" | "ghost";
+}) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={cn(
+        "w-full py-3.5 rounded-2xl font-bold text-base transition-all flex items-center justify-center gap-2",
+        variant === "primary"
+          ? cn(subject.bgClass, subject.colorClass, "border-2", subject.borderClass, "hover:opacity-90 disabled:opacity-40 shadow-sm")
+          : "bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground border border-border/30",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+/* ─── Interactive Lesson Engine ─────────────────────────────────── */
+
+interface EngineProps {
+  data: LessonContent;
+  topic: Topic;
+  subject: Subject;
+  lang: LangCode;
+  grade: number;
+  onComplete: (practiceCorrect: number, quizCorrect: number) => void;
+  onRecordLesson: () => void;
+  onBack: () => void;
+}
+
+function InteractiveLessonEngine({
+  data, topic, subject, lang, grade, onComplete, onRecordLesson, onBack,
+}: EngineProps) {
+  const l = L[lang];
+  const d = D[lang];
+  const isPrimary = grade <= 4;
+
+  /* ── stable random strings (avoid re-roll on re-render) */
+  const greetingText = useRef(pick(d.greeting)).current;
+  const topicIntroText = useRef(pick(d.topicIntro(topic.label[lang] ?? topic.label.en))).current;
+
+  /* ── phase state */
+  const [phase, setPhase] = useState<Phase>({ kind: "greeting" });
+  const [dialogue, setDialogue] = useState<string>(greetingText);
+  const [answerInput, setAnswerInput] = useState("");
+
+  /* ── score tracking */
+  const practiceCorrectRef = useRef(0);
+  const quizCorrectRef = useRef(0);
+  const lessonRecordedRef = useRef(false);
+
+  /* ── phase-specific cached pick refs */
+  const explanationLeadRef = useRef(pick(d.explanationLead));
+  const exampleLeadRef = useRef(pick(d.exampleLead));
+  const practiceLeadRef = useRef(pick(d.practiceLead));
+
+  const examples = data.lesson.examples;
+  const problems = data.practice.problems;
+  const questions = data.quiz.questions;
+
+  /* ── total dot count for progress */
+  const totalSteps = 2 + examples.length + problems.length + 1 + questions.length + 1;
+  const currentStep = (() => {
+    switch (phase.kind) {
+      case "greeting": return 0;
+      case "explanation": return 1;
+      case "example": return 2 + phase.idx;
+      case "practice": return 2 + examples.length + phase.idx;
+      case "quiz-intro": return 2 + examples.length + problems.length;
+      case "quiz": return 2 + examples.length + problems.length + 1 + phase.idx;
+      case "completion": return totalSteps - 1;
     }
+  })();
+
+  const go = useCallback((next: Phase, text: string) => {
+    setPhase(next);
+    setDialogue(text);
+    setAnswerInput("");
   }, []);
 
+  /* ── advance from greeting */
+  const fromGreeting = () => {
+    go({ kind: "explanation" }, `${topicIntroText} ${explanationLeadRef.current}`);
+    if (!lessonRecordedRef.current) {
+      lessonRecordedRef.current = true;
+      onRecordLesson();
+    }
+  };
+
+  /* ── advance from explanation */
+  const fromExplanation = () => {
+    if (examples.length > 0) {
+      go({ kind: "example", idx: 0, revealed: false }, `${exampleLeadRef.current}`);
+    } else if (problems.length > 0) {
+      go({ kind: "practice", idx: 0, attempts: 0, feedback: "none" }, pick(d.practiceLead));
+    } else {
+      go({ kind: "quiz-intro" }, pick(d.quizIntro));
+    }
+  };
+
+  /* ── reveal example solution */
+  const revealExample = (idx: number) => {
+    setPhase({ kind: "example", idx, revealed: true });
+    setDialogue(pick(d.exampleReveal));
+  };
+
+  /* ── advance from example */
+  const fromExample = (idx: number) => {
+    if (idx + 1 < examples.length) {
+      go({ kind: "example", idx: idx + 1, revealed: false }, exampleLeadRef.current);
+    } else if (problems.length > 0) {
+      go({ kind: "practice", idx: 0, attempts: 0, feedback: "none" }, pick(d.practiceLead));
+    } else {
+      go({ kind: "quiz-intro" }, pick(d.quizIntro));
+    }
+  };
+
+  /* ── check practice answer */
+  const checkPractice = (idx: number, attempts: number) => {
+    const correct = problems[idx].answer.trim().toLowerCase();
+    const given = answerInput.trim().toLowerCase();
+    if (given === correct) {
+      practiceCorrectRef.current += 1;
+      setPhase({ kind: "practice", idx, attempts, feedback: "correct" });
+      setDialogue(pick(d.practiceCorrect));
+    } else {
+      setPhase({ kind: "practice", idx, attempts: attempts + 1, feedback: "wrong" });
+      setDialogue(attempts === 0 ? pick(d.practiceWrong) : pick(d.practiceWrong2));
+    }
+  };
+
+  /* ── advance from practice */
+  const fromPractice = (idx: number, feedback: "correct" | "wrong") => {
+    if (idx + 1 < problems.length) {
+      go({ kind: "practice", idx: idx + 1, attempts: 0, feedback: "none" }, pick(d.practiceLead));
+    } else {
+      onComplete(practiceCorrectRef.current, quizCorrectRef.current);
+      go({ kind: "quiz-intro" }, pick(d.quizIntro));
+    }
+  };
+
+  /* ── select quiz option */
+  const selectQuiz = (idx: number, optIdx: number) => {
+    const correct = optIdx === questions[idx].correctIndex;
+    if (correct) quizCorrectRef.current += 1;
+    setPhase({ kind: "quiz", idx, selected: optIdx });
+    setDialogue(correct ? pick(d.quizCorrect) : pick(d.quizWrong));
+  };
+
+  /* ── advance from quiz */
+  const fromQuiz = (idx: number) => {
+    if (idx + 1 < questions.length) {
+      go({ kind: "quiz", idx: idx + 1, selected: null }, pick(d.quizIntro));
+    } else {
+      const pc = practiceCorrectRef.current;
+      const qc = quizCorrectRef.current;
+      const total = { practice: problems.length, quiz: questions.length };
+      const pct = total.quiz > 0 ? qc / total.quiz : (total.practice > 0 ? pc / total.practice : 1);
+      const topicLabel = topic.label[lang] ?? topic.label.en;
+      const completionMsg = pct >= 0.9
+        ? d.completionHigh(topicLabel)
+        : pct >= 0.6
+        ? d.completionMid(topicLabel)
+        : d.completionLow(topicLabel);
+      go({ kind: "completion", practiceCorrect: pc, quizCorrect: qc, total }, completionMsg);
+      onComplete(pc, qc);
+    }
+  };
+
+  const emotion = phaseEmotion(phase);
+
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-      {showGreeting && (
-        <AyaDialogue message={getRandomPhrase(dialogue.lessonReady)} />
+
+      {/* Progress dots */}
+      {totalSteps > 2 && (
+        <div className="px-4">
+          <ProgressDots current={currentStep} total={Math.min(totalSteps, 12)} colorClass={subject.colorClass} />
+        </div>
       )}
-      
-      <div className={cn("rounded-3xl border-2 p-6", subject.bgClass, subject.borderClass)}>
-        <h3 className={cn("text-xl font-display font-bold mb-3", subject.colorClass)}>{data.lesson.title}</h3>
-        <p className="text-foreground leading-relaxed">{data.lesson.explanation}</p>
-      </div>
 
-      <div className="space-y-3">
-        {data.lesson.examples.map((ex, i) => (
-          <div key={i} className="bg-card rounded-2xl border border-border/40 shadow-sm overflow-hidden">
-            <div className="flex items-center gap-4 px-5 py-4">
-              <div className={cn("w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm flex-shrink-0", subject.bgClass, subject.colorClass)}>
-                {i + 1}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={phase.kind + (phase.kind === "example" ? phase.idx : phase.kind === "practice" ? phase.idx : phase.kind === "quiz" ? phase.idx : "")}
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -24 }}
+          transition={{ duration: 0.25 }}
+          className="space-y-5"
+        >
+          {/* AYA speech */}
+          <AyaSpeech emotion={emotion} text={dialogue} speaking={phase.kind === "explanation"} />
+
+          {/* ── Greeting ── */}
+          {phase.kind === "greeting" && (
+            <ActionBtn onClick={fromGreeting} subject={subject}>
+              {l.ready} <ChevronRight className="w-5 h-5" />
+            </ActionBtn>
+          )}
+
+          {/* ── Explanation ── */}
+          {phase.kind === "explanation" && (
+            <div className="space-y-4">
+              <div className={cn("rounded-3xl border-2 p-5", subject.bgClass, subject.borderClass)}>
+                <h3 className={cn("text-lg font-display font-bold mb-2", subject.colorClass)}>{data.lesson.title}</h3>
+                <p className="text-sm text-foreground leading-relaxed">{data.lesson.explanation}</p>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-mono text-base font-bold">{ex.problem}</p>
-                <p className={cn("font-mono text-base font-bold mt-0.5", subject.colorClass)}>{ex.solution}</p>
-              </div>
-            </div>
-            {showHints[i] ? (
-              <div className="px-5 pb-4 text-sm text-muted-foreground italic">{ex.hint}</div>
-            ) : (
-              <button
-                onClick={() => setShowHints(h => h.map((v, j) => j === i ? true : v))}
-                className="w-full px-5 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground border-t border-border/20 transition-colors text-left"
-              >
-                💡 {ui.showHint}
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 text-sm text-amber-900">
-        {data.lesson.tip}
-      </div>
-    </motion.div>
-  );
-}
-
-/* ─── Practice Panel ───────────────────────────────────────────── */
-interface PracticePanelProps {
-  data: LessonContent;
-  lang: LangCode;
-  subject: Subject;
-  onComplete: (correctCount: number) => void;
-}
-function PracticePanel({ data, lang, subject, onComplete }: PracticePanelProps) {
-  const ui = UI[lang];
-  const dialogue = AYA_DIALOGUE[lang];
-  const [answers, setAnswers] = useState<string[]>(data.practice.problems.map(() => ""));
-  const [checked, setChecked] = useState<(boolean | null)[]>(data.practice.problems.map(() => null));
-  const [showIntroDialogue, setShowIntroDialogue] = useState(true);
-  const firedRef = useRef(false);
-
-  useEffect(() => {
-    const allChecked = checked.every(c => c !== null);
-    if (allChecked && !firedRef.current) {
-      firedRef.current = true;
-      const correctCount = checked.filter(c => c === true).length;
-      onComplete(correctCount);
-    }
-  }, [checked]);
-
-  const checkOne = (i: number) => {
-    const correct = data.practice.problems[i].answer.trim().toLowerCase();
-    const given = answers[i].trim().toLowerCase();
-    setChecked(c => c.map((v, j) => j === i ? given === correct : v));
-  };
-
-  const resetOne = (i: number) => {
-    setAnswers(a => a.map((v, j) => j === i ? "" : v));
-    setChecked(c => c.map((v, j) => j === i ? null : v));
-    firedRef.current = false;
-  };
-
-  const correctCount = checked.filter(c => c === true).length;
-  const doneCount = checked.filter(c => c !== null).length;
-
-  return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
-      {showIntroDialogue && (
-        <AyaDialogue message={getRandomPhrase(dialogue.practiceReady)} />
-      )}
-      
-      <p className="text-sm text-muted-foreground">{data.practice.instructions}</p>
-      
-      {doneCount > 0 && (
-        <AyaDialogue message={dialogue.progress(doneCount, data.practice.problems.length)} />
-      )}
-      
-      {data.practice.problems.map((prob, i) => {
-        const state = checked[i];
-        return (
-          <motion.div key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={cn(
-            "bg-card rounded-2xl border-2 shadow-sm p-5 transition-colors",
-            state === true ? "border-green-300 bg-green-50" : state === false ? "border-red-300 bg-red-50" : "border-border/40",
-          )}>
-            {state !== null && (
-              <AyaDialogue message={state ? getRandomPhrase(dialogue.correctPraise) : getRandomPhrase(dialogue.tryAgain)} />
-            )}
-            
-            <div className="flex items-start gap-3 mb-3">
-              <span className={cn("w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0", subject.bgClass, subject.colorClass)}>
-                {i + 1}
-              </span>
-              <p className="font-mono font-semibold text-base pt-0.5">{prob.question}</p>
-            </div>
-
-            {state === null ? (
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={answers[i]}
-                  onChange={e => setAnswers(a => a.map((v, j) => j === i ? e.target.value : v))}
-                  placeholder={ui.placeholder}
-                  onKeyDown={e => e.key === "Enter" && checkOne(i)}
-                  className="flex-1 bg-white/60 border border-border/50 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                />
-                <button
-                  onClick={() => { checkOne(i); setShowIntroDialogue(false); }}
-                  disabled={!answers[i].trim()}
-                  className={cn("px-4 py-2 rounded-xl font-bold text-sm transition-all", subject.bgClass, subject.colorClass, "border", subject.borderClass, "hover:opacity-90 disabled:opacity-40")}
-                >
-                  {ui.check}
-                </button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {state ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
-                  ) : (
-                    <XCircle className="w-5 h-5 text-red-500" />
-                  )}
-                  <span className={cn("font-semibold text-sm", state ? "text-green-700" : "text-red-600")}>
-                    {state ? ui.correct : `${ui.wrong} — ${prob.answer}`}
-                  </span>
+              {data.lesson.tip && (
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 text-sm text-amber-900 flex gap-2">
+                  <span>💡</span>
+                  <span>{data.lesson.tip}</span>
                 </div>
-                {!state && (
-                  <button onClick={() => resetOne(i)} className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
-                    <RotateCcw className="w-3 h-3" /> {ui.retry}
-                  </button>
+              )}
+              <ActionBtn onClick={fromExplanation} subject={subject}>
+                {l.understood} <ChevronRight className="w-5 h-5" />
+              </ActionBtn>
+            </div>
+          )}
+
+          {/* ── Example ── */}
+          {phase.kind === "example" && (() => {
+            const ex = examples[phase.idx];
+            return (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider px-1">
+                  <span className={cn("w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold", subject.bgClass, subject.colorClass)}>
+                    {phase.idx + 1}
+                  </span>
+                  {lang === "bg" ? `Пример ${phase.idx + 1} от ${examples.length}` : `Example ${phase.idx + 1} of ${examples.length}`}
+                </div>
+                <div className={cn("rounded-2xl border-2 p-5", subject.bgClass, subject.borderClass)}>
+                  <p className="font-mono text-xl font-bold text-center">{ex.problem}</p>
+                  <AnimatePresence>
+                    {phase.revealed && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        className="mt-4 pt-4 border-t border-current/20"
+                      >
+                        <p className={cn("font-mono text-lg font-bold text-center", subject.colorClass)}>{ex.solution}</p>
+                        {isPrimary && ex.hint && (
+                          <p className="text-sm text-muted-foreground text-center mt-2 italic">{ex.hint}</p>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                {!phase.revealed ? (
+                  <ActionBtn onClick={() => revealExample(phase.idx)} subject={subject}>
+                    <Eye className="w-4 h-4" /> {l.seeAnswer}
+                  </ActionBtn>
+                ) : (
+                  <ActionBtn onClick={() => fromExample(phase.idx)} subject={subject}>
+                    {l.nextExample} <ChevronRight className="w-4 h-4" />
+                  </ActionBtn>
                 )}
               </div>
-            )}
-          </motion.div>
-        );
-      })}
-    </motion.div>
-  );
-}
+            );
+          })()}
 
-/* ─── Quiz Panel ───────────────────────────────────────────────── */
-interface QuizPanelProps {
-  data: LessonContent;
-  lang: LangCode;
-  subject: Subject;
-  onComplete: (score: number) => void;
-}
-function QuizPanel({ data, lang, subject, onComplete }: QuizPanelProps) {
-  const ui = UI[lang];
-  const dialogue = AYA_DIALOGUE[lang];
-  const questions = data.quiz.questions;
-  const [current, setCurrent] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-  const [score, setScore] = useState(0);
-  const [done, setDone] = useState(false);
-  const [showIntroDialogue, setShowIntroDialogue] = useState(true);
-  const firedRef = useRef(false);
+          {/* ── Practice ── */}
+          {phase.kind === "practice" && (() => {
+            const prob = problems[phase.idx];
+            const feedback = phase.feedback;
+            const attempts = phase.attempts;
+            return (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-wider px-1">
+                  <span className={cn("w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold", subject.bgClass, subject.colorClass)}>
+                    {phase.idx + 1}
+                  </span>
+                  {lang === "bg" ? `Задача ${phase.idx + 1} от ${problems.length}` : `Problem ${phase.idx + 1} of ${problems.length}`}
+                </div>
 
-  useEffect(() => {
-    if (done && !firedRef.current) {
-      firedRef.current = true;
-      onComplete(score);
-    }
-  }, [done, score]);
+                <div className={cn(
+                  "rounded-2xl border-2 p-5 transition-colors",
+                  feedback === "correct" ? "border-green-300 bg-green-50"
+                  : feedback === "wrong" ? "border-orange-200 bg-orange-50"
+                  : cn(subject.bgClass, subject.borderClass),
+                )}>
+                  <p className="font-mono text-xl font-bold text-center">{prob.question}</p>
+                </div>
 
-  const handleSelect = (idx: number) => {
-    if (selected !== null) return;
-    setSelected(idx);
-    setShowIntroDialogue(false);
-    if (idx === questions[current].correctIndex) setScore(s => s + 1);
-  };
+                {feedback === "none" && (
+                  <div className="flex gap-2">
+                    <input
+                      key={phase.idx}
+                      autoFocus
+                      type="text"
+                      value={answerInput}
+                      onChange={e => setAnswerInput(e.target.value)}
+                      placeholder={l.placeholder}
+                      onKeyDown={e => e.key === "Enter" && answerInput.trim() && checkPractice(phase.idx, attempts)}
+                      className="flex-1 bg-white border-2 border-border/40 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50"
+                    />
+                    <button
+                      onClick={() => checkPractice(phase.idx, attempts)}
+                      disabled={!answerInput.trim()}
+                      className={cn("px-5 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-40", subject.bgClass, subject.colorClass, "border-2", subject.borderClass, "hover:opacity-90")}
+                    >
+                      {l.check}
+                    </button>
+                  </div>
+                )}
 
-  const handleNext = () => {
-    if (current + 1 >= questions.length) {
-      setDone(true);
-    } else {
-      setCurrent(c => c + 1);
-      setSelected(null);
-    }
-  };
+                {feedback === "correct" && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-green-700 font-bold text-sm">
+                      <CheckCircle2 className="w-5 h-5" />
+                      <span>{lang === "bg" ? "Правилно!" : "Correct!"}</span>
+                    </div>
+                    <ActionBtn onClick={() => fromPractice(phase.idx, feedback)} subject={subject}>
+                      {phase.idx + 1 < problems.length ? l.nextProblem : (lang === "bg" ? "Продължи →" : "Continue →")}
+                      <ChevronRight className="w-4 h-4" />
+                    </ActionBtn>
+                  </div>
+                )}
 
-  const restart = () => {
-    setCurrent(0); setSelected(null); setScore(0); setDone(false);
-    firedRef.current = false;
-  };
+                {feedback === "wrong" && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-orange-600 font-bold text-sm">
+                      <XCircle className="w-4 h-4" />
+                      <span>{lang === "bg" ? "Не съвсем — опитай пак!" : "Not quite — try again!"}</span>
+                    </div>
+                    {attempts >= 2 && (
+                      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 text-sm text-amber-800">
+                        <span className="font-bold">{l.showAnswer}: </span>{prob.answer}
+                      </div>
+                    )}
+                    <div className="flex gap-2">
+                      <ActionBtn
+                        onClick={() => { go({ kind: "practice", idx: phase.idx, attempts: phase.attempts, feedback: "none" }, pick(d.practiceWrong)); }}
+                        subject={subject}
+                        variant={attempts >= 2 ? "ghost" : "primary"}
+                      >
+                        <RotateCcw className="w-4 h-4" /> {l.retry}
+                      </ActionBtn>
+                      {attempts >= 1 && (
+                        <ActionBtn onClick={() => fromPractice(phase.idx, feedback)} subject={subject} variant="ghost">
+                          {l.nextProblem}
+                        </ActionBtn>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
-  if (done) {
-    const pct = Math.round((score / questions.length) * 100);
-    return (
-      <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        className={cn("rounded-3xl border-2 p-8 text-center", subject.bgClass, subject.borderClass)}>
-        <div className="text-6xl mb-4">{pct === 100 ? "🏆" : pct >= 66 ? "⭐" : "💪"}</div>
-        <h3 className={cn("text-2xl font-display font-bold mb-2", subject.colorClass)}>{ui.score(score, questions.length)}</h3>
-        <p className="text-muted-foreground text-sm mb-6">
-          {pct === 100
-            ? (lang === "bg" ? "Перфектно! Страхотна работа!" : lang === "es" ? "¡Perfecto! ¡Excelente trabajo!" : "Perfect! Excellent work!")
-            : pct >= 66
-            ? (lang === "bg" ? "Добра работа! Продължавай така!" : lang === "es" ? "¡Buen trabajo! ¡Sigue así!" : "Good job! Keep it up!")
-            : (lang === "bg" ? "Прегледай урока и опитай пак!" : lang === "es" ? "¡Repasa la lección e inténtalo de nuevo!" : "Review the lesson and try again!")}
-        </p>
-        <button onClick={restart}
-          className={cn("px-6 py-3 rounded-2xl font-bold flex items-center gap-2 mx-auto transition-all hover:opacity-90", subject.bgClass, subject.colorClass, "border-2", subject.borderClass)}>
-          <RotateCcw className="w-4 h-4" /> {ui.retry}
-        </button>
-      </motion.div>
-    );
-  }
+          {/* ── Quiz Intro ── */}
+          {phase.kind === "quiz-intro" && (
+            <div className="space-y-3">
+              <div className={cn("rounded-3xl border-2 p-5 text-center", subject.bgClass, subject.borderClass)}>
+                <p className="text-4xl mb-2">📝</p>
+                <p className={cn("font-bold", subject.colorClass)}>
+                  {lang === "bg" ? `${questions.length} въпроса` : `${questions.length} questions`}
+                </p>
+              </div>
+              <ActionBtn onClick={() => go({ kind: "quiz", idx: 0, selected: null }, pick(d.quizIntro))} subject={subject}>
+                {l.startQuiz} <Sparkles className="w-4 h-4" />
+              </ActionBtn>
+            </div>
+          )}
 
-  const q = questions[current];
-  const isCorrect = selected === q.correctIndex;
-  
-  return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-      {showIntroDialogue && selected === null && current === 0 && (
-        <AyaDialogue message={getRandomPhrase(dialogue.quizReady)} />
-      )}
-      
-      {selected !== null && (
-        <AyaDialogue message={isCorrect ? getRandomPhrase(dialogue.correctPraise) : getRandomPhrase(dialogue.tryAgain)} />
-      )}
-      
-      <div className="flex items-center justify-between mb-1">
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-          {lang === "bg" ? `Въпрос ${current + 1} от ${questions.length}` : lang === "es" ? `Pregunta ${current + 1} de ${questions.length}` : `Question ${current + 1} of ${questions.length}`}
-        </p>
-        <div className="flex gap-1">
-          {questions.map((_, i) => (
-            <div key={i} className={cn("w-2 h-2 rounded-full",
-              i < current ? "bg-green-500" : i === current ? subject.colorClass.replace("text-", "bg-") : "bg-muted"
-            )} />
-          ))}
-        </div>
-      </div>
-      <div className={cn("rounded-3xl border-2 p-6", subject.bgClass, subject.borderClass)}>
-        <p className="font-mono text-xl font-bold text-center">{q.question}</p>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        {q.options.map((opt, i) => {
-          const isSelected = selected === i;
-          const isCorrect = i === q.correctIndex;
-          const revealed = selected !== null;
-          return (
-            <button key={i} onClick={() => handleSelect(i)} disabled={revealed}
-              className={cn(
-                "p-4 rounded-2xl border-2 font-bold text-base transition-all text-center",
-                !revealed && "hover:scale-105 cursor-pointer border-border/40 bg-card",
-                revealed && isCorrect && "border-green-400 bg-green-50 text-green-700",
-                revealed && isSelected && !isCorrect && "border-red-400 bg-red-50 text-red-600",
-                revealed && !isSelected && !isCorrect && "border-border/30 bg-muted/30 text-muted-foreground opacity-60",
-              )}>
-              {opt}
-            </button>
-          );
-        })}
-      </div>
-      {selected !== null && (
-        <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
-          <button onClick={handleNext}
-            className={cn("px-5 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all hover:opacity-90", subject.bgClass, subject.colorClass, "border-2", subject.borderClass)}>
-            {ui.next} <ChevronRight className="w-4 h-4" />
-          </button>
+          {/* ── Quiz Question ── */}
+          {phase.kind === "quiz" && (() => {
+            const q = questions[phase.idx];
+            const revealed = phase.selected !== null;
+            return (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs font-bold text-muted-foreground px-1">
+                  <span>{l.question(phase.idx + 1, questions.length)}</span>
+                  <div className="flex gap-1">
+                    {questions.map((_, i) => (
+                      <div key={i} className={cn("w-2 h-2 rounded-full",
+                        i < phase.idx ? "bg-green-400"
+                        : i === phase.idx ? cn(subject.colorClass.replace("text-", "bg-"))
+                        : "bg-muted"
+                      )} />
+                    ))}
+                  </div>
+                </div>
+                <div className={cn("rounded-2xl border-2 p-5", subject.bgClass, subject.borderClass)}>
+                  <p className="font-mono text-lg font-bold text-center">{q.question}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {q.options.map((opt, i) => {
+                    const isSelected = phase.selected === i;
+                    const isCorrect = i === q.correctIndex;
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => !revealed && selectQuiz(phase.idx, i)}
+                        disabled={revealed}
+                        className={cn(
+                          "p-4 rounded-2xl border-2 font-bold text-sm transition-all text-center",
+                          !revealed && "hover:scale-[1.02] cursor-pointer border-border/40 bg-card",
+                          revealed && isCorrect && "border-green-400 bg-green-50 text-green-700",
+                          revealed && isSelected && !isCorrect && "border-red-400 bg-red-50 text-red-600",
+                          revealed && !isSelected && !isCorrect && "border-border/30 bg-muted/30 text-muted-foreground opacity-50",
+                        )}
+                      >
+                        {revealed && isCorrect && <span className="mr-1">✓</span>}
+                        {revealed && isSelected && !isCorrect && <span className="mr-1">✗</span>}
+                        {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+                {revealed && (
+                  <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}>
+                    <ActionBtn onClick={() => fromQuiz(phase.idx)} subject={subject}>
+                      {phase.idx + 1 < questions.length ? l.nextQuestion : (lang === "bg" ? "Финиш! 🏁" : "Finish! 🏁")}
+                      <ChevronRight className="w-4 h-4" />
+                    </ActionBtn>
+                  </motion.div>
+                )}
+              </div>
+            );
+          })()}
+
+          {/* ── Completion ── */}
+          {phase.kind === "completion" && (() => {
+            const { practiceCorrect, quizCorrect, total } = phase;
+            const pct = total.quiz > 0
+              ? Math.round((quizCorrect / total.quiz) * 100)
+              : total.practice > 0
+              ? Math.round((practiceCorrect / total.practice) * 100)
+              : 100;
+            return (
+              <div className="space-y-4">
+                <motion.div
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  className={cn("rounded-3xl border-2 p-6 text-center", subject.bgClass, subject.borderClass)}
+                >
+                  <div className="text-5xl mb-3">{pct >= 90 ? "🏆" : pct >= 60 ? "⭐" : "💪"}</div>
+                  {total.quiz > 0 && (
+                    <p className={cn("text-lg font-display font-bold mb-1", subject.colorClass)}>
+                      {l.score(quizCorrect, total.quiz)}
+                    </p>
+                  )}
+                  {total.practice > 0 && (
+                    <p className="text-sm text-muted-foreground">
+                      {lang === "bg" ? `Упражнения: ${practiceCorrect} от ${total.practice}` : `Practice: ${practiceCorrect} of ${total.practice}`}
+                    </p>
+                  )}
+                  <div className="mt-3">
+                    <div className="w-full bg-white/50 rounded-full h-2.5 overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ delay: 0.3, duration: 0.8 }}
+                        className={cn("h-full rounded-full", subject.colorClass.replace("text-", "bg-"))}
+                      />
+                    </div>
+                    <p className={cn("text-xs font-bold mt-1.5", subject.colorClass)}>{pct}%</p>
+                  </div>
+                </motion.div>
+                <ActionBtn onClick={onBack} subject={subject}>
+                  <Star className="w-4 h-4" /> {l.backToLessons}
+                </ActionBtn>
+              </div>
+            );
+          })()}
+
         </motion.div>
-      )}
+      </AnimatePresence>
     </motion.div>
   );
 }
 
-/* ─── Main LessonViewer ────────────────────────────────────────── */
+/* ─── Public LessonViewer ───────────────────────────────────────── */
+
+export type LessonMode = "lesson" | "practice" | "quiz";
+
 export interface LessonViewerProps {
   subject: Subject;
   topic: Topic;
@@ -475,14 +774,13 @@ export interface LessonViewerProps {
   onAskAya: () => void;
 }
 
-export function LessonViewer({ subject, topic, initialMode, grade, lang, childId, onBack, onAskAya }: LessonViewerProps) {
-  const [mode, setMode] = useState<LessonMode>(initialMode);
+export function LessonViewer({ subject, topic, initialMode, grade, lang, childId, onBack }: LessonViewerProps) {
   const [reward, setReward] = useState<XpReward | null>(null);
-  const ui = UI[lang];
-  const tabs = TAB_LABELS[lang];
+  const l = L[lang];
   const queryClient = useQueryClient();
+  const completeFiredRef = useRef(false);
+  const lessonFiredRef = useRef(false);
 
-  /* Fetch lesson content */
   const { data, isLoading, isError } = useQuery<LessonContent>({
     queryKey: ["lesson", subject.id, topic.id, grade, lang],
     queryFn: async () => {
@@ -493,7 +791,6 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
     staleTime: 5 * 60 * 1000,
   });
 
-  /* Record completion and receive XP */
   const completeMutation = useMutation({
     mutationFn: async ({ action, correctCount }: { action: "lesson" | "practice" | "quiz"; correctCount: number }) => {
       const res = await fetch("/api/learning/complete", {
@@ -505,100 +802,73 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
       return res.json() as Promise<XpReward & { newBadges: Array<{ icon: string; title: string }> }>;
     },
     onSuccess: (result) => {
-      if (result.xpGained > 0 || result.starsGained > 0) {
-        setReward(result);
-      }
-      // Refresh child data so XP/stars/level update in the UI
+      if (result.xpGained > 0 || result.starsGained > 0) setReward(result);
       queryClient.invalidateQueries({ queryKey: getListChildrenQueryKey() });
-      // Refresh topic progress
       queryClient.invalidateQueries({ queryKey: ["learning-progress", childId] });
     },
   });
 
-  const recordCompletion = useCallback((action: "lesson" | "practice" | "quiz", correctCount: number) => {
-    if (childId > 0) {
-      completeMutation.mutate({ action, correctCount });
-    }
+  const record = useCallback((action: "lesson" | "practice" | "quiz", correctCount: number) => {
+    if (childId > 0) completeMutation.mutate({ action, correctCount });
   }, [childId]);
 
-  const TABS: Array<{ id: LessonMode; label: string; Icon: typeof BookOpen }> = [
-    { id: "lesson",   label: tabs.lesson,   Icon: BookOpen },
-    { id: "practice", label: tabs.practice, Icon: Pencil },
-    { id: "quiz",     label: tabs.quiz,     Icon: Brain },
-  ];
+  const handleComplete = useCallback((practiceCorrect: number, quizCorrect: number) => {
+    if (!completeFiredRef.current) {
+      completeFiredRef.current = true;
+      record("quiz", quizCorrect);
+      record("practice", practiceCorrect);
+    }
+  }, [record]);
+
+  const handleRecordLesson = useCallback(() => {
+    if (!lessonFiredRef.current) {
+      lessonFiredRef.current = true;
+      record("lesson", 0);
+    }
+  }, [record]);
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-      {/* XP reward toast */}
       <XpToast reward={reward} lang={lang} onDismiss={() => setReward(null)} />
 
-      <div className="flex items-center justify-between mb-5">
-        <button onClick={onBack}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> {ui.back}
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors text-sm"
+        >
+          <ArrowLeft className="w-4 h-4" /> {l.back}
         </button>
         <div className="flex items-center gap-2 bg-white/60 px-4 py-2 rounded-xl border border-white/50">
           <span className="text-lg">{subject.emoji}</span>
-          <span className={cn("font-bold text-sm", subject.colorClass)}>{topic.label[lang]}</span>
+          <span className={cn("font-bold text-sm", subject.colorClass)}>{topic.label[lang] ?? topic.label.en}</span>
         </div>
         <div className="w-20" />
       </div>
 
-      {/* Mode tabs */}
-      <div className="grid grid-cols-3 gap-2 mb-6 bg-muted/30 p-1.5 rounded-2xl">
-        {TABS.map(({ id, label, Icon }) => (
-          <button key={id} onClick={() => setMode(id)}
-            className={cn(
-              "flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold text-sm transition-all",
-              mode === id
-                ? cn(subject.bgClass, subject.colorClass, "shadow-sm border", subject.borderClass)
-                : "text-muted-foreground hover:text-foreground",
-            )}>
-            <Icon className="w-4 h-4" />
-            {label}
-          </button>
-        ))}
-      </div>
-
       {isLoading ? (
-        <div className="flex items-center justify-center py-16 text-muted-foreground gap-3">
+        <div className="flex items-center justify-center py-20 text-muted-foreground gap-3">
           <Loader2 className="w-6 h-6 animate-spin" />
-          <span>{ui.loading}</span>
+          <span>{l.loading}</span>
         </div>
       ) : isError || !data ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <p>{lang === "bg" ? "Грешка при зареждане. Опитай пак." : lang === "es" ? "Error al cargar. Inténtalo de nuevo." : "Error loading lesson. Please try again."}</p>
+        <div className="text-center py-16 text-muted-foreground">
+          <p className="text-4xl mb-3">😕</p>
+          <p>{lang === "bg" ? "Грешка при зареждане. Опитай пак." : "Error loading lesson. Please try again."}</p>
+          <button onClick={onBack} className="mt-4 text-sm underline hover:text-foreground">{l.back}</button>
         </div>
       ) : (
-        <AnimatePresence mode="wait">
-          {mode === "lesson" && (
-            <LessonPanel
-              key="lesson"
-              data={data}
-              lang={lang}
-              subject={subject}
-              onView={() => recordCompletion("lesson", 0)}
-            />
-          )}
-          {mode === "practice" && (
-            <PracticePanel
-              key={`practice-${topic.id}`}
-              data={data}
-              lang={lang}
-              subject={subject}
-              onComplete={(n) => recordCompletion("practice", n)}
-            />
-          )}
-          {mode === "quiz" && (
-            <QuizPanel
-              key={`quiz-${topic.id}`}
-              data={data}
-              lang={lang}
-              subject={subject}
-              onComplete={(score) => recordCompletion("quiz", score)}
-            />
-          )}
-        </AnimatePresence>
+        <InteractiveLessonEngine
+          key={`${subject.id}-${topic.id}`}
+          data={data}
+          topic={topic}
+          subject={subject}
+          lang={lang}
+          grade={grade}
+          onComplete={handleComplete}
+          onRecordLesson={handleRecordLesson}
+          onBack={onBack}
+        />
       )}
     </motion.div>
   );

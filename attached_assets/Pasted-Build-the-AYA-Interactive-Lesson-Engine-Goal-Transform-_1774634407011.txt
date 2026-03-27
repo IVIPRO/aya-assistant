@@ -1,0 +1,212 @@
+Build the AYA Interactive Lesson Engine.
+
+Goal:
+Transform lessons from static exercises into a guided interactive teaching experience where AYA behaves like a friendly teacher.
+
+AYA should explain → ask → listen → react → continue the lesson.
+
+--------------------------------
+
+CORE TEACHING LOOP
+
+Each lesson must follow this structure:
+
+1. Greeting
+AYA welcomes the student.
+
+Example:
+"Здравей! Днес ще учим нещо интересно."
+
+2. Topic introduction
+AYA introduces the lesson topic in a short explanation.
+
+Example:
+"Днес ще разберем как работи делението."
+
+3. Micro explanation
+Explain the concept in 1–2 short sentences.
+
+Rules:
+- simple language
+- short sentences
+- age appropriate
+
+4. Guided question
+AYA asks the student a question.
+
+Example:
+"Ако имаме 10 ябълки и ги разделим на 2 деца, по колко ще получи всяко?"
+
+5. Student answer input
+Student can answer by:
+- typing
+- selecting
+- tapping options
+- voice (future support)
+
+6. Response evaluation
+
+AYA checks the answer.
+
+If correct:
+- praise
+- short reinforcement
+
+Example:
+"Браво! Това е правилно."
+
+If incorrect:
+- supportive feedback
+- hint
+- retry
+
+Example:
+"Почти! Нека помислим още веднъж."
+
+7. Next step
+
+AYA continues lesson flow.
+
+Example:
+"Хайде да опитаме още един пример."
+
+--------------------------------
+
+LESSON STRUCTURE
+
+Each lesson must include:
+
+Intro
+Explanation
+Practice
+Mini quiz
+Completion
+
+--------------------------------
+
+EXPLANATION RULES
+
+Explanations must be:
+
+Short
+Clear
+Friendly
+Age appropriate
+
+Avoid long paragraphs.
+
+Preferred length:
+1–2 sentences per explanation.
+
+--------------------------------
+
+PRACTICE MODE
+
+Practice should contain:
+
+3–5 guided problems.
+
+After each problem:
+AYA reacts.
+
+Examples:
+
+Correct:
+"Страхотно!"
+
+Incorrect:
+"Добър опит. Помисли пак."
+
+--------------------------------
+
+MINI QUIZ
+
+At the end of the lesson:
+
+AYA says:
+
+"Готов ли си за малък тест?"
+
+Quiz contains:
+3 questions.
+
+AYA provides feedback immediately after each answer.
+
+--------------------------------
+
+COMPLETION
+
+When the lesson ends:
+
+AYA congratulates the student.
+
+Example:
+
+"Чудесно! Ти научи как работи делението."
+
+Reward system:
+
+XP reward
+Progress update
+Optional badge.
+
+--------------------------------
+
+AVATAR INTERACTION
+
+AYA avatar should react during the lesson:
+
+Happy
+Thinking
+Explaining
+Encouraging
+
+--------------------------------
+
+STAGE ADAPTATION
+
+Primary stage (1–4 class):
+
+Very simple language
+More encouragement
+More hints
+
+Lower secondary (5–7 class):
+
+More complex explanations
+More problem solving
+Less hand-holding
+
+--------------------------------
+
+SUPPORTED SUBJECTS
+
+The engine must work for:
+
+Math
+Bulgarian language
+Literature
+History
+Geography
+Biology
+Physics
+Chemistry
+English
+
+--------------------------------
+
+PERFORMANCE
+
+Do NOT increase heavy processing.
+
+Reuse current lesson data structures when possible.
+
+--------------------------------
+
+RESULT
+
+AYA behaves like an interactive teacher guiding the student step-by-step through lessons instead of presenting static exercises.
+
+Feature name:
+
+AYA Interactive Lesson Engine

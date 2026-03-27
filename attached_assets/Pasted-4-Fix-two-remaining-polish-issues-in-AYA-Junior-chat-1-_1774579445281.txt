@@ -1,0 +1,121 @@
+4"}
+Fix two remaining polish issues in AYA Junior chat:
+
+1) Bulgarian speech still saying "equal"
+2) Avatar cropped in chat header
+
+Important rules:
+Do NOT modify lesson logic.
+Do NOT change OpenAI responses.
+Do NOT modify math solving.
+Do NOT rebuild UI components.
+Only fix speech preprocessing and avatar container sizing.
+
+--------------------------------------------------
+1. Bulgarian TTS fix for math expressions
+--------------------------------------------------
+
+Problem:
+When AYA solves homework from image or math tasks, speech sometimes still says "equal" (English) instead of "равно".
+
+Reason:
+The speech engine receives raw math string before Bulgarian normalization.
+
+Solution:
+Before sending text to TTS, normalize math operators for Bulgarian speech.
+
+Create a preprocessing step for Bulgarian voice output:
+
+Replace:
+
+=  → " равно "
++  → " плюс "
+-  → " минус "
+*  or × → " по "
+/  → " разделено на "
+
+Example transformation for TTS only:
+
+Original text (visible UI):
+3 × 6 = 18
+
+Speech text sent to TTS:
+"три по шест равно осемнадесет"
+
+Important:
+This transformation must apply to:
+• homework photo solutions
+• math exercises
+• quick math help
+• any expression rendered with "="
+
+Do NOT change visible UI math formatting.
+Only modify the string passed to speech synthesis.
+
+If UI language = Bulgarian:
+force Bulgarian math speech mapping before TTS.
+
+--------------------------------------------------
+2. Fix cropped avatar in chat header
+--------------------------------------------------
+
+Problem:
+AYA avatar in the top chat header is vertically clipped.
+
+Likely cause:
+Avatar container height smaller than avatar image.
+
+Fix:
+
+Ensure header avatar container uses:
+
+display: flex
+align-items: center
+justify-content: center
+
+Increase container size slightly:
+
+avatar size:
+32px → 36px
+
+container height:
+min-height: 40px
+
+Ensure avatar image uses:
+
+object-fit: contain
+
+Remove overflow clipping if present:
+
+overflow: visible
+
+Result:
+• Avatar fully visible
+• No top cropping
+• Alignment stays centered with "AYA Стил Panda"
+
+--------------------------------------------------
+3. Do NOT break layout
+
+Preserve:
+
+• header spacing
+• back button readability
+• voice mode button
+• style chip
+• responsive layout
+
+--------------------------------------------------
+
+Return after implementation:
+
+1. Files modified
+2. TTS preprocessing function added
+3. Avatar container fix
+4. Confirmation that UI math display stayed unchanged
+5. Manual Preview test steps
+
+Feature name:
+AYA Bulgarian Math Speech Fix + Avatar Header Polish
+
+Do not auto publi

@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState, useEffect } from "react";
-import { setBulgarianVoice } from "@/lib/bulgarian-speech";
+import { setBulgarianVoice, preprocessBulgarianSpeech } from "@/lib/bulgarian-speech";
 
 export interface TextToSpeechOptions {
   rate?: number;
@@ -66,7 +66,15 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
     // Cancel any ongoing speech
     synth.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    // For Bulgarian, preprocess math operators to spoken Bulgarian words
+    // (e.g. "15 / 5 = 3" → "петнадесет разделено на пет равно три")
+    // English and all other languages pass through unchanged.
+    const lang = options?.lang ?? "en-US";
+    const processedText = lang.startsWith("bg")
+      ? preprocessBulgarianSpeech(text, lang)
+      : text;
+
+    const utterance = new SpeechSynthesisUtterance(processedText);
     
     utterance.rate = options?.rate ?? 0.95;
     utterance.pitch = options?.pitch ?? 1;

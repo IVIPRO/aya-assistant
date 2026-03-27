@@ -1271,7 +1271,7 @@ export function Junior() {
             )}
 
             {/* ── AYA Junior Avatar ─────────────────────────────── */}
-            <div className="flex items-center gap-3 mb-3 bg-white/60 border border-yellow-200 rounded-2xl px-4 py-2.5 shadow-sm">
+            <div className="flex items-center gap-3 mb-3 bg-white/60 border border-yellow-200 rounded-2xl px-4 py-3 shadow-sm overflow-visible" style={{ minHeight: 72 }}>
               <AyaAvatar
                 emotion={
                   celebrationActive

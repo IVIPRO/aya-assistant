@@ -1,0 +1,147 @@
+Audit and improve AYA's Bulgarian teaching language for grades 1-4.
+
+IMPORTANT:
+Do NOT rewrite the whole lesson system blindly.
+First inspect how Bulgarian lesson text is currently generated and then improve only the language layer.
+
+CRITICAL RULE:
+Do not duplicate prompt builders, text generators, lesson feedback modules, or teaching text constants.
+If a Bulgarian language layer already exists, improve and normalize it instead of creating a second one.
+
+------------------------------------------------
+
+GOAL
+
+All lesson explanations, hints, praise, feedback, task guidance, and completion messages must sound like a real Bulgarian primary-school teacher.
+
+AYA must sound:
+- natural
+- warm
+- short
+- clear
+- child-friendly
+- suitable for grades 1-4
+
+------------------------------------------------
+
+PHASE 1 — LANGUAGE AUDIT
+
+Inspect the codebase and detect where Bulgarian lesson text is generated.
+
+Search for:
+- lesson intro text
+- explanation text
+- prompt builders
+- feedback generators
+- hint generators
+- praise messages
+- retry / wrong answer messages
+- completion messages
+- static Bulgarian strings
+- language dictionaries
+- multilingual prompt maps
+- Bulgarian-specific lesson templates
+
+Return:
+
+1. where Bulgarian lesson text is generated
+2. which files control Bulgarian teaching tone
+3. whether there are duplicate text sources
+4. awkward or machine-like patterns found
+5. English leftovers found
+6. literal translations found
+
+DO NOT IMPLEMENT BEFORE THIS AUDIT SUMMARY.
+
+------------------------------------------------
+
+PHASE 2 — LANGUAGE CLEANUP
+
+Improve and normalize the language system.
+
+TASKS:
+- remove awkward machine-like phrasing
+- remove English leftovers
+- remove literal translations
+- shorten long sentences
+- make explanations child-friendly
+- make feedback warm and natural
+- make all teacher text sound consistent
+
+------------------------------------------------
+
+TARGET STYLE
+
+Bulgarian for children in grades 1-4:
+- very clear
+- short
+- encouraging
+- simple vocabulary
+- educational but warm
+
+AYA should sound like a kind Bulgarian primary-school teacher.
+
+------------------------------------------------
+
+NORMALIZE THESE TYPES OF TEXT
+
+- lesson intros
+- task prompts
+- hints
+- praise
+- wrong-answer encouragement
+- completion messages
+- explanation lines
+- mini guidance between steps
+- spoken lesson phrases if those exist
+
+------------------------------------------------
+
+GOOD TONE EXAMPLES
+
+Use this style:
+
+- "Нека видим."
+- "Опитай сам."
+- "Браво!"
+- "Почти!"
+- "Ще ти покажа лесен начин."
+- "Справяш се чудесно."
+- "Нека го направим заедно."
+- "Помисли още малко."
+- "Готов ли си за следващата задача?"
+
+Avoid:
+- robotic phrases
+- translated English structure
+- long academic wording
+- unnatural repetition
+- adult-heavy explanations
+
+------------------------------------------------
+
+PROTECTION RULES
+
+Do not break:
+- interactive lesson engine
+- spoken lesson engine
+- avatar speaking flow
+- daily plan
+- adaptive learning logic
+- junior / student separation
+- existing subject routing
+
+Only improve language quality and consistency.
+
+------------------------------------------------
+
+RETURN
+
+1. where Bulgarian lesson text is generated
+2. files modified
+3. language rules added
+4. examples before / after
+5. preview test steps
+
+Feature name:
+AYA Bulgarian Teaching Language Cleanup

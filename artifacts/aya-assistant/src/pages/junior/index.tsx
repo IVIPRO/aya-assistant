@@ -1220,21 +1220,19 @@ export function Junior() {
         ) : (
           <motion.div key="chat" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             {/* ── Chat view header ─────────────────────────────── */}
-            <div className="flex items-center justify-between mb-6 gap-4">
+            <div className="flex items-center mb-6 gap-2">
               <button onClick={() => setView("welcome")}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors flex-shrink-0">
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors flex-shrink-0 whitespace-nowrap">
                 <ArrowLeft className="w-4 h-4" /> {lbl.back}
               </button>
-              <div className="flex items-center gap-2 bg-white/60 px-3 py-2 rounded-xl border border-white/50 flex-1 min-w-0 justify-center">
-                <span className="text-lg flex-shrink-0">👧</span>
+              <div className="flex items-center gap-1.5 bg-white/60 px-3 py-2 rounded-xl border border-white/50 flex-1 min-w-0 justify-center overflow-hidden">
+                <span className="text-base flex-shrink-0">👧</span>
                 <span className="font-bold text-sm text-junior-foreground flex-shrink-0">AYA</span>
                 {currentChar && (
-                  <span className="text-xs font-semibold bg-junior/20 text-junior-foreground px-2 py-0.5 rounded-full flex-shrink-0">
+                  <span className="text-xs font-semibold bg-junior/20 text-junior-foreground px-2 py-0.5 rounded-full flex-shrink-0 truncate max-w-[130px]">
                     {lbl.styleLabel}: {currentChar.emoji} {currentChar.name}
                   </span>
                 )}
-                {!selectedSubject && <span className="text-xs text-muted-foreground hidden sm:inline">{lbl.freeChatLabel}</span>}
-                {selectedSubject && currentChar && <span className="text-xs text-muted-foreground hidden sm:inline">{lbl.toneStyle(CHAR_LABELS[currentChar.id]?.[juniorLang]?.tone ?? currentChar.tone)}</span>}
               </div>
               {/* Free Conversation Mode toggle — only shown in free chat (no subject) */}
               {!selectedSubject && (

@@ -1,0 +1,85 @@
+Fix two UI/voice polish issues in AYA Junior chat without changing lesson logic.
+
+Important:
+Do NOT modify backend lesson logic.
+Do NOT modify OpenAI routing.
+Do NOT modify image/homework solving logic.
+Do NOT rebuild the avatar system.
+Do NOT redesign the page.
+Only fix:
+1) Bulgarian TTS pronunciation of math expressions
+2) top chat header spacing/alignment
+
+Context:
+Current behavior:
+- When AYA solves homework correctly, the written math is correct.
+- But in speech, "=" is pronounced like "equal/еуал" instead of proper Bulgarian "равно".
+- In the top Junior chat header, the back button, avatar, and AYA label still overlap / feel cramped.
+
+Goal:
+Polish Bulgarian speech output and clean up header layout.
+
+Tasks:
+
+1. Bulgarian TTS pronunciation fix
+- Find where math expressions are converted to spoken text for Bulgarian TTS.
+- Ensure expressions such as:
+  "15 / 5 = 3"
+  are spoken in Bulgarian naturally.
+- Replace operator speech rendering with Bulgarian words:
+  + => "плюс"
+  - => "минус"
+  × or * => "по"
+  / => "разделено на"
+  = => "равно"
+- Important:
+  This is only for spoken/TTS text preparation, not visual math rendering.
+- Do not change the visible written expression.
+- Do not break English mode. This pronunciation fix is for Bulgarian speech only.
+
+Example:
+Visible:
+"15 / 5 = 3"
+Spoken:
+"петнадесет разделено на пет равно три"
+
+2. Header spacing / overlap fix
+- In the Junior chat header, ensure these elements do not overlap:
+  [← Назад] [AYA avatar] [AYA] [Стил: Panda]
+- Add proper spacing/gap between:
+  - back button
+  - avatar
+  - AYA label
+  - style chip
+- Keep everything on one clean line where possible.
+- Ensure "Назад" remains fully readable.
+- Ensure avatar does not sit on top of text.
+- Ensure voice mode controls on the right still align properly.
+
+3. Responsive polish
+- Make the header resilient on narrower widths.
+- If needed, slightly reduce avatar size or chip spacing in header only.
+- Do not affect lesson content area below.
+
+4. Preserve everything else
+Do NOT break:
+- homework photo solving
+- Bulgarian lesson flow
+- quick actions
+- daily plan
+- avatar emotions
+- floating helper
+- voice input/output
+- image homework support
+
+Return exactly:
+1. files modified
+2. what was changed for Bulgarian TTS pronunciation
+3. what was changed in the header layout
+4. confirmation that visible math rendering stayed unchanged
+5. manual Preview test steps
+
+Feature name:
+AYA Bulgarian TTS + Header Polish Fix
+
+Do not publish automatically.

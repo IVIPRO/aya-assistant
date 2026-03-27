@@ -98,68 +98,46 @@ export function preprocessBulgarianSpeech(text: string, lang: string): string {
   // First transliterate brand names for proper TTS pronunciation
   result = transliterateBrandNames(result);
   
+  // Helper: convert math operator symbol → Bulgarian word
+  function opToBg(op: string): string {
+    switch (op) {
+      case "+":  return "плюс";
+      case "-":  return "минус";
+      case "×":
+      case "*":  return "по";
+      case "÷":
+      case "/":  return "разделено на";
+      default:   return op;
+    }
+  }
+
   // Pattern: "number operator number = number"
-  // Match: 0 + 3 = 3, 4 - 1 = 3, 2 × 5 = 10, 8 ÷ 2 = 4
-  const mathPattern = /(\d+)\s*([+\-×÷])\s*(\d+)\s*=\s*(\d+)/g;
-  
-  result = result.replace(mathPattern, (match, num1, op, num2, result_num) => {
+  // Handles: +  -  ×  ÷  *  /
+  const mathPattern = /(\d+)\s*([+\-×÷*/])\s*(\d+)\s*=\s*(\d+)/g;
+
+  result = result.replace(mathPattern, (_match, num1, op, num2, result_num) => {
     const n1 = parseInt(num1, 10);
     const n2 = parseInt(num2, 10);
     const nResult = parseInt(result_num, 10);
-    
-    let opText = "";
-    switch (op) {
-      case "+":
-        opText = "плюс";
-        break;
-      case "-":
-        opText = "минус";
-        break;
-      case "×":
-        opText = "по";
-        break;
-      case "÷":
-        opText = "делено на";
-        break;
-      default:
-        opText = op;
-    }
-    
-    return `${numberToBulgarian(n1)} ${opText} ${numberToBulgarian(n2)} е равно на ${numberToBulgarian(nResult)}`;
+    return `${numberToBulgarian(n1)} ${opToBg(op)} ${numberToBulgarian(n2)} равно ${numberToBulgarian(nResult)}`;
   });
-  
-  // Pattern: "number operator number" (without result)
-  // This handles partial expressions like "3 + 2"
-  const partialMathPattern = /(\d+)\s*([+\-×÷])\s*(\d+)(?!\s*=)/g;
-  
-  result = result.replace(partialMathPattern, (match, num1, op, num2) => {
+
+  // Pattern: "number operator number" (without result) — e.g. "3 + 2"
+  const partialMathPattern = /(\d+)\s*([+\-×÷*/])\s*(\d+)(?!\s*=)/g;
+
+  result = result.replace(partialMathPattern, (_match, num1, op, num2) => {
     const n1 = parseInt(num1, 10);
     const n2 = parseInt(num2, 10);
-    
-    let opText = "";
-    switch (op) {
-      case "+":
-        opText = "плюс";
-        break;
-      case "-":
-        opText = "минус";
-        break;
-      case "×":
-        opText = "по";
-        break;
-      case "÷":
-        opText = "делено на";
-        break;
-      default:
-        opText = op;
-    }
-    
-    return `${numberToBulgarian(n1)} ${opText} ${numberToBulgarian(n2)}`;
+    return `${numberToBulgarian(n1)} ${opToBg(op)} ${numberToBulgarian(n2)}`;
   });
-  
+
+  // Fallback: bare "=" remaining in text (e.g. in sentences without surrounding numbers)
+  // Only replace if not part of ==, !=, <=, >=
+  result = result.replace(/(?<![=!<>])=(?!=)/g, " равно ");
+
   // Remove multiple spaces
   result = result.replace(/\s+/g, " ").trim();
-  
+
   return result;
 }
 

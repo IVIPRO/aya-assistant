@@ -1,0 +1,85 @@
+Finalize AYA branding in the dashboard and Junior flow so that AYA Avatar is always the main visible teacher identity.
+
+Important:
+Do NOT rebuild the app.
+Do NOT modify backend, database, lesson logic, OpenAI logic, workflows, or routing.
+Do NOT duplicate avatar systems.
+
+Context:
+AYA Avatar (girl with glasses) is the official teacher identity.
+Panda / Robot / Fox / Owl must remain only as learning styles, not as the visible primary teacher.
+
+Goal:
+Make the UI fully consistent so the user always sees AYA as the teacher, while Panda/Robot/Fox/Owl only describe teaching style.
+
+Tasks:
+
+1. Dashboard cards
+- On the main dashboard, replace any panda icon used as the primary icon for "AYA Начален етап" with the AYA Avatar.
+- Keep the card title:
+  "AYA Начален етап"
+- Keep the subtitle:
+  "Учебен свят за 1–4 клас"
+- Do not show Panda as the main identity on dashboard cards.
+
+2. Junior entry / welcome screens
+- Replace panda visuals used as the main welcome teacher with the AYA Avatar.
+- Update texts so they refer to AYA, not Panda.
+Example:
+Before:
+"AYA Panda е готова за днешното учебно приключение"
+After:
+"AYA е готова за днешното учебно приключение"
+
+3. Lesson / chat / daily plan / preview
+- The visible teacher avatar must always be the AYA Avatar.
+- Never use Panda as the main speaking or lesson teacher image.
+- Keep existing emotional states and animations already built for AYA Avatar.
+
+4. Floating bottom-right helper
+- Replace the panda floating helper icon with the AYA Avatar icon.
+- Reuse the existing avatar component or avatar asset.
+- Do not create another floating assistant system.
+
+5. Learning styles
+- Keep Panda / Robot / Fox / Owl only inside the style picker or style-related labels.
+- Update descriptions so they describe how AYA teaches.
+Examples:
+Before:
+"AYA Panda учи стъпка по стъпка..."
+After:
+"AYA използва нежен стил на учене..."
+- If a style is selected, show it only as a label/chip such as:
+  "Стил: Panda"
+
+6. Subject cards / world cards / headers
+- If a card or header currently shows Panda as the face of the teacher, replace it with AYA Avatar.
+- Keep style chips if needed, but the main visible identity must remain AYA.
+
+7. Preserve everything working
+Do NOT break:
+- Помогни ми с математика
+- Да четем заедно
+- Задай ми логически въпрос
+- English quick actions if present
+- emotional reactions
+- avatar animation
+- video teacher hooks
+- daily plan
+- dashboard navigation
+
+8. No redesign
+- Keep the current layout.
+- This is a branding cleanup and identity unification only.
+
+Return exactly:
+1. files modified
+2. panda elements replaced
+3. places where Panda still remains intentionally as a style only
+4. confirmation that AYA Avatar is now the visible teacher everywhere
+5. manual Preview test steps
+
+Feature name:
+AYA Final Teacher Identity Cleanup
+
+Do not publish automatically.

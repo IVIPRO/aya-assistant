@@ -129,10 +129,10 @@ const DIFFICULTY_LABELS: Record<WorldLang, Record<string, { label: string; color
 };
 
 const COMPANION_INFO: Record<string, { emoji: string; name: string; color: string; borderColor: string; textColor: string }> = {
-  panda: { emoji: "🐼", name: "AYA Panda", color: "bg-green-50", borderColor: "border-green-200", textColor: "text-green-700" },
-  robot: { emoji: "🤖", name: "AYA Robot", color: "bg-blue-50", borderColor: "border-blue-200", textColor: "text-blue-700" },
-  fox:   { emoji: "🦊", name: "AYA Fox",   color: "bg-orange-50", borderColor: "border-orange-200", textColor: "text-orange-700" },
-  owl:   { emoji: "🦉", name: "AYA Owl",   color: "bg-purple-50", borderColor: "border-purple-200", textColor: "text-purple-700" },
+  panda: { emoji: "🐼", name: "Panda", color: "bg-green-50", borderColor: "border-green-200", textColor: "text-green-700" },
+  robot: { emoji: "🤖", name: "Robot", color: "bg-blue-50", borderColor: "border-blue-200", textColor: "text-blue-700" },
+  fox:   { emoji: "🦊", name: "Fox",   color: "bg-orange-50", borderColor: "border-orange-200", textColor: "text-orange-700" },
+  owl:   { emoji: "🦉", name: "Owl",   color: "bg-purple-50", borderColor: "border-purple-200", textColor: "text-purple-700" },
 };
 
 const ZONE_COMPANION_MESSAGES: Record<WorldLang, Record<string, Record<string, string>>> = {
@@ -244,9 +244,14 @@ function CompanionGuidance({ companionId, zoneName, lang }: {
       animate={{ opacity: 1, y: 0 }}
       className={`flex items-start gap-4 p-4 rounded-2xl border-2 mb-6 ${companion.color} ${companion.borderColor}`}
     >
-      <div className="text-4xl flex-shrink-0">{companion.emoji}</div>
+      <span className="text-4xl flex-shrink-0">👧</span>
       <div>
-        <div className={`font-bold text-sm mb-0.5 ${companion.textColor}`}>{lbl.companionSays(companion.name)}</div>
+        <div className={`flex items-center gap-1.5 font-bold text-sm mb-0.5 ${companion.textColor}`}>
+          {lbl.companionSays("AYA")}
+          <span className="text-[10px] font-semibold bg-white/60 px-1.5 py-0.5 rounded-full border border-black/10 ml-0.5">
+            {companion.emoji} {companion.name}
+          </span>
+        </div>
         <p className="text-sm text-foreground/80 leading-relaxed">{message}</p>
       </div>
     </motion.div>

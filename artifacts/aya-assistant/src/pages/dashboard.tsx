@@ -8,7 +8,7 @@ import { useI18n } from "@/hooks/use-i18n";
 import type { Badge } from "@workspace/api-client-react";
 
 const CHARACTER_EMOJIS: Record<string, string> = {
-  panda: "🐼",
+  panda: "👧",
   robot: "🤖",
   fox: "🦊",
   owl: "🦉",

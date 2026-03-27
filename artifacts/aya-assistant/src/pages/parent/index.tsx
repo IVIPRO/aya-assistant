@@ -37,10 +37,10 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from "recha
 const ZONE_ORDER = ["Math Island", "Reading Forest", "Logic Mountain", "English City", "Science Planet"];
 
 const COMPANION_DATA: Record<string, { emoji: string; name: string; tone: string; color: string; accentColor: string }> = {
-  panda: { emoji: "🐼", name: "AYA Panda", tone: "gentle", color: "bg-green-50 border-green-200", accentColor: "text-green-700" },
-  robot: { emoji: "🤖", name: "AYA Robot", tone: "encouraging", color: "bg-blue-50 border-blue-200", accentColor: "text-blue-700" },
-  fox:   { emoji: "🦊", name: "AYA Fox",   tone: "playful",    color: "bg-orange-50 border-orange-200", accentColor: "text-orange-700" },
-  owl:   { emoji: "🦉", name: "AYA Owl",   tone: "calm",       color: "bg-purple-50 border-purple-200", accentColor: "text-purple-700" },
+  panda: { emoji: "🐼", name: "Panda", tone: "gentle",      color: "bg-green-50 border-green-200",   accentColor: "text-green-700" },
+  robot: { emoji: "🤖", name: "Robot", tone: "encouraging", color: "bg-blue-50 border-blue-200",     accentColor: "text-blue-700" },
+  fox:   { emoji: "🦊", name: "Fox",   tone: "playful",     color: "bg-orange-50 border-orange-200", accentColor: "text-orange-700" },
+  owl:   { emoji: "🦉", name: "Owl",   tone: "calm",        color: "bg-purple-50 border-purple-200", accentColor: "text-purple-700" },
 };
 
 const ZONE_EMOJIS: Record<string, string> = {
@@ -143,10 +143,10 @@ const familySchema = z.object({
 type ChildFormData = z.infer<typeof childSchema>;
 
 const COMPANION_CHARS = [
-  { id: "panda", emoji: "🐼", name: "AYA Panda", desc: "Patient and gentle", tone: "gentle", color: "bg-green-100 border-green-300", accentColor: "text-green-700" },
-  { id: "robot", emoji: "🤖", name: "AYA Robot", desc: "Logical and precise", tone: "encouraging", color: "bg-blue-100 border-blue-300", accentColor: "text-blue-700" },
-  { id: "fox",   emoji: "🦊", name: "AYA Fox",   desc: "Creative and playful", tone: "playful",    color: "bg-orange-100 border-orange-300", accentColor: "text-orange-700" },
-  { id: "owl",   emoji: "🦉", name: "AYA Owl",   desc: "Wise and thoughtful", tone: "calm",       color: "bg-purple-100 border-purple-300", accentColor: "text-purple-700" },
+  { id: "panda", emoji: "🐼", name: "Panda", desc: "Patient and gentle",   tone: "gentle",      color: "bg-green-100 border-green-300",   accentColor: "text-green-700" },
+  { id: "robot", emoji: "🤖", name: "Robot", desc: "Logical and precise",  tone: "encouraging", color: "bg-blue-100 border-blue-300",     accentColor: "text-blue-700" },
+  { id: "fox",   emoji: "🦊", name: "Fox",   desc: "Creative and playful", tone: "playful",     color: "bg-orange-100 border-orange-300", accentColor: "text-orange-700" },
+  { id: "owl",   emoji: "🦉", name: "Owl",   desc: "Wise and thoughtful",  tone: "calm",        color: "bg-purple-100 border-purple-300", accentColor: "text-purple-700" },
 ];
 
 type ParentLang = LangCode;
@@ -1408,9 +1408,14 @@ export function ParentDashboard() {
                   <p className="text-muted-foreground mb-2">{getGradeDisplay(child.grade, child.language)} · {child.country}</p>
                   {child.aiCharacter && COMPANION_DATA[child.aiCharacter] ? (
                     <div className={`flex items-center gap-2 mb-3 px-3 py-2 rounded-xl border ${COMPANION_DATA[child.aiCharacter].color}`}>
-                      <span className="text-2xl">{COMPANION_DATA[child.aiCharacter].emoji}</span>
+                      <span className="text-2xl flex-shrink-0">👧</span>
                       <div className="flex-1 min-w-0">
-                        <div className="font-bold text-sm">{COMPANION_DATA[child.aiCharacter].name}</div>
+                        <div className="font-bold text-sm flex items-center gap-1 flex-wrap">
+                          AYA
+                          <span className="text-[10px] font-semibold bg-white/60 px-1.5 py-0.5 rounded-full border border-black/10">
+                            {COMPANION_DATA[child.aiCharacter].emoji} {COMPANION_DATA[child.aiCharacter].name}
+                          </span>
+                        </div>
                         <div className={`text-[10px] font-semibold uppercase tracking-wider ${COMPANION_DATA[child.aiCharacter].accentColor}`}>
                           {t.parent.toneStyle[COMPANION_DATA[child.aiCharacter].tone] ?? `${COMPANION_DATA[child.aiCharacter].tone} style`} · {t.parent.aiCompanion}
                         </div>
@@ -1607,9 +1612,14 @@ export function ParentDashboard() {
 
           {progressChild && progressChild.aiCharacter && COMPANION_DATA[progressChild.aiCharacter] && (
             <div className={`flex items-start gap-4 p-4 rounded-2xl border ${COMPANION_DATA[progressChild.aiCharacter].color}`}>
-              <span className="text-4xl">{COMPANION_DATA[progressChild.aiCharacter].emoji}</span>
+              <span className="text-4xl flex-shrink-0">👧</span>
               <div className="flex-1 min-w-0">
-                <div className="font-bold">{COMPANION_DATA[progressChild.aiCharacter].name}</div>
+                <div className="font-bold flex items-center gap-1.5 flex-wrap mb-0.5">
+                  AYA
+                  <span className="text-[10px] font-semibold bg-white/60 px-1.5 py-0.5 rounded-full border border-black/10">
+                    {COMPANION_DATA[progressChild.aiCharacter].emoji} {COMPANION_DATA[progressChild.aiCharacter].name}
+                  </span>
+                </div>
                 <div className={`text-xs font-semibold uppercase tracking-wider mb-1 ${COMPANION_DATA[progressChild.aiCharacter].accentColor}`}>
                   {t.parent.toneStyle[COMPANION_DATA[progressChild.aiCharacter].tone] ?? `${COMPANION_DATA[progressChild.aiCharacter].tone} teaching style`} · Montessori {t.parent.aiCompanion}
                 </div>

@@ -107,7 +107,7 @@ export function CelebrationCard({ celebration, active }: CelebrationCardProps) {
               </div>
 
               <div className="flex items-start gap-2 bg-white/60 rounded-lg px-3 py-2">
-                <span className="text-xl flex-shrink-0">🐼</span>
+                <span className="text-xl flex-shrink-0">👧</span>
                 <p className="text-xs text-gray-700 leading-relaxed">
                   {getMessage()}
                 </p>

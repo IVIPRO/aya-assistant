@@ -104,7 +104,7 @@ export function ListeningMode({
   onClose,
   contentToRead,
   lang,
-  characterEmoji = "🐼",
+  characterEmoji = "👧",
 }: ListeningModeProps) {
   const lbl = LISTENING_LABELS[lang];
   const { speak, pause, resume, stop, isSpeaking, isPaused, isSupported } =

@@ -1,0 +1,125 @@
+Add the AYA Junior Avatar character to the existing Video Teacher system.
+
+Important:
+The Video Teacher architecture was already implemented earlier.  
+Do NOT rebuild it, duplicate it, or change the lesson engine.
+
+Your task is ONLY to add the AYA avatar character layer.
+
+Context:
+AYA is the main character of the application.
+
+Character profile:
+- girl
+- 9 years old
+- curly hair
+- glasses
+- friendly
+- supportive
+- cartoon style (2D)
+- designed for children ages 6–10
+
+Goal:
+Display the AYA avatar in the Junior interface and allow it to react to lesson states.
+
+Do NOT:
+- modify server infrastructure
+- modify workflows
+- rebuild lesson logic
+- duplicate chat systems
+- duplicate video teacher logic
+- modify OpenAI integrations
+- redesign UI layout
+
+Implementation tasks:
+
+1. Avatar Assets
+
+Create placeholder avatar assets in:
+
+/attached_assets/aya-avatar/
+
+Use these filenames (placeholders are acceptable):
+
+aya-neutral.png
+aya-happy.png
+aya-thinking.png
+aya-encourage.png
+aya-celebrate.png
+
+If assets do not exist yet, create placeholders or references without breaking the UI.
+
+2. Avatar Component
+
+Create a reusable component:
+
+AyaAvatar
+
+Props:
+- emotion
+- visible
+- optional text bubble
+
+Emotion values:
+
+neutral
+happy
+thinking
+encourage
+celebrate
+
+The component should display the correct avatar image based on the emotion.
+
+3. Connect Avatar to Lesson States
+
+Hook the avatar to the existing Junior learning events:
+
+lesson_start -> neutral
+correct_answer -> happy
+wrong_answer -> thinking
+retry_prompt -> encourage
+lesson_complete -> celebrate
+
+Reuse existing lesson state signals from the junior chat engine.
+
+Do NOT duplicate state logic.
+
+4. Placement
+
+Show the AYA avatar inside the Junior learning interface near the lesson/chat area.
+
+The avatar should appear as the "teacher guide" for the student.
+
+Do not redesign the whole layout.
+
+5. Safe fallback
+
+If avatar assets are missing:
+- the app must still work
+- hide avatar silently
+- do not crash
+
+6. Code quality
+
+Keep the implementation lightweight and modular.
+
+Do not introduce heavy animation frameworks.
+
+The avatar system must remain compatible with future animation or video upgrades.
+
+Deliverables:
+
+Return exactly:
+
+1. files created
+2. files modified
+3. where AyaAvatar component is used
+4. how lesson states map to avatar emotions
+5. confirmation that no lesson/chat logic was duplicated
+6. manual Preview test steps
+
+Name the feature:
+
+AYA Junior Avatar
+
+Do not publish automatically.

@@ -4,6 +4,8 @@ import { SubjectPanel } from "./subjects";
 import { DailyPlanCard } from "@/components/DailyPlanCard";
 import { AnimatedTeacher } from "@/components/AnimatedTeacher";
 import { VideoTeacher } from "@/components/VideoTeacher";
+import { AyaAvatar } from "@/components/AyaAvatar";
+import type { AyaEmotion } from "@/components/AyaAvatar";
 import { ListeningMode } from "@/components/ListeningMode";
 import { CelebrationCard } from "@/components/CelebrationCard";
 import type { TeacherState } from "@/components/AnimatedTeacher";
@@ -438,6 +440,24 @@ function getGradeLabel(grade: number, country: string): string {
 }
 
 type JuniorView = "welcome" | "map" | "subjects" | "chat";
+
+/**
+ * AYA Junior Avatar — lesson state → avatar emotion mapping.
+ * Reuses the existing teacher state signal; no new state logic.
+ *   lesson_start  (talking)     → neutral
+ *   correct_answer (happy)      → happy
+ *   wrong_answer  (encouraging) → thinking
+ *   retry_prompt  (thinking)    → encourage
+ *   lesson_complete (happy, high celebrate flag) → celebrate
+ */
+function teacherStateToAyaEmotion(state: TeacherState): AyaEmotion {
+  switch (state) {
+    case "happy":       return "happy";
+    case "encouraging": return "thinking";
+    case "thinking":    return "encourage";
+    default:            return "neutral";
+  }
+}
 
 function CharacterPicker({ child, onSelect, onClose }: { child: Child; onSelect: (char: UpdateChildBodyAiCharacter) => void; onClose: () => void }) {
   const lang = getLang(child.language);
@@ -1231,6 +1251,30 @@ export function Junior() {
                 </button>
               </div>
             )}
+
+            {/* ── AYA Junior Avatar ─────────────────────────────── */}
+            <div className="flex items-center gap-3 mb-3 bg-white/60 border border-yellow-200 rounded-2xl px-4 py-2.5 shadow-sm">
+              <AyaAvatar
+                emotion={teacherState === "happy" ? "happy" : teacherStateToAyaEmotion(teacherState)}
+                visible={!!activeChild}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="text-[11px] font-bold text-yellow-700 uppercase tracking-wide leading-none mb-1">
+                  AYA Junior Guide
+                </div>
+                <div className="text-xs text-muted-foreground leading-snug">
+                  {teacherState === "happy"
+                    ? (juniorLang === "bg" ? "Браво! Отлична работа! ⭐" : juniorLang === "es" ? "¡Muy bien! ⭐" : "Great job! ⭐")
+                    : teacherState === "encouraging"
+                    ? (juniorLang === "bg" ? "Хмм, опитай пак! 💭" : juniorLang === "es" ? "¡Inténtalo de nuevo! 💭" : "Hmm, try again! 💭")
+                    : teacherState === "thinking"
+                    ? (juniorLang === "bg" ? "Ти можеш! Продължавай! ✨" : juniorLang === "es" ? "¡Tú puedes! ✨" : "You can do it! ✨")
+                    : teacherState === "talking"
+                    ? (juniorLang === "bg" ? "Нека учим заедно! 📚" : juniorLang === "es" ? "¡Aprendamos juntos! 📚" : "Let's learn together! 📚")
+                    : (juniorLang === "bg" ? "Готова съм да помогна! 🌟" : juniorLang === "es" ? "¡Lista para ayudarte! 🌟" : "Ready to help! 🌟")}
+                </div>
+              </div>
+            </div>
 
             <Chat
               module="junior"

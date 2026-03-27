@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 140" fill="none">
+  <!-- Sparkle accents -->
+  <text x="4" y="22" font-size="11">✨</text>
+  <text x="98" y="28" font-size="11">✨</text>
+  <!-- Background circle -->
+  <circle cx="60" cy="66" r="52" fill="#E8F5E9"/>
+  <!-- Curly hair -->
+  <ellipse cx="60" cy="26" rx="38" ry="22" fill="#5D3A1A"/>
+  <circle cx="26" cy="39" r="13" fill="#5D3A1A"/>
+  <circle cx="94" cy="39" r="13" fill="#5D3A1A"/>
+  <circle cx="18" cy="53" r="10" fill="#5D3A1A"/>
+  <circle cx="102" cy="53" r="10" fill="#5D3A1A"/>
+  <circle cx="40" cy="15" r="9" fill="#5D3A1A"/>
+  <circle cx="60" cy="11" r="9" fill="#5D3A1A"/>
+  <circle cx="80" cy="15" r="9" fill="#5D3A1A"/>
+  <!-- Face -->
+  <ellipse cx="60" cy="73" rx="34" ry="38" fill="#FFCC99"/>
+  <!-- Glasses frame -->
+  <rect x="27" y="63" width="24" height="16" rx="7" stroke="#444" stroke-width="2.5" fill="#E3F2FD" fill-opacity="0.6"/>
+  <rect x="69" y="63" width="24" height="16" rx="7" stroke="#444" stroke-width="2.5" fill="#E3F2FD" fill-opacity="0.6"/>
+  <line x1="51" y1="71" x2="69" y2="71" stroke="#444" stroke-width="2"/>
+  <!-- Determined eyes -->
+  <ellipse cx="39" cy="71" rx="5" ry="5.5" fill="#333"/>
+  <ellipse cx="81" cy="71" rx="5" ry="5.5" fill="#333"/>
+  <circle cx="41" cy="69" r="1.5" fill="white"/>
+  <circle cx="83" cy="69" r="1.5" fill="white"/>
+  <!-- Encouraging eyebrows - lifted -->
+  <path d="M32 59 Q39 54 46 58" stroke="#5D3A1A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <path d="M74 58 Q81 54 88 58" stroke="#5D3A1A" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+  <!-- Nose -->
+  <ellipse cx="60" cy="83" rx="3" ry="2" fill="#E8A87C"/>
+  <!-- Encouraging wide smile -->
+  <path d="M48 92 Q60 103 72 92" stroke="#C0705A" stroke-width="2.5" stroke-linecap="round" fill="#FFCCBC"/>
+  <!-- Thumbs up hand -->
+  <rect x="94" y="75" width="12" height="18" rx="4" fill="#FFCC99" stroke="#E8A87C" stroke-width="1.5"/>
+  <rect x="96" y="68" width="8" height="10" rx="4" fill="#FFCC99" stroke="#E8A87C" stroke-width="1.5"/>
+  <!-- Cheeks -->
+  <ellipse cx="38" cy="87" rx="9" ry="6" fill="#FF8A80" opacity="0.55"/>
+  <ellipse cx="82" cy="87" rx="9" ry="6" fill="#FF8A80" opacity="0.55"/>
+</svg>

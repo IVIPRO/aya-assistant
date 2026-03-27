@@ -11,6 +11,7 @@ import type { LangCode } from "@/lib/i18n";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { XpToast, type XpReward } from "@/components/xp-toast";
 import { AyaAvatar, type AyaEmotion } from "@/components/AyaAvatar";
+import { getCuriosityCard, type CuriosityCard as CuriosityCardData } from "@/lib/curiosityEngine";
 
 /* ─── Adaptive profile ──────────────────────────────────────────── */
 
@@ -469,6 +470,65 @@ function ActionBtn({ onClick, subject, children, disabled, variant = "primary" }
   );
 }
 
+/* ─── Curiosity Card (shown after lesson completion) ────────────── */
+
+const CURIOSITY_CARD_LABELS: Record<LangCode, {
+  seeReveal: string;
+  nextLesson: string;
+  discoverMore: string;
+}> = {
+  bg: { seeReveal: "Виж отговора 🔍", nextLesson: "Към следващия урок", discoverMore: "Искаш ли да разберем нещо интересно?" },
+  en: { seeReveal: "See the answer 🔍", nextLesson: "Next lesson", discoverMore: "Want to discover something interesting?" },
+  es: { seeReveal: "Ver la respuesta 🔍", nextLesson: "Siguiente lección", discoverMore: "¿Quieres descubrir algo interesante?" },
+  de: { seeReveal: "Antwort sehen 🔍", nextLesson: "Nächste Lektion", discoverMore: "Möchtest du etwas Interessantes entdecken?" },
+  fr: { seeReveal: "Voir la réponse 🔍", nextLesson: "Leçon suivante", discoverMore: "Tu veux découvrir quelque chose d'intéressant?" },
+};
+
+function CuriosityCardDisplay({ card, lang }: {
+  card: CuriosityCardData;
+  lang: LangCode;
+}) {
+  const [revealShown, setRevealShown] = useState(false);
+  const lbl = CURIOSITY_CARD_LABELS[lang];
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.35 }}
+      className="rounded-2xl border-2 border-dashed border-violet-200 bg-violet-50/60 p-4 space-y-2.5"
+    >
+      <p className="text-xs font-bold text-violet-400 uppercase tracking-wider text-center">
+        {lbl.discoverMore}
+      </p>
+      <div className="flex items-start gap-2.5">
+        <span className="text-2xl flex-shrink-0">{card.emoji}</span>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-bold text-violet-700 mb-0.5">{card.title}</p>
+          <p className="text-sm text-foreground leading-relaxed">{card.content}</p>
+          {card.reveal && !revealShown && (
+            <button
+              onClick={() => setRevealShown(true)}
+              className="mt-2 text-xs font-semibold text-violet-600 hover:text-violet-800 underline underline-offset-2"
+            >
+              {lbl.seeReveal}
+            </button>
+          )}
+          {card.reveal && revealShown && (
+            <motion.p
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="mt-2 text-sm font-semibold text-violet-700 bg-violet-100 rounded-xl px-3 py-1.5"
+            >
+              {card.reveal}
+            </motion.p>
+          )}
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 /* ─── Interactive Lesson Engine ─────────────────────────────────── */
 
 interface EngineProps {
@@ -511,6 +571,9 @@ function InteractiveLessonEngine({
   const explanationLeadRef = useRef(pick(d.explanationLead));
   const exampleLeadRef = useRef(pick(d.exampleLead));
   const practiceLeadRef = useRef(pick(d.practiceLead));
+
+  /* ── curiosity card — stable per lesson session */
+  const curiosityCard = useRef(getCuriosityCard(subject.id, lang)).current;
 
   const examples = data.lesson.examples;
   const problems = data.practice.problems;
@@ -681,7 +744,7 @@ function InteractiveLessonEngine({
                 {l.understood} <ChevronRight className="w-5 h-5" />
               </ActionBtn>
               {topicContext === "strong" && ctxD.skipExplanationBtn && (
-                <ActionBtn onClick={fromExplanation} subject={subject} variant="secondary">
+                <ActionBtn onClick={fromExplanation} subject={subject} variant="ghost">
                   <Sparkles className="w-4 h-4" /> {ctxD.skipExplanationBtn}
                 </ActionBtn>
               )}
@@ -929,6 +992,7 @@ function InteractiveLessonEngine({
                     <p className={cn("text-xs font-bold mt-1.5", subject.colorClass)}>{pct}%</p>
                   </div>
                 </motion.div>
+                <CuriosityCardDisplay card={curiosityCard} lang={lang} />
                 <ActionBtn onClick={onBack} subject={subject}>
                   <Star className="w-4 h-4" /> {l.backToLessons}
                 </ActionBtn>

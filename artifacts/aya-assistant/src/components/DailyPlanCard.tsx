@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getDailyHook } from "@/lib/curiosityEngine";
 import {
   useGetDailyPlan,
   updateDailyPlanTask,
@@ -331,6 +332,9 @@ export function DailyPlanCard({ childId, lang, onStartTask, onPlanLoaded }: Dail
   const i18n = PLAN_I18N[lang];
   const qc = useQueryClient();
 
+  /* Stable daily hook — picked once per mount */
+  const dailyHook = useRef(getDailyHook(lang)).current;
+
   const { data: plan, isLoading } = useGetDailyPlan(
     { childId },
     { query: { queryKey: getGetDailyPlanQueryKey({ childId }), enabled: !!childId, staleTime: 60_000 } },
@@ -372,6 +376,10 @@ export function DailyPlanCard({ childId, lang, onStartTask, onPlanLoaded }: Dail
             </span>
           )}
         </div>
+
+        {!isLoading && totalCount > 0 && doneCount < totalCount && (
+          <p className="mt-1 text-xs text-violet-500 italic leading-snug">{dailyHook}</p>
+        )}
 
         {!isLoading && totalCount > 0 && (
           <div className="mt-2 space-y-1">

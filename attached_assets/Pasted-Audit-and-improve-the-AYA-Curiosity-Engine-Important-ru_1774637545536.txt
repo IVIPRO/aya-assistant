@@ -1,0 +1,222 @@
+Audit and improve the AYA Curiosity Engine.
+
+Important rule:
+Do NOT automatically create a new system.
+First verify whether curiosity/engagement mechanics already exist in the codebase.
+
+The goal is to increase student curiosity and motivation to continue learning.
+
+--------------------------------
+
+PHASE 1 — AUDIT
+
+Inspect the current codebase and determine whether any of the following systems already exist:
+
+Curiosity mechanics
+Engagement prompts
+Motivation messages
+Next-lesson suggestions
+Discovery prompts
+Exploration suggestions
+Learning streak logic
+Reward-based curiosity triggers
+
+Look for logic related to:
+
+• "What should we explore next?"
+• suggestion cards
+• curiosity questions
+• learning prompts after lesson completion
+• discovery tasks
+• random interesting facts
+• motivational dialogues
+• gamified exploration
+
+Also inspect:
+
+Daily plan generator
+Lesson completion flow
+Chat interaction logic
+Avatar reaction logic
+
+Determine if any curiosity-driving logic already exists.
+
+--------------------------------
+
+PHASE 2 — REPORT
+
+Before implementing anything, return an audit report:
+
+1. Does a Curiosity Engine already exist?
+   - Full
+   - Partial
+   - None
+
+2. If partial:
+   - where it exists
+   - what features it already has
+   - what is missing
+
+3. Files and modules involved.
+
+4. Identify duplication risks:
+   - multiple suggestion systems
+   - overlapping motivational prompts
+   - separate recommendation engines
+
+--------------------------------
+
+PHASE 3 — DECISION
+
+Choose only one path:
+
+PATH A
+Curiosity Engine exists → Improve it.
+
+PATH B
+Curiosity features exist partially → Merge them into a single Curiosity Engine.
+
+PATH C
+No Curiosity Engine exists → Create one.
+
+--------------------------------
+
+AYA CURIOSITY ENGINE FEATURES
+
+The Curiosity Engine should make students WANT to continue learning.
+
+AYA should naturally encourage exploration through:
+
+1. Curiosity prompts
+
+After a lesson AYA might say:
+
+"Искаш ли да разберем нещо още по-интересно?"
+
+or
+
+"Знаеш ли защо това работи така?"
+
+These prompts should invite discovery.
+
+--------------------------------
+
+2. Exploration cards
+
+AYA suggests optional learning paths like:
+
+• “Интересен факт”
+• “Мини предизвикателство”
+• “Да проверим дали знаеш това”
+• “Малка загадка”
+
+These should feel playful, not mandatory.
+
+--------------------------------
+
+3. Discovery questions
+
+AYA occasionally asks surprising questions like:
+
+"Знаеш ли защо планетите не падат?"
+
+or
+
+"Как мислиш, защо някои животни могат да виждат в тъмното?"
+
+These questions should spark curiosity.
+
+--------------------------------
+
+4. Learning streak encouragement
+
+When the student returns multiple days:
+
+AYA acknowledges the streak:
+
+"Трети ден учим заедно! Готов ли си за нещо ново?"
+
+--------------------------------
+
+5. Adaptive curiosity
+
+Use Adaptive Learning Brain data to trigger curiosity prompts when:
+
+• student is bored (too many correct answers quickly)
+• student is stuck
+• student finishes a lesson early
+
+--------------------------------
+
+6. Fun mini exploration
+
+Examples:
+
+• mini riddles
+• quick facts
+• tiny experiments
+• “Did you know?” moments
+
+--------------------------------
+
+PERFORMANCE RULES
+
+Do NOT introduce heavy AI pipelines.
+
+Prefer:
+
+• lightweight prompts
+• small discovery cards
+• simple curiosity triggers
+
+--------------------------------
+
+INTEGRATION
+
+Curiosity Engine should integrate with:
+
+Lesson completion
+Daily Plan
+Adaptive Learning Brain
+Avatar reactions
+Chat system
+
+--------------------------------
+
+DO NOT BREAK
+
+Dashboard
+Lesson engine
+Stage separation
+Adaptive Learning Brain
+Daily plan
+Homework solving
+Rewards / XP
+Chat
+Voice mode
+
+--------------------------------
+
+RETURN FORMAT
+
+Before implementation return:
+
+AUDIT REPORT
+1. Curiosity system status
+2. Existing files and modules
+3. Missing components
+4. Duplication risks
+5. Chosen path (A/B/C)
+
+After implementation return:
+
+IMPLEMENTATION REPORT
+1. Files modified
+2. New or improved curiosity triggers
+3. Integration points
+4. Example curiosity prompts
+5. Preview test steps
+
+Feature name:
+
+AYA Curiosity Engine

@@ -15,7 +15,8 @@ import { Link } from "wouter";
 import { Star, Trophy, Sparkles, Map, MessageCircle, Lock, CheckCircle2, Mic, Volume2, Video, ChevronRight, ArrowLeft, BookOpen } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useListChildren, useUpdateChild, useListMissions, useListProgress, getListChildrenQueryKey, getListMissionsQueryKey, getListProgressQueryKey } from "@workspace/api-client-react";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { getStreakMessage, mergeWithDiscoveryPrompts } from "@/lib/curiosityEngine";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -338,25 +339,12 @@ const ZONES = [
   { id: "Science Planet", emoji: "🌍", color: "text-teal-600", bgColor: "bg-gradient-to-br from-teal-100 to-cyan-50", borderColor: "border-teal-300", xpRequired: 250, desc: "Nature & discovery" },
 ];
 
-const JUNIOR_PROMPTS_BY_LANG: Record<string, string[]> = {
-  en: [
-    "Help me with math",
-    "Let's read together",
-    "Ask me a logic question",
-    "Practice English",
-  ],
-  bg: [
-    "Помогни ми с математика",
-    "Да четем заедно",
-    "Задай ми логически въпрос",
-    "Упражнявай с мен английски",
-  ],
-  es: [
-    "Ayúdame con matemáticas",
-    "Leamos juntos",
-    "Hazme una pregunta de lógica",
-    "Practicar inglés",
-  ],
+const JUNIOR_TASK_PROMPTS_BY_LANG: Record<string, string[]> = {
+  en: ["Help me with math", "Let's read together", "Ask me a logic question", "Practice English"],
+  bg: ["Помогни ми с математика", "Да четем заедно", "Задай ми логически въпрос", "Упражнявай с мен английски"],
+  es: ["Ayúdame con matemáticas", "Leamos juntos", "Hazme una pregunta de lógica", "Practicar inglés"],
+  de: ["Hilf mir bei Mathe", "Lass uns zusammen lesen", "Stell mir eine Logikfrage", "Englisch üben"],
+  fr: ["Aide-moi en maths", "Lisons ensemble", "Pose-moi une question de logique", "Pratiquer l'anglais"],
 };
 
 function getLang(language?: string | null): "bg" | "es" | "en" {
@@ -367,7 +355,9 @@ function getLang(language?: string | null): "bg" | "es" | "en" {
 }
 
 function getJuniorPrompts(language?: string | null): string[] {
-  return JUNIOR_PROMPTS_BY_LANG[getLang(language)] ?? JUNIOR_PROMPTS_BY_LANG.en;
+  const lang = resolveLang(language);
+  const taskPrompts = JUNIOR_TASK_PROMPTS_BY_LANG[lang] ?? JUNIOR_TASK_PROMPTS_BY_LANG.en;
+  return mergeWithDiscoveryPrompts(taskPrompts, lang);
 }
 
 function getMissionZone(mission: Mission): string {
@@ -580,7 +570,12 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
               <div className="flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-orange-400" />
                 <span className="font-bold text-sm">{lbl.levelLabel} {level}</span>
-                {streak > 0 && <span className="text-sm font-semibold">🔥 {streak} {streak === 1 ? 'day' : 'days'}</span>}
+                {streak > 0 && (() => {
+                  const streakMsg = getStreakMessage(streak, lang);
+                  return streakMsg
+                    ? <span className="text-sm font-semibold">{streakMsg}</span>
+                    : <span className="text-sm font-semibold">🔥 {streak}</span>;
+                })()}
               </div>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
                 <span className="flex items-center gap-1">

@@ -309,6 +309,8 @@ const CONTEXT_D: Record<LangCode, Record<TopicContext, {
   practiceSupport: string;
   hintPrefix: string;
   skipExplanationBtn: string;
+  reExplainMsg: string;
+  quizSupport: string;
 }>> = {
   bg: {
     weak: {
@@ -320,6 +322,8 @@ const CONTEXT_D: Record<LangCode, Record<TopicContext, {
       practiceSupport: "Не се притеснявай — тази тема е трудна. Помислим заедно!",
       hintPrefix: "💡 Подсказка:",
       skipExplanationBtn: "Виж обяснението →",
+      reExplainMsg: "Нека се върнем към основата — ще разгледаме обяснението заедно! 🔍",
+      quizSupport: "Не се притеснявай! Тази тема ти идва трудна — продължаваме заедно.",
     },
     strong: {
       greeting: [
@@ -330,12 +334,16 @@ const CONTEXT_D: Record<LangCode, Record<TopicContext, {
       practiceSupport: "Чудесно! Тази тема ти е силна страна.",
       hintPrefix: "💡 Спомни си:",
       skipExplanationBtn: "Познавам обяснението, пропусни →",
+      reExplainMsg: "",
+      quizSupport: "",
     },
     normal: {
       greeting: [],
       practiceSupport: "",
       hintPrefix: "💡",
       skipExplanationBtn: "",
+      reExplainMsg: "",
+      quizSupport: "",
     },
   },
   en: {
@@ -348,6 +356,8 @@ const CONTEXT_D: Record<LangCode, Record<TopicContext, {
       practiceSupport: "Don't worry — this topic is tricky. Let's think together!",
       hintPrefix: "💡 Hint:",
       skipExplanationBtn: "See explanation →",
+      reExplainMsg: "Let's go back to basics — I'll walk you through the explanation again! 🔍",
+      quizSupport: "No worries! This topic is tricky — let's keep going together.",
     },
     strong: {
       greeting: [
@@ -358,12 +368,16 @@ const CONTEXT_D: Record<LangCode, Record<TopicContext, {
       practiceSupport: "Great! This topic is one of your strengths.",
       hintPrefix: "💡 Remember:",
       skipExplanationBtn: "I know this — skip →",
+      reExplainMsg: "",
+      quizSupport: "",
     },
     normal: {
       greeting: [],
       practiceSupport: "",
       hintPrefix: "💡",
       skipExplanationBtn: "",
+      reExplainMsg: "",
+      quizSupport: "",
     },
   },
   es: {
@@ -376,6 +390,8 @@ const CONTEXT_D: Record<LangCode, Record<TopicContext, {
       practiceSupport: "No te preocupes — este tema es difícil. ¡Pensemos juntos!",
       hintPrefix: "💡 Pista:",
       skipExplanationBtn: "Ver explicación →",
+      reExplainMsg: "¡Volvamos a lo básico — repasemos la explicación juntos! 🔍",
+      quizSupport: "¡No te preocupes! Este tema es difícil — seguimos juntos.",
     },
     strong: {
       greeting: [
@@ -386,12 +402,16 @@ const CONTEXT_D: Record<LangCode, Record<TopicContext, {
       practiceSupport: "¡Genial! Este tema es uno de tus puntos fuertes.",
       hintPrefix: "💡 Recuerda:",
       skipExplanationBtn: "Lo conozco — saltar →",
+      reExplainMsg: "",
+      quizSupport: "",
     },
     normal: {
       greeting: [],
       practiceSupport: "",
       hintPrefix: "💡",
       skipExplanationBtn: "",
+      reExplainMsg: "",
+      quizSupport: "",
     },
   },
   de: {
@@ -404,6 +424,8 @@ const CONTEXT_D: Record<LangCode, Record<TopicContext, {
       practiceSupport: "Kein Sorge — dieses Thema ist schwierig. Denken wir gemeinsam!",
       hintPrefix: "💡 Hinweis:",
       skipExplanationBtn: "Erklärung ansehen →",
+      reExplainMsg: "Zurück zu den Grundlagen — ich erkläre es dir noch einmal! 🔍",
+      quizSupport: "Keine Sorge! Dieses Thema ist schwierig — wir machen zusammen weiter.",
     },
     strong: {
       greeting: [
@@ -414,12 +436,16 @@ const CONTEXT_D: Record<LangCode, Record<TopicContext, {
       practiceSupport: "Großartig! Dieses Thema ist eine deiner Stärken.",
       hintPrefix: "💡 Erinnere dich:",
       skipExplanationBtn: "Ich kenne das — überspringen →",
+      reExplainMsg: "",
+      quizSupport: "",
     },
     normal: {
       greeting: [],
       practiceSupport: "",
       hintPrefix: "💡",
       skipExplanationBtn: "",
+      reExplainMsg: "",
+      quizSupport: "",
     },
   },
   fr: {
@@ -432,6 +458,8 @@ const CONTEXT_D: Record<LangCode, Record<TopicContext, {
       practiceSupport: "Ne t'inquiète pas — ce sujet est difficile. Réfléchissons ensemble!",
       hintPrefix: "💡 Indice:",
       skipExplanationBtn: "Voir l'explication →",
+      reExplainMsg: "Revenons aux bases — je vais t'expliquer encore une fois! 🔍",
+      quizSupport: "Pas d'inquiétude! Ce sujet est difficile — on continue ensemble.",
     },
     strong: {
       greeting: [
@@ -442,12 +470,16 @@ const CONTEXT_D: Record<LangCode, Record<TopicContext, {
       practiceSupport: "Super! Ce sujet est l'un de tes points forts.",
       hintPrefix: "💡 Rappelle-toi:",
       skipExplanationBtn: "Je connais — passer →",
+      reExplainMsg: "",
+      quizSupport: "",
     },
     normal: {
       greeting: [],
       practiceSupport: "",
       hintPrefix: "💡",
       skipExplanationBtn: "",
+      reExplainMsg: "",
+      quizSupport: "",
     },
   },
 };
@@ -619,6 +651,8 @@ function InteractiveLessonEngine({
   const quizCorrectRef = useRef(0);
   const lessonRecordedRef = useRef(false);
   const consecutiveCorrectRef = useRef(0);
+  /* ── cumulative lesson mistake counter (across all practice problems) */
+  const lessonMistakesRef = useRef(0);
 
   /* ── voice: speak whenever dialogue changes ─────────────────── */
   useEffect(() => {
@@ -707,6 +741,7 @@ function InteractiveLessonEngine({
       setDialogue(pick(d.practiceCorrect));
     } else {
       consecutiveCorrectRef.current = 0;
+      lessonMistakesRef.current += 1;
       const nextAttempts = attempts + 1;
       /* First wrong in primary grades (1-4): go to hinting phase. */
       if (isPrimary && attempts === 0) {
@@ -753,8 +788,13 @@ function InteractiveLessonEngine({
   const selectQuiz = (idx: number, optIdx: number) => {
     const correct = optIdx === questions[idx].correctIndex;
     if (correct) quizCorrectRef.current += 1;
+    else lessonMistakesRef.current += 1;
     setPhase({ kind: "quiz", idx, selected: optIdx });
-    setDialogue(correct ? pick(d.quizCorrect) : pick(d.quizWrong));
+    /* Weak topics get a supportive wrong-answer message; others get generic */
+    const wrongMsg = (topicContext === "weak" && ctxD.quizSupport)
+      ? ctxD.quizSupport
+      : pick(d.quizWrong);
+    setDialogue(correct ? pick(d.quizCorrect) : wrongMsg);
   };
 
   /* ── advance from quiz */
@@ -971,8 +1011,26 @@ function InteractiveLessonEngine({
             const prob = problems[phase.practiceIdx];
             /* Find the most relevant example hint to show */
             const hintEx = examples.find(e => e.hint) ?? examples[0];
+            /* Deep-struggle: weak topic + 3+ cumulative lesson mistakes → show re-explain */
+            const showReExplain = topicContext === "weak"
+              && lessonMistakesRef.current >= 3
+              && (data.lesson.tip || data.lesson.explanation);
             return (
               <div className="space-y-4">
+                {/* Deep-struggle re-explanation banner (weak topics, 3+ mistakes) */}
+                {showReExplain && ctxD.reExplainMsg && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-violet-50 border-2 border-violet-200 rounded-2xl p-4 space-y-2"
+                  >
+                    <p className="text-sm font-bold text-violet-800">{ctxD.reExplainMsg}</p>
+                    {data.lesson.tip && (
+                      <p className="text-sm text-violet-700 leading-relaxed">{data.lesson.tip}</p>
+                    )}
+                  </motion.div>
+                )}
+
                 {/* Mini re-teach: show the problem again */}
                 <div className={cn("rounded-2xl border-2 p-4 text-center", subject.bgClass, subject.borderClass)}>
                   <p className="text-xs font-bold text-muted-foreground mb-2 uppercase tracking-wider">
@@ -990,8 +1048,7 @@ function InteractiveLessonEngine({
                     className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 space-y-2"
                   >
                     <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
-                      <span>💡</span>
-                      <span>{ctxD.hintPrefix || (lang === "bg" ? "Подсказка" : "Hint")}</span>
+                      <span>{ctxD.hintPrefix || "💡"}</span>
                     </div>
                     {hintEx.hint && (
                       <p className="text-sm text-amber-900 leading-relaxed">{hintEx.hint}</p>

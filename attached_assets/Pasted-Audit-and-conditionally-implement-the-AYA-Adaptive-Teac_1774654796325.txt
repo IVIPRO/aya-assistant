@@ -1,0 +1,133 @@
+Audit and conditionally implement the AYA Adaptive Teacher Brain.
+
+CRITICAL RULE:
+Do NOT create duplicate adaptive systems.
+Do NOT stack new logic on top of existing logic.
+
+First inspect the codebase and determine if an Adaptive Learning system already exists.
+
+------------------------------------------------
+
+GOAL
+
+Ensure that AYA has a working Adaptive Teacher Brain that adjusts lessons based on the child's performance.
+
+If such a system already exists:
+• audit it
+• improve it
+• stabilize it
+• connect it properly to the lesson flow
+
+If the system does NOT exist:
+• implement a clean adaptive learning layer
+• integrate it with the lesson engine
+• ensure no architecture conflicts
+
+If the system exists and already works correctly:
+• do NOT rewrite it
+• only clean minor issues if needed
+
+------------------------------------------------
+
+PHASE 1 — SYSTEM AUDIT
+
+Search the codebase for adaptive logic or performance tracking.
+
+Look for patterns such as:
+
+adaptive_learning
+difficulty_adjustment
+progress_tracker
+mistake_counter
+mastery_score
+lesson_retry_logic
+student_performance
+adaptive_lesson_flow
+
+Return:
+
+1. whether an Adaptive Teacher Brain exists
+2. where it is implemented
+3. files containing adaptive logic
+4. how the system currently adjusts lessons
+5. what performance data is tracked
+
+Do NOT modify code yet.
+
+------------------------------------------------
+
+PHASE 2 — EVALUATION
+
+Evaluate the existing system:
+
+• Does it detect repeated mistakes?
+• Does it adapt lesson difficulty?
+• Does it provide additional hints?
+• Does it slow down explanations when needed?
+• Does it increase challenge when the child performs well?
+
+If missing functionality exists, mark it for improvement.
+
+------------------------------------------------
+
+PHASE 3 — SAFE IMPROVEMENTS
+
+Only if necessary, improve the adaptive system.
+
+Possible improvements:
+
+If child struggles:
+• increase hints
+• show visual explanation
+• slow lesson pacing
+
+If child repeats mistakes:
+• re-explain concept
+• show simpler example
+
+If child performs confidently:
+• slightly increase difficulty
+• introduce challenge tasks
+
+Ensure changes integrate with:
+
+interactive lesson engine
+spoken teaching system
+avatar reactions
+daily plan
+progress tracking
+
+------------------------------------------------
+
+PHASE 4 — PROTECTION RULES
+
+Do NOT break or rewrite:
+
+interactive lesson engine
+speech system
+avatar animation system
+daily plan system
+subject routing
+lesson UI
+
+Avoid:
+
+duplicate adaptive logic
+parallel progress systems
+stacked difficulty engines
+
+------------------------------------------------
+
+PHASE 5 — VERIFICATION
+
+After audit or improvements, return:
+
+1. whether Adaptive Teacher Brain existed
+2. whether improvements were applied
+3. files modified (if any)
+4. how adaptive behavior works now
+5. preview testing steps
+
+Feature name:
+
+AYA Adaptive Teacher Brain Audit & Safe Implementation

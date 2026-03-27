@@ -4,7 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Eye, CheckCircle2, XCircle,
   ChevronRight, RotateCcw, Loader2, Trophy, Star, Sparkles,
+  Volume2, VolumeX,
 } from "lucide-react";
+import { useAyaLessonVoice } from "@/hooks/use-aya-lesson-voice";
 import { cn } from "@/components/layout";
 import { getListChildrenQueryKey } from "@workspace/api-client-react";
 import type { LangCode } from "@/lib/i18n";
@@ -538,14 +540,20 @@ interface EngineProps {
   subject: Subject;
   lang: LangCode;
   grade: number;
+  childId: number;
   topicContext: TopicContext;
+  speak: (text: string) => void;
+  isVoicePlaying: boolean;
+  voiceEnabled: boolean;
   onComplete: (practiceCorrect: number, quizCorrect: number, practiceTotal: number, quizTotal: number) => void;
   onRecordLesson: () => void;
   onBack: () => void;
 }
 
 function InteractiveLessonEngine({
-  data, topic, subject, lang, grade, topicContext, onComplete, onRecordLesson, onBack,
+  data, topic, subject, lang, grade, topicContext,
+  speak, isVoicePlaying,
+  onComplete, onRecordLesson, onBack,
 }: EngineProps) {
   const l = L[lang];
   const d = D[lang];
@@ -567,6 +575,11 @@ function InteractiveLessonEngine({
   const practiceCorrectRef = useRef(0);
   const quizCorrectRef = useRef(0);
   const lessonRecordedRef = useRef(false);
+
+  /* ── voice: speak whenever dialogue changes ─────────────────── */
+  useEffect(() => {
+    speak(dialogue);
+  }, [dialogue]);
 
   /* ── phase-specific cached pick refs */
   const explanationLeadRef = useRef(pick(d.explanationLead));
@@ -719,7 +732,7 @@ function InteractiveLessonEngine({
           className="space-y-5"
         >
           {/* AYA speech */}
-          <AyaSpeech emotion={emotion} text={dialogue} speaking={phase.kind === "explanation"} />
+          <AyaSpeech emotion={emotion} text={dialogue} speaking={isVoicePlaying} />
 
           {/* ── Greeting ── */}
           {phase.kind === "greeting" && (
@@ -1026,6 +1039,15 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
   const [reward, setReward] = useState<XpReward | null>(null);
   const l = L[lang];
   const queryClient = useQueryClient();
+
+  /* ── Voice ─────────────────────────────────────────────────────── */
+  const {
+    speak,
+    stop: stopVoice,
+    isPlaying: isVoicePlaying,
+    voiceEnabled,
+    toggleVoice,
+  } = useAyaLessonVoice(lang, childId);
   const completeFiredRef = useRef(false);
   const lessonFiredRef = useRef(false);
 
@@ -1106,7 +1128,7 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <button
-          onClick={onBack}
+          onClick={() => { stopVoice(); onBack(); }}
           className="flex items-center gap-2 text-muted-foreground hover:text-foreground font-bold bg-white/60 px-4 py-2 rounded-xl border border-white/50 transition-colors text-sm"
         >
           <ArrowLeft className="w-4 h-4" /> {l.back}
@@ -1115,7 +1137,23 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
           <span className="text-lg">{subject.emoji}</span>
           <span className={cn("font-bold text-sm", subject.colorClass)}>{topic.label[lang] ?? topic.label.en}</span>
         </div>
-        <div className="w-20" />
+        {/* Voice toggle */}
+        <button
+          onClick={toggleVoice}
+          title={voiceEnabled
+            ? (lang === "bg" ? "Изключи гласа" : "Mute AYA voice")
+            : (lang === "bg" ? "Включи гласа" : "Unmute AYA voice")}
+          className={cn(
+            "flex items-center justify-center w-10 h-10 rounded-xl border transition-colors",
+            voiceEnabled
+              ? "bg-violet-100 border-violet-200 text-violet-600 hover:bg-violet-200"
+              : "bg-white/60 border-white/50 text-muted-foreground hover:bg-muted/40",
+          )}
+        >
+          {voiceEnabled
+            ? <Volume2 className="w-4 h-4" />
+            : <VolumeX className="w-4 h-4" />}
+        </button>
       </div>
 
       {isLoading ? (
@@ -1148,10 +1186,14 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
           subject={subject}
           lang={lang}
           grade={grade}
+          childId={childId}
           topicContext={topicContext}
+          speak={speak}
+          isVoicePlaying={isVoicePlaying}
+          voiceEnabled={voiceEnabled}
           onComplete={handleComplete}
           onRecordLesson={handleRecordLesson}
-          onBack={onBack}
+          onBack={() => { stopVoice(); onBack(); }}
         />
       )}
     </motion.div>

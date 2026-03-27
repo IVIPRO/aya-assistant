@@ -249,7 +249,7 @@ function CompanionGuidance({ companionId, zoneName, lang }: {
         <div className={`flex items-center gap-1.5 font-bold text-sm mb-0.5 ${companion.textColor}`}>
           {lbl.companionSays("AYA")}
           <span className="text-[10px] font-semibold bg-white/60 px-1.5 py-0.5 rounded-full border border-black/10 ml-0.5">
-            {companion.emoji} {companion.name}
+            {companion.name}
           </span>
         </div>
         <p className="text-sm text-foreground/80 leading-relaxed">{message}</p>

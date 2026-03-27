@@ -8,7 +8,6 @@ import { AyaAvatar } from "@/components/AyaAvatar";
 import type { AyaEmotion } from "@/components/AyaAvatar";
 import { ListeningMode } from "@/components/ListeningMode";
 import { CelebrationCard } from "@/components/CelebrationCard";
-import type { TeacherState } from "@/components/AnimatedTeacher";
 import { teacherStateToVideoKey } from "@/lib/videoTeacherMap";
 import type { VideoKey } from "@/lib/videoTeacherMap";
 import { Link } from "wouter";
@@ -26,11 +25,13 @@ import type { Subject, Topic } from "@/lib/curriculum";
 import { resolveLang } from "@/lib/i18n";
 import { getLevel, getLevelProgress as getLevelProgressObj, LEVEL_THRESHOLDS, LEVEL_NAMES } from "@/lib/levelSystem";
 
+type TeacherState = "idle" | "talking" | "happy" | "thinking" | "encouraging";
+
 const CHARACTERS = [
   {
     id: "panda",
     name: "Panda",
-    emoji: "🐼",
+    emoji: "🌿",
     color: "bg-green-100 border-green-300",
     accentColor: "text-green-700",
     desc: "Patient and gentle",
@@ -40,7 +41,7 @@ const CHARACTERS = [
   {
     id: "robot",
     name: "Robot",
-    emoji: "🤖",
+    emoji: "⚡",
     color: "bg-blue-100 border-blue-300",
     accentColor: "text-blue-700",
     desc: "Logical and precise",
@@ -50,7 +51,7 @@ const CHARACTERS = [
   {
     id: "fox",
     name: "Fox",
-    emoji: "🦊",
+    emoji: "✨",
     color: "bg-orange-100 border-orange-300",
     accentColor: "text-orange-700",
     desc: "Creative and playful",
@@ -60,7 +61,7 @@ const CHARACTERS = [
   {
     id: "owl",
     name: "Owl",
-    emoji: "🦉",
+    emoji: "🌙",
     color: "bg-purple-100 border-purple-300",
     accentColor: "text-purple-700",
     desc: "Wise and thoughtful",
@@ -537,7 +538,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
                   <div className="font-bold text-base">AYA</div>
                   <span className="text-xs font-bold bg-white/60 px-2 py-0.5 rounded-full border border-black/10">
-                    {lbl.styleLabel}: {character.emoji} {character.name}
+                    {lbl.styleLabel}: {character.name}
                   </span>
                 </div>
                 <div className={`text-xs font-semibold uppercase tracking-wider mb-1 ${character.accentColor}`}>
@@ -789,6 +790,8 @@ export function Junior() {
   const [showListeningMode, setShowListeningMode] = useState(false);
   const [listeningContent, setListeningContent] = useState("");
   const [lastAyaMessage, setLastAyaMessage] = useState("");
+  /** True while SubjectPanel has an open lesson/practice/quiz — hides the corner AYA avatar to prevent dual-avatar overlap */
+  const [lessonActive, setLessonActive] = useState(false);
 
   /* ── Free Conversation Mode ──────────────────────────────────── */
   const [conversationMode, setConversationMode] = useState<"default" | "free">("default");
@@ -1142,7 +1145,8 @@ export function Junior() {
               setSelectedTopic(topic);
               setView("chat");
             }}
-            onBack={() => { setSelectedGrade(null); setView("stages"); }} /* Stay in same stage, just clear grade */
+            onBack={() => { setSelectedGrade(null); setView("stages"); }}
+            onLessonActiveChange={setLessonActive}
           />
         ) : view === "map" ? (
           <motion.div key="map" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
@@ -1156,7 +1160,7 @@ export function Junior() {
                 <span className="font-bold text-sm text-junior-foreground">AYA</span>
                 {currentChar && (
                   <span className="text-xs font-semibold bg-junior/20 text-junior-foreground px-2 py-0.5 rounded-full">
-                    {lbl.styleLabel}: {currentChar.emoji} {currentChar.name}
+                    {lbl.styleLabel}: {currentChar.name}
                   </span>
                 )}
                 <span className="text-xs text-muted-foreground">· {lbl.levelLabel} {level} · {childXp} XP</span>
@@ -1241,7 +1245,7 @@ export function Junior() {
                 <span className="font-bold text-sm text-junior-foreground flex-shrink-0">AYA</span>
                 {currentChar && (
                   <span className="text-xs font-semibold bg-junior/20 text-junior-foreground px-2 py-0.5 rounded-full flex-shrink-0 truncate max-w-[130px]">
-                    {lbl.styleLabel}: {currentChar.emoji} {currentChar.name}
+                    {lbl.styleLabel}: {currentChar.name}
                   </span>
                 )}
               </div>
@@ -1379,7 +1383,7 @@ export function Junior() {
         onEnded={() => setActiveVideoKey(null)}
       />
 
-      {activeChild && view !== "chat" && (
+      {activeChild && view !== "chat" && !lessonActive && (
         <div className="fixed bottom-6 right-5 z-50">
           <AyaAvatar
             emotion={celebrationActive ? "celebrate" : teacherStateToAyaEmotion(teacherState)}

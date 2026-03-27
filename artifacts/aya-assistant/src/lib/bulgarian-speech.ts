@@ -60,11 +60,9 @@ function numberToBulgarian(num: number): string {
 /**
  * Transliterate Latin brand names to Bulgarian phonetic form for proper TTS pronunciation
  * Examples:
- *   "AYA Panda" -> "Ей Ай Ей Панда"
  *   "AYA" -> "Ей Ай Ей"
  */
 const BULGARIAN_BRAND_TRANSLITERATIONS: Record<string, string> = {
-  "AYA Panda": "Ей Ай Ей Панда",
   "AYA": "Ей Ай Ей",
 };
 

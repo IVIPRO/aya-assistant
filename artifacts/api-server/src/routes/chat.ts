@@ -50,11 +50,7 @@ router.get("/chat/messages", requireAuth, async (req, res): Promise<void> => {
 
 /* Helper function to build homework analysis prompt */
 function buildHomeworkAnalysisPrompt(lang: "bg" | "es" | "en", grade: number, childName: string, charKey: string): string {
-  const charName =
-    charKey === "panda" ? (lang === "bg" ? "AYA Панда" : "AYA Panda")
-    : charKey === "robot" ? (lang === "bg" ? "AYA Робот" : "AYA Robot")
-    : charKey === "fox" ? (lang === "bg" ? "AYA Лисица" : "AYA Fox")
-    : (lang === "bg" ? "AYA Сова" : "AYA Owl");
+  const charName = lang === "bg" ? "АЯ" : "AYA";
 
   const gradeLabel = lang === "bg" ? `${grade} клас` : `Grade ${grade}`;
 

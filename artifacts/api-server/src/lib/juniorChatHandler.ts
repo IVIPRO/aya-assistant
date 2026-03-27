@@ -893,13 +893,7 @@ async function awardXp(
 // ─── Subject Task Helpers ──────────────────────────────────────────────────────
 
 function getCharacterName(aiCharacter: string | undefined, lang: Lang): string {
-  const names: Record<string, Record<Lang, string>> = {
-    panda: { bg: "AYA Панда", en: "AYA Panda", es: "AYA Panda" },
-    robot: { bg: "AYA Робот", en: "AYA Robot", es: "AYA Robot" },
-    fox:   { bg: "AYA Лисица", en: "AYA Fox",   es: "AYA Zorro" },
-    owl:   { bg: "AYA Сова",   en: "AYA Owl",   es: "AYA Búho" },
-  };
-  return names[aiCharacter ?? "panda"]?.[lang] ?? "AYA Панда";
+  return lang === "bg" ? "АЯ" : "AYA";
 }
 
 async function generateSubjectQuestion(

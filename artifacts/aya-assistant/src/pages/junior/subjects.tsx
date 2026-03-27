@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, BookOpen, Pencil, Brain, MessageCircle, CheckCircle2, Circle, AlertTriangle, BookMarked } from "lucide-react";
@@ -27,6 +27,8 @@ interface SubjectPanelProps {
   characterEmoji: string;
   onStart: (subject: Subject, topic: Topic | null) => void;
   onBack: () => void;
+  /** Called when a lesson/story opens (true) or closes (false). Used to hide the corner AYA avatar during teaching. */
+  onLessonActiveChange?: (active: boolean) => void;
 }
 
 type LessonMode = "lesson" | "practice" | "quiz";
@@ -53,10 +55,23 @@ function getSubjectsForGrade(grade: number): Subject[] {
   return stage?.subjects ?? [];
 }
 
-export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, onStart, onBack }: SubjectPanelProps) {
+export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, onStart, onBack, onLessonActiveChange }: SubjectPanelProps) {
   const [selected, setSelected] = useState<Subject | null>(null);
   const [lessonCtx, setLessonCtx] = useState<LessonContext | null>(null);
   const labels = SUBJECT_ACTIONS_LABELS[lang];
+
+  function openLesson(ctx: LessonContext) {
+    setLessonCtx(ctx);
+    onLessonActiveChange?.(true);
+  }
+
+  function closeLesson() {
+    setLessonCtx(null);
+    onLessonActiveChange?.(false);
+  }
+
+  /* Reset lesson-active flag on unmount so corner avatar re-appears */
+  useEffect(() => () => { onLessonActiveChange?.(false); }, []);
 
   /* Fetch topic progress for this child */
   const { data: progressData } = useQuery<{ topics: TopicProgressItem[] }>({
@@ -98,9 +113,9 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
         grade={grade}
         lang={lang}
         childId={childId}
-        onBack={() => setLessonCtx(null)}
+        onBack={() => closeLesson()}
         onAskAya={() => {
-          setLessonCtx(null);
+          closeLesson();
           onStart(lessonCtx.subject, lessonCtx.topic);
         }}
       />
@@ -271,7 +286,7 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
                             key={key}
                             onClick={() => {
                               if (mode !== null) {
-                                setLessonCtx({ subject: selected, topic, mode });
+                                openLesson({ subject: selected, topic, mode });
                               } else {
                                 onStart(selected, topic);
                               }

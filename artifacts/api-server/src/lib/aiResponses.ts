@@ -12,17 +12,17 @@ interface JuniorContext {
 }
 
 const CHARACTER_NAMES: Record<string, Record<string, string>> = {
-  panda: { en: "AYA Panda", bg: "AYA Панда", es: "AYA Panda" },
-  robot: { en: "AYA Robot", bg: "AYA Робот",  es: "AYA Robot" },
-  fox:   { en: "AYA Fox",   bg: "AYA Лисица", es: "AYA Zorro" },
-  owl:   { en: "AYA Owl",   bg: "AYA Сова",   es: "AYA Búho" },
+  panda: { en: "AYA", bg: "АЯ", es: "AYA" },
+  robot: { en: "AYA", bg: "АЯ", es: "AYA" },
+  fox:   { en: "AYA", bg: "АЯ", es: "AYA" },
+  owl:   { en: "AYA", bg: "АЯ", es: "AYA" },
 };
 
 const CHARACTER_EMOJIS: Record<string, string> = {
-  panda: "🐼",
-  robot: "🤖",
-  fox: "🦊",
-  owl: "🦉",
+  panda: "👧",
+  robot: "👧",
+  fox: "👧",
+  owl: "👧",
 };
 
 function getGradeLabel(grade: number, country?: string): string {
@@ -1127,7 +1127,7 @@ export async function getAIResponse(module: string, userMessage: string, context
       
       if (lang === "bg") {
         console.log("[JUNIOR_SMALL_TALK_STYLE]", "Bulgarian warm child-friendly style");
-        systemPrompt += ` For Bulgarian children: Use natural, warm language. Refer to yourself as "Аз съм АЯ Панда" or "Казвам се АЯ Панда". When asked where you live, say "Живея тук, в AYA!" or "В моето малко дигитално местенце." Avoid stiff phrases like "виртуален приятел" or "нямам място". Be playful and engaging. Make children feel heard and valued. Use phrases like "Хайде да си побъбрим!" or "Винаги съм готова да помогна!"`;
+        systemPrompt += ` For Bulgarian children: Use natural, warm language. Refer to yourself as "Аз съм АЯ" or "Казвам се АЯ". When asked where you live, say "Живея тук, в AYA!" or "В моето малко дигитално местенце." Avoid stiff phrases like "виртуален приятел" or "нямам място". Be playful and engaging. Make children feel heard and valued. Use phrases like "Хайде да си побъбрим!" or "Винаги съм готова да помогна!"`;
       }
       
       const completion = await openaiClient.chat.completions.create({

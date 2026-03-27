@@ -31,13 +31,7 @@ interface FreeConvContext {
 }
 
 function charName(lang: Lang, charKey: string): string {
-  const map: Record<string, Record<Lang, string>> = {
-    panda:  { bg: "AYA Панда",  es: "AYA Panda",   en: "AYA Panda"  },
-    robot:  { bg: "AYA Робот",  es: "AYA Robot",   en: "AYA Robot"  },
-    fox:    { bg: "AYA Лисица", es: "AYA Zorro",   en: "AYA Fox"    },
-    owl:    { bg: "AYA Сова",   es: "AYA Búho",    en: "AYA Owl"    },
-  };
-  return map[charKey]?.[lang] ?? (lang === "bg" ? "AYA Сова" : "AYA Owl");
+  return lang === "bg" ? "АЯ" : "AYA";
 }
 
 function buildSystemPrompt(lang: Lang, charKey: string, childName: string, grade?: number): string {

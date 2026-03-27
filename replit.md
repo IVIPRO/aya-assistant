@@ -106,6 +106,17 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
 
+## AYA Avatar System (Unified)
+
+AYA is the single teacher identity across the entire app. All animal mascot references have been removed from both frontend and backend:
+
+- **`AyaAvatar.tsx`** — Inline SVG girl avatar with curly brown hair, red glasses, orange hoodie. Props: `emotion`, `visible`, `speaking?`, `text?`, `className?`. Used in lesson-viewer, story-engine, and chat.
+- **`AnimatedTeacher.tsx`** — Stub file (type-only export: `TeacherState`). All rendering code removed.
+- **Corner avatar gate** — `junior/index.tsx` tracks `lessonActive` state. Corner AyaAvatar hidden (`&& !lessonActive`) during lessons so only the inline lesson avatar is visible.
+- **Style names** — Panda/Robot/Fox/Owl are teaching _style labels_ only (shown as text badge "Стил: Panda"). No animal emojis appear in any teaching or display context.
+- **Character picker** — Uses personality icons (🌿 ⚡ ✨ 🌙) instead of animal emojis to distinguish style choices.
+- **Backend AI identity** — All system prompts address the AI as "АЯ" (BG) / "AYA" (EN/ES). No "AYA Panda", "AYA Robot" etc. in: `freeConversationHandler.ts`, `juniorChatHandler.ts`, `aiResponses.ts`, `routes/chat.ts`, `routes/vision.ts`.
+
 ## AYA Teaching Engine (api-server/src/lib)
 
 Key teaching files for the Junior (grades 1–7) learning module:

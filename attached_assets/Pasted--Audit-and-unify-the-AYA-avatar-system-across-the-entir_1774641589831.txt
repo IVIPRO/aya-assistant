@@ -1,0 +1,146 @@
+"}
+Audit and unify the AYA avatar system across the entire application.
+
+CRITICAL RULE:
+Do NOT add a new avatar layer without checking existing avatar implementations.
+First audit the current avatar system and then unify it.
+
+------------------------------------------------
+
+GOAL
+
+AYA must have ONE single avatar identity across the entire app.
+
+All other avatars must be removed.
+
+The new avatar must be based on the provided cartoon reference image.
+
+The avatar must match the same:
+
+• face shape  
+• expression  
+• red glasses  
+• warm smile  
+• curly hair  
+• friendly emotional tone  
+
+It must feel:
+
+soft  
+friendly  
+beautiful  
+child-safe  
+educational  
+
+Do NOT create a different character.
+
+The new avatar must visually resemble the provided cartoon reference.
+
+------------------------------------------------
+
+PHASE 1 — AVATAR SYSTEM AUDIT
+
+Search the codebase for all avatar implementations.
+
+Examples of possible locations:
+
+• welcome screen  
+• primary stage screen  
+• lesson screen  
+• chat assistant  
+• corner helper avatar  
+• panda style avatar  
+• companion avatar  
+• lesson feedback avatar  
+• progress cards  
+
+Return audit results:
+
+1. all avatar components found
+2. files where avatars are rendered
+3. screens where multiple avatars appear
+4. legacy avatar styles
+
+------------------------------------------------
+
+PHASE 2 — CLEANUP
+
+Remove all duplicate avatars.
+
+Examples:
+
+• remove panda avatar
+• remove old assistant avatars
+• remove extra lesson avatars
+• remove duplicate avatars on the start screen
+
+Only ONE AYA avatar should remain.
+
+------------------------------------------------
+
+PHASE 3 — NEW AYA AVATAR
+
+Create a unified avatar component:
+
+AYAAvatar
+
+Design rules:
+
+• inspired by the provided cartoon image
+• red glasses
+• curly hair
+• warm smile
+• soft child-friendly illustration
+• 2D illustration style
+• clean vector style for UI use
+
+------------------------------------------------
+
+ANIMATION STATES
+
+Add soft animations:
+
+idle  
+blink  
+thinking  
+speaking  
+celebrating  
+
+Animations must be subtle and lightweight.
+
+------------------------------------------------
+
+USAGE
+
+AYAAvatar must replace all previous avatars in:
+
+• welcome screen
+• lesson UI
+• chat assistant
+• corner avatar
+• feedback messages
+• progress screens
+• encouragement messages
+
+------------------------------------------------
+
+IMPORTANT
+
+There must never be two avatars on the same teaching screen.
+
+AYA is the only teaching character.
+
+------------------------------------------------
+
+RETURN
+
+Implementation report:
+
+1. removed avatar components
+2. replaced avatar locations
+3. new unified avatar component
+4. screens updated
+5. preview test steps
+
+Feature name:
+AYA Unified Avatar Syst

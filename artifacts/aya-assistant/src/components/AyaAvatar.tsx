@@ -392,15 +392,17 @@ function AyaCharacterSVG({
       <rect x="51" y="108" width="18" height="12" rx="4" fill={C.skin} />
       <path d="M 51 114 Q 59 118 69 114" fill={C.skinDark} opacity="0.4" />
 
-      {/* ── BACK HAIR (behind face) ── */}
-      <ellipse cx="60" cy="68" rx="40" ry="46" fill={C.hairDark} />
+      {/* ── BACK HAIR (behind face) — fuller for curly volume ── */}
+      <ellipse cx="60" cy="68" rx="42" ry="48" fill={C.hairDark} />
       {/* Ponytail right side */}
-      <ellipse cx="96" cy="72" rx="9" ry="7" fill={C.hair} />
-      <ellipse cx="100" cy="65" rx="7" ry="5.5" fill={C.hairDark} />
-      <path d="M 96 75 Q 105 82 108 95 Q 104 88 96 82 Z" fill={C.hairDark} opacity="0.7" />
+      <ellipse cx="97" cy="72" rx="10" ry="8" fill={C.hair} />
+      <ellipse cx="101" cy="65" rx="8" ry="6" fill={C.hairDark} />
+      {/* Curly ponytail coils */}
+      <path d="M 97 78 C 106 85 110 96 106 106" fill="none" stroke={C.hairDark} strokeWidth="5" strokeLinecap="round" />
+      <path d="M 104 88 C 110 95 109 104 104 110" fill="none" stroke={C.hair} strokeWidth="3.5" strokeLinecap="round" opacity="0.7" />
       {/* Hair scrunchie/band dot */}
-      <circle cx="96" cy="73" r="4" fill={C.headband} />
-      <circle cx="96" cy="73" r="2.5" fill="#FF4444" />
+      <circle cx="97" cy="73" r="4.5" fill={C.headband} />
+      <circle cx="97" cy="73" r="2.8" fill="#FF4444" />
 
       {/* ── FACE ── */}
       {/* Face shadow/depth */}
@@ -418,19 +420,26 @@ function AyaCharacterSVG({
       <ellipse cx="25" cy="73" rx="2.5" ry="3.5" fill={C.skinDark} opacity="0.5" />
       <ellipse cx="95" cy="73" rx="2.5" ry="3.5" fill={C.skinDark} opacity="0.5" />
 
-      {/* ── FRONT HAIR ── */}
-      {/* Main hair shape over forehead */}
-      <path d="M 25 62 Q 28 30 59 26 Q 90 28 95 62 Q 82 48 59 47 Q 36 48 25 62 Z"
+      {/* ── FRONT HAIR — CURLY ── */}
+      {/* Main curly hair shape — bumpy top hairline */}
+      <path d="M 24 62 C 22 51 26 41 30 35 C 28 29 31 24 36 23 C 39 21 43 23 46 26 C 48 22 53 20 57 21 C 60 18 65 19 69 22 C 72 19 77 20 81 24 C 85 25 88 30 87 35 C 90 41 94 51 96 62 C 88 49 78 46 70 45 C 65 44 61 44 59 44 C 57 44 53 44 48 45 C 40 46 31 49 24 62 Z"
         fill={C.hair} />
-      {/* Hair parting / texture lines */}
-      <path d="M 59 26 Q 56 36 54 47" fill="none" stroke={C.hairDark} strokeWidth="1.5" opacity="0.5" />
-      <path d="M 59 26 Q 63 36 65 47" fill="none" stroke={C.hairDark} strokeWidth="1.2" opacity="0.4" />
-      {/* Side hair strands left */}
-      <path d="M 25 62 Q 22 75 24 88 Q 27 72 28 62 Z" fill={C.hair} opacity="0.8" />
-      {/* Side hair strands right — covering ear a bit */}
-      <path d="M 95 62 Q 98 75 96 88 Q 93 72 92 62 Z" fill={C.hair} opacity="0.8" />
+      {/* Curl loops along the top hairline */}
+      <path d="M 31 33 C 28 27 32 22 37 25" fill="none" stroke={C.hairDark} strokeWidth="2.2" strokeLinecap="round" />
+      <path d="M 44 22 C 42 16 48 15 51 20" fill="none" stroke={C.hairDark} strokeWidth="2" strokeLinecap="round" />
+      <path d="M 58 20 C 56 14 62 13 65 18" fill="none" stroke={C.hairDark} strokeWidth="2" strokeLinecap="round" />
+      <path d="M 73 22 C 72 16 77 16 80 21" fill="none" stroke={C.hairDark} strokeWidth="2" strokeLinecap="round" />
+      <path d="M 85 32 C 88 26 92 28 90 34" fill="none" stroke={C.hairDark} strokeWidth="2" strokeLinecap="round" />
+      {/* Curly coil — left side */}
+      <path d="M 24 62 C 19 70 18 79 22 87" fill="none" stroke={C.hair} strokeWidth="6.5" strokeLinecap="round" />
+      <path d="M 21 72 C 16 79 17 87 22 93" fill="none" stroke={C.hairDark} strokeWidth="2.5" strokeLinecap="round" opacity="0.6" />
+      <path d="M 20 82 C 15 88 16 94 21 98" fill="none" stroke={C.hair} strokeWidth="4" strokeLinecap="round" opacity="0.75" />
+      {/* Curly coil — right side */}
+      <path d="M 96 62 C 101 70 102 79 98 87" fill="none" stroke={C.hair} strokeWidth="6.5" strokeLinecap="round" />
+      <path d="M 99 72 C 104 79 103 87 98 93" fill="none" stroke={C.hairDark} strokeWidth="2.5" strokeLinecap="round" opacity="0.6" />
+      <path d="M 100 82 C 105 88 104 94 99 98" fill="none" stroke={C.hair} strokeWidth="4" strokeLinecap="round" opacity="0.75" />
       {/* Hair shine */}
-      <path d="M 40 32 Q 55 28 65 30 Q 55 31 42 37 Z" fill={C.white} opacity="0.2" />
+      <path d="M 38 30 Q 53 25 67 27 Q 55 28 41 34 Z" fill={C.white} opacity="0.2" />
 
       {/* ── RED HEADBAND ── */}
       <path d="M 26 56 Q 30 38 59 36 Q 88 37 94 56 Q 84 44 59 43 Q 34 44 26 56 Z"

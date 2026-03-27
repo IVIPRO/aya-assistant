@@ -276,6 +276,108 @@ router.get("/learning/progress", requireAuth, async (req, res): Promise<void> =>
 });
 
 /* ─────────────────────────────────────────────────────────────────
+   GET /api/learning/adaptive-profile?childId=&subjectId=&topicId=
+   Unified adaptive state for a child (optionally scoped to a topic).
+   No new tables — pure computation from childTopicProgressTable.
+   Used by the interactive lesson engine to adapt difficulty/support.
+───────────────────────────────────────────────────────────────── */
+router.get("/learning/adaptive-profile", requireAuth, async (req, res): Promise<void> => {
+  const childId = parseInt(req.query.childId as string, 10);
+  const subjectId = (req.query.subjectId as string) ?? null;
+  const topicId   = (req.query.topicId   as string) ?? null;
+
+  if (isNaN(childId)) {
+    res.status(400).json({ error: "childId is required" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
+
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const allTopics = await db
+    .select()
+    .from(childTopicProgressTable)
+    .where(eq(childTopicProgressTable.childId, childId));
+
+  /* ── Weak topics (authoritative: weaknessDetection.ts) ─────── */
+  const weakTopics = detectWeakTopics(allTopics);
+
+  /* ── Strong topics: >=80% success, >=5 attempts ────────────── */
+  const strongTopics = allTopics
+    .filter(r => {
+      const att = r.attempts ?? 0;
+      const cor = r.correctAnswers ?? 0;
+      return att >= 5 && cor / att >= 0.8;
+    })
+    .map(r => ({
+      subjectId: r.subjectId,
+      topicId: r.topicId,
+      successRate: Math.round(((r.correctAnswers ?? 0) / (r.attempts ?? 1)) * 100),
+      attempts: r.attempts ?? 0,
+    }));
+
+  /* ── Current topic stats (if subjectId + topicId provided) ─── */
+  let currentTopicStats: {
+    attempts: number; correctAnswers: number; wrongAnswers: number;
+    successRate: number; retryCount: number; quizPassed: boolean;
+    context: "weak" | "strong" | "normal";
+  } | null = null;
+
+  if (subjectId && topicId) {
+    const row = allTopics.find(r => r.subjectId === subjectId && r.topicId === topicId);
+    if (row) {
+      const att = row.attempts ?? 0;
+      const cor = row.correctAnswers ?? 0;
+      const sr = att > 0 ? Math.round((cor / att) * 100) : 0;
+      const isWeak = weakTopics.some(w => w.subjectId === subjectId && w.topicId === topicId);
+      const isStrong = !isWeak && att >= 5 && sr >= 80;
+      currentTopicStats = {
+        attempts: att,
+        correctAnswers: cor,
+        wrongAnswers: row.wrongAnswers ?? 0,
+        successRate: sr,
+        retryCount: row.retryCount ?? 0,
+        quizPassed: row.quizPassed ?? false,
+        context: isWeak ? "weak" : isStrong ? "strong" : "normal",
+      };
+    }
+  }
+
+  /* ── Overall accuracy across all attempts ───────────────────── */
+  const totalAttempts = allTopics.reduce((s, r) => s + (r.attempts ?? 0), 0);
+  const totalCorrect  = allTopics.reduce((s, r) => s + (r.correctAnswers ?? 0), 0);
+  const overallAccuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : null;
+
+  /* ── Recommended mode ───────────────────────────────────────── */
+  let recommendedMode: "normal" | "review" | "boost" = "normal";
+  if (weakTopics.length >= 2 || (overallAccuracy !== null && overallAccuracy < 55)) {
+    recommendedMode = "review";
+  } else if (strongTopics.length >= 3 && (overallAccuracy === null || overallAccuracy >= 80)) {
+    recommendedMode = "boost";
+  }
+
+  res.json({
+    childId,
+    weakTopics,
+    strongTopics,
+    currentTopicStats,
+    overallAccuracy,
+    recommendedMode,
+    totalTopicsStudied: allTopics.length,
+  });
+});
+
+/* ─────────────────────────────────────────────────────────────────
    GET /api/learning/weaknesses?childId=
    Return weak topics detected from performance data.
 ───────────────────────────────────────────────────────────────── */

@@ -117,6 +117,40 @@ Key teaching files for the Junior (grades 1–7) learning module:
 | `freeConversationHandler.ts` | Free chat AI handler: injects curriculum context into system prompt, detects BG language tasks (local shortcut, no AI cost), grade-aware prompts |
 | `aiResponses.ts` | `getMathFeedback()` + `getStepByStepExplanation()` — grade-aware via `bgCurriculumTeaching.ts` |
 | `juniorChatHandler.ts` | Intent router for math tasks, BG lessons, homework |
+| `weaknessDetection.ts` | **Authoritative weak-topic detector**: computes weak/strong topics from `childTopicProgressTable` |
+| `smartTaskSequencing.ts` | Reorders daily plan tasks to prioritize weak topics |
+| `studentAdaptiveProfile.ts` | Per-child 5-level difficulty + streak tracking (JSON in `memoriesTable`) — chat-only |
+| `topicProgression.ts` | Auto-advance/retreat topic difficulty (>70% → next, <30% → weak) — chat-only |
+
+## Adaptive Learning Brain
+
+The adaptive learning system has two layers:
+
+### Layer 1: Persistent Progress (authoritative)
+- **Storage**: `childTopicProgressTable` (PostgreSQL) — `attempts`, `correctAnswers`, `wrongAnswers`, `retryCount`, `lastActivityAt`, `quizPassed`
+- **Weak topics**: `detectWeakTopics()` in `weaknessDetection.ts` — `successRate < 0.7 && attempts >= 3`
+- **Strong topics**: `successRate >= 0.8 && attempts >= 5` (computed in adaptive-profile endpoint)
+- **Used by**: daily plan generator, `/learning/weaknesses` API, `/learning/adaptive-profile` API, lesson engine
+
+### Layer 2: Chat-session Difficulty (chat-only)
+- **Storage**: `memoriesTable` (JSON blob) — 5-level difficulty, streaks per subject
+- **Used by**: `juniorChatHandler.ts` for AI prompt adaptation only
+
+### Adaptive Lesson Engine (lesson-viewer.tsx)
+The interactive lesson engine fetches `/api/learning/adaptive-profile?childId=&subjectId=&topicId=` at load time and adapts:
+- **Weak topics**: context-specific greeting ("Вече работихме по тази тема..."), supportive hint message after 1st wrong (not 2nd), correct answer revealed after 1st wrong (not 2nd), retry button styled as ghost
+- **Strong topics**: confidence greeting ("Справяш се отлично..."), "Skip explanation" secondary button
+- **Normal topics**: standard behavior
+
+### `GET /api/learning/adaptive-profile`
+```
+Query: ?childId=N&subjectId=S&topicId=T
+Returns: { weakTopics[], strongTopics[], currentTopicStats: { context: "weak"|"strong"|"normal", ... }, overallAccuracy, recommendedMode }
+```
+No new DB tables — pure computation from `childTopicProgressTable` via `detectWeakTopics()`.
+
+### totalCount fix
+`POST /api/learning/complete` receives `totalCount` from the lesson engine (practice = `problems.length`, quiz = `questions.length`) to accurately track `wrongAnswers` in the DB. Previously defaulted to `correctCount + 1`, overcounting wrongs.
 
 **Teaching flow for Bulgarian grade N child:**
 1. Free chat → `freeConversationHandler` detects BG grammar task → returns `getBgLanguageExplanation()` (no API call)

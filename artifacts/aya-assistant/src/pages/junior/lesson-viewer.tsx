@@ -12,6 +12,21 @@ import type { Subject, Topic } from "@/lib/curriculum";
 import { XpToast, type XpReward } from "@/components/xp-toast";
 import { AyaAvatar, type AyaEmotion } from "@/components/AyaAvatar";
 
+/* ─── Adaptive profile ──────────────────────────────────────────── */
+
+type TopicContext = "weak" | "strong" | "normal";
+
+interface AdaptiveProfile {
+  weakTopics: Array<{ subjectId: string; topicId: string; successRate: number; label: string }>;
+  strongTopics: Array<{ subjectId: string; topicId: string; successRate: number }>;
+  currentTopicStats: {
+    attempts: number; successRate: number; retryCount: number; quizPassed: boolean;
+    context: TopicContext;
+  } | null;
+  overallAccuracy: number | null;
+  recommendedMode: "normal" | "review" | "boost";
+}
+
 /* ─── Data types ────────────────────────────────────────────────── */
 
 interface LessonContent {
@@ -243,6 +258,156 @@ function pick(arr: string[]): string {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+/* ─── Adaptive Context Dialogue ─────────────────────────────────── */
+
+const CONTEXT_D: Record<LangCode, Record<TopicContext, {
+  greeting: string[];
+  practiceSupport: string;
+  hintPrefix: string;
+  skipExplanationBtn: string;
+}>> = {
+  bg: {
+    weak: {
+      greeting: [
+        "Вече работихме по тази тема. Нека я затвърдим заедно — стъпка по стъпка! 💪",
+        "Тази тема беше предизвикателна. Но сега с практика ще стане по-лесно! 🌟",
+        "Заедно ще преодолеем тези трудности! Аз съм тук да помогна.",
+      ],
+      practiceSupport: "Не се притеснявай — тази тема е трудна. Помислим заедно!",
+      hintPrefix: "💡 Подсказка:",
+      skipExplanationBtn: "Виж обяснението →",
+    },
+    strong: {
+      greeting: [
+        "Справяш се отлично с тази тема! Нека потвърдим знанията ти. 🏆",
+        "Ти вече владееш тази тема! Едно бързо преговаряне и продължаваме. ⭐",
+        "Страхотно! Тази тема ти е добре позната. Нека я затвърдим!",
+      ],
+      practiceSupport: "Чудесно! Тази тема ти е силна страна.",
+      hintPrefix: "💡 Спомни си:",
+      skipExplanationBtn: "Познавам обяснението, пропусни →",
+    },
+    normal: {
+      greeting: [],
+      practiceSupport: "",
+      hintPrefix: "💡",
+      skipExplanationBtn: "",
+    },
+  },
+  en: {
+    weak: {
+      greeting: [
+        "We've worked on this topic before. Let's strengthen it together — step by step! 💪",
+        "This topic was challenging. With more practice it'll get easier! 🌟",
+        "We'll work through the difficulties together! I'm here to help.",
+      ],
+      practiceSupport: "Don't worry — this topic is tricky. Let's think together!",
+      hintPrefix: "💡 Hint:",
+      skipExplanationBtn: "See explanation →",
+    },
+    strong: {
+      greeting: [
+        "You're doing great with this topic! Let's confirm your knowledge. 🏆",
+        "You already master this topic! A quick review and we move on. ⭐",
+        "Fantastic! This topic is familiar to you. Let's solidify it!",
+      ],
+      practiceSupport: "Great! This topic is one of your strengths.",
+      hintPrefix: "💡 Remember:",
+      skipExplanationBtn: "I know this — skip →",
+    },
+    normal: {
+      greeting: [],
+      practiceSupport: "",
+      hintPrefix: "💡",
+      skipExplanationBtn: "",
+    },
+  },
+  es: {
+    weak: {
+      greeting: [
+        "Ya trabajamos en este tema. ¡Reforcémoslo juntos — paso a paso! 💪",
+        "Este tema fue desafiante. ¡Con más práctica será más fácil! 🌟",
+        "¡Superaremos las dificultades juntos! Estoy aquí para ayudar.",
+      ],
+      practiceSupport: "No te preocupes — este tema es difícil. ¡Pensemos juntos!",
+      hintPrefix: "💡 Pista:",
+      skipExplanationBtn: "Ver explicación →",
+    },
+    strong: {
+      greeting: [
+        "¡Lo estás haciendo muy bien en este tema! Confirmemos tu conocimiento. 🏆",
+        "¡Ya dominas este tema! Un repaso rápido y seguimos. ⭐",
+        "¡Fantástico! Este tema te es familiar. ¡Reforcémoslo!",
+      ],
+      practiceSupport: "¡Genial! Este tema es uno de tus puntos fuertes.",
+      hintPrefix: "💡 Recuerda:",
+      skipExplanationBtn: "Lo conozco — saltar →",
+    },
+    normal: {
+      greeting: [],
+      practiceSupport: "",
+      hintPrefix: "💡",
+      skipExplanationBtn: "",
+    },
+  },
+  de: {
+    weak: {
+      greeting: [
+        "Wir haben schon an diesem Thema gearbeitet. Lass es uns gemeinsam festigen — Schritt für Schritt! 💪",
+        "Dieses Thema war schwierig. Mit mehr Übung wird es leichter! 🌟",
+        "Wir überwinden die Schwierigkeiten gemeinsam! Ich bin hier um zu helfen.",
+      ],
+      practiceSupport: "Kein Sorge — dieses Thema ist schwierig. Denken wir gemeinsam!",
+      hintPrefix: "💡 Hinweis:",
+      skipExplanationBtn: "Erklärung ansehen →",
+    },
+    strong: {
+      greeting: [
+        "Du machst das großartig mit diesem Thema! Lass uns dein Wissen bestätigen. 🏆",
+        "Du beherrschst dieses Thema bereits! Eine schnelle Wiederholung und weiter. ⭐",
+        "Fantastisch! Dieses Thema ist dir vertraut. Lass es uns festigen!",
+      ],
+      practiceSupport: "Großartig! Dieses Thema ist eine deiner Stärken.",
+      hintPrefix: "💡 Erinnere dich:",
+      skipExplanationBtn: "Ich kenne das — überspringen →",
+    },
+    normal: {
+      greeting: [],
+      practiceSupport: "",
+      hintPrefix: "💡",
+      skipExplanationBtn: "",
+    },
+  },
+  fr: {
+    weak: {
+      greeting: [
+        "On a déjà travaillé sur ce sujet. Renforçons-le ensemble — étape par étape! 💪",
+        "Ce sujet était difficile. Avec plus de pratique ça deviendra plus facile! 🌟",
+        "On surmontera les difficultés ensemble! Je suis là pour aider.",
+      ],
+      practiceSupport: "Ne t'inquiète pas — ce sujet est difficile. Réfléchissons ensemble!",
+      hintPrefix: "💡 Indice:",
+      skipExplanationBtn: "Voir l'explication →",
+    },
+    strong: {
+      greeting: [
+        "Tu fais très bien avec ce sujet! Confirmons tes connaissances. 🏆",
+        "Tu maîtrises déjà ce sujet! Une révision rapide et on continue. ⭐",
+        "Fantastique! Ce sujet t'est familier. Renforçons-le!",
+      ],
+      practiceSupport: "Super! Ce sujet est l'un de tes points forts.",
+      hintPrefix: "💡 Rappelle-toi:",
+      skipExplanationBtn: "Je connais — passer →",
+    },
+    normal: {
+      greeting: [],
+      practiceSupport: "",
+      hintPrefix: "💡",
+      skipExplanationBtn: "",
+    },
+  },
+};
+
 /* ─── Step Progress Bar ─────────────────────────────────────────── */
 
 function ProgressDots({ current, total, colorClass }: { current: number; total: number; colorClass: string }) {
@@ -312,20 +477,24 @@ interface EngineProps {
   subject: Subject;
   lang: LangCode;
   grade: number;
-  onComplete: (practiceCorrect: number, quizCorrect: number) => void;
+  topicContext: TopicContext;
+  onComplete: (practiceCorrect: number, quizCorrect: number, practiceTotal: number, quizTotal: number) => void;
   onRecordLesson: () => void;
   onBack: () => void;
 }
 
 function InteractiveLessonEngine({
-  data, topic, subject, lang, grade, onComplete, onRecordLesson, onBack,
+  data, topic, subject, lang, grade, topicContext, onComplete, onRecordLesson, onBack,
 }: EngineProps) {
   const l = L[lang];
   const d = D[lang];
+  const ctxD = CONTEXT_D[lang][topicContext];
   const isPrimary = grade <= 4;
 
   /* ── stable random strings (avoid re-roll on re-render) */
-  const greetingText = useRef(pick(d.greeting)).current;
+  const greetingText = useRef(
+    ctxD.greeting.length > 0 ? pick(ctxD.greeting) : pick(d.greeting)
+  ).current;
   const topicIntroText = useRef(pick(d.topicIntro(topic.label[lang] ?? topic.label.en))).current;
 
   /* ── phase state */
@@ -413,17 +582,25 @@ function InteractiveLessonEngine({
       setPhase({ kind: "practice", idx, attempts, feedback: "correct" });
       setDialogue(pick(d.practiceCorrect));
     } else {
-      setPhase({ kind: "practice", idx, attempts: attempts + 1, feedback: "wrong" });
-      setDialogue(attempts === 0 ? pick(d.practiceWrong) : pick(d.practiceWrong2));
+      const nextAttempts = attempts + 1;
+      setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong" });
+      /* Weak topics: show supportive hint message from 1st wrong attempt onward.
+         Normal/strong topics: plain "almost" on 1st, hint on 2nd. */
+      const isFirstWrong = attempts === 0;
+      if (topicContext === "weak") {
+        setDialogue(isFirstWrong ? ctxD.practiceSupport : pick(d.practiceWrong2));
+      } else {
+        setDialogue(isFirstWrong ? pick(d.practiceWrong) : pick(d.practiceWrong2));
+      }
     }
   };
 
   /* ── advance from practice */
-  const fromPractice = (idx: number, feedback: "correct" | "wrong") => {
+  const fromPractice = (idx: number, _feedback: "correct" | "wrong") => {
     if (idx + 1 < problems.length) {
       go({ kind: "practice", idx: idx + 1, attempts: 0, feedback: "none" }, pick(d.practiceLead));
     } else {
-      onComplete(practiceCorrectRef.current, quizCorrectRef.current);
+      onComplete(practiceCorrectRef.current, quizCorrectRef.current, problems.length, questions.length);
       go({ kind: "quiz-intro" }, pick(d.quizIntro));
     }
   };
@@ -452,7 +629,7 @@ function InteractiveLessonEngine({
         ? d.completionMid(topicLabel)
         : d.completionLow(topicLabel);
       go({ kind: "completion", practiceCorrect: pc, quizCorrect: qc, total }, completionMsg);
-      onComplete(pc, qc);
+      onComplete(pc, qc, problems.length, questions.length);
     }
   };
 
@@ -496,13 +673,18 @@ function InteractiveLessonEngine({
               </div>
               {data.lesson.tip && (
                 <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 text-sm text-amber-900 flex gap-2">
-                  <span>💡</span>
+                  <span>{ctxD.hintPrefix || "💡"}</span>
                   <span>{data.lesson.tip}</span>
                 </div>
               )}
               <ActionBtn onClick={fromExplanation} subject={subject}>
                 {l.understood} <ChevronRight className="w-5 h-5" />
               </ActionBtn>
+              {topicContext === "strong" && ctxD.skipExplanationBtn && (
+                <ActionBtn onClick={fromExplanation} subject={subject} variant="secondary">
+                  <Sparkles className="w-4 h-4" /> {ctxD.skipExplanationBtn}
+                </ActionBtn>
+              )}
             </div>
           )}
 
@@ -611,7 +793,8 @@ function InteractiveLessonEngine({
                       <XCircle className="w-4 h-4" />
                       <span>{lang === "bg" ? "Не съвсем — опитай пак!" : "Not quite — try again!"}</span>
                     </div>
-                    {attempts >= 2 && (
+                    {/* Weak topics: reveal correct answer after 1st wrong; others after 2nd */}
+                    {((topicContext === "weak" && attempts >= 1) || attempts >= 2) && (
                       <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 text-sm text-amber-800">
                         <span className="font-bold">{l.showAnswer}: </span>{prob.answer}
                       </div>
@@ -620,7 +803,7 @@ function InteractiveLessonEngine({
                       <ActionBtn
                         onClick={() => { go({ kind: "practice", idx: phase.idx, attempts: phase.attempts, feedback: "none" }, pick(d.practiceWrong)); }}
                         subject={subject}
-                        variant={attempts >= 2 ? "ghost" : "primary"}
+                        variant={(topicContext === "weak" && attempts >= 1) || attempts >= 2 ? "ghost" : "primary"}
                       >
                         <RotateCcw className="w-4 h-4" /> {l.retry}
                       </ActionBtn>
@@ -791,12 +974,29 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
     staleTime: 5 * 60 * 1000,
   });
 
+  const { data: adaptiveProfile } = useQuery<AdaptiveProfile>({
+    queryKey: ["adaptive-profile", childId, subject.id, topic.id],
+    queryFn: async () => {
+      const res = await fetch(
+        `/api/learning/adaptive-profile?childId=${childId}&subjectId=${subject.id}&topicId=${topic.id}`
+      );
+      if (!res.ok) throw new Error("Failed to load adaptive profile");
+      return res.json();
+    },
+    staleTime: 2 * 60 * 1000,
+    enabled: childId > 0,
+  });
+
+  const topicContext: TopicContext = adaptiveProfile?.currentTopicStats?.context ?? "normal";
+
   const completeMutation = useMutation({
-    mutationFn: async ({ action, correctCount }: { action: "lesson" | "practice" | "quiz"; correctCount: number }) => {
+    mutationFn: async ({
+      action, correctCount, totalCount,
+    }: { action: "lesson" | "practice" | "quiz"; correctCount: number; totalCount?: number }) => {
       const res = await fetch("/api/learning/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ childId, subjectId: subject.id, topicId: topic.id, action, correctCount }),
+        body: JSON.stringify({ childId, subjectId: subject.id, topicId: topic.id, action, correctCount, totalCount }),
       });
       if (!res.ok) throw new Error("Failed to record progress");
       return res.json() as Promise<XpReward & { newBadges: Array<{ icon: string; title: string }> }>;
@@ -805,18 +1005,21 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
       if (result.xpGained > 0 || result.starsGained > 0) setReward(result);
       queryClient.invalidateQueries({ queryKey: getListChildrenQueryKey() });
       queryClient.invalidateQueries({ queryKey: ["learning-progress", childId] });
+      queryClient.invalidateQueries({ queryKey: ["adaptive-profile", childId, subject.id, topic.id] });
     },
   });
 
-  const record = useCallback((action: "lesson" | "practice" | "quiz", correctCount: number) => {
-    if (childId > 0) completeMutation.mutate({ action, correctCount });
+  const record = useCallback((action: "lesson" | "practice" | "quiz", correctCount: number, totalCount?: number) => {
+    if (childId > 0) completeMutation.mutate({ action, correctCount, totalCount });
   }, [childId]);
 
-  const handleComplete = useCallback((practiceCorrect: number, quizCorrect: number) => {
+  const handleComplete = useCallback((
+    practiceCorrect: number, quizCorrect: number, practiceTotal: number, quizTotal: number,
+  ) => {
     if (!completeFiredRef.current) {
       completeFiredRef.current = true;
-      record("quiz", quizCorrect);
-      record("practice", practiceCorrect);
+      record("quiz", quizCorrect, quizTotal);
+      record("practice", practiceCorrect, practiceTotal);
     }
   }, [record]);
 
@@ -865,6 +1068,7 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
           subject={subject}
           lang={lang}
           grade={grade}
+          topicContext={topicContext}
           onComplete={handleComplete}
           onRecordLesson={handleRecordLesson}
           onBack={onBack}

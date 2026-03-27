@@ -1,0 +1,232 @@
+Audit and upgrade AYA Adaptive Learning Brain.
+
+Important:
+Do NOT blindly add new code on top of old code.
+First inspect the current codebase and determine whether adaptive learning already exists fully, partially, or not at all.
+
+Goal:
+AYA should adapt to the student’s performance over time:
+- identify weak areas
+- identify strong areas
+- adjust difficulty
+- repeat concepts when needed
+- give more support when the student struggles
+- progress faster when the student succeeds
+
+But this must be implemented cleanly, without duplicate systems.
+
+--------------------------------
+PHASE 1 — AUDIT FIRST
+
+Before changing anything, inspect the current codebase and report:
+
+1. Whether adaptive learning already exists:
+- fully
+- partially
+- not implemented
+
+2. Where it currently lives, if present:
+- performance tracking
+- mistake tracking
+- skill progress
+- lesson difficulty adjustment
+- retry logic
+- daily plan adaptation
+- weak-topic prioritization
+- XP / mastery relations
+
+3. Which files/functions already handle:
+- correctness history
+- progress history
+- lesson recommendations
+- difficulty selection
+- student profile / learning state
+- weak topic detection
+
+4. Detect duplication risk:
+- old experimental code
+- overlapping tracking logic
+- redundant performance evaluators
+- repeated mastery systems
+- repeated “weak topic” logic
+
+Do NOT implement anything until this audit is complete.
+
+--------------------------------
+PHASE 2 — DECISION
+
+After the audit, choose exactly one path:
+
+PATH A:
+If a solid adaptive system already exists:
+- improve it
+- simplify it
+- remove duplication
+- extend it carefully
+
+PATH B:
+If partial adaptive logic exists:
+- unify it into one clean system
+- keep working parts
+- remove redundant parts
+- connect missing pieces
+
+PATH C:
+If no adaptive system exists:
+- build one cleanly from scratch
+- but keep it integrated with the current lesson/chat/reward architecture
+
+--------------------------------
+ADAPTIVE LEARNING FEATURES REQUIRED
+
+AYA Adaptive Learning Brain should do the following:
+
+1. Weakness detection
+AYA should detect weak topics from:
+- repeated wrong answers
+- repeated retries
+- unfinished lessons
+- low quiz accuracy
+- frequent hint use
+
+Examples:
+- multiplication
+- reading comprehension
+- noun/adjective recognition
+- fractions
+- English vocabulary
+
+2. Strength detection
+AYA should detect strong areas from:
+- repeated correct answers
+- fast completion
+- high quiz performance
+- lesson streaks
+
+3. Difficulty adaptation
+If student struggles:
+- easier explanations
+- more step-by-step guidance
+- more examples
+- easier follow-up task
+
+If student succeeds consistently:
+- slightly harder tasks
+- fewer hints
+- faster progression
+
+4. Lesson recommendation adaptation
+AYA should prioritize:
+- weak topics first
+- review before new hard content
+- reinforcement in Daily Plan when needed
+
+5. Support adaptation
+When student struggles:
+- more encouragement
+- smaller steps
+- hints before full answer
+- repetition of the concept in simpler words
+
+6. Progress memory
+AYA should remember learning state across sessions.
+
+Examples:
+- “student struggles with division”
+- “student is strong in addition”
+- “student needs more reading comprehension practice”
+
+7. No punishment logic
+AYA must never feel harsh.
+Adaptive behavior must stay:
+- supportive
+- motivating
+- child-friendly
+
+--------------------------------
+DATA / ARCHITECTURE RULES
+
+1. Reuse current systems where possible
+Integrate with existing:
+- lesson engine
+- daily plan
+- rewards / XP
+- chat
+- progress tracking
+- profile / student state
+
+2. No duplicate tracking systems
+Do NOT create:
+- a second mastery engine
+- a second progress engine
+- a parallel weak-topic database
+- a separate lesson recommendation engine unless absolutely necessary
+
+3. Prefer extension over duplication
+If existing structures already store useful learning data, extend them instead of replacing them.
+
+4. Keep the system lightweight
+Do not add heavy over-engineering.
+Use practical, maintainable logic.
+
+--------------------------------
+EXPECTED BEHAVIOR
+
+Examples:
+
+If the student keeps missing multiplication:
+- AYA notices it
+- Daily Plan includes more multiplication
+- explanations become simpler
+- more practice appears before moving on
+
+If the student does very well in reading:
+- AYA reduces repetition
+- introduces slightly harder reading tasks
+- progresses to the next concept sooner
+
+If the student struggles in Bulgarian grammar:
+- AYA offers more examples
+- breaks tasks into smaller steps
+- repeats the rule in simpler Bulgarian
+
+--------------------------------
+PRESERVE
+
+Do NOT break:
+- current lesson flow
+- current chat
+- daily plan
+- photo homework solving
+- voice mode
+- avatar reactions
+- rewards / XP
+- stage separation (1–4 vs 5–7)
+
+--------------------------------
+RETURN FORMAT
+
+Before implementation, return:
+
+AUDIT REPORT
+1. adaptive learning status: full / partial / none
+2. files involved
+3. existing logic found
+4. duplication risks found
+5. chosen path: A / B / C
+
+Then implement.
+
+After implementation, return:
+
+IMPLEMENTATION REPORT
+1. files modified
+2. what existing code was reused
+3. what duplicated code was removed or avoided
+4. how weak topics are detected
+5. how difficulty is adapted
+6. how daily plan is influenced
+7. preview test steps
+
+Feature name:
+AYA Adaptive Learning Brain

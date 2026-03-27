@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { useAyaLessonVoice } from "@/hooks/use-aya-lesson-voice";
 import { cn } from "@/components/layout";
-import { getListChildrenQueryKey } from "@workspace/api-client-react";
+import { getListChildrenQueryKey, updateDailyPlanTask } from "@workspace/api-client-react";
 import type { LangCode } from "@/lib/i18n";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { XpToast, type XpReward } from "@/components/xp-toast";
@@ -1187,9 +1187,12 @@ export interface LessonViewerProps {
   childId: number;
   onBack: () => void;
   onAskAya: () => void;
+  /** When launched from Daily Plan, supply these to auto-mark the task complete */
+  dailyPlanId?: number;
+  dailyPlanTaskId?: string;
 }
 
-export function LessonViewer({ subject, topic, initialMode, grade, lang, childId, onBack, onAskAya }: LessonViewerProps) {
+export function LessonViewer({ subject, topic, initialMode, grade, lang, childId, onBack, onAskAya, dailyPlanId, dailyPlanTaskId }: LessonViewerProps) {
   const [reward, setReward] = useState<XpReward | null>(null);
   const l = L[lang];
   const queryClient = useQueryClient();
@@ -1237,7 +1240,10 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
       const res = await fetch("/api/learning/complete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ childId, subjectId: subject.id, topicId: topic.id, action, correctCount, totalCount }),
+        body: JSON.stringify({
+          childId, subjectId: subject.id, topicId: topic.id, action, correctCount, totalCount,
+          ...(dailyPlanId && dailyPlanTaskId ? { dailyPlanId, dailyPlanTaskId } : {}),
+        }),
       });
       if (!res.ok) throw new Error("Failed to record progress");
       return res.json() as Promise<XpReward & { newBadges: Array<{ icon: string; title: string }> }>;
@@ -1247,6 +1253,11 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
       queryClient.invalidateQueries({ queryKey: getListChildrenQueryKey() });
       queryClient.invalidateQueries({ queryKey: ["learning-progress", childId] });
       queryClient.invalidateQueries({ queryKey: ["adaptive-profile", childId, subject.id, topic.id] });
+      queryClient.invalidateQueries({ queryKey: ["daily-plan", childId] });
+      /* Auto-mark daily plan task complete if launched from plan */
+      if (dailyPlanId && dailyPlanTaskId) {
+        updateDailyPlanTask(dailyPlanId, dailyPlanTaskId, { status: "completed" }).catch(() => {});
+      }
     },
   });
 

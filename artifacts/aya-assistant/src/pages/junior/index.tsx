@@ -2,6 +2,8 @@ import { Layout } from "@/components/layout";
 import { Chat } from "@/components/chat";
 import { SubjectPanel } from "./subjects";
 import { StageSelector } from "./stage-selector";
+import { LessonViewer } from "./lesson-viewer";
+import type { LessonMode } from "./lesson-viewer";
 import { DailyPlanCard } from "@/components/DailyPlanCard";
 import { VideoTeacher } from "@/components/VideoTeacher";
 import { AyaAvatar } from "@/components/AyaAvatar";
@@ -20,7 +22,7 @@ import { getStreakMessage, mergeWithDiscoveryPrompts } from "@/lib/curiosityEngi
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
 import { useCelebration } from "@/hooks/use-celebration";
-import type { Badge, Child, Mission, UpdateChildBodyAiCharacter } from "@workspace/api-client-react";
+import type { Badge, Child, Mission, UpdateChildBodyAiCharacter, DailyPlanTask } from "@workspace/api-client-react";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { resolveLang } from "@/lib/i18n";
 import { getLevel, getLevelProgress as getLevelProgressObj, LEVEL_THRESHOLDS, LEVEL_NAMES } from "@/lib/levelSystem";
@@ -434,7 +436,7 @@ function getGradeLabel(grade: number, country: string): string {
   return `Grade ${grade}`;
 }
 
-type JuniorView = "welcome" | "map" | "stages" | "subjects" | "chat";
+type JuniorView = "welcome" | "map" | "stages" | "subjects" | "chat" | "lesson";
 
 /**
  * AYA Junior Avatar — lesson state → avatar emotion mapping.
@@ -792,6 +794,11 @@ export function Junior() {
   const [lastAyaMessage, setLastAyaMessage] = useState("");
   /** True while SubjectPanel has an open lesson/practice/quiz — hides the corner AYA avatar to prevent dual-avatar overlap */
   const [lessonActive, setLessonActive] = useState(false);
+  /** Context for a lesson launched directly from the Daily Plan */
+  const [dpLessonCtx, setDpLessonCtx] = useState<{
+    subject: Subject; topic: Topic; mode: LessonMode;
+    dailyPlanId: number; dailyPlanTaskId: string;
+  } | null>(null);
 
   /* ── Free Conversation Mode ──────────────────────────────────── */
   const [conversationMode, setConversationMode] = useState<"default" | "free">("default");
@@ -949,6 +956,7 @@ export function Junior() {
     if (view === "subjects") handleTeacherStateChange("thinking");
     if (view === "map")      handleTeacherStateChange("encouraging");
     if (view === "chat")     handleTeacherStateChange("talking");
+    if (view === "lesson")   handleTeacherStateChange("talking");
   }, [view, handleTeacherStateChange]);
 
   /* ── Turn off Free Conversation Mode when leaving chat view ─────── */
@@ -1101,10 +1109,10 @@ export function Junior() {
               <DailyPlanCard
                 childId={activeChild.id}
                 lang={juniorLang}
-                onStartTask={(subject, topic) => {
-                  setSelectedSubject(subject);
-                  setSelectedTopic(topic);
-                  setView("chat");
+                onStartTask={(subject, topic, task, planId) => {
+                  const mode: LessonMode = task.taskType === "practice" ? "practice" : "lesson";
+                  setDpLessonCtx({ subject, topic, mode, dailyPlanId: planId, dailyPlanTaskId: task.id });
+                  setView("lesson");
                 }}
                 onPlanLoaded={handlePlanLoaded}
               />
@@ -1148,6 +1156,26 @@ export function Junior() {
             onBack={() => { setSelectedGrade(null); setView("stages"); }}
             onLessonActiveChange={setLessonActive}
           />
+        ) : view === "lesson" && dpLessonCtx && activeChild ? (
+          <motion.div key="lesson" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <LessonViewer
+              subject={dpLessonCtx.subject}
+              topic={dpLessonCtx.topic}
+              initialMode={dpLessonCtx.mode}
+              grade={activeChild.grade}
+              lang={juniorLang}
+              childId={activeChild.id}
+              dailyPlanId={dpLessonCtx.dailyPlanId}
+              dailyPlanTaskId={dpLessonCtx.dailyPlanTaskId}
+              onBack={() => { setDpLessonCtx(null); setView("welcome"); }}
+              onAskAya={() => {
+                setSelectedSubject(dpLessonCtx.subject);
+                setSelectedTopic(dpLessonCtx.topic);
+                setDpLessonCtx(null);
+                setView("chat");
+              }}
+            />
+          </motion.div>
         ) : view === "map" ? (
           <motion.div key="map" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             <div className="flex items-center justify-between mb-6">
@@ -1383,7 +1411,7 @@ export function Junior() {
         onEnded={() => setActiveVideoKey(null)}
       />
 
-      {activeChild && view !== "chat" && !lessonActive && (
+      {activeChild && view !== "chat" && view !== "lesson" && !lessonActive && (
         <div className="fixed bottom-6 right-5 z-50">
           <AyaAvatar
             emotion={celebrationActive ? "celebrate" : teacherStateToAyaEmotion(teacherState)}

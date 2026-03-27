@@ -1,0 +1,107 @@
+Audit and connect the AYA Interactive Lesson Brain to the Daily Plan system.
+
+CRITICAL RULE:
+Do NOT create a second lesson entry system.
+Reuse the existing lesson engine and connect Daily Plan to it.
+
+------------------------------------------------
+
+GOAL
+
+Whenever a child starts a lesson from Daily Plan, AYA must guide the learning session interactively.
+
+The lesson must include:
+
+• AYA greeting the child  
+• topic introduction  
+• spoken explanation  
+• guided task  
+• feedback after answers  
+• hints when needed  
+• encouragement  
+• lesson completion  
+
+------------------------------------------------
+
+PHASE 1 — DAILY PLAN AUDIT
+
+Inspect the current Daily Plan system.
+
+Check:
+
+1. how Daily Plan launches lessons
+2. whether it launches plain tasks or full lessons
+3. whether it triggers AYA speech
+4. whether it connects to avatar reactions
+5. whether it connects to adaptive learning
+6. whether lesson states are used
+
+Return an audit summary before making changes.
+
+------------------------------------------------
+
+PHASE 2 — CONNECT SYSTEMS
+
+Ensure Daily Plan launches the full lesson flow:
+
+lesson_intro  
+lesson_explanation  
+guided_example  
+task_prompt  
+feedback  
+hint  
+retry  
+celebration  
+lesson_completion  
+
+AYA must lead the lesson step by step.
+
+------------------------------------------------
+
+PHASE 3 — CONNECT SPEECH
+
+Ensure Daily Plan triggers spoken teaching.
+
+AYA must:
+
+explain tasks with voice  
+encourage the child  
+react after answers  
+
+Speech must be Bulgarian for grades 1–4.
+
+------------------------------------------------
+
+PHASE 4 — CONNECT AVATAR
+
+Ensure avatar reacts during lessons:
+
+speaking animation  
+thinking state  
+celebration state  
+
+------------------------------------------------
+
+PROTECTION RULES
+
+Do not break:
+
+interactive lesson engine  
+spoken teaching engine  
+avatar system  
+subject routing  
+progress tracking  
+
+------------------------------------------------
+
+RETURN
+
+1. Daily Plan connection status
+2. missing connections fixed
+3. files modified
+4. lesson flow verification
+5. preview test steps
+
+Feature name:
+
+AYA Daily Plan Brain Wiring

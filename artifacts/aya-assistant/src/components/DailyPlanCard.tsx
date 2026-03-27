@@ -324,7 +324,7 @@ function ProgressBar({ done, total }: { done: number; total: number }) {
 export interface DailyPlanCardProps {
   childId: number;
   lang: LangCode;
-  onStartTask: (subject: Subject, topic: Topic) => void;
+  onStartTask: (subject: Subject, topic: Topic, task: DailyPlanTask, planId: number) => void;
   onPlanLoaded?: (plan: DailyPlan) => void;
 }
 
@@ -351,8 +351,8 @@ export function DailyPlanCard({ childId, lang, onStartTask, onPlanLoaded }: Dail
   function handleStartTask(task: DailyPlanTask) {
     const subject = resolveSubject(task.subjectId);
     const topic   = resolveTopic(task.subjectId, task.topicId);
-    if (subject && topic) {
-      onStartTask(subject, topic);
+    if (subject && topic && plan) {
+      onStartTask(subject, topic, task, plan.id);
     }
   }
 

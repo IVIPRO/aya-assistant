@@ -2176,6 +2176,985 @@ function getTopicText(subjectId: string, topicId: string, grade: number, lang: L
         },
       },
     },
+    /* ── NATURE-SCIENCE / SEASONS ── */
+    "nature-science/seasons": {
+      en: {
+        low: {
+          title: "The Four Seasons",
+          explanation: "There are four seasons in a year: spring, summer, autumn, and winter. Each season has its own weather, plants, and activities. Spring is warm and flowers bloom. Summer is hot and sunny. Autumn is cool and leaves fall. Winter is cold and it can snow.",
+          examples: [
+            { problem: "What are the four seasons?", solution: "Spring, Summer, Autumn, Winter.", hint: "Think: what weather do you know? Cold, hot, warm, cool..." },
+            { problem: "In which season do flowers bloom?", solution: "Spring — it gets warm after winter, plants wake up and flowers open.", hint: "Think: after cold winter, what comes?" },
+            { problem: "Name one thing you can do in summer.", solution: "Swim in the sea or river, play outside, eat ice cream — because summer is warm and sunny.", hint: "Summer is the hottest season." },
+          ],
+          tip: "🌸❄️ Remember the seasons with colours: Spring = green, Summer = yellow, Autumn = orange, Winter = white!",
+        },
+        high: {
+          title: "Seasons and Changes in Nature",
+          explanation: "The seasons change because the Earth orbits the Sun. When your part of the Earth tilts toward the Sun, it is warmer — summer. When it tilts away, it is colder — winter. Each season brings changes: animals migrate, plants grow or lose leaves, days get longer or shorter.",
+          examples: [
+            { problem: "Why does summer have longer days than winter?", solution: "In summer the Earth is tilted toward the Sun, so the Sun is up for more hours each day.", hint: "Think about how long it stays light outside in summer vs winter." },
+            { problem: "What do deciduous trees do in autumn?", solution: "They lose their leaves — the tree saves energy for winter when there is less sunlight.", hint: "Deciduous = trees that shed leaves. Oak, beech, maple." },
+            { problem: "Name one way animals adapt to winter.", solution: "Bears hibernate (sleep all winter). Birds migrate south. Rabbits grow thicker white fur.", hint: "Animals survive winter by storing food, sleeping, or moving somewhere warmer." },
+          ],
+          tip: "🌍 The Earth's tilt causes seasons — not how far it is from the Sun!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Четирите годишни времена",
+          explanation: "Годината има четири сезона: пролет, лято, есен и зима. Всеки сезон има различно време, различни растения и различни занимания. Пролетта е топла и цветята цъфтят. Лятото е горещо и слънчево. Есента е хладна и листата падат. Зимата е студена и може да вали сняг.",
+          examples: [
+            { problem: "Кои са четирите годишни времена?", solution: "Пролет, лято, есен, зима.", hint: "Сетни кое е студено, горещо, топло, хладно..." },
+            { problem: "Кога цъфтят цветята?", solution: "Напролет — след студената зима природата се събужда и цветята отварят.", hint: "Мисли: след зимата какво идва?" },
+            { problem: "Назови едно нещо, което правиш лятото.", solution: "Плувам, играя навън, ям сладолед — защото лятото е топло и слънчево.", hint: "Лятото е най-горещото годишно време." },
+          ],
+          tip: "🌸❄️ Запомни сезоните с цветове: пролет = зелено, лято = жълто, есен = оранжево, зима = бяло!",
+        },
+        high: {
+          title: "Сезоните и промените в природата",
+          explanation: "Сезоните се сменят, защото Земята се върти около Слънцето. Когато твоята страна е наклонена към Слънцето — е лято и е по-топло. Когато е наклонена встрани — е зима и е студено. Всеки сезон носи промени: животните мигрират, растенията растат или губят листа, дните стават по-дълги или по-къси.",
+          examples: [
+            { problem: "Защо лятото има по-дълги дни от зимата?", solution: "Лятото Земята е наклонена към Слънцето — затова то грее повече часове на ден.", hint: "Сетни колко дълго е светло лятото спрямо зимата." },
+            { problem: "Какво правят листопадните дървета есента?", solution: "Губят листата си — дървото пести енергия за зимата, когато слънчевата светлина е по-малко.", hint: "Листопадни = дървета, които губят листата си. Дъб, бук, клен." },
+            { problem: "Назови един начин, по който животните се приспособяват към зимата.", solution: "Мечките зимуват (спят цяла зима). Птиците мигрират на юг. Зайците израстват по-гъста бяла козина.", hint: "Животните оцеляват зимата като трупат храна, спят или се преместват на по-топло място." },
+          ],
+          tip: "🌍 Наклонът на Земята причинява сезоните — не разстоянието до Слънцето!",
+        },
+      },
+      es: {
+        low: {
+          title: "Las cuatro estaciones",
+          explanation: "El año tiene cuatro estaciones: primavera, verano, otoño e invierno. Cada estación tiene su propio clima, plantas y actividades. La primavera es cálida y florecen las flores. El verano es caliente y soleado. El otoño es fresco y las hojas caen. El invierno es frío y puede nevar.",
+          examples: [
+            { problem: "¿Cuáles son las cuatro estaciones?", solution: "Primavera, Verano, Otoño, Invierno.", hint: "Piensa: ¿qué tiempo conoces? Frío, caliente, cálido, fresco..." },
+            { problem: "¿En qué estación florecen las flores?", solution: "En primavera — después del frío invierno, la naturaleza despierta y las flores se abren.", hint: "Piensa: después del invierno frío, ¿qué viene?" },
+            { problem: "Nombra algo que puedes hacer en verano.", solution: "Nadar en el mar, jugar afuera, comer helado — porque el verano es cálido y soleado.", hint: "El verano es la estación más caliente." },
+          ],
+          tip: "🌸❄️ Recuerda las estaciones con colores: Primavera = verde, Verano = amarillo, Otoño = naranja, Invierno = blanco!",
+        },
+        high: {
+          title: "Las estaciones y los cambios en la naturaleza",
+          explanation: "Las estaciones cambian porque la Tierra orbita alrededor del Sol. Cuando tu parte de la Tierra se inclina hacia el Sol, es más cálido — verano. Cuando se inclina hacia el otro lado, es más frío — invierno. Cada estación trae cambios: los animales migran, las plantas crecen o pierden hojas.",
+          examples: [
+            { problem: "¿Por qué el verano tiene días más largos que el invierno?", solution: "En verano la Tierra está inclinada hacia el Sol, por lo que el Sol permanece arriba más horas al día.", hint: "Piensa en cuánto tiempo permanece luminoso en verano vs. invierno." },
+            { problem: "¿Qué hacen los árboles caducos en otoño?", solution: "Pierden sus hojas — el árbol ahorra energía para el invierno cuando hay menos luz solar.", hint: "Caducos = árboles que pierden sus hojas. Roble, haya, arce." },
+            { problem: "Nombra una forma en que los animales se adaptan al invierno.", solution: "Los osos hibernan (duermen todo el invierno). Las aves migran al sur. Los conejos crecen pelo más grueso y blanco.", hint: "Los animales sobreviven el invierno almacenando comida, durmiendo o moviéndose a lugares más cálidos." },
+          ],
+          tip: "🌍 ¡La inclinación de la Tierra causa las estaciones — no la distancia al Sol!",
+        },
+      },
+    },
+
+    /* ── NATURE-SCIENCE / WEATHER ── */
+    "nature-science/weather": {
+      en: {
+        low: {
+          title: "What Is the Weather?",
+          explanation: "Weather tells us what the sky and air are like outside right now. Is it sunny or cloudy? Warm or cold? Windy or calm? Rainy or dry? We can describe weather using words like: sunny, rainy, snowy, windy, cloudy, foggy, stormy. A thermometer measures temperature — how hot or cold it is.",
+          examples: [
+            { problem: "Name 3 weather types.", solution: "Sunny, rainy, snowy, windy, cloudy, foggy, stormy — any 3 are correct!", hint: "Look out the window — what do you see?" },
+            { problem: "What tool measures temperature?", solution: "A thermometer. It shows how hot or cold the air is, usually in degrees Celsius (°C).", hint: "Thermo = heat. Meter = measure." },
+            { problem: "What should you wear when it rains?", solution: "A raincoat or jacket and boots — to stay warm and dry.", hint: "Think: how do you protect yourself from rain?" },
+          ],
+          tip: "🌤️ Check the weather every morning! It helps you decide what to wear and what to bring.",
+        },
+        high: {
+          title: "Weather Patterns and Climate",
+          explanation: "Weather is what the atmosphere does each day. Climate is the average weather of a region over many years. Clouds form when water vapour rises, cools, and condenses into tiny droplets. Rain falls when cloud droplets combine and get heavy. Bulgaria has a temperate continental climate — cold winters, warm summers.",
+          examples: [
+            { problem: "What is the difference between weather and climate?", solution: "Weather = what happens on a specific day. Climate = the typical weather of a region over 30+ years.", hint: "Weather changes daily; climate changes very slowly over decades." },
+            { problem: "How do clouds form?", solution: "Water on Earth evaporates (becomes water vapour), rises into cool air, condenses into tiny droplets, and forms clouds.", hint: "Think of steam from hot soup — that is water vapour condensing as it cools." },
+            { problem: "Name the stages of the water cycle.", solution: "1. Evaporation — water becomes vapour. 2. Condensation — vapour forms clouds. 3. Precipitation — rain/snow falls. 4. Collection — water collects in rivers and seas.", hint: "Sun → evaporation → cloud → rain → river → sea → repeat." },
+          ],
+          tip: "💧 The water cycle has no beginning or end — water is constantly moving between land, sea, and sky!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Какво е времето?",
+          explanation: "Времето ни казва какво е небето и въздухът навън в момента. Слънчево ли е или облачно? Топло или студено? Ветровито или тихо? Дъждовно или сухо? Можем да опишем времето с думи като: слънчево, дъждовно, снежно, ветровито, облачно, мъгливо, бурно. Термометърът измерва температурата.",
+          examples: [
+            { problem: "Назови 3 вида времето.", solution: "Слънчево, дъждовно, снежно, ветровито, облачно, мъгливо, бурно — всеки 3 са верни!", hint: "Погледни навън — какво виждаш?" },
+            { problem: "С какво се мери температурата?", solution: "С термометър. Той показва колко е топъл или студен въздухът, обикновено в градуси по Целзий (°C).", hint: "Термо = топлина. Метър = мярка." },
+            { problem: "Какво трябва да облечеш, когато вали дъжд?", solution: "Дъждобран или яке и гумени ботуши — за да останеш топъл и сух.", hint: "Как се предпазваш от дъжда?" },
+          ],
+          tip: "🌤️ Проверявай времето всяка сутрин! Ще знаеш какво да облечеш и какво да вземеш.",
+        },
+        high: {
+          title: "Времето и климатът",
+          explanation: "Времето е това, което атмосферата прави всеки ден. Климатът е средното време за даден регион за много години. Облаците се образуват, когато водната пара се издига, охлажда и кондензира в малки капчици. Дъждът пада, когато капчиците се събират и стават тежки. България има умерено-континентален климат — студени зими, топли лета.",
+          examples: [
+            { problem: "Каква е разликата между времето и климата?", solution: "Времето = какво се случва конкретен ден. Климат = типичното за даден регион за 30+ години.", hint: "Времето се мени всеки ден; климатът се мени много бавно — за десетилетия." },
+            { problem: "Как се образуват облаците?", solution: "Водата изпарява (става водна пара), издига се нагоре, охлажда се и кондензира в малки капчици, образувайки облак.", hint: "Като парата от горещ чай — кондензира, когато се охлади." },
+            { problem: "Назови стъпките на водния цикъл.", solution: "1. Изпарение — водата се превръща в пара. 2. Кондензация — парата образува облаци. 3. Валеж — пада дъжд или сняг. 4. Събиране — водата тече в реки и морета.", hint: "Слънце → изпарение → облак → дъжд → река → море → отново." },
+          ],
+          tip: "💧 Водният цикъл няма начало или край — водата непрекъснато се движи между сушата, морето и небето!",
+        },
+      },
+      es: {
+        low: {
+          title: "¿Qué es el tiempo?",
+          explanation: "El tiempo nos dice cómo está el cielo y el aire fuera ahora mismo. ¿Está soleado o nublado? ¿Cálido o frío? ¿Ventoso o tranquilo? ¿Lluvioso o seco? Podemos describir el tiempo con palabras como: soleado, lluvioso, nevado, ventoso, nublado, brumoso, tormentoso. Un termómetro mide la temperatura.",
+          examples: [
+            { problem: "Nombra 3 tipos de tiempo.", solution: "Soleado, lluvioso, nevado, ventoso, nublado, brumoso, tormentoso — ¡cualquier 3 son correctos!", hint: "Mira afuera, ¿qué ves?" },
+            { problem: "¿Qué herramienta mide la temperatura?", solution: "Un termómetro. Muestra qué tan caliente o frío está el aire, generalmente en grados Celsius (°C).", hint: "Thermo = calor. Metro = medida." },
+            { problem: "¿Qué deberías usar cuando llueve?", solution: "Un impermeable o chaqueta y botas — para mantenerte cálido y seco.", hint: "¿Cómo te proteges de la lluvia?" },
+          ],
+          tip: "🌤️ ¡Revisa el tiempo cada mañana! Te ayudará a decidir qué usar y qué llevar.",
+        },
+        high: {
+          title: "Patrones del tiempo y clima",
+          explanation: "El tiempo es lo que hace la atmósfera cada día. El clima es el tiempo típico de una región durante muchos años. Las nubes se forman cuando el vapor de agua sube, se enfría y condensa en pequeñas gotas. La lluvia cae cuando las gotas se combinan y se vuelven pesadas.",
+          examples: [
+            { problem: "¿Cuál es la diferencia entre tiempo y clima?", solution: "Tiempo = qué ocurre en un día específico. Clima = el tiempo típico de una región durante 30+ años.", hint: "El tiempo cambia a diario; el clima cambia muy lentamente." },
+            { problem: "¿Cómo se forman las nubes?", solution: "El agua se evapora (se convierte en vapor), sube al aire frío, se condensa en pequeñas gotas y forma nubes.", hint: "Como el vapor del té caliente — se condensa al enfriarse." },
+            { problem: "Nombra las etapas del ciclo del agua.", solution: "1. Evaporación. 2. Condensación. 3. Precipitación. 4. Recolección en ríos y mares.", hint: "Sol → evaporación → nube → lluvia → río → mar → repetir." },
+          ],
+          tip: "💧 ¡El ciclo del agua no tiene principio ni fin — el agua se mueve constantemente!",
+        },
+      },
+    },
+
+    /* ── LOGIC-THINKING / COMPARISON ── */
+    "logic-thinking/comparison": {
+      en: {
+        low: {
+          title: "Comparing Things",
+          explanation: "We compare things to find out how they are the same or different. We use words like: bigger, smaller, heavier, lighter, longer, shorter, more, fewer, faster, slower. To compare, look at ONE thing at a time: size, colour, shape, weight, speed, number. Always say WHAT you are comparing: 'A cat is smaller THAN a dog.'",
+          examples: [
+            { problem: "Which is bigger: a mouse or an elephant?", solution: "An elephant is much bigger than a mouse. Compare: size. Elephant — huge. Mouse — tiny.", hint: "Use 'bigger than' or 'smaller than' to compare." },
+            { problem: "Anna has 5 apples. Bobi has 3 apples. Who has more?", solution: "Anna has more apples. 5 > 3. Bobi has fewer apples.", hint: "Compare the numbers: which is greater?" },
+            { problem: "A car and a bicycle: which is faster?", solution: "A car is faster than a bicycle. A bicycle is slower than a car.", hint: "Think about how quickly each one travels." },
+          ],
+          tip: "🔍 Compare one property at a time: first size, then colour, then weight. Don't mix them up!",
+        },
+        high: {
+          title: "Comparing with Multiple Attributes",
+          explanation: "We can compare things by many attributes at once. A Venn diagram shows two overlapping circles: the left has things only one item has, the right has things only the other has, and the middle shows what they share. When comparing, use: 'Both... but...', 'Unlike X, Y has...', 'They share... but differ in...'",
+          examples: [
+            { problem: "Compare a fish and a bird: similarities and differences.", solution: "Both: animals, have eyes, need food and water. Fish: lives in water, has scales, breathes with gills. Bird: lives on land/air, has feathers and wings, breathes with lungs.", hint: "List both: what do they share? What is different?" },
+            { problem: "3 is to 9 as 4 is to __?", solution: "12. Pattern: 3×3=9, so 4×3=12.", hint: "Find the relationship between the first pair, then apply it." },
+            { problem: "Which statement is correct? A) All cats are animals. B) All animals are cats.", solution: "A is correct. All cats are animals, but not all animals are cats (dogs, birds, fish are animals too).", hint: "Can you think of an animal that is NOT a cat?" },
+          ],
+          tip: "🔵🟡 Venn diagrams are great for comparing: draw two overlapping circles and sort the features!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Сравняване",
+          explanation: "Сравняваме неща, за да разберем в какво си приличат или се различават. Използваме думи като: по-голям, по-малък, по-тежък, по-лек, по-дълъг, по-къс, повече, по-малко, по-бърз, по-бавен. При сравнение гледаме ЕДНО нещо наведнъж: размер, цвят, форма, тегло, скорост. Винаги казваме КАЗваме какво сравняваме: 'Котката е по-малка ОТ кучето.'",
+          examples: [
+            { problem: "Кое е по-голямо: мишка или слон?", solution: "Слонът е много по-голям от мишката. Сравняваме: размер. Слон — огромен. Мишка — малка.", hint: "Използвай 'по-голям от' или 'по-малък от'." },
+            { problem: "Анна има 5 ябълки. Боби има 3 ябълки. Кой има повече?", solution: "Анна има повече ябълки. 5 > 3. Боби има по-малко ябълки.", hint: "Сравни числата: кое е по-голямо?" },
+            { problem: "Кола и велосипед: кое е по-бързо?", solution: "Колата е по-бърза от велосипеда. Велосипедът е по-бавен от колата.", hint: "Помисли колко бързо се движи всяко едно." },
+          ],
+          tip: "🔍 Сравнявай по едно свойство наведнъж: първо размер, после цвят, после тегло. Не ги бъркай!",
+        },
+        high: {
+          title: "Сравняване по много белези",
+          explanation: "Можем да сравняваме неща по много белези едновременно. Диаграмата на Вен показва два припокриващи се кръга: левият има само за едното, десният — само за другото, а в средата е общото. При сравнение използвай: 'И двете... но...', 'За разлика от Х, Y има...', 'Приличат си по... но се различават по...'",
+          examples: [
+            { problem: "Сравни риба и птица: прилики и разлики.", solution: "Общо: животни, имат очи, нуждаят се от храна и вода. Риба: живее във вода, има люспи, диша с хриле. Птица: живее на сушата/въздуха, има пера и крила, диша с бели дробове.", hint: "Изброй: какво имат общо? Какво е различно?" },
+            { problem: "3 е към 9 като 4 е към __?", solution: "12. Закономерност: 3×3=9, значи 4×3=12.", hint: "Намери връзката в първата двойка, после я приложи." },
+            { problem: "Кое твърдение е вярно? А) Всички котки са животни. Б) Всички животни са котки.", solution: "А е вярно. Всички котки са животни, но не всички животни са котки (кучета, птици, риби също са животни).", hint: "Можеш ли да измислиш животно, което не е котка?" },
+          ],
+          tip: "🔵🟡 Диаграмата на Вен е чудесна за сравнение: нарисувай два припокриващи се кръга и сортирай белезите!",
+        },
+      },
+      es: {
+        low: {
+          title: "Comparar cosas",
+          explanation: "Comparamos cosas para ver en qué se parecen o en qué se diferencian. Usamos palabras como: más grande, más pequeño, más pesado, más ligero, más largo, más corto, más, menos, más rápido, más lento. Para comparar, mira UNA cosa a la vez: tamaño, color, forma, peso, velocidad. Siempre di QUÉ comparas: 'Un gato es más pequeño QUE un perro.'",
+          examples: [
+            { problem: "¿Cuál es más grande: un ratón o un elefante?", solution: "Un elefante es mucho más grande que un ratón. Comparamos: tamaño. Elefante — enorme. Ratón — diminuto.", hint: "Usa 'más grande que' o 'más pequeño que' para comparar." },
+            { problem: "Ana tiene 5 manzanas. Bobi tiene 3 manzanas. ¿Quién tiene más?", solution: "Ana tiene más manzanas. 5 > 3. Bobi tiene menos manzanas.", hint: "Compara los números: ¿cuál es mayor?" },
+            { problem: "Un coche y una bicicleta: ¿cuál es más rápido?", solution: "Un coche es más rápido que una bicicleta. Una bicicleta es más lenta que un coche.", hint: "Piensa en qué tan rápido se mueve cada uno." },
+          ],
+          tip: "🔍 ¡Compara una propiedad a la vez: primero tamaño, luego color, luego peso. No los mezcles!",
+        },
+        high: {
+          title: "Comparar con múltiples atributos",
+          explanation: "Podemos comparar cosas por muchos atributos a la vez. Un diagrama de Venn muestra dos círculos superpuestos: el izquierdo tiene lo que solo tiene uno, el derecho lo que solo tiene el otro, y el medio muestra lo que comparten. Al comparar usa: 'Ambos... pero...', 'A diferencia de X, Y tiene...', 'Se parecen en... pero se diferencian en...'",
+          examples: [
+            { problem: "Compara un pez y un pájaro: similitudes y diferencias.", solution: "Ambos: animales, tienen ojos, necesitan comida y agua. Pez: vive en agua, tiene escamas, respira con branquias. Pájaro: vive en tierra/aire, tiene plumas y alas, respira con pulmones.", hint: "Lista: ¿qué tienen en común? ¿Qué es diferente?" },
+            { problem: "3 es a 9 como 4 es a __?", solution: "12. Patrón: 3×3=9, entonces 4×3=12.", hint: "Encuentra la relación en el primer par, luego aplícala." },
+            { problem: "¿Qué afirmación es correcta? A) Todos los gatos son animales. B) Todos los animales son gatos.", solution: "A es correcta. Todos los gatos son animales, pero no todos los animales son gatos.", hint: "¿Puedes pensar en un animal que NO sea un gato?" },
+          ],
+          tip: "🔵🟡 ¡Los diagramas de Venn son geniales para comparar: dibuja dos círculos superpuestos y clasifica las características!",
+        },
+      },
+    },
+
+    /* ── LOGIC-THINKING / SEQUENCING ── */
+    "logic-thinking/sequencing": {
+      en: {
+        low: {
+          title: "Putting Things in Order",
+          explanation: "Sequencing means putting events or steps in the RIGHT order — from first to last. We use order words: first, then, next, after that, finally, last. The order matters! If you put on shoes before socks, something is wrong. Look for what must come BEFORE and what must come AFTER.",
+          examples: [
+            { problem: "Put in the right order: 3) Eat the apple. 1) Pick up the apple. 2) Wash the apple.", solution: "1. Pick up the apple. 2. Wash the apple. 3. Eat the apple. You must wash before eating!", hint: "What do you need to do first? You can't eat it before washing." },
+            { problem: "What is missing? Plant seed → __ → Flower blooms.", solution: "Water the plant / the plant grows — after planting, the seed needs water and time to grow before it blooms.", hint: "What happens between planting and flowering?" },
+            { problem: "Use sequence words to describe getting dressed: socks, trousers, shirt, shoes.", solution: "First, put on your socks. Then, put on your trousers. Next, put on your shirt. Finally, put on your shoes.", hint: "Which goes under which? Socks go before shoes!" },
+          ],
+          tip: "1️⃣2️⃣3️⃣ Use the words FIRST, THEN, NEXT, FINALLY to keep your sequence clear!",
+        },
+        high: {
+          title: "Sequencing and Cause & Effect",
+          explanation: "Advanced sequencing links events as causes and effects: A happens, BECAUSE of A, B happens, BECAUSE of B, C happens. Understanding sequence helps you follow instructions, solve problems, and write stories. Signal words: consequently, as a result, therefore, which led to, due to.",
+          examples: [
+            { problem: "Put in order: C) The cat chases the mouse. A) The mouse steals the cheese. B) The farmer sees the mouse.", solution: "A → B → C. The mouse steals cheese → farmer sees it → cat chases the mouse. Each event causes the next!", hint: "Ask: what causes what? A leads to B, B leads to C." },
+            { problem: "Identify cause and effect: 'It rained heavily, so the river flooded.'", solution: "Cause: heavy rain. Effect: river flooded. Key word 'so' shows the cause-effect link.", hint: "Cause = why it happened. Effect = what happened as a result." },
+            { problem: "Write 3 steps for making a sandwich using sequence words.", solution: "First, take two slices of bread. Then, spread butter or filling on one slice. Finally, place the second slice on top and press gently.", hint: "Steps: bread → filling → close. Use: First, Then, Finally." },
+          ],
+          tip: "🔗 Every effect becomes the cause of the next event — that's a chain of events!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Наредба — правилният ред",
+          explanation: "Наредбата означава да наредим събитията или стъпките в ПРАВИЛНИЯ ред — от първото до последното. Използваме думи за ред: първо, после, след това, накрая. Редът е важен! Ако обуеш обувките преди чорапите — нещо не е наред. Гледай какво трябва да е ПРЕДИ и какво — СЛЕД.",
+          examples: [
+            { problem: "Наредете правилно: 3) Изяжда ябълката. 1) Взима ябълката. 2) Мие ябълката.", solution: "1. Взима ябълката. 2. Мие ябълката. 3. Изяжда ябълката. Трябва да измием преди да изядем!", hint: "Какво се прави първо? Не можеш да изядеш преди да измиеш." },
+            { problem: "Какво липсва? Засаждам семе → __ → Цветето цъфти.", solution: "Поливам растението / то расте — след засаждането семето се нуждае от вода и време да порасне, преди да разцъфти.", hint: "Какво се случва между засаждането и цъфтежа?" },
+            { problem: "Опиши обличането с думи за ред: чорапи, панталон, риза, обувки.", solution: "Първо слагам чорапите. После слагам панталона. След това слагам ризата. Накрая слагам обувките.", hint: "Кое е под кое? Чорапите са преди обувките!" },
+          ],
+          tip: "1️⃣2️⃣3️⃣ Използвай ПЪРВО, ПОСЛЕ, СЛЕД ТОВА, НАКРАЯ, за да е ясен редът!",
+        },
+        high: {
+          title: "Наредба и причинно-следствени връзки",
+          explanation: "Напредналата наредба свързва събитията като причина и следствие: А се случва, ЗАЩОТО А — следва Б, ЗАЩОТО Б — следва В. Разбирането на реда помага да следваш инструкции, да решаваш задачи и да пишеш разкази. Думи-сигнали: затова, в резултат, вследствие, поради това.",
+          examples: [
+            { problem: "Наредете: В) Котката гони мишката. А) Мишката краде сиренето. Б) Земеделецът вижда мишката.", solution: "А → Б → В. Мишката краде сиреното → земеделецът я вижда → котката я гони. Всяко събитие причинява следващото!", hint: "Питай: кое причинява кое? А води до Б, Б води до В." },
+            { problem: "Определи причина и следствие: 'Валя силно, затова реката се разля.'", solution: "Причина: силен дъжд. Следствие: реката се разля. Думата 'затова' показва причинно-следствената връзка.", hint: "Причина = защо се случи. Следствие = какво се случи в резултат." },
+            { problem: "Напиши 3 стъпки за правене на сандвич с думи за ред.", solution: "Първо взимам два филийки хляб. После намазвам масло или пълнеж на едната. Накрая слагам втората отгоре и натискам леко.", hint: "Стъпки: хляб → пълнеж → затваряне. Използвай: Първо, После, Накрая." },
+          ],
+          tip: "🔗 Всяко следствие се превръща в причина за следващото събитие — това е верига от събития!",
+        },
+      },
+      es: {
+        low: {
+          title: "Ordenar las cosas",
+          explanation: "Secuenciar significa poner eventos o pasos en el ORDEN CORRECTO — de primero a último. Usamos palabras de orden: primero, luego, después, a continuación, finalmente. ¡El orden importa! Si te pones los zapatos antes que los calcetines, algo está mal. Busca qué debe venir ANTES y qué debe venir DESPUÉS.",
+          examples: [
+            { problem: "Ordena correctamente: 3) Come la manzana. 1) Agarra la manzana. 2) Lava la manzana.", solution: "1. Agarrar. 2. Lavar. 3. Comer. ¡Debes lavar antes de comer!", hint: "¿Qué debes hacer primero? No puedes comer antes de lavar." },
+            { problem: "¿Qué falta? Plantar semilla → __ → La flor florece.", solution: "Regar la planta / que la planta crezca — después de plantar, la semilla necesita agua y tiempo para crecer antes de florecer.", hint: "¿Qué pasa entre plantar y florecer?" },
+            { problem: "Describe vestirse con palabras de secuencia: calcetines, pantalón, camisa, zapatos.", solution: "Primero, ponte los calcetines. Luego, ponte el pantalón. A continuación, ponte la camisa. Finalmente, ponte los zapatos.", hint: "¿Qué va debajo de qué? ¡Los calcetines van antes que los zapatos!" },
+          ],
+          tip: "1️⃣2️⃣3️⃣ ¡Usa PRIMERO, LUEGO, DESPUÉS, FINALMENTE para que tu secuencia sea clara!",
+        },
+        high: {
+          title: "Secuencias y causa y efecto",
+          explanation: "La secuenciación avanzada conecta eventos como causas y efectos: A ocurre, DEBIDO A A, ocurre B, DEBIDO A B, ocurre C. Palabras clave: consecuentemente, como resultado, por lo tanto, lo que llevó a, debido a.",
+          examples: [
+            { problem: "Ordena: C) El gato persigue al ratón. A) El ratón roba el queso. B) El granjero ve al ratón.", solution: "A → B → C. El ratón roba el queso → el granjero lo ve → el gato persigue al ratón. ¡Cada evento causa el siguiente!", hint: "Pregunta: ¿qué causa qué? A lleva a B, B lleva a C." },
+            { problem: "Identifica causa y efecto: 'Llovió mucho, así que el río se desbordó.'", solution: "Causa: lluvia fuerte. Efecto: el río se desbordó. La palabra 'así que' muestra el vínculo causa-efecto.", hint: "Causa = por qué ocurrió. Efecto = qué ocurrió como resultado." },
+            { problem: "Escribe 3 pasos para hacer un sándwich usando palabras de secuencia.", solution: "Primero, toma dos rebanadas de pan. Luego, unta mantequilla en una rebanada. Finalmente, coloca la segunda rebanada encima.", hint: "Pasos: pan → relleno → cerrar. Usa: Primero, Luego, Finalmente." },
+          ],
+          tip: "🔗 ¡Todo efecto se convierte en la causa del siguiente evento — ¡eso es una cadena de eventos!",
+        },
+      },
+    },
+
+    /* ── SOCIAL-STUDIES / FAMILY-COMMUNITY ── */
+    "social-studies/family-community": {
+      en: {
+        low: {
+          title: "Family and Community",
+          explanation: "A family is a group of people who love and care for each other. Families can look different: some have a mother and father, some have grandparents too, some are big, some are small. A community is all the people who live in the same town or neighbourhood. Everyone in a community helps each other — teachers, doctors, firefighters, shopkeepers.",
+          examples: [
+            { problem: "Name 4 members of a typical family.", solution: "Mother, father, sister, brother — or grandparents (babà, dyado in Bulgarian), aunts, uncles.", hint: "Think of the people who live in your home or who you visit." },
+            { problem: "Who helps you if you are sick?", solution: "A doctor (лекар) at a clinic or hospital. Your family also takes care of you.", hint: "Think of community helpers: doctor, nurse, pharmacist." },
+            { problem: "Name 3 community helpers and what they do.", solution: "Teacher — teaches children. Firefighter — puts out fires and saves people. Police officer — keeps people safe.", hint: "Think of who helps your neighbourhood every day." },
+          ],
+          tip: "❤️ A community works because everyone does their part — including you!",
+        },
+        high: {
+          title: "Roles in Family and Community",
+          explanation: "Every family member has a role: parents provide food, shelter and love; children learn and help with chores; grandparents share wisdom. In a community, people have roles too: a mayor leads the town, teachers educate, doctors heal, builders construct, farmers grow food. Society works when everyone does their role responsibly.",
+          examples: [
+            { problem: "What responsibilities might a child have at home?", solution: "Tidying their room, helping wash dishes, feeding a pet, doing homework, being kind to siblings.", hint: "Responsibilities = things you are expected to do." },
+            { problem: "Why do communities need rules?", solution: "Rules help people live together safely and fairly. Without rules, there would be chaos — people could get hurt or treated unfairly.", hint: "Think: what would happen if there were no traffic rules?" },
+            { problem: "How is a community different from a family?", solution: "A family = a small group connected by love and kinship. A community = a larger group sharing a place (town, school, neighbourhood) — members may not know each other personally.", hint: "Family = small and personal. Community = larger and shared space." },
+          ],
+          tip: "🏘️ A strong community is built by people who respect each other and help when needed!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Семейство и общество",
+          explanation: "Семейството е група от хора, които се обичат и се грижат един за друг. Семействата могат да изглеждат различно: някои имат майка и татко, при някои живеят и баба и дядо, едни са по-малки, а други по-големи. Обществото са всички хора, живеещи в едно населено място. Всеки помага: учители, лекари, пожарникари, продавачи.",
+          examples: [
+            { problem: "Назови 4 члена на семейство.", solution: "Майка, татко, сестра, брат — или баба, дядо, леля, чичо.", hint: "Помисли за хората, с които живееш или при които ходиш на гости." },
+            { problem: "Кой те помага, ако си болен?", solution: "Лекарят — в поликлиника или болница. Семейството ти също се грижи за теб.", hint: "Помисли за помощниците в обществото: лекар, медицинска сестра, фармацевт." },
+            { problem: "Назови 3 помощника в обществото и какво правят.", solution: "Учителят — учи децата. Пожарникарят — гаси пожари и спасява хора. Полицаят — пази обществената сигурност.", hint: "Кой помага на твоя квартал всеки ден?" },
+          ],
+          tip: "❤️ Обществото работи добре, когато всеки дава своя принос — включително и ти!",
+        },
+        high: {
+          title: "Роли в семейството и обществото",
+          explanation: "Всеки член на семейството има роля: родителите осигуряват храна, дом и любов; децата учат и помагат; бабите и дядовците споделят мъдрост. В обществото хората също имат роли: кметът ръководи общината, учителите образоват, лекарите лекуват, строителите строят, земеделците отглеждат храна. Обществото работи, когато всеки изпълнява ролята си отговорно.",
+          examples: [
+            { problem: "Какви задължения може да има едно дете у дома?", solution: "Да нарежда стаята си, да помага при миенето на чиниите, да храни домашния любимец, да учи, да е внимателно към братчето или сестричето си.", hint: "Задължения = нещата, за които се очаква да ги направиш." },
+            { problem: "Защо обществото се нуждае от правила?", solution: "Правилата помагат на хората да живеят заедно безопасно и справедливо. Без правила би имало хаос — хората биха се наранявали или отнасяли несправедливо.", hint: "Помисли: какво би станало, ако нямаше правила за движение по пътищата?" },
+            { problem: "Как се различава общността от семейството?", solution: "Семейство = малка група, свързана с любов и родство. Общност = по-голяма група, споделяща населено място — членовете може да не се познават лично.", hint: "Семейство = малко и лично. Общност = по-голямо и споделено пространство." },
+          ],
+          tip: "🏘️ Силната общност се изгражда от хора, уважаващи се взаимно и помагащи при нужда!",
+        },
+      },
+      es: {
+        low: {
+          title: "Familia y comunidad",
+          explanation: "Una familia es un grupo de personas que se aman y cuidan mutuamente. Las familias pueden ser diferentes: algunas tienen madre y padre, algunas también tienen abuelos, unas son grandes y otras pequeñas. Una comunidad es toda la gente que vive en el mismo pueblo o barrio. Todos en la comunidad se ayudan: maestros, médicos, bomberos, tenderos.",
+          examples: [
+            { problem: "Nombra 4 miembros de una familia típica.", solution: "Madre, padre, hermana, hermano — o abuelos, tías, tíos.", hint: "Piensa en las personas con quienes vives o visitas." },
+            { problem: "¿Quién te ayuda si estás enfermo?", solution: "Un médico en una clínica u hospital. Tu familia también cuida de ti.", hint: "Piensa en los ayudantes de la comunidad: médico, enfermera, farmacéutico." },
+            { problem: "Nombra 3 ayudantes de la comunidad y qué hacen.", solution: "Maestro — enseña a los niños. Bombero — apaga incendios y salva personas. Policía — mantiene a la gente segura.", hint: "¿Quién ayuda a tu barrio cada día?" },
+          ],
+          tip: "❤️ ¡Una comunidad funciona porque todos hacen su parte — incluyéndote a ti!",
+        },
+        high: {
+          title: "Roles en familia y comunidad",
+          explanation: "Cada miembro de la familia tiene un rol: los padres proveen comida, hogar y amor; los niños aprenden y ayudan; los abuelos comparten sabiduría. En la comunidad, las personas también tienen roles: el alcalde dirige la ciudad, los maestros educan, los médicos curan. La sociedad funciona cuando todos hacen su rol responsablemente.",
+          examples: [
+            { problem: "¿Qué responsabilidades puede tener un niño en casa?", solution: "Ordenar su habitación, ayudar a lavar los platos, alimentar a la mascota, hacer la tarea, ser amable con los hermanos.", hint: "Responsabilidades = cosas que se espera que hagas." },
+            { problem: "¿Por qué las comunidades necesitan reglas?", solution: "Las reglas ayudan a las personas a vivir juntas de forma segura y justa. Sin reglas habría caos.", hint: "Piensa: ¿qué pasaría si no hubiera reglas de tráfico?" },
+            { problem: "¿En qué se diferencia una comunidad de una familia?", solution: "Familia = grupo pequeño conectado por amor y parentesco. Comunidad = grupo más grande que comparte un lugar.", hint: "Familia = pequeño y personal. Comunidad = más grande y espacio compartido." },
+          ],
+          tip: "🏘️ ¡Una comunidad fuerte se construye con personas que se respetan y ayudan cuando es necesario!",
+        },
+      },
+    },
+
+    /* ── SOCIAL-STUDIES / MY-HOMELAND ── */
+    "social-studies/my-homeland": {
+      en: {
+        low: {
+          title: "My Hometown and Region",
+          explanation: "Your hometown (родно място) is the place where you were born and grew up. It can be a big city (град) or a small village (село). Every place has special things: nature, buildings, streets, parks, and stories. Learn the name of your municipality (община), district (област), and nearby landmarks (забележителности).",
+          examples: [
+            { problem: "What is the difference between a city and a village?", solution: "A city is large — many people, lots of buildings, traffic, shops, schools. A village is small — fewer people, more nature, quieter.", hint: "Think: where do more people live together?" },
+            { problem: "Name 2 things that make your hometown special.", solution: "It could be a river, a mountain, a church, a museum, a festival, or a local market — every town has something special!", hint: "What do visitors or tourists come to see in your town?" },
+            { problem: "What is a municipality (община)?", solution: "A municipality is the area managed by a local government. The head of a municipality is called a mayor (кмет).", hint: "Think of a municipality as a 'mini-country' with its own local government." },
+          ],
+          tip: "📍 Ask your parents or grandparents: 'What is special about where we live?' — every place has stories!",
+        },
+        high: {
+          title: "My Region and Its Features",
+          explanation: "Bulgaria is divided into 28 districts (области) and many municipalities (общини). Each region has its own geography (mountains, rivers, plains), economy (farming, industry, tourism), and cultural traditions. Understanding your region helps you feel connected to your roots and your country.",
+          examples: [
+            { problem: "Name the 3 main types of terrain in Bulgaria.", solution: "Mountains (Rila, Balkan, Rhodope), valleys and plains (Thracian plain, Danubian plain), and the Black Sea coast.", hint: "Think: mountains, flat lands, sea." },
+            { problem: "How does geography affect how people live in a region?", solution: "In mountain areas people farm animals and harvest timber; in plains they grow crops; on the coast they fish and work in tourism.", hint: "Geography shapes the jobs and lifestyle of people in each area." },
+            { problem: "What is a landmark? Give an example from Bulgaria.", solution: "A landmark is a famous or recognisable feature of a place. Example: The Rila Monastery — a UNESCO heritage site in the Rila mountains.", hint: "Landmarks can be natural (mountain, lake) or man-made (monument, church)." },
+          ],
+          tip: "🗺️ Bulgaria is a small country but has incredible variety — mountains, plains, sea, forests, and ancient history all in one!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Моят роден край",
+          explanation: "Твоят роден край е мястото, където си роден и израснал. Може да е голям град или малко село. Всяко място има нещо специално: природа, сгради, улици, паркове и истории. Научи името на своята община, своята област и близките забележителности.",
+          examples: [
+            { problem: "Каква е разликата между град и село?", solution: "Градът е голям — много хора, много сгради, трафик, магазини, училища. Селото е малко — по-малко хора, повече природа, по-тихо.", hint: "Помисли: къде живеят повече хора заедно?" },
+            { problem: "Назови 2 неща, с които се отличава твоят роден край.", solution: "Може да е река, планина, църква, музей, местен фестивал или пазар — всяко населено място има нещо специално!", hint: "Какво идват да видят гостите или туристите в твоя град?" },
+            { problem: "Какво е община?", solution: "Общината е административна единица, управлявана от местно самоуправление. Начело на общината стои кметът.", hint: "Мисли за общината като за 'малка страна' с местно управление." },
+          ],
+          tip: "📍 Попитай родителите или баба и дядо: 'Какво е специалното в нашия роден край?' — всяко място крие истории!",
+        },
+        high: {
+          title: "Моят регион и неговите особености",
+          explanation: "България е разделена на 28 области и много общини. Всеки регион има своя география (планини, реки, равнини), стопанство (земеделие, промишленост, туризъм) и културни традиции. Опознаването на своя регион те свързва с корените ти и с твоята страна.",
+          examples: [
+            { problem: "Назови 3-те основни вида релеф в България.", solution: "Планини (Рила, Стара планина, Родопи), долини и равнини (Тракийска низина, Дунавска равнина) и Черноморско крайбрежие.", hint: "Помисли: планини, равни земи, море." },
+            { problem: "Как географията влияе на начина на живот в даден регион?", solution: "В планинските райони хората отглеждат животни и добиват дървесина; в равнините отглеждат зърно и зеленчуци; по крайбрежието се занимават с риболов и туризъм.", hint: "Географията определя поминъка и начина на живот на хората." },
+            { problem: "Какво е забележителност? Дай пример от България.", solution: "Забележителност е известен обект на дадено място. Пример: Рилският манастир — обект на ЮНЕСКО в Рила планина.", hint: "Забележителностите могат да са природни (планина, езеро) или създадени от хора (паметник, църква)." },
+          ],
+          tip: "🗺️ България е малка страна, но с невероятно разнообразие — планини, равнини, море, гори и древна история — всичко наведнъж!",
+        },
+      },
+      es: {
+        low: {
+          title: "Mi ciudad natal y región",
+          explanation: "Tu ciudad natal es el lugar donde naciste y creciste. Puede ser una gran ciudad o un pequeño pueblo. Cada lugar tiene cosas especiales: naturaleza, edificios, calles, parques e historias. Aprende el nombre de tu municipio, provincia y los puntos de referencia cercanos.",
+          examples: [
+            { problem: "¿Cuál es la diferencia entre una ciudad y un pueblo?", solution: "Una ciudad es grande — mucha gente, muchos edificios, tráfico, tiendas, escuelas. Un pueblo es pequeño — menos gente, más naturaleza, más tranquilo.", hint: "Piensa: ¿dónde vive más gente junta?" },
+            { problem: "Nombra 2 cosas que hacen especial a tu ciudad natal.", solution: "Podría ser un río, una montaña, una iglesia, un museo, un festival o un mercado — ¡cada lugar tiene algo especial!", hint: "¿Qué vienen a ver los visitantes o turistas a tu ciudad?" },
+            { problem: "¿Qué es un municipio?", solution: "Un municipio es el área gestionada por un gobierno local. El jefe del municipio se llama alcalde.", hint: "Piensa en un municipio como un 'mini-país' con su propio gobierno local." },
+          ],
+          tip: "📍 ¡Pregunta a tus padres o abuelos: '¿Qué tiene de especial nuestra ciudad?' — ¡cada lugar tiene historias!",
+        },
+        high: {
+          title: "Mi región y sus características",
+          explanation: "Bulgaria está dividida en 28 provincias y muchos municipios. Cada región tiene su propia geografía (montañas, ríos, llanuras), economía (agricultura, industria, turismo) y tradiciones culturales. Comprender tu región te ayuda a sentirte conectado con tus raíces.",
+          examples: [
+            { problem: "Nombra los 3 tipos principales de terreno en Bulgaria.", solution: "Montañas (Rila, Balcán, Ródope), valles y llanuras (llanura tracia, llanura danubiana) y la costa del Mar Negro.", hint: "Piensa: montañas, tierras planas, mar." },
+            { problem: "¿Cómo afecta la geografía a la vida de las personas en una región?", solution: "En zonas montañosas crían animales y explotan madera; en las llanuras cultivan; en la costa pescan y trabajan en turismo.", hint: "La geografía moldea los empleos y el estilo de vida de las personas." },
+            { problem: "¿Qué es un punto de referencia? Da un ejemplo de Bulgaria.", solution: "Un punto de referencia es un lugar famoso o reconocible. Ejemplo: El Monasterio de Rila — patrimonio de la UNESCO.", hint: "Los puntos de referencia pueden ser naturales (montaña, lago) o artificiales (monumento, iglesia)." },
+          ],
+          tip: "🗺️ ¡Bulgaria es un país pequeño pero con increíble variedad — montañas, llanuras, mar, bosques e historia antigua, todo en uno!",
+        },
+      },
+    },
+
+    /* ── SOCIAL-STUDIES / BULGARIA ── */
+    "social-studies/bulgaria": {
+      en: {
+        low: {
+          title: "Our Country — Bulgaria",
+          explanation: "Bulgaria is a country in southeastern Europe. The capital city is Sofia (София). The Bulgarian flag has three colours: white (белo), green (зелено), and red (червено) from top to bottom. The national anthem is 'Mila Rodino' (Dear Homeland). Bulgaria has mountains, plains, rivers, and a Black Sea coast.",
+          examples: [
+            { problem: "What is the capital of Bulgaria?", solution: "Sofia (София) — it is the largest city and the seat of government.", hint: "Sofia is in western Bulgaria, near the Vitosha mountain." },
+            { problem: "Name the 3 colours of the Bulgarian flag in order.", solution: "White (top), Green (middle), Red (bottom) — horizontal stripes.", hint: "The colours go from top to bottom: white, green, red." },
+            { problem: "Name 2 mountains in Bulgaria.", solution: "Rila (with Musala — the highest peak in the Balkans), Vitosha (near Sofia), Balkan mountain (Stara Planina), Rhodope mountains.", hint: "Bulgaria has many mountains! The highest is Musala in Rila." },
+          ],
+          tip: "🇧🇬 Remember Bulgaria's flag: White-Green-Red — top to bottom!",
+        },
+        high: {
+          title: "Bulgaria: History, Geography and Culture",
+          explanation: "Bulgaria was founded in 681 AD by Khan Asparuh. The Bulgarian alphabet (Cyrillic) was created by Saints Cyril and Methodius and their disciples in the 9th century. Bulgaria joined the European Union in 2007. It has a rich culture: rose oil (атар от рози), yogurt (кисело мляко), Kukeri rituals, and many UNESCO heritage sites.",
+          examples: [
+            { problem: "When was Bulgaria founded and by whom?", solution: "Bulgaria was founded in 681 AD by Khan Asparuh — this makes it one of the oldest countries in Europe.", hint: "681 AD — that's over 1300 years ago!" },
+            { problem: "Who created the Cyrillic alphabet and why is it important?", solution: "Saints Cyril and Methodius and their disciples (especially Kliment Ohridski) created the Glagolitic and then Cyrillic alphabet so that Slavic peoples could read and write in their own language.", hint: "Cyrillic is used today by Bulgarian, Russian, Serbian, Ukrainian and many other languages." },
+            { problem: "Name 2 things Bulgaria is famous for worldwide.", solution: "Rose oil (used in perfumes — Bulgaria produces most of the world's rose oil). Yogurt — the bacteria Lactobacillus bulgaricus was named after Bulgaria. Kukeri — ancient ritual to scare away evil spirits.", hint: "Think: what does the world know about Bulgaria?" },
+          ],
+          tip: "🌹 Bulgaria is one of the oldest countries in Europe — over 1300 years of history!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Нашата страна — България",
+          explanation: "България е страна в Югоизточна Европа. Столицата е София. Българското знаме има три цвята: бяло, зелено и червено — от горе надолу. Националният химн е 'Мила Родино'. България има планини, равнини, реки и Черноморско крайбрежие.",
+          examples: [
+            { problem: "Коя е столицата на България?", solution: "София — тя е най-големият град и седалище на управлението.", hint: "София е в западна България, близо до планината Витоша." },
+            { problem: "Назови 3-те цвята на българския флаг по ред.", solution: "Бяло (горе), Зелено (в средата), Червено (долу) — хоризонтални ивици.", hint: "Цветовете от горе надолу: бяло, зелено, червено." },
+            { problem: "Назови 2 планини в България.", solution: "Рила (с връх Мусала — най-висок в Балканите), Витоша (до София), Стара планина, Родопите.", hint: "България има много планини! Най-високата е Мусала в Рила." },
+          ],
+          tip: "🇧🇬 Запомни флага на България: Бяло-Зелено-Червено — от горе надолу!",
+        },
+        high: {
+          title: "България: история, география и култура",
+          explanation: "България е основана през 681 г. от хан Аспарух. Кирилицата е създадена от св. Кирил и Методий и техните ученици през 9-ти век. България е член на ЕС от 2007 г. Богата е с розово масло, кисело мляко, кукерски ритуали и множество обекти под закрилата на ЮНЕСКО.",
+          examples: [
+            { problem: "Кога е основана България и от кого?", solution: "България е основана през 681 г. от хан Аспарух — това я прави една от най-старите страни в Европа.", hint: "681 г. — преди повече от 1300 години!" },
+            { problem: "Кой е създал кирилицата и защо е важна?", solution: "Св. Кирил и Методий и техните ученици (особено Климент Охридски) са създали глаголицата, а после кирилицата — за да могат славянските народи да четат и пишат на своя език.", hint: "Кирилицата се ползва и днес — на български, руски, сръбски, украински и много други езици." },
+            { problem: "Назови 2 неща, с които България е известна по света.", solution: "Розово масло (използва се в парфюмерията — България произвежда по-голямата част от световното розово масло). Кисело мляко — бактерията Lactobacillus bulgaricus е кръстена на България. Кукерите — древен ритуал за прогонване на злите духове.", hint: "Помисли: с какво светът познава България?" },
+          ],
+          tip: "🌹 България е една от най-старите страни в Европа — над 1300 години история!",
+        },
+      },
+      es: {
+        low: {
+          title: "Nuestro país — Bulgaria",
+          explanation: "Bulgaria es un país en el sureste de Europa. La capital es Sofía. La bandera búlgara tiene tres colores: blanco, verde y rojo — de arriba hacia abajo. El himno nacional es 'Mila Rodino' (Querida Patria). Bulgaria tiene montañas, llanuras, ríos y la costa del Mar Negro.",
+          examples: [
+            { problem: "¿Cuál es la capital de Bulgaria?", solution: "Sofía — es la ciudad más grande y la sede del gobierno.", hint: "Sofía está en el oeste de Bulgaria, cerca de la montaña Vitosha." },
+            { problem: "Nombra los 3 colores de la bandera búlgara en orden.", solution: "Blanco (arriba), Verde (medio), Rojo (abajo) — franjas horizontales.", hint: "Los colores de arriba abajo: blanco, verde, rojo." },
+            { problem: "Nombra 2 montañas en Bulgaria.", solution: "Rila (con Musala — el pico más alto de los Balcanes), Vitosha (cerca de Sofía), los Balcanes, los Ródope.", hint: "¡Bulgaria tiene muchas montañas! La más alta es Musala en Rila." },
+          ],
+          tip: "🇧🇬 ¡Recuerda la bandera de Bulgaria: Blanco-Verde-Rojo — de arriba hacia abajo!",
+        },
+        high: {
+          title: "Bulgaria: historia, geografía y cultura",
+          explanation: "Bulgaria fue fundada en 681 d.C. por el Khan Asparuh. El alfabeto cirílico fue creado por los Santos Cirilo y Metodio y sus discípulos en el siglo IX. Bulgaria se unió a la UE en 2007. Tiene rica cultura: aceite de rosa, yogur, rituales kukeri y sitios patrimonio de la UNESCO.",
+          examples: [
+            { problem: "¿Cuándo fue fundada Bulgaria y por quién?", solution: "Bulgaria fue fundada en 681 d.C. por el Khan Asparuh — esto la convierte en uno de los países más antiguos de Europa.", hint: "¡681 d.C. — hace más de 1300 años!" },
+            { problem: "¿Quién creó el alfabeto cirílico y por qué es importante?", solution: "Los Santos Cirilo y Metodio y sus discípulos crearon el alfabeto cirílico para que los pueblos eslavos pudieran leer y escribir en su propio idioma.", hint: "El cirílico se usa hoy en búlgaro, ruso, serbio, ucraniano y muchos otros idiomas." },
+            { problem: "Nombra 2 cosas por las que Bulgaria es famosa en el mundo.", solution: "Aceite de rosa (Bulgaria produce la mayor parte del aceite de rosa mundial). Yogur — la bacteria Lactobacillus bulgaricus lleva el nombre de Bulgaria. Kukeri — ritual antiguo para espantar los malos espíritus.", hint: "Piensa: ¿por qué el mundo conoce Bulgaria?" },
+          ],
+          tip: "🌹 ¡Bulgaria es uno de los países más antiguos de Europa — más de 1300 años de historia!",
+        },
+      },
+    },
+
+    /* ── SOCIAL-STUDIES / RIGHTS-DUTIES ── */
+    "social-studies/rights-duties": {
+      en: {
+        low: {
+          title: "Rights and Duties",
+          explanation: "Every child has RIGHTS — things you are entitled to. And every child has DUTIES — things you are responsible for. Rights: the right to go to school, to play, to be safe, to have a home, to be loved. Duties: to study, to help at home, to be kind, to follow rules, to respect others.",
+          examples: [
+            { problem: "Name 3 rights that every child has.", solution: "The right to education, to play, to be safe (from danger), to have food and shelter, to be loved and cared for.", hint: "Rights = things you deserve by being human." },
+            { problem: "Name 3 duties that children have at school.", solution: "To attend school, to listen to the teacher, to do homework, to be kind to classmates, to follow school rules.", hint: "Duties = things you are responsible to do." },
+            { problem: "Why do we have traffic rules?", solution: "Traffic rules keep everyone safe — drivers, cyclists and pedestrians. Without them, accidents would happen all the time.", hint: "Rules protect people — they are there for everyone's safety." },
+          ],
+          tip: "⚖️ Rights and duties go together — if you have the right to play, you also have the duty to let others play too!",
+        },
+        high: {
+          title: "Children's Rights and Civic Duties",
+          explanation: "The United Nations Convention on the Rights of the Child (1989) lists rights every child has: survival, development, protection, and participation. In Bulgaria these are protected by law. With rights come responsibilities: if you have the right to education, you have the duty to study and respect your school. A good citizen uses their rights wisely and fulfils their duties.",
+          examples: [
+            { problem: "What is the UN Convention on the Rights of the Child?", solution: "An international agreement (1989) signed by most countries that lists rights every child has — to be safe, educated, healthy, and to have their voice heard.", hint: "Convention = an international agreement between countries." },
+            { problem: "Give an example of how a right and a duty are connected.", solution: "Right: the right to education. Duty: to attend school, study, and do homework. Right: the right to a clean environment. Duty: to not litter and to recycle.", hint: "For each right, think: 'What is my responsibility that comes with it?'" },
+            { problem: "What can you do if you see a classmate being bullied?", solution: "Tell a teacher or trusted adult immediately. You have both the RIGHT to be safe and the DUTY to help others be safe too.", hint: "Civic duty = doing what is right for your community, not just for yourself." },
+          ],
+          tip: "📜 Every right comes with a matching duty — knowing both makes you a responsible citizen!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Права и задължения",
+          explanation: "Всяко дете има ПРАВА — неща, на които имаш право. И всяко дете има ЗАДЪЛЖЕНИЯ — неща, за които си отговорен. Права: правото да ходиш на училище, да се играеш, да си в безопасност, да имаш дом, да бъдеш обичан. Задължения: да учиш, да помагаш у дома, да си добро, да спазваш правилата, да уважаваш другите.",
+          examples: [
+            { problem: "Назови 3 права, които всяко дете има.", solution: "Правото на образование, на игра, на безопасност (от опасност), на храна и дом, на обич и грижа.", hint: "Права = нещата, на които имаш право просто защото си човек." },
+            { problem: "Назови 3 задължения, които децата имат в училище.", solution: "Да ходят на училище, да слушат учителя, да си пишат домашното, да са добри към съучениците, да спазват правилника.", hint: "Задължения = нещата, за които си отговорен да ги направиш." },
+            { problem: "Защо имаме правила за движение по пътищата?", solution: "Правилата за движение пазят всички — шофьори, колоездачи и пешеходци. Без тях катастрофите щяха да са ежедневие.", hint: "Правилата предпазват хората — те са за безопасността на всички." },
+          ],
+          tip: "⚖️ Правата и задълженията вървят заедно — ако имаш право да играеш, имаш и задължение да оставяш другите да играят!",
+        },
+        high: {
+          title: "Права на детето и граждански задължения",
+          explanation: "Конвенцията на ООН за правата на детето (1989 г.) изброява правата, на които има право всяко дете: оцеляване, развитие, закрила и участие. В България те са защитени от закона. С правата идват и отговорности: ако имаш право на образование, имаш и задължение да учиш и да уважаваш училището. Добрият гражданин ползва правата си разумно и изпълнява задълженията си.",
+          examples: [
+            { problem: "Какво е Конвенцията на ООН за правата на детето?", solution: "Международно споразумение (1989 г.), подписано от повечето страни, което изброява правата на всяко дете — да бъде в безопасност, образовано, здраво и чуто.", hint: "Конвенция = международно споразумение между страните." },
+            { problem: "Дай пример как едно право и едно задължение са свързани.", solution: "Право: правото на образование. Задължение: да ходиш на училище, да учиш, да пишеш домашното. Право: правото на чиста природа. Задължение: да не замърсяваш и да рециклираш.", hint: "За всяко право помисли: 'Каква е моята отговорност, която идва с него?'" },
+            { problem: "Какво можеш да направиш, ако видиш съученик да бъде тормозен?", solution: "Незабавно разкажи на учител или доверен възрастен. Имаш и ПРАВОТО да си в безопасност, и ЗАДЪЛЖЕНИЕТО да помагаш на другите да са в безопасност.", hint: "Гражданско задължение = да правиш правилното за своята общност, не само за себе си." },
+          ],
+          tip: "📜 С всяко право идва съответстващо задължение — знанието и на двете те прави отговорен гражданин!",
+        },
+      },
+      es: {
+        low: {
+          title: "Derechos y deberes",
+          explanation: "Cada niño tiene DERECHOS — cosas a las que tienes derecho. Y cada niño tiene DEBERES — cosas de las que eres responsable. Derechos: el derecho a ir a la escuela, a jugar, a estar seguro, a tener un hogar, a ser amado. Deberes: estudiar, ayudar en casa, ser amable, seguir las reglas, respetar a los demás.",
+          examples: [
+            { problem: "Nombra 3 derechos que tiene todo niño.", solution: "El derecho a la educación, al juego, a la seguridad, a tener comida y hogar, a ser amado y cuidado.", hint: "Derechos = cosas a las que tienes derecho por ser humano." },
+            { problem: "Nombra 3 deberes que los niños tienen en la escuela.", solution: "Asistir a la escuela, escuchar al maestro, hacer la tarea, ser amable con los compañeros, seguir las reglas escolares.", hint: "Deberes = cosas de las que eres responsable de hacer." },
+            { problem: "¿Por qué tenemos reglas de tráfico?", solution: "Las reglas de tráfico mantienen seguros a todos — conductores, ciclistas y peatones. Sin ellas, habría accidentes constantemente.", hint: "Las reglas protegen a las personas — existen para la seguridad de todos." },
+          ],
+          tip: "⚖️ ¡Los derechos y los deberes van juntos — si tienes el derecho de jugar, también tienes el deber de dejar jugar a otros!",
+        },
+        high: {
+          title: "Derechos del niño y deberes cívicos",
+          explanation: "La Convención de la ONU sobre los Derechos del Niño (1989) enumera los derechos de todo niño: supervivencia, desarrollo, protección y participación. Con los derechos vienen responsabilidades: si tienes el derecho a la educación, tienes el deber de estudiar y respetar tu escuela.",
+          examples: [
+            { problem: "¿Qué es la Convención de la ONU sobre los Derechos del Niño?", solution: "Un acuerdo internacional (1989) firmado por la mayoría de países que enumera los derechos de todo niño — estar seguro, educado, sano y ser escuchado.", hint: "Convención = acuerdo internacional entre países." },
+            { problem: "Da un ejemplo de cómo un derecho y un deber están conectados.", solution: "Derecho: a la educación. Deber: asistir a la escuela, estudiar, hacer la tarea. Derecho: a un ambiente limpio. Deber: no tirar basura y reciclar.", hint: "Para cada derecho, piensa: '¿Cuál es mi responsabilidad que viene con él?'" },
+            { problem: "¿Qué puedes hacer si ves a un compañero siendo intimidado?", solution: "Díselo inmediatamente a un maestro o adulto de confianza. Tienes el DERECHO a estar seguro y el DEBER de ayudar a otros a estarlo también.", hint: "Deber cívico = hacer lo correcto para tu comunidad, no solo para ti." },
+          ],
+          tip: "📜 ¡Cada derecho viene con un deber correspondiente — conocer ambos te hace un ciudadano responsable!",
+        },
+      },
+    },
+
+    /* ── SOCIAL-STUDIES / TRADITIONS ── */
+    "social-studies/traditions": {
+      en: {
+        low: {
+          title: "Bulgarian Holidays and Traditions",
+          explanation: "Bulgaria has many beautiful traditions and national holidays. Baba Marta (Grandma Marta, 1 March) — we tie red-and-white martenitsi for health and happiness. Bŭdni Vecher (Christmas Eve, 24 December) — the family gathers for a meatless meal. Vassilvaden (New Year, 1 January) — children tap adults with cornel branches for health. Tryphon Zarezan (1 February) — celebration of vineyards.",
+          examples: [
+            { problem: "What is a martenitsa and when do we give it?", solution: "A martenitsa is a red-and-white decoration (bracelet or figure). We give it on 1 March (Baba Marta Day) for health and the coming of spring.", hint: "Red and white twisted together — worn until you see a stork or a blossoming tree." },
+            { problem: "What do Bulgarian families do on Bŭdni Vecher (Christmas Eve)?", solution: "The family gathers for a meatless dinner with an odd number of dishes (7, 9, or 12). They share the ritual bread (пита) and sometimes crack nuts to predict the coming year.", hint: "Christmas Eve in Bulgaria is a family and religious celebration — meat is not eaten." },
+            { problem: "What is the national holiday of Bulgaria?", solution: "3 March — Liberation Day (Ден на Освобождението). On 3 March 1878 Bulgaria was liberated from Ottoman rule after the Russo-Turkish War.", hint: "3 March 1878 — the signing of the San Stefano Peace Treaty." },
+          ],
+          tip: "🩺 Bulgarian traditions connect us to our ancestors and to each other — they keep our culture alive!",
+        },
+        high: {
+          title: "Bulgarian Cultural Traditions and Their Meaning",
+          explanation: "Bulgarian traditions blend pre-Christian (pagan), Orthodox Christian, and folk elements. Kukeri: men dress in scary costumes with bells to scare away evil spirits — done in late winter. Lazaruvane: young girls sing folk songs at neighbours' doors on Lazarus Saturday before Easter. Nestinarstvo: fire dancing on hot coals — a UNESCO Intangible Heritage ritual from the Strandzha region. Traditions carry community memory and identity.",
+          examples: [
+            { problem: "What are Kukeri and what is their purpose?", solution: "Kukeri are men dressed in animal fur costumes with large bells. They dance through villages in late winter to chase away evil spirits and bring good crops and health for the new year.", hint: "Kukeri = a pre-Christian ritual meant to protect the community." },
+            { problem: "What is Nestinarstvo and why is it special?", solution: "Nestinarstvo is a ritual where people dance barefoot on hot embers (fire) in a trance state. It comes from the Strandzha region and is recognised by UNESCO as Intangible Cultural Heritage.", hint: "Nestinarstvo blends Thracian and Christian traditions — very unique to Bulgaria." },
+            { problem: "How does a tradition differ from a habit?", solution: "A habit is personal (e.g. brushing teeth). A tradition is shared by a community or culture across generations — it has cultural meaning and story behind it.", hint: "Tradition = shared across a community + passed down through generations." },
+          ],
+          tip: "🎭 Every Bulgarian tradition tells a story — understanding them connects you to thousands of years of culture!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Български празници и традиции",
+          explanation: "България има много красиви традиции и национални празници. Баба Марта (1 март) — завързваме мартеници за здраве и щастие. Бъдни вечер (24 декември) — семейството се събира за постна вечеря. Васильовден (1 януари) — децата потупват с дренова клонка за здраве. Трифон Зарезан (1 февруари) — празник на лозята.",
+          examples: [
+            { problem: "Какво е мартеница и кога я даваме?", solution: "Мартеницата е червено-бяла украса (гривна или фигурки). Даваме я на 1 март (Баба Марта) за здраве и настъпването на пролетта.", hint: "Червено и бяло усукани заедно — носим я, докато не видим щъркел или цъфнало дърво." },
+            { problem: "Какво правят българските семейства на Бъдни вечер?", solution: "Семейството се събира за постна вечеря с нечетен брой ястия (7, 9 или 12). Чупят пита и ядки, за да предрекат идващата година.", hint: "Бъдни вечер в България е семеен и религиозен празник — не се яде месо." },
+            { problem: "Кой е националният празник на България?", solution: "3 март — Ден на Освобождението. На 3 март 1878 г. България е освободена от османско владичество след Руско-турската война.", hint: "3 март 1878 г. — подписването на Санстефанския мирен договор." },
+          ],
+          tip: "🎀 Българските традиции ни свързват с прадедите ни и помежду ни — те пазят нашата култура жива!",
+        },
+        high: {
+          title: "Български културни традиции и тяхното значение",
+          explanation: "Българските традиции съчетават предхристиянски (езически), православни и народни елементи. Кукери: мъже с наплашващи костюми и камбани прогонват злите духове — ритуалът е в края на зимата. Лазаруване: млади момичета пеят народни песни по домовете на съседите на Лазарица преди Великден. Нестинарство: танцуване по горещи въглени — ритуал от Странджа, признат от ЮНЕСКО.",
+          examples: [
+            { problem: "Какво са кукерите и каква е тяхната цел?", solution: "Кукерите са мъже, облечени в животински кожи с огромни камбани. Те танцуват из селата в края на зимата, за да прогонят злите духове и да донесат богата реколта и здраве.", hint: "Кукерите са предхристиянски ритуал за закрила на общността." },
+            { problem: "Какво е нестинарство и защо е специално?", solution: "Нестинарството е ритуал, при който хора танцуват боси върху горещи въглени в транс. Идва от Странджа и е признато от ЮНЕСКО за нематериално културно наследство.", hint: "Нестинарството съчетава тракийски и православни традиции — уникално за България." },
+            { problem: "Как се различава традицията от навика?", solution: "Навикът е личен (напр. миене на зъби). Традицията е споделена от общност или култура в продължение на поколения — тя носи културен смисъл и история.", hint: "Традиция = споделена от общността + предавана от поколение на поколение." },
+          ],
+          tip: "🎭 Всяка българска традиция разказва история — разбирането им те свързва с хиляди години култура!",
+        },
+      },
+      es: {
+        low: {
+          title: "Festividades y tradiciones búlgaras",
+          explanation: "Bulgaria tiene muchas hermosas tradiciones y festividades nacionales. Baba Marta (1 de marzo) — atamos martenitsas rojas y blancas para la salud. Bŭdni Vecher (Nochebuena, 24 de diciembre) — la familia se reúne para una cena sin carne. Vassilvaden (Año Nuevo, 1 de enero). Tryphon Zarezan (1 de febrero) — celebración de los viñedos.",
+          examples: [
+            { problem: "¿Qué es una martenitsa y cuándo la damos?", solution: "Una martenitsa es una decoración roja y blanca (pulsera o figura). La damos el 1 de marzo (Día de Baba Marta) para la salud y la llegada de la primavera.", hint: "Rojo y blanco entrelazados — se lleva hasta ver una cigüeña o un árbol en flor." },
+            { problem: "¿Qué hacen las familias búlgaras en Nochebuena?", solution: "La familia se reúne para una cena sin carne con un número impar de platos (7, 9 o 12). Comparten el pan ritual y a veces rompen nueces para predecir el año venidero.", hint: "La Nochebuena en Bulgaria es una celebración familiar y religiosa — no se come carne." },
+            { problem: "¿Cuál es el día festivo nacional de Bulgaria?", solution: "El 3 de marzo — Día de la Liberación. El 3 de marzo de 1878 Bulgaria fue liberada del dominio otomano tras la guerra ruso-turca.", hint: "3 de marzo de 1878 — la firma del Tratado de Paz de San Stefano." },
+          ],
+          tip: "🎀 ¡Las tradiciones búlgaras nos conectan con nuestros antepasados y entre nosotros — mantienen viva nuestra cultura!",
+        },
+        high: {
+          title: "Tradiciones culturales búlgaras y su significado",
+          explanation: "Las tradiciones búlgaras mezclan elementos precristianos (paganos), ortodoxos y folclóricos. Kukeri: hombres disfrazados con pieles y campanas para ahuyentar espíritus malignos. Lazaruvane: chicas jóvenes cantan canciones folclóricas en los sábados de Lázaro. Nestinarstvo: danza en carbones ardientes — Patrimonio Inmaterial de la UNESCO de la región de Strandja.",
+          examples: [
+            { problem: "¿Qué son los Kukeri y cuál es su propósito?", solution: "Los Kukeri son hombres disfrazados con pieles de animales y grandes campanas. Danzan por los pueblos a finales del invierno para ahuyentar los malos espíritus y traer buenas cosechas.", hint: "Kukeri = un ritual precristiano para proteger a la comunidad." },
+            { problem: "¿Qué es Nestinarstvo y por qué es especial?", solution: "El Nestinarstvo es un ritual donde personas danzan descalzas sobre brasas ardientes en estado de trance. Proviene de la región de Strandja y es reconocido por la UNESCO.", hint: "El Nestinarstvo mezcla tradiciones tracias y cristianas — muy único de Bulgaria." },
+            { problem: "¿Cómo se diferencia una tradición de un hábito?", solution: "Un hábito es personal (p. ej. cepillarse los dientes). Una tradición es compartida por una comunidad a través de generaciones — tiene significado cultural e historia.", hint: "Tradición = compartida por la comunidad + transmitida de generación en generación." },
+          ],
+          tip: "🎭 ¡Cada tradición búlgara cuenta una historia — comprenderlas te conecta con miles de años de cultura!",
+        },
+      },
+    },
+
+    /* ── NATURAL-SCIENCE / LIVING-THINGS ── */
+    "natural-science/living-things": {
+      en: {
+        low: {
+          title: "Living Things",
+          explanation: "A living thing is alive — it grows, breathes, needs food and water, moves, and can make more of itself (reproduce). Plants, animals, fungi, and bacteria are all living things. Non-living things (like rocks, chairs, water) do not grow, breathe, or reproduce. Remember the 7 signs of life: MRS GREN — Movement, Respiration, Sensitivity, Growth, Reproduction, Excretion, Nutrition.",
+          examples: [
+            { problem: "Is a rock a living thing? Why or why not?", solution: "No — a rock does not grow, breathe, eat, or reproduce. It shows none of the 7 signs of life.", hint: "Check: does it grow? breathe? reproduce? If no to all — it is non-living." },
+            { problem: "Name 2 things that ALL living things need.", solution: "All living things need food/energy and water to survive.", hint: "Think: what do you, a plant, and a dog all need every day?" },
+            { problem: "How is a plant different from an animal as a living thing?", solution: "Plants make their own food using sunlight (photosynthesis). Animals cannot make their own food — they must eat plants or other animals.", hint: "Plants = producers. Animals = consumers." },
+          ],
+          tip: "🌱 MRS GREN: Movement, Respiration, Sensitivity, Growth, Reproduction, Excretion, Nutrition — all 7 = living!",
+        },
+        high: {
+          title: "Characteristics of Living Organisms",
+          explanation: "All living organisms share 7 life processes (MRS GREN). Scientists classify living things into kingdoms: Animals, Plants, Fungi, Bacteria, Protists. Cells are the basic unit of life — every living thing is made of one or more cells. Plant cells have a cell wall and chloroplasts (for photosynthesis). Animal cells do not have a cell wall.",
+          examples: [
+            { problem: "What are the 5 kingdoms of living things?", solution: "1. Animalia (animals) 2. Plantae (plants) 3. Fungi (mushrooms, mould) 4. Bacteria 5. Protists (e.g. amoeba)", hint: "We use classification to organise the huge variety of life on Earth." },
+            { problem: "What is photosynthesis?", solution: "The process by which plants make their own food using sunlight, water and carbon dioxide: sunlight + water + CO₂ → glucose + oxygen.", hint: "Photo = light. Synthesis = making. Plants make food using light energy." },
+            { problem: "What is the difference between a plant cell and an animal cell?", solution: "Plant cell: has a cell wall, chloroplasts (for photosynthesis), and a large vacuole. Animal cell: no cell wall, no chloroplasts.", hint: "The cell wall gives plants their rigid shape." },
+          ],
+          tip: "🔬 Every living thing, from bacteria to blue whales, is made of cells — the building blocks of life!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Живи организми",
+          explanation: "Живият организъм е жив — расте, диша, нуждае се от храна и вода, движи се и може да се размножава. Растенията, животните, гъбите и бактериите са живи организми. Неживите неща (камъни, столове, вода) не растат, не дишат и не се размножават. Запомни 7-те признака на живота: движение, дишане, раздразнимост, растеж, размножаване, отделяне, хранене.",
+          examples: [
+            { problem: "Камъкът жив организъм ли е? Защо?", solution: "Не — камъкът не расте, не диша, не се храни и не се размножава. Не показва нито един от 7-те признака на живота.", hint: "Провери: расте ли? Диша ли? Размножава ли се? Ако не на всичко — не е жив." },
+            { problem: "Назови 2 неща, от които се нуждаят ВСИЧКИ живи организми.", solution: "Всички живи организми се нуждаят от храна/енергия и вода, за да оцелеят.", hint: "Помисли: от какво се нуждаят ежедневно ти, едно растение и едно куче?" },
+            { problem: "Как се различава растението от животното като жив организъм?", solution: "Растенията си правят сами храна чрез фотосинтеза (използват слънчева светлина). Животните не могат сами да правят храна — трябва да ядат растения или други животни.", hint: "Растения = производители. Животни = потребители." },
+          ],
+          tip: "🌱 7-те признака на живота: движение, дишане, раздразнимост, растеж, размножаване, отделяне, хранене — всичките 7 = жив!",
+        },
+        high: {
+          title: "Признаци на живите организми",
+          explanation: "Всички живи организми споделят 7 жизнени процеса. Учените класифицират живите организми в царства: Животни, Растения, Гъби, Бактерии, Протисти. Клетката е основна единица на живота — всеки жив организъм е изграден от една или повече клетки. Растителните клетки имат клетъчна стена и хлоропласти (за фотосинтеза). Животинските клетки нямат клетъчна стена.",
+          examples: [
+            { problem: "Кои са 5-те царства на живите организми?", solution: "1. Животни 2. Растения 3. Гъби 4. Бактерии 5. Протисти (напр. амеба)", hint: "Класификацията ни помага да наредим огромното разнообразие на живота на Земята." },
+            { problem: "Какво е фотосинтеза?", solution: "Процесът, чрез който растенията правят сами храна, използвайки слънчева светлина, вода и въглероден двуокис: светлина + вода + CO₂ → глюкоза + кислород.", hint: "Фото = светлина. Синтеза = създаване. Растенията правят храна чрез светлинна енергия." },
+            { problem: "Каква е разликата между растителна и животинска клетка?", solution: "Растителна клетка: има клетъчна стена, хлоропласти (за фотосинтеза) и голяма вакуола. Животинска клетка: няма клетъчна стена, няма хлоропласти.", hint: "Клетъчната стена дава на растенията твърдата им форма." },
+          ],
+          tip: "🔬 Всеки жив организъм, от бактерия до синия кит, е изграден от клетки — основните градивни единици на живота!",
+        },
+      },
+      es: {
+        low: {
+          title: "Seres vivos",
+          explanation: "Un ser vivo está vivo — crece, respira, necesita comida y agua, se mueve y puede reproducirse. Plantas, animales, hongos y bacterias son seres vivos. Los objetos sin vida (como piedras, sillas, agua) no crecen, respiran ni se reproducen. Recuerda los 7 signos de vida: movimiento, respiración, sensibilidad, crecimiento, reproducción, excreción, nutrición.",
+          examples: [
+            { problem: "¿Es una piedra un ser vivo? ¿Por qué?", solution: "No — una piedra no crece, no respira, no come ni se reproduce. No muestra ninguno de los 7 signos de vida.", hint: "Comprueba: ¿crece? ¿respira? ¿se reproduce? Si no a todo — no está vivo." },
+            { problem: "Nombra 2 cosas que necesitan TODOS los seres vivos.", solution: "Todos los seres vivos necesitan comida/energía y agua para sobrevivir.", hint: "Piensa: ¿qué necesitan diariamente tú, una planta y un perro?" },
+            { problem: "¿En qué se diferencia una planta de un animal como ser vivo?", solution: "Las plantas producen su propio alimento usando luz solar (fotosíntesis). Los animales no pueden producir su propio alimento — deben comer plantas u otros animales.", hint: "Plantas = productores. Animales = consumidores." },
+          ],
+          tip: "🌱 Los 7 signos de vida: movimiento, respiración, sensibilidad, crecimiento, reproducción, excreción, nutrición — ¡los 7 = vivo!",
+        },
+        high: {
+          title: "Características de los organismos vivos",
+          explanation: "Todos los organismos vivos comparten 7 procesos vitales. Los científicos clasifican a los seres vivos en reinos: Animales, Plantas, Hongos, Bacterias, Protistas. La célula es la unidad básica de la vida. Las células vegetales tienen pared celular y cloroplastos. Las células animales no tienen pared celular.",
+          examples: [
+            { problem: "¿Cuáles son los 5 reinos de los seres vivos?", solution: "1. Animalia (animales) 2. Plantae (plantas) 3. Fungi (hongos) 4. Bacteria 5. Protistas (p. ej. ameba)", hint: "Usamos la clasificación para organizar la enorme variedad de vida en la Tierra." },
+            { problem: "¿Qué es la fotosíntesis?", solution: "El proceso por el cual las plantas producen su propio alimento usando luz solar, agua y dióxido de carbono: luz + agua + CO₂ → glucosa + oxígeno.", hint: "Foto = luz. Síntesis = producción. Las plantas producen alimento usando energía luminosa." },
+            { problem: "¿Cuál es la diferencia entre una célula vegetal y una animal?", solution: "Célula vegetal: tiene pared celular, cloroplastos y una gran vacuola. Célula animal: sin pared celular, sin cloroplastos.", hint: "La pared celular da a las plantas su forma rígida." },
+          ],
+          tip: "🔬 ¡Todos los seres vivos, desde bacterias hasta ballenas azules, están hechos de células — los bloques de construcción de la vida!",
+        },
+      },
+    },
+
+    /* ── NATURAL-SCIENCE / MATERIALS ── */
+    "natural-science/materials": {
+      en: {
+        low: {
+          title: "Materials and Their Properties",
+          explanation: "Everything around us is made of materials. Materials have properties — features that describe what they are like: hard or soft, rough or smooth, transparent (see-through) or opaque (cannot see through), flexible or rigid, heavy or light. We choose materials based on their properties: glass is transparent so we use it for windows; rubber is flexible so we use it for tyres.",
+          examples: [
+            { problem: "Name 2 properties of glass.", solution: "Glass is transparent (you can see through it) and hard (rigid, does not bend). It can also break — it is brittle.", hint: "Think of a window — what can you do with glass? See through it? Bend it?" },
+            { problem: "Why is rubber used for tyres?", solution: "Rubber is flexible (it bends without breaking), waterproof, and durable — perfect for tyres that must grip the road and survive bumps.", hint: "Tyres must grip, stretch a little, and not break. Which material can do that?" },
+            { problem: "Is wood natural or man-made?", solution: "Wood is a NATURAL material — it comes from trees. Plastic is man-made.", hint: "Natural = comes from nature (plants, animals, earth). Man-made = made in a factory." },
+          ],
+          tip: "🔍 Scientists describe materials by their PROPERTIES — always ask: Is it hard? Heavy? Transparent? Flexible?",
+        },
+        high: {
+          title: "Materials: Natural, Synthetic and Their Uses",
+          explanation: "Materials are classified as natural (wood, stone, cotton, wool, water) or synthetic/man-made (plastic, nylon, glass, steel, concrete). Synthetic materials are often made from natural ones (plastic from oil). Scientists test materials by properties: strength (can it hold weight?), hardness (can it be scratched?), conductivity (does it carry electricity?), transparency.",
+          examples: [
+            { problem: "What is the difference between a natural and a synthetic material?", solution: "Natural: found in nature — wood, stone, cotton, wool, leather. Synthetic: made by humans in factories — plastic, nylon, polyester, concrete.", hint: "Synthetic usually means: made in a factory from chemical processes." },
+            { problem: "Why is steel used for bridges and buildings?", solution: "Steel is very strong (high tensile strength), durable, and can be shaped — it can hold enormous weight without breaking.", hint: "Bridges must hold heavy vehicles. What property does the material need?" },
+            { problem: "Name a material that conducts electricity and one that does not.", solution: "Conducts: copper (used in wires), aluminium, iron — metals generally conduct electricity. Does NOT conduct (insulators): rubber, plastic, wood, glass.", hint: "Conductors let electricity flow. Insulators block it." },
+          ],
+          tip: "⚡ Metals conduct electricity; non-metals mostly don't — that's why wires are copper but covered in plastic!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Материали и техните свойства",
+          explanation: "Всичко около нас е направено от материали. Материалите имат свойства — характеристики, описващи какви са: твърди или меки, грапави или гладки, прозрачни или непрозрачни, гъвкави или твърди, тежки или леки. Избираме материали според свойствата им: стъклото е прозрачно, затова го използваме за прозорци; гумата е гъвкава, затова я използваме за гуми на коли.",
+          examples: [
+            { problem: "Назови 2 свойства на стъклото.", solution: "Стъклото е прозрачно (може да се вижда през него) и твърдо (не се огъва). То може и да се чупи — крехко е.", hint: "Помисли за прозорец — какво може да правиш с него? Виждаш ли през него? Огъва ли се?" },
+            { problem: "Защо гумата се използва за автомобилни гуми?", solution: "Гумата е гъвкава (огъва се, без да се чупи), водонепропусклива и издръжлива — идеална за гуми, нуждаещи се от сцепление с пътя.", hint: "Гумите трябва да се захващат за пътя, да се огъват малко и да не се чупят. Кой материал може да прави това?" },
+            { problem: "Дървото природен или изкуствен материал ли е?", solution: "Дървото е ПРИРОДЕН материал — идва от дърветата. Пластмасата е изкуствен материал.", hint: "Природен = идва от природата (растения, животни, земя). Изкуствен = направен в завод." },
+          ],
+          tip: "🔍 Учените описват материалите чрез СВОЙСТВАТА им — винаги питай: Твърд ли е? Тежък ли е? Прозрачен ли е? Гъвкав ли е?",
+        },
+        high: {
+          title: "Материали: природни, изкуствени и тяхното приложение",
+          explanation: "Материалите се делят на природни (дърво, камък, памук, вълна, вода) и изкуствени/синтетични (пластмаса, найлон, стъкло, стомана, бетон). Синтетичните материали често се правят от природни (пластмасата — от нефт). Учените изследват материалите по свойства: якост, твърдост, електропроводимост, прозрачност.",
+          examples: [
+            { problem: "Каква е разликата между природен и синтетичен материал?", solution: "Природен: намиран в природата — дърво, камък, памук, вълна, кожа. Синтетичен: направен от хората в заводи — пластмаса, найлон, полиестер, бетон.", hint: "Синтетичен обикновено означава: направен в завод чрез химически процеси." },
+            { problem: "Защо стоманата се използва за мостове и сгради?", solution: "Стоманата е много яка (висока опъна якост), издръжлива и може да се оформя — може да издържа огромно тегло, без да се чупи.", hint: "Мостовете трябва да издържат тежки превозни средства. Какво свойство трябва да има материалът?" },
+            { problem: "Назови материал, провеждащ електричество, и такъв, който не провежда.", solution: "Провежда: мед (използва се в кабели), алуминий, желязо — металите като цяло провеждат електричество. НЕ провежда (изолатор): гума, пластмаса, дърво, стъкло.", hint: "Проводниците пускат електричеството да тече. Изолаторите го блокират." },
+          ],
+          tip: "⚡ Металите провеждат електричество; неметалите — обикновено не — затова жиците са медни, но обвити в пластмаса!",
+        },
+      },
+      es: {
+        low: {
+          title: "Materiales y sus propiedades",
+          explanation: "Todo lo que nos rodea está hecho de materiales. Los materiales tienen propiedades: duro o blando, rugoso o liso, transparente u opaco, flexible o rígido, pesado o ligero. Elegimos materiales según sus propiedades: el vidrio es transparente, por eso lo usamos para ventanas; el caucho es flexible, por eso lo usamos para neumáticos.",
+          examples: [
+            { problem: "Nombra 2 propiedades del vidrio.", solution: "El vidrio es transparente (puedes ver a través de él) y duro (rígido, no se dobla). También puede romperse — es frágil.", hint: "Piensa en una ventana — ¿qué puedes hacer con el vidrio? ¿Ver a través de él? ¿Doblarlo?" },
+            { problem: "¿Por qué se usa caucho para los neumáticos?", solution: "El caucho es flexible (se dobla sin romperse), impermeable y duradero — perfecto para neumáticos que deben agarrar la carretera.", hint: "Los neumáticos deben agarrar, estirarse un poco y no romperse. ¿Qué material puede hacer eso?" },
+            { problem: "¿Es la madera natural o artificial?", solution: "La madera es un material NATURAL — proviene de los árboles. El plástico es artificial.", hint: "Natural = viene de la naturaleza. Artificial = fabricado en una fábrica." },
+          ],
+          tip: "🔍 ¡Los científicos describen los materiales por sus PROPIEDADES — siempre pregunta: ¿Es duro? ¿Pesado? ¿Transparente? ¿Flexible?",
+        },
+        high: {
+          title: "Materiales: naturales, sintéticos y sus usos",
+          explanation: "Los materiales se clasifican en naturales (madera, piedra, algodón, lana, agua) o sintéticos/artificiales (plástico, nailón, vidrio, acero, hormigón). Los materiales sintéticos a menudo se fabrican a partir de naturales (el plástico del petróleo). Los científicos prueban materiales por propiedades: resistencia, dureza, conductividad, transparencia.",
+          examples: [
+            { problem: "¿Cuál es la diferencia entre material natural y sintético?", solution: "Natural: encontrado en la naturaleza — madera, piedra, algodón, lana, cuero. Sintético: hecho por humanos en fábricas — plástico, nailón, poliéster, hormigón.", hint: "Sintético generalmente significa: fabricado en una fábrica mediante procesos químicos." },
+            { problem: "¿Por qué se usa acero para puentes y edificios?", solution: "El acero es muy resistente, duradero y puede moldearse — puede soportar un peso enorme sin romperse.", hint: "Los puentes deben soportar vehículos pesados. ¿Qué propiedad necesita el material?" },
+            { problem: "Nombra un material que conduce electricidad y uno que no.", solution: "Conduce: cobre (usado en cables), aluminio, hierro — los metales generalmente conducen. No conduce: caucho, plástico, madera, vidrio.", hint: "Los conductores dejan fluir la electricidad. Los aislantes la bloquean." },
+          ],
+          tip: "⚡ ¡Los metales conducen electricidad; los no metales generalmente no — por eso los cables son de cobre pero cubiertos de plástico!",
+        },
+      },
+    },
+
+    /* ── NATURAL-SCIENCE / LIGHT-SOUND ── */
+    "natural-science/light-sound": {
+      en: {
+        low: {
+          title: "Light and Sound",
+          explanation: "Light allows us to see. Light comes from sources: the Sun (natural), a lamp or candle (artificial). Light travels in straight lines. When light hits a surface, it can reflect (bounce back) — that is why you see yourself in a mirror. Sound is made when something vibrates. Sound travels through air, water, and solid objects. Loud sounds have strong vibrations; quiet sounds have gentle vibrations.",
+          examples: [
+            { problem: "Name 2 natural and 2 artificial sources of light.", solution: "Natural: the Sun, fire, lightning, glowing animals (firefly). Artificial: electric lamp, candle, torch, phone screen.", hint: "Natural = exists in nature without humans. Artificial = made by humans." },
+            { problem: "Why do you see yourself in a mirror?", solution: "Mirrors are very smooth and shiny — they reflect light in a regular pattern so the image is clear. Your face reflects light into the mirror, which reflects it back to your eyes.", hint: "Reflection = light bounces off a smooth surface." },
+            { problem: "Why can you hear a sound even in a different room?", solution: "Sound travels through air as vibrations (sound waves). Walls and floors also carry vibrations, allowing sound to pass through to other rooms.", hint: "Sound needs a medium (air, water, solid) to travel through. It cannot travel in a vacuum." },
+          ],
+          tip: "💡 Light travels straight. Sound travels in all directions as waves — that's why you can hear around corners!",
+        },
+        high: {
+          title: "Properties of Light and Sound",
+          explanation: "Light travels at 300,000 km per second — the fastest thing in the universe. Sound travels at only 340 m/s in air (much slower). Shadows form when opaque objects block light. Refraction happens when light bends as it passes from air into water (why a straw looks bent). Sound pitch depends on frequency — high frequency = high pitch (whistle). Loudness depends on amplitude.",
+          examples: [
+            { problem: "Why does a straw look bent in a glass of water?", solution: "Refraction — light bends when it passes from air into water (different densities). This makes the straw appear to be in a different position than it actually is.", hint: "Refraction = bending of light when passing between materials." },
+            { problem: "What is the difference between pitch and volume of sound?", solution: "Pitch = how high or low a sound is (frequency). A whistle is high-pitched; thunder is low-pitched. Volume = how loud or quiet (amplitude of vibration).", hint: "Pitch = high/low tone. Volume = loud/quiet." },
+            { problem: "Why do you see lightning before you hear thunder?", solution: "Light travels much faster than sound. Lightning reaches your eyes almost instantly. Thunder (the sound) follows more slowly — about 3 seconds per kilometre away.", hint: "Light speed: 300,000 km/s. Sound speed: 340 m/s. Light wins by a huge margin!" },
+          ],
+          tip: "⚡ Count the seconds between lightning and thunder — every 3 seconds = 1 km away!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Светлина и звук",
+          explanation: "Светлината ни позволява да виждаме. Светлината идва от източници: Слънцето (естествен), лампа или свещ (изкуствен). Светлината се разпространява праволинейно. Когато светлината удари повърхност, тя може да се отрази — затова се виждаш в огледалото. Звукът се получава, когато нещо вибрира. Звукът се разпространява през въздух, вода и твърди тела. Силните звуци имат силни вибрации; тихите — слаби.",
+          examples: [
+            { problem: "Назови 2 естествени и 2 изкуствени източници на светлина.", solution: "Естествени: Слънцето, огънят, мълнията, светещи животни (светулка). Изкуствени: електрическа лампа, свещ, фенерче, екран на телефон.", hint: "Естествен = съществува в природата без хора. Изкуствен = направен от хора." },
+            { problem: "Защо се виждаш в огледалото?", solution: "Огледалата са много гладки и блестящи — те отразяват светлината по правилен начин, така че образът е ясен. Лицето ти отразява светлина към огледалото, а то я отразява обратно към очите ти.", hint: "Отражение = светлината отскача от гладка повърхност." },
+            { problem: "Защо чуваш звук дори в друга стая?", solution: "Звукът пътува през въздуха като вибрации (звукови вълни). Стените и подовете също пренасят вибрации, позволявайки на звука да премине в другите стаи.", hint: "Звукът се нуждае от среда (въздух, вода, твърдо тяло), за да се разпространява. Не може да пътува във вакуум." },
+          ],
+          tip: "💡 Светлината пътува праволинейно. Звукът пътува във всички посоки като вълни — затова чуваш зад ъгъла!",
+        },
+        high: {
+          title: "Свойства на светлината и звука",
+          explanation: "Светлината пътува с 300 000 км/с — най-бързото нещо в Вселената. Звукът пътува само с 340 м/с във въздуха (много по-бавно). Сенките се образуват, когато непрозрачни предмети блокират светлината. Пречупването на светлината се получава, когато тя преминава от въздух към вода (затова сламката изглежда огъната). Височината на звука зависи от честотата — висока честота = висок звук.",
+          examples: [
+            { problem: "Защо сламката изглежда огъната в чаша с вода?", solution: "Пречупване — светлината се огъва, когато преминава от въздух в вода (различни плътности). Това кара сламката да изглежда в различна позиция, отколкото е в действителност.", hint: "Пречупване = огъване на светлината при преминаване между материали." },
+            { problem: "Каква е разликата между тон и сила на звука?", solution: "Тон = колко висок или нисък е звукът (честота). Свирката е висок тон; гръмотевицата е нисък тон. Сила = колко силен или тих е (амплитуда на вибрацията).", hint: "Тон = висок/нисък. Сила = силен/тих." },
+            { problem: "Защо виждаш мълния преди да чуеш гърма?", solution: "Светлината пътува много по-бързо от звука. Мълнията достига до очите ти почти мигновено. Гърмът (звукът) следва по-бавно — около 3 секунди на километър разстояние.", hint: "Скорост на светлина: 300 000 км/с. Скорост на звук: 340 м/с. Светлината е много по-бърза!" },
+          ],
+          tip: "⚡ Брой секундите между мълнията и гърма — всеки 3 секунди = 1 км разстояние!",
+        },
+      },
+      es: {
+        low: {
+          title: "Luz y sonido",
+          explanation: "La luz nos permite ver. La luz viene de fuentes: el Sol (natural), una lámpara o vela (artificial). La luz viaja en línea recta. Cuando la luz golpea una superficie puede reflejarse — por eso te ves en un espejo. El sonido se produce cuando algo vibra. El sonido viaja por el aire, el agua y los sólidos.",
+          examples: [
+            { problem: "Nombra 2 fuentes naturales y 2 artificiales de luz.", solution: "Naturales: el Sol, fuego, rayo, animales luminosos (luciérnaga). Artificiales: lámpara eléctrica, vela, linterna, pantalla de teléfono.", hint: "Natural = existe en la naturaleza sin humanos. Artificial = fabricado por humanos." },
+            { problem: "¿Por qué te ves en un espejo?", solution: "Los espejos son muy lisos y brillantes — reflejan la luz de manera ordenada para que la imagen sea clara.", hint: "Reflexión = la luz rebota en una superficie lisa." },
+            { problem: "¿Por qué puedes oír un sonido incluso en otra habitación?", solution: "El sonido viaja por el aire como vibraciones (ondas sonoras). Las paredes y los pisos también transportan vibraciones, permitiendo que el sonido pase.", hint: "El sonido necesita un medio (aire, agua, sólido) para viajar." },
+          ],
+          tip: "💡 ¡La luz viaja en línea recta. El sonido viaja en todas las direcciones como ondas — por eso puedes oír doblar las esquinas!",
+        },
+        high: {
+          title: "Propiedades de la luz y el sonido",
+          explanation: "La luz viaja a 300,000 km/s — lo más rápido del universo. El sonido viaja a solo 340 m/s en el aire. Las sombras se forman cuando objetos opacos bloquean la luz. La refracción ocurre cuando la luz se dobla al pasar del aire al agua. El tono del sonido depende de la frecuencia.",
+          examples: [
+            { problem: "¿Por qué una pajita parece doblada en un vaso de agua?", solution: "Refracción — la luz se dobla al pasar del aire al agua (diferentes densidades). Esto hace que la pajita parezca estar en una posición diferente.", hint: "Refracción = doblamiento de la luz al pasar entre materiales." },
+            { problem: "¿Cuál es la diferencia entre el tono y el volumen del sonido?", solution: "Tono = qué tan alto o bajo es un sonido (frecuencia). Un silbato tiene tono alto; el trueno tiene tono bajo. Volumen = qué tan fuerte o suave (amplitud).", hint: "Tono = alto/bajo. Volumen = fuerte/suave." },
+            { problem: "¿Por qué ves el relámpago antes de escuchar el trueno?", solution: "La luz viaja mucho más rápido que el sonido. El relámpago llega a tus ojos casi instantáneamente. El trueno sigue más lentamente — unos 3 segundos por kilómetro de distancia.", hint: "Velocidad de la luz: 300,000 km/s. Velocidad del sonido: 340 m/s." },
+          ],
+          tip: "⚡ ¡Cuenta los segundos entre el relámpago y el trueno — cada 3 segundos = 1 km de distancia!",
+        },
+      },
+    },
+
+    /* ── NATURAL-SCIENCE / WATER-AIR ── */
+    "natural-science/water-air": {
+      en: {
+        low: {
+          title: "Water and Air",
+          explanation: "Water (вода) is essential for all life. It exists in 3 states: solid (ice), liquid (water), gas (steam/water vapour). Air is all around us — we cannot see it, but we can feel the wind. Air is a mixture of gases: mostly nitrogen (78%) and oxygen (21%). We need oxygen to breathe. Plants need carbon dioxide (CO₂) and release oxygen through photosynthesis.",
+          examples: [
+            { problem: "Name the 3 states of water.", solution: "Solid (ice/snow), Liquid (water), Gas (steam/water vapour). Water changes state when heated or cooled.", hint: "Cold → water freezes to ice. Hot → water evaporates to steam." },
+            { problem: "What gas do we need to breathe?", solution: "Oxygen (O₂) — our lungs take in oxygen from the air and release carbon dioxide (CO₂).", hint: "We breathe IN oxygen, breathe OUT carbon dioxide." },
+            { problem: "How can you prove that air exists even though you can't see it?", solution: "Feel wind on your face. Blow up a balloon — air fills it. Wave a piece of paper — you feel the air moving.", hint: "Air is invisible but has mass and takes up space." },
+          ],
+          tip: "💧 Water is the only natural substance that exists in all 3 states (solid, liquid, gas) in everyday conditions on Earth!",
+        },
+        high: {
+          title: "The Properties of Water and Air",
+          explanation: "Water is a polar molecule (H₂O) — it dissolves many substances, which is why it is called 'the universal solvent'. The water cycle: evaporation → condensation → precipitation → collection. Air pressure: the weight of air pressing down. At higher altitude, air pressure is lower (less air above) — that's why mountain climbers need extra oxygen. Air pollution harms health and the environment.",
+          examples: [
+            { problem: "What is the water cycle? Name its 4 stages.", solution: "1. Evaporation: water → vapour (heated by the Sun). 2. Condensation: vapour cools → clouds form. 3. Precipitation: rain/snow falls. 4. Collection: water collects in rivers, lakes, seas.", hint: "Sun heats water → cloud → rain → river → sea → repeats forever." },
+            { problem: "Why do we need to keep water clean?", solution: "Polluted water spreads diseases, kills aquatic life, and is unsafe to drink. Clean water is essential for human health, farming, and all living things.", hint: "Think: what happens if the water in rivers is full of chemicals or rubbish?" },
+            { problem: "What is air made of?", solution: "Nitrogen (78%), Oxygen (21%), Argon (~1%), Carbon dioxide (0.04%), plus small amounts of other gases.", hint: "78% nitrogen, 21% oxygen — remember: more N than O in air!" },
+          ],
+          tip: "🌊 70% of Earth's surface is covered by water — yet only 3% is fresh water, and most of that is frozen. Protect it!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Вода и въздух",
+          explanation: "Водата е необходима за целия живот. Тя съществува в 3 състояния: твърдо (лед), течно (вода), газообразно (пара). Въздухът е навсякъде около нас — не го виждаме, но усещаме вятъра. Въздухът е смес от газове: предимно азот (78%) и кислород (21%). Нуждаем се от кислород за дишане. Растенията се нуждаят от въглероден диоксид и отделят кислород чрез фотосинтеза.",
+          examples: [
+            { problem: "Назови 3-те агрегатни състояния на водата.", solution: "Твърдо (лед/сняг), Течно (вода), Газообразно (водна пара). Водата сменя агрегатното си състояние при нагряване или охлаждане.", hint: "Студено → водата замръзва в лед. Горещо → водата се изпарява в пара." },
+            { problem: "Какъв газ ни е необходим за дишане?", solution: "Кислород (O₂) — белите ни дробове поемат кислород от въздуха и отделят въглероден диоксид (CO₂).", hint: "Вдишваме кислород, издишваме въглероден диоксид." },
+            { problem: "Как можеш да докажеш, че въздухът съществува, макар да не го виждаш?", solution: "Усети вятъра на лицето си. Надуй балон — въздухът го изпълва. Размаши лист хартия — усещаш как въздухът се движи.", hint: "Въздухът е невидим, но има маса и заема пространство." },
+          ],
+          tip: "💧 Водата е единственото природно вещество, което на Земята се среща и в трите агрегатни състояния при обикновени условия!",
+        },
+        high: {
+          title: "Свойства на водата и въздуха",
+          explanation: "Водата е полярна молекула (H₂O) — разтваря много вещества, затова се нарича 'универсален разтворител'. Водният цикъл: изпарение → кондензация → валеж → събиране. Атмосферното налягане: тежестта на въздуха, натискаща надолу. На по-голяма надморска височина налягането е по-ниско — затова алпинистите се нуждаят от допълнителен кислород.",
+          examples: [
+            { problem: "Какво е водният цикъл? Назови 4-те му етапа.", solution: "1. Изпарение: вода → пара (нагрята от Слънцето). 2. Кондензация: парата се охлажда → образуват се облаци. 3. Валеж: пада дъжд или сняг. 4. Събиране: водата се стича в реки, езера, морета.", hint: "Слънцето загрява водата → облак → дъжд → река → море → повтаря се вечно." },
+            { problem: "Защо трябва да пазим водата чиста?", solution: "Замърсената вода разпространява болести, убива водни организми и е опасна за пиене. Чистата вода е необходима за здравето на хората, земеделието и всички живи организми.", hint: "Помисли: какво се случва, ако водата в реките е пълна с химикали или боклуци?" },
+            { problem: "От какво е съставен въздухът?", solution: "Азот (78%), Кислород (21%), Аргон (~1%), Въглероден диоксид (0,04%), плюс малко количество от други газове.", hint: "78% азот, 21% кислород — запомни: повече N от O в атмосферата!" },
+          ],
+          tip: "🌊 70% от повърхността на Земята е покрита с вода — но само 3% е прясна вода, и голяма част от нея е замръзнала. Пазете я!",
+        },
+      },
+      es: {
+        low: {
+          title: "Agua y aire",
+          explanation: "El agua es esencial para toda la vida. Existe en 3 estados: sólido (hielo), líquido (agua), gas (vapor). El aire está a nuestro alrededor — no podemos verlo, pero podemos sentir el viento. El aire es una mezcla de gases: principalmente nitrógeno (78%) y oxígeno (21%). Necesitamos oxígeno para respirar.",
+          examples: [
+            { problem: "Nombra los 3 estados del agua.", solution: "Sólido (hielo/nieve), Líquido (agua), Gas (vapor de agua). El agua cambia de estado cuando se calienta o enfría.", hint: "Frío → el agua se congela en hielo. Caliente → el agua se evapora en vapor." },
+            { problem: "¿Qué gas necesitamos para respirar?", solution: "Oxígeno (O₂) — nuestros pulmones inhalan oxígeno del aire y exhalan dióxido de carbono (CO₂).", hint: "Inhalamos oxígeno, exhalamos dióxido de carbono." },
+            { problem: "¿Cómo puedes demostrar que el aire existe aunque no puedas verlo?", solution: "Siente el viento en tu cara. Infla un globo — el aire lo llena. Agita un papel — sientes el aire moverse.", hint: "El aire es invisible pero tiene masa y ocupa espacio." },
+          ],
+          tip: "💧 ¡El agua es la única sustancia natural que existe en los 3 estados (sólido, líquido, gas) en condiciones normales en la Tierra!",
+        },
+        high: {
+          title: "Propiedades del agua y el aire",
+          explanation: "El agua es una molécula polar (H₂O) — disuelve muchas sustancias, por eso se llama 'solvente universal'. El ciclo del agua: evaporación → condensación → precipitación → recogida. La presión del aire: el peso del aire que empuja hacia abajo. A mayor altitud, menor presión.",
+          examples: [
+            { problem: "¿Qué es el ciclo del agua? Nombra sus 4 etapas.", solution: "1. Evaporación. 2. Condensación: nubes. 3. Precipitación: lluvia/nieve. 4. Recogida: ríos, lagos, mares.", hint: "Sol calienta agua → nube → lluvia → río → mar → se repite." },
+            { problem: "¿Por qué necesitamos mantener el agua limpia?", solution: "El agua contaminada propaga enfermedades, mata organismos acuáticos y es peligrosa para beber. El agua limpia es esencial para la salud humana.", hint: "Piensa: ¿qué pasa si el agua de los ríos está llena de químicos?" },
+            { problem: "¿De qué está compuesto el aire?", solution: "Nitrógeno (78%), Oxígeno (21%), Argón (~1%), Dióxido de carbono (0,04%), más pequeñas cantidades de otros gases.", hint: "78% nitrógeno, 21% oxígeno." },
+          ],
+          tip: "🌊 ¡El 70% de la superficie de la Tierra está cubierta de agua, pero solo el 3% es agua dulce, y gran parte está congelada. ¡Protégela!",
+        },
+      },
+    },
+
+    /* ── NATURAL-SCIENCE / HUMAN-BODY ── */
+    "natural-science/human-body": {
+      en: {
+        low: {
+          title: "My Body and Health",
+          explanation: "Our body has many parts that work together. The skeleton (bones) gives us shape and protects organs. Muscles help us move. The heart pumps blood. The lungs breathe air. The brain controls everything. Healthy habits keep our body strong: eat vegetables and fruit, drink water, sleep 8-10 hours, exercise, wash hands.",
+          examples: [
+            { problem: "What does the heart do?", solution: "The heart pumps blood around the body. Blood carries oxygen and nutrients to all organs and removes waste.", hint: "Think of the heart as a pump — it never stops working!" },
+            { problem: "Name 3 healthy habits.", solution: "Eating fruits and vegetables, drinking enough water, getting 8-10 hours of sleep, exercising, washing hands, brushing teeth.", hint: "Healthy habits keep your body and mind strong." },
+            { problem: "What are bones for?", solution: "Bones make up the skeleton — they give our body its shape, protect organs (skull protects brain, ribs protect lungs and heart), and help us move.", hint: "Without bones we would be like a bag of skin." },
+          ],
+          tip: "💪 Your body is amazing — it has over 200 bones and 600 muscles working together every second!",
+        },
+        high: {
+          title: "Body Systems and Health",
+          explanation: "The human body has systems that work together. Skeletal system: 206 bones give shape and protect organs. Muscular system: 600+ muscles enable movement. Circulatory system: heart + blood vessels carry blood. Respiratory system: lungs take in O₂ and expel CO₂. Digestive system: breaks food into nutrients. Nervous system: brain and nerves control everything.",
+          examples: [
+            { problem: "Name 3 body systems and their functions.", solution: "1. Circulatory: heart pumps blood carrying O₂ and nutrients. 2. Respiratory: lungs breathe in O₂, breathe out CO₂. 3. Digestive: stomach and intestines break down food into nutrients the body can use.", hint: "Each system has a job. Together they keep you alive and healthy." },
+            { problem: "What happens to food in the digestive system?", solution: "Food is chewed and mixed with saliva (mouth) → travels to stomach → stomach acids break it down → small intestine absorbs nutrients → large intestine absorbs water → waste is excreted.", hint: "Follow the path: mouth → stomach → intestines → exit." },
+            { problem: "Why is physical exercise important for the body?", solution: "Exercise strengthens muscles and bones, improves heart and lung function, releases chemicals that improve mood, and helps maintain a healthy weight.", hint: "Exercise = stronger heart, stronger muscles, better mood." },
+          ],
+          tip: "🧠 Your brain uses 20% of your body's energy even though it makes up only 2% of your weight — feed it well with sleep and learning!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Тялото ми и здравето",
+          explanation: "Нашето тяло има много части, работещи заедно. Скелетът (костите) ни дава форма и предпазва органите. Мускулите ни помагат да се движим. Сърцето изпомпва кръвта. Белите дробове дишат въздух. Мозъкът управлява всичко. Здравите навици пазят тялото ни силно: яж зеленчуци и плодове, пий вода, спи 8-10 часа, спортувай, мий ръцете си.",
+          examples: [
+            { problem: "Какво прави сърцето?", solution: "Сърцето изпомпва кръв из цялото тяло. Кръвта пренася кислород и хранителни вещества до всички органи и извежда отпадъците.", hint: "Мисли за сърцето като за помпа — то никога не спира да работи!" },
+            { problem: "Назови 3 здравни навика.", solution: "Да ядем плодове и зеленчуци, да пием достатъчно вода, да спим 8-10 часа, да спортуваме, да мием ръцете си, да мием зъбите си.", hint: "Здравните навици пазят тялото и ума ти силни." },
+            { problem: "За какво са костите?", solution: "Костите изграждат скелета — те дават форма на тялото, предпазват органите (черепът защитава мозъка, ребрата защитават белите дробове и сърцето) и ни помагат да се движим.", hint: "Без кости щяхме да сме като торба от кожа." },
+          ],
+          tip: "💪 Тялото ти е невероятно — има над 200 кости и 600 мускула, работещи заедно всяка секунда!",
+        },
+        high: {
+          title: "Телесни системи и здраве",
+          explanation: "Човешкото тяло има системи, работещи заедно. Опорно-двигателна система: 206 кости дават форма и предпазват органи. Мускулна система: 600+ мускула осигуряват движение. Кръвоносна система: сърце + кръвоносни съдове пренасят кръвта. Дихателна система: белите дробове поемат O₂ и отделят CO₂. Храносмилателна система: разгражда храната на хранителни вещества. Нервна система: мозъкът и нервите управляват всичко.",
+          examples: [
+            { problem: "Назови 3 телесни системи и функциите им.", solution: "1. Кръвоносна: сърцето изпомпва кръв, пренасяща O₂ и хранителни вещества. 2. Дихателна: белите дробове вдишват O₂, издишват CO₂. 3. Храносмилателна: стомахът и червата разграждат храната на полезни вещества.", hint: "Всяка система има задача. Заедно те пазят живота ти." },
+            { problem: "Какво се случва с храната в храносмилателната система?", solution: "Храната се сдъвква и смесва со слюнка (уста) → преминава в стомаха → стомашните киселини я разграждат → тънкото черво всмуква хранителните вещества → дебелото черво всмуква водата → отпадъците се извеждат навън.", hint: "Следвай пътя: уста → стомах → черва → изход." },
+            { problem: "Защо физическото упражнение е важно за тялото?", solution: "Упражнението укрепва мускулите и костите, подобрява функцията на сърцето и белите дробове, отделя химикали, подобряващи настроението, и помага да се поддържа здравословно тегло.", hint: "Спорт = по-силно сърце, по-силни мускули, по-добро настроение." },
+          ],
+          tip: "🧠 Мозъкът ти използва 20% от енергията на тялото, въпреки че съставлява само 2% от теглото ти — хранете го добре чрез сън и учене!",
+        },
+      },
+      es: {
+        low: {
+          title: "Mi cuerpo y la salud",
+          explanation: "Nuestro cuerpo tiene muchas partes que trabajan juntas. El esqueleto (huesos) nos da forma y protege los órganos. Los músculos nos ayudan a movernos. El corazón bombea sangre. Los pulmones respiran aire. El cerebro controla todo. Los hábitos saludables mantienen nuestro cuerpo fuerte.",
+          examples: [
+            { problem: "¿Qué hace el corazón?", solution: "El corazón bombea sangre por todo el cuerpo. La sangre lleva oxígeno y nutrientes a todos los órganos y elimina los desechos.", hint: "Piensa en el corazón como una bomba — ¡nunca deja de trabajar!" },
+            { problem: "Nombra 3 hábitos saludables.", solution: "Comer frutas y verduras, beber suficiente agua, dormir 8-10 horas, hacer ejercicio, lavarse las manos, cepillarse los dientes.", hint: "Los hábitos saludables mantienen tu cuerpo y mente fuertes." },
+            { problem: "¿Para qué sirven los huesos?", solution: "Los huesos forman el esqueleto — dan forma al cuerpo, protegen órganos y nos ayudan a movernos.", hint: "Sin huesos seríamos como una bolsa de piel." },
+          ],
+          tip: "💪 ¡Tu cuerpo es increíble — tiene más de 200 huesos y 600 músculos trabajando juntos cada segundo!",
+        },
+        high: {
+          title: "Sistemas del cuerpo y salud",
+          explanation: "El cuerpo humano tiene sistemas que trabajan juntos. Sistema esquelético: 206 huesos. Sistema muscular: 600+ músculos. Sistema circulatorio: corazón + vasos sanguíneos. Sistema respiratorio: pulmones. Sistema digestivo: descompone los alimentos. Sistema nervioso: cerebro y nervios.",
+          examples: [
+            { problem: "Nombra 3 sistemas corporales y sus funciones.", solution: "1. Circulatorio: el corazón bombea sangre con O₂ y nutrientes. 2. Respiratorio: los pulmones inhalan O₂, exhalan CO₂. 3. Digestivo: el estómago e intestinos descomponen los alimentos.", hint: "Cada sistema tiene una función. Juntos te mantienen vivo y sano." },
+            { problem: "¿Qué le sucede a la comida en el sistema digestivo?", solution: "La comida se mastica y mezcla con saliva (boca) → viaja al estómago → ácidos estomacales la descomponen → el intestino delgado absorbe nutrientes → el intestino grueso absorbe agua → los desechos se excretan.", hint: "Sigue el camino: boca → estómago → intestinos → salida." },
+            { problem: "¿Por qué el ejercicio físico es importante para el cuerpo?", solution: "El ejercicio fortalece músculos y huesos, mejora el funcionamiento del corazón y pulmones, libera sustancias que mejoran el estado de ánimo y ayuda a mantener un peso saludable.", hint: "Ejercicio = corazón más fuerte, músculos más fuertes, mejor humor." },
+          ],
+          tip: "🧠 ¡Tu cerebro usa el 20% de la energía de tu cuerpo aunque solo representa el 2% de tu peso — aliméntalo bien con sueño y aprendizaje!",
+        },
+      },
+    },
   };
 
   // Fallback for topics not fully authored
@@ -2791,6 +3770,328 @@ function textPractice(topicId: string, lang: LangCode, grade: number): Array<{ q
         { question: "¿Qué pregunta ayuda a encontrar el escenario?", answer: "'¿Dónde y cuándo ocurre la historia?'" },
       ],
     },
+    seasons: {
+      en: [
+        { question: "Name the 4 seasons in order starting from spring.", answer: "Spring, Summer, Autumn, Winter" },
+        { question: "In which season do leaves fall from trees?", answer: "Autumn" },
+        { question: "Which is the hottest season?", answer: "Summer" },
+        { question: "Which is the coldest season?", answer: "Winter" },
+        { question: "In which season do flowers bloom and birds return?", answer: "Spring" },
+      ],
+      bg: [
+        { question: "Назови 4-те сезона по ред, като започнеш от пролетта.", answer: "Пролет, Лято, Есен, Зима" },
+        { question: "Кое годишно време е листопадът?", answer: "Есен" },
+        { question: "Кое е най-горещото годишно време?", answer: "Лято" },
+        { question: "Кое е най-студеното годишно време?", answer: "Зима" },
+        { question: "Кое годишно време носи цъфтежа и завръщането на птиците?", answer: "Пролет" },
+      ],
+      es: [
+        { question: "Nombra las 4 estaciones en orden empezando por la primavera.", answer: "Primavera, Verano, Otoño, Invierno" },
+        { question: "¿En qué estación caen las hojas?", answer: "Otoño" },
+        { question: "¿Cuál es la estación más caliente?", answer: "Verano" },
+        { question: "¿Cuál es la estación más fría?", answer: "Invierno" },
+        { question: "¿En qué estación florecen las flores y vuelven las aves?", answer: "Primavera" },
+      ],
+    },
+    weather: {
+      en: [
+        { question: "What tool is used to measure temperature?", answer: "thermometer" },
+        { question: "Name 2 types of weather.", answer: "Any 2: sunny, rainy, snowy, windy, cloudy, foggy, stormy" },
+        { question: "What is the difference between weather and climate?", answer: "Weather = today. Climate = average over many years." },
+        { question: "What is the unit for measuring temperature?", answer: "degrees Celsius (°C)" },
+        { question: "Name a natural light source used to predict weather.", answer: "Sun — if you can't see it, it may be cloudy or about to rain" },
+      ],
+      bg: [
+        { question: "С какъв инструмент се измерва температурата?", answer: "термометър" },
+        { question: "Назови 2 вида времето.", answer: "Всеки 2: слънчево, дъждовно, снежно, ветровито, облачно, мъгливо, бурно" },
+        { question: "Каква е разликата между времето и климата?", answer: "Времето = днес. Климатът = средното за много години." },
+        { question: "В какви единици се измерва температурата?", answer: "градуси по Целзий (°C)" },
+        { question: "От какво се образуват облаците?", answer: "от водна пара, която се охлажда и кондензира" },
+      ],
+      es: [
+        { question: "¿Qué herramienta se usa para medir la temperatura?", answer: "termómetro" },
+        { question: "Nombra 2 tipos de tiempo.", answer: "Cualquier 2: soleado, lluvioso, nevado, ventoso, nublado, brumoso, tormentoso" },
+        { question: "¿Cuál es la diferencia entre tiempo y clima?", answer: "Tiempo = hoy. Clima = promedio durante muchos años." },
+        { question: "¿En qué unidad se mide la temperatura?", answer: "grados Celsius (°C)" },
+        { question: "¿De qué se forman las nubes?", answer: "de vapor de agua que se enfría y condensa" },
+      ],
+    },
+    comparison: {
+      en: [
+        { question: "Which is bigger: a mouse or an elephant?", answer: "an elephant" },
+        { question: "Complete: 'A cat is __ than a dog.' (size usually)", answer: "smaller" },
+        { question: "Name a word used to compare 2 things.", answer: "bigger, smaller, faster, heavier, taller (etc.)" },
+        { question: "A car and a bicycle — which is faster?", answer: "a car" },
+        { question: "10 is __ than 5.", answer: "greater (more)" },
+      ],
+      bg: [
+        { question: "Кое е по-голямо: мишка или слон?", answer: "слон" },
+        { question: "Попълни: 'Котката е __ от кучето.' (по размер обикновено)", answer: "по-малка" },
+        { question: "Назови дума, използвана за сравнение на 2 неща.", answer: "по-голям, по-малък, по-бърз, по-тежък, по-висок (и т.н.)" },
+        { question: "Кола и велосипед — кое е по-бързо?", answer: "колата" },
+        { question: "10 е __ от 5.", answer: "по-голямо (повече)" },
+      ],
+      es: [
+        { question: "¿Cuál es más grande: un ratón o un elefante?", answer: "un elefante" },
+        { question: "Completa: 'Un gato es __ que un perro.' (de tamaño generalmente)", answer: "más pequeño" },
+        { question: "Nombra una palabra usada para comparar 2 cosas.", answer: "más grande, más pequeño, más rápido, más pesado (etc.)" },
+        { question: "Un coche y una bicicleta — ¿cuál es más rápido?", answer: "un coche" },
+        { question: "10 es __ que 5.", answer: "mayor (más)" },
+      ],
+    },
+    sequencing: {
+      en: [
+        { question: "What word means 'at the beginning of the sequence'?", answer: "first / firstly" },
+        { question: "What word means 'at the end of the sequence'?", answer: "finally / last / at last" },
+        { question: "Put in order: B) Wash apple. A) Pick up apple. C) Eat apple.", answer: "A → B → C" },
+        { question: "What is a sequence?", answer: "events or steps in a specific order from first to last" },
+        { question: "Name a sequence word between 'first' and 'finally'.", answer: "then / next / after that" },
+      ],
+      bg: [
+        { question: "Коя дума означава 'в началото на наредбата'?", answer: "първо" },
+        { question: "Коя дума означава 'в края на наредбата'?", answer: "накрая" },
+        { question: "Наредете: Б) Мие ябълката. А) Взима ябълката. В) Изяжда ябълката.", answer: "А → Б → В" },
+        { question: "Какво е наредба?", answer: "събития или стъпки в определен ред от първото до последното" },
+        { question: "Назови дума за наредба между 'първо' и 'накрая'.", answer: "после / след това" },
+      ],
+      es: [
+        { question: "¿Qué palabra significa 'al principio de la secuencia'?", answer: "primero / en primer lugar" },
+        { question: "¿Qué palabra significa 'al final de la secuencia'?", answer: "finalmente / por último" },
+        { question: "Ordena: B) Lavar la manzana. A) Agarrar la manzana. C) Comer la manzana.", answer: "A → B → C" },
+        { question: "¿Qué es una secuencia?", answer: "eventos o pasos en un orden específico de primero a último" },
+        { question: "Nombra una palabra de secuencia entre 'primero' y 'finalmente'.", answer: "luego / después / a continuación" },
+      ],
+    },
+    "family-community": {
+      en: [
+        { question: "Name 3 members of a family.", answer: "mother, father, sibling, grandparent, aunt, uncle (any 3)" },
+        { question: "Name 2 community helpers and what they do.", answer: "Teacher — teaches. Doctor — heals. Firefighter — puts out fires. Police — keeps people safe. (any 2)" },
+        { question: "What do we call the group of people living in the same town?", answer: "community" },
+        { question: "Name 2 responsibilities a child has at home.", answer: "tidying room, helping with dishes, feeding pets, doing homework (any 2)" },
+        { question: "Why do communities need rules?", answer: "to help people live safely and fairly together" },
+      ],
+      bg: [
+        { question: "Назови 3 члена на семейство.", answer: "майка, татко, брат/сестра, баба, дядо, леля, чичо (всеки 3)" },
+        { question: "Назови 2 помощника в обществото и какво правят.", answer: "Учителят — учи. Лекарят — лекува. Пожарникарят — гаси пожари. (всеки 2)" },
+        { question: "Как се казват хората, живеещи в едно населено място?", answer: "общност / общество" },
+        { question: "Назови 2 задължения на детето у дома.", answer: "да нарежда стаята, да помага при съдовете, да храни домашния любимец (всеки 2)" },
+        { question: "Защо обществото се нуждае от правила?", answer: "за да живеят хората заедно безопасно и справедливо" },
+      ],
+      es: [
+        { question: "Nombra 3 miembros de una familia.", answer: "madre, padre, hermano/a, abuelo, abuela, tía, tío (cualquier 3)" },
+        { question: "Nombra 2 ayudantes de la comunidad y qué hacen.", answer: "Maestro — enseña. Doctor — cura. Bombero — apaga incendios. (cualquier 2)" },
+        { question: "¿Cómo se llama el grupo de personas que viven en el mismo pueblo?", answer: "comunidad" },
+        { question: "Nombra 2 responsabilidades de un niño en casa.", answer: "ordenar la habitación, ayudar con los platos, alimentar mascotas (cualquier 2)" },
+        { question: "¿Por qué las comunidades necesitan reglas?", answer: "para ayudar a las personas a vivir juntas de forma segura y justa" },
+      ],
+    },
+    "my-homeland": {
+      en: [
+        { question: "What is the difference between a city and a village?", answer: "City = large, many people, more buildings. Village = small, fewer people, more nature." },
+        { question: "What is a municipality?", answer: "An area managed by a local government, headed by a mayor." },
+        { question: "What is a landmark? Give 1 example.", answer: "A famous feature of a place. Example: Rila Monastery, Eiffel Tower, Big Ben." },
+        { question: "Name the 3 main terrain types in Bulgaria.", answer: "Mountains, plains/valleys, and the Black Sea coast." },
+        { question: "What do we call the region where you were born?", answer: "hometown / birthplace / родно място (in Bulgarian)" },
+      ],
+      bg: [
+        { question: "Каква е разликата между град и село?", answer: "Градът е голям, с много хора и сгради. Селото е малко, с по-малко хора и повече природа." },
+        { question: "Какво е община?", answer: "Административна единица, управлявана от местно самоуправление, начело с кмет." },
+        { question: "Какво е забележителност? Дай 1 пример.", answer: "Известен обект на дадено място. Пример: Рилски манастир, Стари Несебър." },
+        { question: "Назови 3-те основни вида релеф в България.", answer: "Планини, равнини/долини и Черноморско крайбрежие." },
+        { question: "Как се казва областта, в която си роден?", answer: "родно място / роден край" },
+      ],
+      es: [
+        { question: "¿Cuál es la diferencia entre una ciudad y un pueblo?", answer: "Ciudad = grande, mucha gente, más edificios. Pueblo = pequeño, menos gente, más naturaleza." },
+        { question: "¿Qué es un municipio?", answer: "Un área gestionada por un gobierno local, encabezado por un alcalde." },
+        { question: "¿Qué es un punto de referencia? Da 1 ejemplo.", answer: "Un lugar famoso de un sitio. Ejemplo: Monasterio de Rila, Torre Eiffel." },
+        { question: "Nombra los 3 tipos principales de terreno en Bulgaria.", answer: "Montañas, llanuras/valles y la costa del Mar Negro." },
+        { question: "¿Cómo se llama la región donde naciste?", answer: "ciudad natal / lugar de nacimiento" },
+      ],
+    },
+    bulgaria: {
+      en: [
+        { question: "What is the capital of Bulgaria?", answer: "Sofia" },
+        { question: "Name the 3 colors of the Bulgarian flag in order (top to bottom).", answer: "White, Green, Red" },
+        { question: "When was Bulgaria founded and by whom?", answer: "681 AD by Khan Asparuh" },
+        { question: "Who created the Cyrillic alphabet?", answer: "Saints Cyril and Methodius and their disciples" },
+        { question: "What is the national holiday of Bulgaria?", answer: "3 March — Liberation Day (Day of Liberation from Ottoman rule)" },
+      ],
+      bg: [
+        { question: "Коя е столицата на България?", answer: "София" },
+        { question: "Назови 3-те цвята на българския флаг по ред (от горе надолу).", answer: "Бяло, Зелено, Червено" },
+        { question: "Кога е основана България и от кого?", answer: "681 г. от хан Аспарух" },
+        { question: "Кой е създал кирилицата?", answer: "Св. Кирил и Методий и техните ученици" },
+        { question: "Кой е националният празник на България?", answer: "3 март — Ден на Освобождението" },
+      ],
+      es: [
+        { question: "¿Cuál es la capital de Bulgaria?", answer: "Sofía" },
+        { question: "Nombra los 3 colores de la bandera búlgara en orden (de arriba abajo).", answer: "Blanco, Verde, Rojo" },
+        { question: "¿Cuándo fue fundada Bulgaria y por quién?", answer: "681 d.C. por el Khan Asparuh" },
+        { question: "¿Quién creó el alfabeto cirílico?", answer: "Los Santos Cirilo y Metodio y sus discípulos" },
+        { question: "¿Cuál es el día festivo nacional de Bulgaria?", answer: "3 de marzo — Día de la Liberación" },
+      ],
+    },
+    "rights-duties": {
+      en: [
+        { question: "Name 2 rights every child has.", answer: "Right to education, to play, to be safe, to have food and shelter (any 2)" },
+        { question: "Name 2 duties a child has at school.", answer: "Attend school, listen to the teacher, do homework, follow rules, be kind (any 2)" },
+        { question: "Why do we have traffic rules?", answer: "To keep everyone safe — drivers, cyclists and pedestrians." },
+        { question: "What does 'duty' mean?", answer: "Something you are responsible to do." },
+        { question: "What is the name of the UN agreement on children's rights?", answer: "UN Convention on the Rights of the Child (1989)" },
+      ],
+      bg: [
+        { question: "Назови 2 права, на които има право всяко дете.", answer: "Право на образование, на игра, на безопасност, на дом, на храна (всеки 2)" },
+        { question: "Назови 2 задължения на ученика в училище.", answer: "Да ходи на училище, да слуша учителя, да пише домашното, да спазва правилата (всеки 2)" },
+        { question: "Защо имаме правила за движение по пътя?", answer: "За да са в безопасност всички — шофьори, колоездачи и пешеходци." },
+        { question: "Какво означава 'задължение'?", answer: "Нещо, за което си отговорен да го направиш." },
+        { question: "Как се казва международният документ за правата на детето?", answer: "Конвенция на ООН за правата на детето (1989 г.)" },
+      ],
+      es: [
+        { question: "Nombra 2 derechos que tiene todo niño.", answer: "Derecho a la educación, al juego, a la seguridad, a tener comida y hogar (cualquier 2)" },
+        { question: "Nombra 2 deberes de un niño en la escuela.", answer: "Asistir a la escuela, escuchar al maestro, hacer la tarea, seguir las reglas (cualquier 2)" },
+        { question: "¿Por qué tenemos reglas de tráfico?", answer: "Para mantener a todos seguros — conductores, ciclistas y peatones." },
+        { question: "¿Qué significa 'deber'?", answer: "Algo de lo que eres responsable de hacer." },
+        { question: "¿Cómo se llama el acuerdo de la ONU sobre los derechos del niño?", answer: "Convención de la ONU sobre los Derechos del Niño (1989)" },
+      ],
+    },
+    traditions: {
+      en: [
+        { question: "When is Baba Marta Day and what do we give?", answer: "1 March — we give red-and-white martenitsi for health and spring." },
+        { question: "When is Bulgarian Liberation Day?", answer: "3 March — liberation from Ottoman rule in 1878." },
+        { question: "What do Bulgarians do on Christmas Eve?", answer: "They gather for a meatless dinner with an odd number of dishes." },
+        { question: "What are Kukeri?", answer: "Men dressed in scary costumes with bells who chase away evil spirits in late winter." },
+        { question: "What is Nestinarstvo?", answer: "A ritual from Strandzha where people dance on hot coals — recognized by UNESCO." },
+      ],
+      bg: [
+        { question: "Кога е Баба Марта и какво даваме?", answer: "1 март — даваме червено-бели мартеници за здраве и пролет." },
+        { question: "Кога е Денят на Освобождението на България?", answer: "3 март — освобождение от османско владичество през 1878 г." },
+        { question: "Какво правят българите на Бъдни вечер?", answer: "Събират се за постна вечеря с нечетен брой ястия." },
+        { question: "Какво са кукерите?", answer: "Мъже с наплашващи костюми и камбани, прогонващи злите духове в края на зимата." },
+        { question: "Какво е нестинарство?", answer: "Ритуал от Странджа, при който хора танцуват върху горещи въглени — признат от ЮНЕСКО." },
+      ],
+      es: [
+        { question: "¿Cuándo es el Día de Baba Marta y qué se da?", answer: "1 de marzo — se dan martenitsas rojas y blancas para la salud y la primavera." },
+        { question: "¿Cuándo es el Día de la Liberación de Bulgaria?", answer: "3 de marzo — liberación del dominio otomano en 1878." },
+        { question: "¿Qué hacen los búlgaros en Nochebuena?", answer: "Se reúnen para una cena sin carne con un número impar de platos." },
+        { question: "¿Qué son los Kukeri?", answer: "Hombres disfrazados con trajes aterradores y campanas que ahuyentan espíritus malignos a finales del invierno." },
+        { question: "¿Qué es Nestinarstvo?", answer: "Un ritual de Strandja donde la gente baila sobre brasas ardientes — reconocido por la UNESCO." },
+      ],
+    },
+    "living-things": {
+      en: [
+        { question: "Name 3 signs that something is alive.", answer: "Moves, breathes, eats, grows, reproduces, feels, excretes — any 3" },
+        { question: "Is a rock a living thing?", answer: "No — it does not grow, breathe, eat, or reproduce." },
+        { question: "Name 2 things all living things need.", answer: "Food/energy and water (also: air/oxygen for most)" },
+        { question: "What process do plants use to make their own food?", answer: "Photosynthesis" },
+        { question: "Name 3 kingdoms of living things.", answer: "Animals, Plants, Fungi (also: Bacteria, Protists)" },
+      ],
+      bg: [
+        { question: "Назови 3 признака, че нещо е живо.", answer: "Движи се, диша, храни се, расте, размножава се, чувства, отделя — всеки 3" },
+        { question: "Камъкът жив ли е?", answer: "Не — не расте, не диша, не се храни и не се размножава." },
+        { question: "Назови 2 неща, от които се нуждаят всички живи организми.", answer: "Храна/енергия и вода (също: въздух/кислород за повечето)" },
+        { question: "Какъв процес използват растенията, за да правят сами храна?", answer: "Фотосинтеза" },
+        { question: "Назови 3 царства на живите организми.", answer: "Животни, Растения, Гъби (и: Бактерии, Протисти)" },
+      ],
+      es: [
+        { question: "Nombra 3 signos de que algo está vivo.", answer: "Se mueve, respira, come, crece, se reproduce, siente, excreta — cualquier 3" },
+        { question: "¿Es una piedra un ser vivo?", answer: "No — no crece, no respira, no come ni se reproduce." },
+        { question: "Nombra 2 cosas que necesitan todos los seres vivos.", answer: "Comida/energía y agua (también: aire/oxígeno para la mayoría)" },
+        { question: "¿Qué proceso usan las plantas para producir su propio alimento?", answer: "Fotosíntesis" },
+        { question: "Nombra 3 reinos de los seres vivos.", answer: "Animales, Plantas, Hongos (también: Bacterias, Protistas)" },
+      ],
+    },
+    materials: {
+      en: [
+        { question: "Name 2 properties used to describe materials.", answer: "Hard/soft, rough/smooth, transparent/opaque, flexible/rigid, heavy/light (any 2)" },
+        { question: "Is wood natural or synthetic?", answer: "Natural — it comes from trees." },
+        { question: "Why is rubber used for tyres?", answer: "It is flexible, waterproof, and durable." },
+        { question: "Name a material that conducts electricity.", answer: "Copper, aluminium, iron — metals generally conduct electricity." },
+        { question: "Name a material that does NOT conduct electricity.", answer: "Rubber, plastic, wood, glass — insulators." },
+      ],
+      bg: [
+        { question: "Назови 2 свойства за описване на материали.", answer: "Твърд/мек, грапав/гладък, прозрачен/непрозрачен, гъвкав/твърд, тежък/лек (всеки 2)" },
+        { question: "Дървото природен или синтетичен материал ли е?", answer: "Природен — идва от дърветата." },
+        { question: "Защо гумата се използва за гуми на коли?", answer: "Тя е гъвкава, водонепропусклива и издръжлива." },
+        { question: "Назови материал, провеждащ електричество.", answer: "Мед, алуминий, желязо — металите провеждат електричество." },
+        { question: "Назови материал, НЕПРОВЕЖДАЩ електричество.", answer: "Гума, пластмаса, дърво, стъкло — изолатори." },
+      ],
+      es: [
+        { question: "Nombra 2 propiedades para describir materiales.", answer: "Duro/blando, rugoso/liso, transparente/opaco, flexible/rígido, pesado/ligero (cualquier 2)" },
+        { question: "¿Es la madera natural o sintética?", answer: "Natural — proviene de los árboles." },
+        { question: "¿Por qué se usa caucho para los neumáticos?", answer: "Es flexible, impermeable y duradero." },
+        { question: "Nombra un material que conduce electricidad.", answer: "Cobre, aluminio, hierro — los metales generalmente conducen electricidad." },
+        { question: "Nombra un material que NO conduce electricidad.", answer: "Caucho, plástico, madera, vidrio — aislantes." },
+      ],
+    },
+    "light-sound": {
+      en: [
+        { question: "Name 2 natural sources of light.", answer: "Sun, fire, lightning, glowing animals (any 2)" },
+        { question: "What happens when light hits a mirror?", answer: "It reflects (bounces back)." },
+        { question: "What gas do we breathe in?", answer: "Oxygen (O₂)" },
+        { question: "Why do you see lightning before hearing thunder?", answer: "Light travels much faster than sound." },
+        { question: "What is pitch in sound?", answer: "How high or low a sound is (determined by frequency)." },
+      ],
+      bg: [
+        { question: "Назови 2 естествени източници на светлина.", answer: "Слънцето, огънят, мълнията, светещи животни (всеки 2)" },
+        { question: "Какво се случва, когато светлината удари огледало?", answer: "Тя се отразява (отскача обратно)." },
+        { question: "Какъв газ вдишваме?", answer: "Кислород (O₂)" },
+        { question: "Защо виждаш мълния преди да чуеш гърма?", answer: "Светлината пътува много по-бързо от звука." },
+        { question: "Какво е тон на звука?", answer: "Колко висок или нисък е звукът (определя се от честотата)." },
+      ],
+      es: [
+        { question: "Nombra 2 fuentes naturales de luz.", answer: "Sol, fuego, rayo, animales luminosos (cualquier 2)" },
+        { question: "¿Qué ocurre cuando la luz golpea un espejo?", answer: "Se refleja (rebota)." },
+        { question: "¿Qué gas inhalamos?", answer: "Oxígeno (O₂)" },
+        { question: "¿Por qué ves el relámpago antes de escuchar el trueno?", answer: "La luz viaja mucho más rápido que el sonido." },
+        { question: "¿Qué es el tono en el sonido?", answer: "Qué tan alto o bajo es un sonido (determinado por la frecuencia)." },
+      ],
+    },
+    "water-air": {
+      en: [
+        { question: "Name the 3 states of water.", answer: "Solid (ice), Liquid (water), Gas (steam/vapour)" },
+        { question: "What gas do we breathe?", answer: "Oxygen (21% of air)" },
+        { question: "What percentage of air is nitrogen?", answer: "78%" },
+        { question: "Name the 4 stages of the water cycle.", answer: "Evaporation, Condensation, Precipitation, Collection" },
+        { question: "Why is clean water important?", answer: "Polluted water spreads disease and harms living things." },
+      ],
+      bg: [
+        { question: "Назови 3-те агрегатни състояния на водата.", answer: "Твърдо (лед), Течно (вода), Газообразно (водна пара)" },
+        { question: "Какъв газ дишаме?", answer: "Кислород (21% от въздуха)" },
+        { question: "Какъв е процентът на азот във въздуха?", answer: "78%" },
+        { question: "Назови 4-те етапа на водния цикъл.", answer: "Изпарение, Кондензация, Валеж, Събиране" },
+        { question: "Защо е важна чистата вода?", answer: "Замърсената вода разпространява болести и вреди на живите организми." },
+      ],
+      es: [
+        { question: "Nombra los 3 estados del agua.", answer: "Sólido (hielo), Líquido (agua), Gas (vapor)" },
+        { question: "¿Qué gas respiramos?", answer: "Oxígeno (21% del aire)" },
+        { question: "¿Qué porcentaje del aire es nitrógeno?", answer: "78%" },
+        { question: "Nombra las 4 etapas del ciclo del agua.", answer: "Evaporación, Condensación, Precipitación, Recogida" },
+        { question: "¿Por qué es importante el agua limpia?", answer: "El agua contaminada propaga enfermedades y daña a los seres vivos." },
+      ],
+    },
+    "human-body": {
+      en: [
+        { question: "What does the heart do?", answer: "It pumps blood carrying oxygen and nutrients around the body." },
+        { question: "Name 3 healthy habits.", answer: "Eating vegetables, drinking water, sleeping 8-10 hours, exercising, washing hands (any 3)" },
+        { question: "What protects the brain?", answer: "The skull (cranium)." },
+        { question: "Name 3 body systems.", answer: "Skeletal, muscular, circulatory, respiratory, digestive, nervous (any 3)" },
+        { question: "What happens to food in the digestive system?", answer: "It is broken down into nutrients absorbed by the intestines." },
+      ],
+      bg: [
+        { question: "Какво прави сърцето?", answer: "Изпомпва кръв, пренасяща кислород и хранителни вещества из тялото." },
+        { question: "Назови 3 здравни навика.", answer: "Ядем зеленчуци, пием вода, спим 8-10 часа, спортуваме, миемне ръцете (всеки 3)" },
+        { question: "Какво предпазва мозъка?", answer: "Черепът." },
+        { question: "Назови 3 телесни системи.", answer: "Скелетна, мускулна, кръвоносна, дихателна, храносмилателна, нервна (всеки 3)" },
+        { question: "Какво се случва с храната в храносмилателната система?", answer: "Разгражда се на хранителни вещества, всмукани от червата." },
+      ],
+      es: [
+        { question: "¿Qué hace el corazón?", answer: "Bombea sangre que lleva oxígeno y nutrientes por el cuerpo." },
+        { question: "Nombra 3 hábitos saludables.", answer: "Comer verduras, beber agua, dormir 8-10 horas, hacer ejercicio, lavarse las manos (cualquier 3)" },
+        { question: "¿Qué protege al cerebro?", answer: "El cráneo." },
+        { question: "Nombra 3 sistemas del cuerpo.", answer: "Esquelético, muscular, circulatorio, respiratorio, digestivo, nervioso (cualquier 3)" },
+        { question: "¿Qué le sucede a la comida en el sistema digestivo?", answer: "Se descompone en nutrientes absorbidos por los intestinos." },
+      ],
+    },
   };
 
   // Grade-band-sensitive: add harder items for high band
@@ -3268,6 +4569,244 @@ function textQuiz(topicId: string, lang: LangCode): QuizQuestion[] {
         { question: "¿Qué palabra de secuencia significa 'al final'?", options: ["primero", "luego", "después", "finalmente"], correctIndex: 3 },
         { question: "La resolución de una historia es:", options: ["la escena inicial", "dónde ocurre la historia", "cómo se resuelve el problema", "el nombre del personaje principal"], correctIndex: 2 },
         { question: "El resumen escrito se diferencia del oral porque el escrito:", options: ["es más largo", "incluye todos los detalles", "solo cubre los puntos más importantes", "narra desde el punto de vista de otro personaje"], correctIndex: 2 },
+      ],
+    },
+    seasons: {
+      en: [
+        { question: "Which season comes after summer?", options: ["Spring", "Winter", "Autumn", "Summer again"], correctIndex: 2 },
+        { question: "In which season do flowers bloom?", options: ["Autumn", "Winter", "Summer", "Spring"], correctIndex: 3 },
+        { question: "What causes the seasons to change?", options: ["The Moon orbiting Earth", "Earth orbiting the Sun", "Wind direction", "Ocean currents"], correctIndex: 1 },
+      ],
+      bg: [
+        { question: "Кое годишно време идва след лятото?", options: ["Пролет", "Зима", "Есен", "Пак лято"], correctIndex: 2 },
+        { question: "Кое годишно време е цъфтежът на цветята?", options: ["Есен", "Зима", "Лято", "Пролет"], correctIndex: 3 },
+        { question: "Какво причинява смяната на сезоните?", options: ["Луната, въртяща се около Земята", "Земята, въртяща се около Слънцето", "Посоката на вятъра", "Океанските течения"], correctIndex: 1 },
+      ],
+      es: [
+        { question: "¿Qué estación viene después del verano?", options: ["Primavera", "Invierno", "Otoño", "Verano otra vez"], correctIndex: 2 },
+        { question: "¿En qué estación florecen las flores?", options: ["Otoño", "Invierno", "Verano", "Primavera"], correctIndex: 3 },
+        { question: "¿Qué causa el cambio de estaciones?", options: ["La Luna orbitando la Tierra", "La Tierra orbitando el Sol", "La dirección del viento", "Las corrientes oceánicas"], correctIndex: 1 },
+      ],
+    },
+    weather: {
+      en: [
+        { question: "What tool measures temperature?", options: ["Barometer", "Thermometer", "Ruler", "Scale"], correctIndex: 1 },
+        { question: "What is the unit of temperature?", options: ["Kg", "Metres", "Degrees Celsius", "Litres"], correctIndex: 2 },
+        { question: "What is climate?", options: ["Today's weather", "Tomorrow's forecast", "The average weather of a region over many years", "The temperature inside a room"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Кой инструмент измерва температурата?", options: ["Барометър", "Термометър", "Линийка", "Везна"], correctIndex: 1 },
+        { question: "В какви единици се измерва температурата?", options: ["Кг", "Метри", "Градуси Целзий", "Литри"], correctIndex: 2 },
+        { question: "Какво е климатът?", options: ["Времето днес", "Прогнозата за утре", "Средното времето за даден регион за много години", "Температурата в стаята"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Qué instrumento mide la temperatura?", options: ["Barómetro", "Termómetro", "Regla", "Báscula"], correctIndex: 1 },
+        { question: "¿En qué unidad se mide la temperatura?", options: ["Kg", "Metros", "Grados Celsius", "Litros"], correctIndex: 2 },
+        { question: "¿Qué es el clima?", options: ["El tiempo de hoy", "El pronóstico de mañana", "El tiempo promedio de una región durante muchos años", "La temperatura dentro de una habitación"], correctIndex: 2 },
+      ],
+    },
+    comparison: {
+      en: [
+        { question: "Which word is used to compare 2 things?", options: ["and", "because", "bigger", "first"], correctIndex: 2 },
+        { question: "Anna has 7 sweets, Bobi has 3. Who has MORE?", options: ["Bobi", "Anna", "They have the same", "Cannot tell"], correctIndex: 1 },
+        { question: "A car is __ than a bicycle.", options: ["slower", "faster", "smaller", "lighter"], correctIndex: 1 },
+      ],
+      bg: [
+        { question: "Коя дума се използва за сравнение на 2 неща?", options: ["и", "защото", "по-голям", "първо"], correctIndex: 2 },
+        { question: "Анна има 7 бонбона, Боби — 3. Кой има ПОВЕЧЕ?", options: ["Боби", "Анна", "Имат еднакво", "Не може да се каже"], correctIndex: 1 },
+        { question: "Колата е __ от велосипеда.", options: ["по-бавна", "по-бърза", "по-малка", "по-лека"], correctIndex: 1 },
+      ],
+      es: [
+        { question: "¿Qué palabra se usa para comparar 2 cosas?", options: ["y", "porque", "más grande", "primero"], correctIndex: 2 },
+        { question: "Ana tiene 7 dulces, Bobi tiene 3. ¿Quién tiene MÁS?", options: ["Bobi", "Ana", "Tienen igual", "No se puede saber"], correctIndex: 1 },
+        { question: "Un coche es __ que una bicicleta.", options: ["más lento", "más rápido", "más pequeño", "más ligero"], correctIndex: 1 },
+      ],
+    },
+    sequencing: {
+      en: [
+        { question: "Which word means 'at the very beginning'?", options: ["Then", "Finally", "First", "After"], correctIndex: 2 },
+        { question: "What is the correct order? A) Eat apple. B) Wash apple. C) Pick up apple.", options: ["A→B→C", "B→C→A", "C→B→A", "C→A→B"], correctIndex: 2 },
+        { question: "A sequence puts events in:", options: ["random order", "alphabetical order", "the correct time order", "the shortest to longest order"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Коя дума означава 'в самото начало'?", options: ["После", "Накрая", "Първо", "След"], correctIndex: 2 },
+        { question: "Кой е верният ред? А) Изяжда ябълката. Б) Мие ябълката. В) Взима ябълката.", options: ["А→Б→В", "Б→В→А", "В→Б→А", "В→А→Б"], correctIndex: 2 },
+        { question: "Наредбата нарежда събитията в:", options: ["произволен ред", "азбучен ред", "правилния времеви ред", "от най-кратко до най-дълго"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Qué palabra significa 'al principio'?", options: ["Luego", "Finalmente", "Primero", "Después"], correctIndex: 2 },
+        { question: "¿Cuál es el orden correcto? A) Comer la manzana. B) Lavar la manzana. C) Agarrar la manzana.", options: ["A→B→C", "B→C→A", "C→B→A", "C→A→B"], correctIndex: 2 },
+        { question: "Una secuencia ordena los eventos en:", options: ["orden aleatorio", "orden alfabético", "el orden correcto de tiempo", "del más corto al más largo"], correctIndex: 2 },
+      ],
+    },
+    "family-community": {
+      en: [
+        { question: "A community is:", options: ["just your family", "a group of people sharing a place", "only people at school", "a group of friends"], correctIndex: 1 },
+        { question: "Who leads a municipality (local government)?", options: ["A teacher", "A doctor", "A mayor", "A police officer"], correctIndex: 2 },
+        { question: "Why do communities need rules?", options: ["To make things boring", "To help people live safely and fairly", "To punish people", "Only adults need rules"], correctIndex: 1 },
+      ],
+      bg: [
+        { question: "Общността е:", options: ["само семейството ти", "група хора, споделящи едно място", "само хора в училище", "група приятели"], correctIndex: 1 },
+        { question: "Кой ръководи общината?", options: ["Учител", "Лекар", "Кмет", "Полицай"], correctIndex: 2 },
+        { question: "Защо обществото се нуждае от правила?", options: ["За да е скучно", "За да живеят хората безопасно и справедливо", "За да наказват хората", "Само възрастните се нуждаят от правила"], correctIndex: 1 },
+      ],
+      es: [
+        { question: "Una comunidad es:", options: ["solo tu familia", "un grupo de personas que comparten un lugar", "solo personas en la escuela", "un grupo de amigos"], correctIndex: 1 },
+        { question: "¿Quién encabeza un municipio (gobierno local)?", options: ["Un maestro", "Un médico", "Un alcalde", "Un policía"], correctIndex: 2 },
+        { question: "¿Por qué las comunidades necesitan reglas?", options: ["Para hacer las cosas aburridas", "Para ayudar a las personas a vivir de forma segura y justa", "Para castigar a las personas", "Solo los adultos necesitan reglas"], correctIndex: 1 },
+      ],
+    },
+    "my-homeland": {
+      en: [
+        { question: "What is the difference between a city and a village?", options: ["A village is bigger", "A city is larger with more people", "They are the same", "A village has more traffic"], correctIndex: 1 },
+        { question: "What is the highest mountain in Bulgaria?", options: ["Vitosha", "Balkan", "Musala (Rila)", "Rhodope"], correctIndex: 2 },
+        { question: "A landmark is:", options: ["a road sign", "a famous recognisable feature of a place", "a type of map", "a border between countries"], correctIndex: 1 },
+      ],
+      bg: [
+        { question: "Каква е разликата между град и село?", options: ["Селото е по-голямо", "Градът е по-голям с повече хора", "Едни и същи са", "Селото има повече трафик"], correctIndex: 1 },
+        { question: "Кой е най-високият връх в България?", options: ["Витоша", "Стара планина", "Мусала (Рила)", "Родопи"], correctIndex: 2 },
+        { question: "Забележителността е:", options: ["пътен знак", "известен обект на дадено място", "вид карта", "граница между страни"], correctIndex: 1 },
+      ],
+      es: [
+        { question: "¿Cuál es la diferencia entre una ciudad y un pueblo?", options: ["El pueblo es más grande", "La ciudad es más grande con más gente", "Son lo mismo", "El pueblo tiene más tráfico"], correctIndex: 1 },
+        { question: "¿Cuál es la montaña más alta de Bulgaria?", options: ["Vitosha", "Balcán", "Musala (Rila)", "Ródope"], correctIndex: 2 },
+        { question: "Un punto de referencia es:", options: ["una señal de tráfico", "un lugar famoso y reconocible de un lugar", "un tipo de mapa", "una frontera entre países"], correctIndex: 1 },
+      ],
+    },
+    bulgaria: {
+      en: [
+        { question: "What is the capital of Bulgaria?", options: ["Plovdiv", "Varna", "Sofia", "Burgas"], correctIndex: 2 },
+        { question: "What are the colours of the Bulgarian flag (top to bottom)?", options: ["Red, White, Green", "White, Green, Red", "Green, White, Red", "Blue, White, Red"], correctIndex: 1 },
+        { question: "When was Bulgaria founded?", options: ["918 AD", "681 AD", "1878 AD", "1000 AD"], correctIndex: 1 },
+      ],
+      bg: [
+        { question: "Коя е столицата на България?", options: ["Пловдив", "Варна", "София", "Бургас"], correctIndex: 2 },
+        { question: "Кои са цветовете на българския флаг (от горе надолу)?", options: ["Червено, Бяло, Зелено", "Бяло, Зелено, Червено", "Зелено, Бяло, Червено", "Синьо, Бяло, Червено"], correctIndex: 1 },
+        { question: "Кога е основана България?", options: ["918 г.", "681 г.", "1878 г.", "1000 г."], correctIndex: 1 },
+      ],
+      es: [
+        { question: "¿Cuál es la capital de Bulgaria?", options: ["Plovdiv", "Varna", "Sofía", "Burgas"], correctIndex: 2 },
+        { question: "¿Cuáles son los colores de la bandera búlgara (de arriba abajo)?", options: ["Rojo, Blanco, Verde", "Blanco, Verde, Rojo", "Verde, Blanco, Rojo", "Azul, Blanco, Rojo"], correctIndex: 1 },
+        { question: "¿Cuándo fue fundada Bulgaria?", options: ["918 d.C.", "681 d.C.", "1878 d.C.", "1000 d.C."], correctIndex: 1 },
+      ],
+    },
+    "rights-duties": {
+      en: [
+        { question: "Every child has the right to:", options: ["skip school anytime", "education and safety", "break any rule", "stay up all night"], correctIndex: 1 },
+        { question: "A duty is:", options: ["something you want to do", "something you are responsible to do", "a type of holiday", "only for adults"], correctIndex: 1 },
+        { question: "Why do we have traffic rules?", options: ["To make roads prettier", "To slow everyone down", "To keep all road users safe", "Only drivers need them"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Всяко дете има право на:", options: ["да пропуска учлище кога иска", "образование и безопасност", "да нарушава всяко правило", "да не спи нощем"], correctIndex: 1 },
+        { question: "Задължението е:", options: ["нещо, което искаш да правиш", "нещо, за което си отговорен да го правиш", "вид празник", "само за възрастни"], correctIndex: 1 },
+        { question: "Защо имаме правила за движение по пътя?", options: ["За да са пътищата по-красиви", "За да забавят всички", "За да са в безопасност всички участници в движението", "Само шофьорите се нуждаят от тях"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "Todo niño tiene derecho a:", options: ["saltarse la escuela cuando quiera", "educación y seguridad", "romper cualquier regla", "quedarse despierto toda la noche"], correctIndex: 1 },
+        { question: "Un deber es:", options: ["algo que quieres hacer", "algo de lo que eres responsable de hacer", "un tipo de vacación", "solo para adultos"], correctIndex: 1 },
+        { question: "¿Por qué tenemos reglas de tráfico?", options: ["Para hacer las carreteras más bonitas", "Para hacer más lentos a todos", "Para mantener a todos los usuarios de la vía seguros", "Solo los conductores las necesitan"], correctIndex: 2 },
+      ],
+    },
+    traditions: {
+      en: [
+        { question: "When is Baba Marta Day?", options: ["1 January", "1 March", "3 March", "24 December"], correctIndex: 1 },
+        { question: "What colour is a martenitsa?", options: ["Blue and yellow", "Red and white", "Green and white", "Red and blue"], correctIndex: 1 },
+        { question: "When is Bulgarian Liberation Day?", options: ["1 March", "24 December", "3 March", "1 January"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Кога е Баба Марта?", options: ["1 януари", "1 март", "3 март", "24 декември"], correctIndex: 1 },
+        { question: "Какъв цвят е мартеницата?", options: ["Синьо и жълто", "Червено и бяло", "Зелено и бяло", "Червено и синьо"], correctIndex: 1 },
+        { question: "Кога е Денят на Освобождението на България?", options: ["1 март", "24 декември", "3 март", "1 януари"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Cuándo es el Día de Baba Marta?", options: ["1 de enero", "1 de marzo", "3 de marzo", "24 de diciembre"], correctIndex: 1 },
+        { question: "¿De qué color es una martenitsa?", options: ["Azul y amarillo", "Rojo y blanco", "Verde y blanco", "Rojo y azul"], correctIndex: 1 },
+        { question: "¿Cuándo es el Día de la Liberación de Bulgaria?", options: ["1 de marzo", "24 de diciembre", "3 de marzo", "1 de enero"], correctIndex: 2 },
+      ],
+    },
+    "living-things": {
+      en: [
+        { question: "Which of these is a living thing?", options: ["A rock", "A chair", "A mushroom", "Water"], correctIndex: 2 },
+        { question: "What process do plants use to make food?", options: ["Digestion", "Photosynthesis", "Respiration", "Reproduction"], correctIndex: 1 },
+        { question: "Which is NOT a sign of life?", options: ["Growth", "Reproduction", "Rusting", "Movement"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Кое от тези е жив организъм?", options: ["Камък", "Стол", "Гъба", "Вода"], correctIndex: 2 },
+        { question: "Какъв процес използват растенията, за да правят храна?", options: ["Храносмилане", "Фотосинтеза", "Дишане", "Размножаване"], correctIndex: 1 },
+        { question: "Кое НЕ е признак на живота?", options: ["Растеж", "Размножаване", "Ръждясване", "Движение"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Cuál de estos es un ser vivo?", options: ["Una roca", "Una silla", "Un hongo", "Agua"], correctIndex: 2 },
+        { question: "¿Qué proceso usan las plantas para producir alimento?", options: ["Digestión", "Fotosíntesis", "Respiración", "Reproducción"], correctIndex: 1 },
+        { question: "¿Cuál NO es un signo de vida?", options: ["Crecimiento", "Reproducción", "Oxidación", "Movimiento"], correctIndex: 2 },
+      ],
+    },
+    materials: {
+      en: [
+        { question: "Is wood a natural or synthetic material?", options: ["Synthetic", "Natural", "Both", "Neither"], correctIndex: 1 },
+        { question: "Why is glass used for windows?", options: ["It is flexible", "It is transparent", "It is the cheapest", "It is magnetic"], correctIndex: 1 },
+        { question: "Which material conducts electricity?", options: ["Wood", "Plastic", "Rubber", "Copper"], correctIndex: 3 },
+      ],
+      bg: [
+        { question: "Дървото природен или синтетичен материал ли е?", options: ["Синтетичен", "Природен", "И двете", "Нито едното"], correctIndex: 1 },
+        { question: "Защо стъклото се използва за прозорци?", options: ["Гъвкаво е", "Прозрачно е", "Най-евтиното е", "Магнитно е"], correctIndex: 1 },
+        { question: "Кой материал провежда електричество?", options: ["Дърво", "Пластмаса", "Гума", "Мед"], correctIndex: 3 },
+      ],
+      es: [
+        { question: "¿Es la madera un material natural o sintético?", options: ["Sintético", "Natural", "Ambos", "Ninguno"], correctIndex: 1 },
+        { question: "¿Por qué se usa vidrio en las ventanas?", options: ["Es flexible", "Es transparente", "Es lo más barato", "Es magnético"], correctIndex: 1 },
+        { question: "¿Qué material conduce la electricidad?", options: ["Madera", "Plástico", "Caucho", "Cobre"], correctIndex: 3 },
+      ],
+    },
+    "light-sound": {
+      en: [
+        { question: "What happens when light hits a mirror?", options: ["It disappears", "It reflects (bounces back)", "It changes colour", "It slows down"], correctIndex: 1 },
+        { question: "Why do you see lightning before hearing thunder?", options: ["Thunder travels faster", "Light travels faster than sound", "They travel at the same speed", "Thunder is quieter"], correctIndex: 1 },
+        { question: "Which is a natural source of light?", options: ["A candle", "A lamp", "The Sun", "A torch"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Какво се случва, когато светлината удари огледало?", options: ["Изчезва", "Отразява се (отскача)", "Сменя цвета си", "Забавя се"], correctIndex: 1 },
+        { question: "Защо виждаш мълнията преди да чуеш гърма?", options: ["Гърмът пътува по-бързо", "Светлината пътува по-бързо от звука", "Пътуват с еднаква скорост", "Гърмът е по-тих"], correctIndex: 1 },
+        { question: "Кой е естествен източник на светлина?", options: ["Свещ", "Лампа", "Слънцето", "Фенерче"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Qué ocurre cuando la luz golpea un espejo?", options: ["Desaparece", "Se refleja (rebota)", "Cambia de color", "Se ralentiza"], correctIndex: 1 },
+        { question: "¿Por qué ves el relámpago antes de escuchar el trueno?", options: ["El trueno viaja más rápido", "La luz viaja más rápido que el sonido", "Viajan a la misma velocidad", "El trueno es más silencioso"], correctIndex: 1 },
+        { question: "¿Cuál es una fuente natural de luz?", options: ["Una vela", "Una lámpara", "El Sol", "Una linterna"], correctIndex: 2 },
+      ],
+    },
+    "water-air": {
+      en: [
+        { question: "What are the 3 states of water?", options: ["Gas, plasma, solid", "Solid, liquid, gas", "Liquid, solid, vapour-gas", "Hot, cold, frozen"], correctIndex: 1 },
+        { question: "What percentage of air is oxygen?", options: ["78%", "21%", "1%", "50%"], correctIndex: 1 },
+        { question: "What is the first stage of the water cycle?", options: ["Precipitation", "Collection", "Evaporation", "Condensation"], correctIndex: 2 },
+      ],
+      bg: [
+        { question: "Кои са 3-те агрегатни състояния на водата?", options: ["Газ, плазма, твърдо", "Твърдо, течно, газообразно", "Течно, твърдо, пара", "Горещо, студено, замръзнало"], correctIndex: 1 },
+        { question: "Какъв е процентът на кислород във въздуха?", options: ["78%", "21%", "1%", "50%"], correctIndex: 1 },
+        { question: "Кой е първият етап на водния цикъл?", options: ["Валеж", "Събиране", "Изпарение", "Кондензация"], correctIndex: 2 },
+      ],
+      es: [
+        { question: "¿Cuáles son los 3 estados del agua?", options: ["Gas, plasma, sólido", "Sólido, líquido, gas", "Líquido, sólido, vapor", "Caliente, frío, congelado"], correctIndex: 1 },
+        { question: "¿Qué porcentaje del aire es oxígeno?", options: ["78%", "21%", "1%", "50%"], correctIndex: 1 },
+        { question: "¿Cuál es la primera etapa del ciclo del agua?", options: ["Precipitación", "Recogida", "Evaporación", "Condensación"], correctIndex: 2 },
+      ],
+    },
+    "human-body": {
+      en: [
+        { question: "What does the heart do?", options: ["Digests food", "Pumps blood", "Controls thinking", "Breathes air"], correctIndex: 1 },
+        { question: "What protects the brain?", options: ["Ribs", "Spine", "Skull", "Muscles"], correctIndex: 2 },
+        { question: "Which body system breaks down food?", options: ["Circulatory", "Respiratory", "Skeletal", "Digestive"], correctIndex: 3 },
+      ],
+      bg: [
+        { question: "Какво прави сърцето?", options: ["Смила храна", "Изпомпва кръвта", "Управлява мисленето", "Диша въздух"], correctIndex: 1 },
+        { question: "Какво защитава мозъка?", options: ["Ребрата", "Гръбначният стълб", "Черепът", "Мускулите"], correctIndex: 2 },
+        { question: "Коя телесна система разгражда храната?", options: ["Кръвоносна", "Дихателна", "Скелетна", "Храносмилателна"], correctIndex: 3 },
+      ],
+      es: [
+        { question: "¿Qué hace el corazón?", options: ["Digiere comida", "Bombea sangre", "Controla el pensamiento", "Respira aire"], correctIndex: 1 },
+        { question: "¿Qué protege al cerebro?", options: ["Las costillas", "La columna", "El cráneo", "Los músculos"], correctIndex: 2 },
+        { question: "¿Qué sistema corporal descompone los alimentos?", options: ["Circulatorio", "Respiratorio", "Esquelético", "Digestivo"], correctIndex: 3 },
       ],
     },
   };

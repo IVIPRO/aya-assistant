@@ -52,7 +52,8 @@ const WEAK_CHIP: Record<LangCode, string> = {
 
 function getSubjectsForGrade(grade: number): Subject[] {
   const stage = EDUCATION_STAGES.find(s => s.grades.includes(grade));
-  return stage?.subjects ?? [];
+  if (!stage) return [];
+  return stage.subjects.filter(s => !s.grades || s.grades.includes(grade));
 }
 
 export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, onStart, onBack, onLessonActiveChange }: SubjectPanelProps) {

@@ -13,6 +13,8 @@ export interface Subject {
   bgClass: string;
   borderClass: string;
   topics: Topic[];
+  /** If set, only show this subject for the listed grades */
+  grades?: number[];
 }
 
 export const elementarySubjects: Subject[] = [
@@ -44,7 +46,7 @@ export const elementarySubjects: Subject[] = [
     topics: [
       { id: "alphabet",    label: { en: "Alphabet",       bg: "Азбука",              es: "Alfabeto",         de: "Alphabet",           fr: "Alphabet" } },
       { id: "reading",     label: { en: "Reading",         bg: "Четене",              es: "Lectura",          de: "Lesen",              fr: "Lecture" } },
-      { id: "writing",     label: { en: "Writing",         bg: "Писане",              es: "Escritura",        de: "Schreiben",          fr: "Écriture" } },
+      { id: "writing",     label: { en: "Writing",         bg: "Пишем изречения",     es: "Escritura",        de: "Schreiben",          fr: "Écriture" } },
       { id: "grammar",     label: { en: "Grammar basics",  bg: "Основна граматика",   es: "Gramática básica", de: "Grundgrammatik",     fr: "Grammaire de base" } },
       { id: "spelling",    label: { en: "Spelling",        bg: "Правопис",            es: "Ortografía",       de: "Rechtschreibung",    fr: "Orthographe" } },
       { id: "word-study",  label: { en: "Word Study",       bg: "Речников запас",      es: "Estudio de palabras", de: "Wortschatz",        fr: "Étude du vocabulaire" } },
@@ -54,7 +56,7 @@ export const elementarySubjects: Subject[] = [
   },
   {
     id: "reading-literature",
-    label: { en: "Reading", bg: "Четене", es: "Lectura", de: "Lesen", fr: "Lecture" },
+    label: { en: "Reading", bg: "Четене и литература", es: "Lectura", de: "Lesen", fr: "Lecture" },
     emoji: "📚",
     colorClass: "text-green-600",
     bgClass: "bg-gradient-to-br from-green-50 to-emerald-50",
@@ -70,27 +72,64 @@ export const elementarySubjects: Subject[] = [
   },
   {
     id: "logic-thinking",
-    label: { en: "Logic", bg: "Логика", es: "Lógica", de: "Logik", fr: "Logique" },
+    label: { en: "Logic & Thinking", bg: "Логика и мислене", es: "Lógica", de: "Logik", fr: "Logique" },
     emoji: "🧩",
     colorClass: "text-purple-600",
     bgClass: "bg-gradient-to-br from-purple-50 to-violet-50",
     borderClass: "border-purple-200",
     topics: [
-      { id: "patterns", label: { en: "Patterns", bg: "Закономерности", es: "Patrones", de: "Muster", fr: "Motifs" } },
-      { id: "puzzles",  label: { en: "Puzzles",  bg: "Пъзели",         es: "Puzles",   de: "Rätsel", fr: "Énigmes" } },
+      { id: "patterns",    label: { en: "Patterns",    bg: "Закономерности", es: "Patrones",    de: "Muster",      fr: "Motifs" } },
+      { id: "puzzles",     label: { en: "Puzzles",     bg: "Пъзели",         es: "Puzles",      de: "Rätsel",      fr: "Énigmes" } },
+      { id: "comparison",  label: { en: "Comparing",   bg: "Сравняване",     es: "Comparar",    de: "Vergleichen", fr: "Comparer" } },
+      { id: "sequencing",  label: { en: "Sequencing",  bg: "Наредба",        es: "Ordenar",     de: "Reihenfolge", fr: "Ordre" } },
     ],
   },
   {
     id: "nature-science",
-    label: { en: "Nature", bg: "Околен свят", es: "Ciencias", de: "Naturwissenschaften", fr: "Sciences naturelles" },
+    label: { en: "Our World", bg: "Околен свят", es: "El mundo", de: "Unsere Welt", fr: "Notre monde" },
     emoji: "🌿",
     colorClass: "text-teal-600",
     bgClass: "bg-gradient-to-br from-teal-50 to-cyan-50",
     borderClass: "border-teal-200",
+    grades: [1, 2],
     topics: [
-      { id: "plants",  label: { en: "Plants",  bg: "Растения", es: "Plantas", de: "Pflanzen", fr: "Plantes" } },
-      { id: "animals", label: { en: "Animals", bg: "Животни",  es: "Animales", de: "Tiere", fr: "Animaux" } },
-      { id: "earth",   label: { en: "Earth",   bg: "Земята",   es: "La Tierra", de: "Erde", fr: "Terre" } },
+      { id: "plants",   label: { en: "Plants",   bg: "Растения",   es: "Plantas",   de: "Pflanzen", fr: "Plantes" } },
+      { id: "animals",  label: { en: "Animals",  bg: "Животни",    es: "Animales",  de: "Tiere",    fr: "Animaux" } },
+      { id: "earth",    label: { en: "Earth",    bg: "Земята",     es: "La Tierra", de: "Erde",     fr: "Terre" } },
+      { id: "seasons",  label: { en: "Seasons",  bg: "Сезони",     es: "Estaciones", de: "Jahreszeiten", fr: "Saisons" } },
+      { id: "weather",  label: { en: "Weather",  bg: "Времето",    es: "El tiempo", de: "Wetter",   fr: "Météo" } },
+    ],
+  },
+  {
+    id: "social-studies",
+    label: { en: "Society & Me", bg: "Човекът и обществото", es: "Sociedad", de: "Gesellschaft", fr: "Société" },
+    emoji: "🏡",
+    colorClass: "text-amber-600",
+    bgClass: "bg-gradient-to-br from-amber-50 to-yellow-50",
+    borderClass: "border-amber-200",
+    grades: [3, 4],
+    topics: [
+      { id: "family-community",  label: { en: "Family & community",  bg: "Семейство и общество",  es: "Familia y comunidad",  de: "Familie und Gemeinschaft", fr: "Famille et communauté" } },
+      { id: "my-homeland",       label: { en: "My homeland",         bg: "Роден край",            es: "Mi tierra natal",      de: "Heimat",                   fr: "Ma région natale" } },
+      { id: "bulgaria",          label: { en: "Bulgaria",            bg: "България",              es: "Bulgaria",             de: "Bulgarien",                fr: "Bulgarie" } },
+      { id: "rights-duties",     label: { en: "Rights & duties",     bg: "Права и задължения",    es: "Derechos y deberes",   de: "Rechte und Pflichten",     fr: "Droits et devoirs" } },
+      { id: "traditions",        label: { en: "Traditions",          bg: "Празници и традиции",   es: "Tradiciones",          de: "Traditionen",              fr: "Traditions" } },
+    ],
+  },
+  {
+    id: "natural-science",
+    label: { en: "Nature & Science", bg: "Човекът и природата", es: "Naturaleza", de: "Naturwissenschaft", fr: "Sciences" },
+    emoji: "🔬",
+    colorClass: "text-lime-600",
+    bgClass: "bg-gradient-to-br from-lime-50 to-green-50",
+    borderClass: "border-lime-200",
+    grades: [3, 4],
+    topics: [
+      { id: "living-things",  label: { en: "Living things",  bg: "Живи организми",  es: "Seres vivos",    de: "Lebewesen",    fr: "Êtres vivants" } },
+      { id: "materials",      label: { en: "Materials",      bg: "Материали",       es: "Materiales",     de: "Materialien",  fr: "Matériaux" } },
+      { id: "light-sound",    label: { en: "Light & sound",  bg: "Светлина и звук", es: "Luz y sonido",   de: "Licht und Schall", fr: "Lumière et son" } },
+      { id: "water-air",      label: { en: "Water & air",    bg: "Вода и въздух",   es: "Agua y aire",    de: "Wasser und Luft", fr: "Eau et air" } },
+      { id: "human-body",     label: { en: "My body & health", bg: "Тяло и здраве", es: "Cuerpo y salud", de: "Körper und Gesundheit", fr: "Corps et santé" } },
     ],
   },
   {
@@ -101,7 +140,7 @@ export const elementarySubjects: Subject[] = [
     bgClass: "bg-gradient-to-br from-rose-50 to-pink-50",
     borderClass: "border-rose-200",
     topics: [
-      { id: "vocabulary",       label: { en: "Vocabulary",       bg: "Речников запас",  es: "Vocabulario",      de: "Wortschatz",       fr: "Vocabulaire" } },
+      { id: "vocabulary",       label: { en: "Vocabulary",       bg: "Речник",          es: "Vocabulario",      de: "Wortschatz",       fr: "Vocabulaire" } },
       { id: "simple-sentences", label: { en: "Simple sentences", bg: "Прости изречения", es: "Oraciones simples", de: "Einfache Sätze",   fr: "Phrases simples" } },
     ],
   },
@@ -118,7 +157,7 @@ export const STAGE_1: EducationStage = {
   id: "stage1",
   label: { en: "Elementary Stage", bg: "Начален етап", es: "Etapa Elemental", de: "Grundschule", fr: "Étape Élémentaire" },
   grades: [1, 2, 3, 4],
-  subjects: elementarySubjects.filter(s => ["mathematics", "bulgarian-language", "reading-literature"].includes(s.id)),
+  subjects: elementarySubjects,
 };
 
 export const lowerSecondarySubjects: Subject[] = [

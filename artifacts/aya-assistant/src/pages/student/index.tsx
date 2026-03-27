@@ -5,6 +5,7 @@ import { StageSelector } from "@/pages/junior/stage-selector";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, BookOpen, Sparkles, MessageCircle } from "lucide-react";
+import { AyaAvatar } from "@/components/AyaAvatar";
 import { useAuth } from "@/hooks/use-auth";
 import { useListChildren, getListChildrenQueryKey } from "@workspace/api-client-react";
 import { resolveLang } from "@/lib/i18n";
@@ -169,8 +170,10 @@ export function Student() {
             <div className="relative rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-student/20 via-student/10 to-transparent border border-student/20 p-8 mb-8">
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 <div className="flex-shrink-0">
-                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-student/30 to-student/10 border-2 border-student/30 flex items-center justify-center text-5xl shadow-lg">
-                    👧
+                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-student/20 to-student/5 border-2 border-student/30 flex items-center justify-center shadow-lg overflow-visible">
+                    <div className="scale-[2.2] mt-3">
+                      <AyaAvatar emotion="happy" visible={true} />
+                    </div>
                   </div>
                 </div>
                 <div className="flex-1 text-center sm:text-left">

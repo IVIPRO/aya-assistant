@@ -10,6 +10,7 @@ import { getListChildrenQueryKey } from "@workspace/api-client-react";
 import type { LangCode } from "@/lib/i18n";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { XpToast, type XpReward } from "@/components/xp-toast";
+import { AyaAvatar } from "@/components/AyaAvatar";
 
 type LessonMode = "lesson" | "practice" | "quiz";
 
@@ -150,7 +151,7 @@ function AyaDialogue({ message, childName = "friend" }: { message: string; child
       className="bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-2xl px-5 py-4 mb-4 shadow-sm"
     >
       <div className="flex items-start gap-3">
-        <span className="text-2xl flex-shrink-0">👧</span>
+        <AyaAvatar emotion="encourage" visible={true} className="flex-shrink-0 scale-75 -my-1" />
         <p className="text-sm text-foreground leading-relaxed font-medium">{message}</p>
       </div>
     </motion.div>

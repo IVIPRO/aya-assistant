@@ -1257,6 +1257,7 @@ export function Junior() {
               <AyaAvatar
                 emotion={teacherState === "happy" ? "happy" : teacherStateToAyaEmotion(teacherState)}
                 visible={!!activeChild}
+                speaking={teacherState === "talking"}
               />
               <div className="flex-1 min-w-0">
                 <div className="text-[11px] font-bold text-yellow-700 uppercase tracking-wide leading-none mb-1">

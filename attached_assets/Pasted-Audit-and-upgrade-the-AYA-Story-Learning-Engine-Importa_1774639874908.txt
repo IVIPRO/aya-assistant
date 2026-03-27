@@ -1,0 +1,257 @@
+Audit and upgrade the AYA Story Learning Engine.
+
+Important rule:
+Do NOT create a new system before verifying whether a story-based learning system already exists in the codebase.
+
+The goal is to allow AYA to teach concepts through interactive stories where the student participates in the narrative.
+
+------------------------------------------------
+
+PHASE 1 — SYSTEM AUDIT
+
+Inspect the codebase and determine if any story-based learning logic already exists.
+
+Look for features such as:
+
+• narrative lessons  
+• story mode  
+• dialogue-driven learning  
+• character interactions  
+• scenario-based tasks  
+• adventure lessons  
+• story progression  
+• branching dialogue  
+• storytelling explanations  
+
+Check especially:
+
+lesson engine  
+chat system  
+avatar interaction  
+curiosity engine  
+daily plan generator  
+
+Determine whether a Story Learning system exists.
+
+------------------------------------------------
+
+PHASE 2 — AUDIT REPORT
+
+Before implementing anything, return a report:
+
+1. Story Learning system status:
+   - Full
+   - Partial
+   - None
+
+2. If partial:
+   - what components exist
+   - what functionality is missing
+
+3. Files and modules involved.
+
+4. Possible duplication risks.
+
+5. Recommended path:
+   - Improve existing system
+   - Merge partial components
+   - Create a new Story Learning Engine
+
+------------------------------------------------
+
+PHASE 3 — STORY LEARNING ENGINE
+
+If the system is missing or incomplete, implement the AYA Story Learning Engine.
+
+AYA should teach through interactive story scenarios.
+
+Example structure:
+
+Story intro  
+Problem  
+Student decision  
+Learning moment  
+Challenge  
+Story continuation
+
+------------------------------------------------
+
+STORY STRUCTURE
+
+Each story lesson should follow this format:
+
+1. Introduction
+
+AYA begins a short story.
+
+Example:
+
+"Маги и нейната котка Мая откриха 6 ябълки в градината."
+
+2. Situation
+
+AYA presents a situation related to the lesson.
+
+Example:
+
+"Ако Маги иска да раздели ябълките между 2 приятели..."
+
+3. Question
+
+AYA asks the student what should happen next.
+
+Example:
+
+"Колко ябълки ще получи всеки?"
+
+4. Student answer
+
+Student responds via:
+
+typing  
+choice selection  
+voice (future support)
+
+5. Story continuation
+
+AYA continues the story depending on the answer.
+
+Correct answer:
+
+"Точно така! Всеки получава по 3 ябълки."
+
+Incorrect answer:
+
+"Почти! Нека помислим още веднъж."
+
+------------------------------------------------
+
+INTERACTIVE ELEMENTS
+
+Stories should include:
+
+• decision points  
+• mini puzzles  
+• math challenges  
+• vocabulary questions  
+• logical reasoning  
+
+The student should feel part of the story.
+
+------------------------------------------------
+
+AVATAR ROLE
+
+AYA avatar becomes the narrator.
+
+Avatar animations:
+
+• explaining  
+• thinking  
+• celebrating success  
+• encouraging retry  
+
+------------------------------------------------
+
+STORY TYPES
+
+Stories may include:
+
+Math adventures  
+Science discovery stories  
+Language puzzles  
+History journeys  
+Nature exploration  
+
+------------------------------------------------
+
+ADAPTIVE STORY INTEGRATION
+
+Integrate with Adaptive Learning Brain.
+
+If a student struggles with fractions:
+
+AYA can start a story involving sharing food or objects.
+
+If a student struggles with reading:
+
+AYA can offer shorter story segments.
+
+------------------------------------------------
+
+CURIOSITY ENGINE CONNECTION
+
+Stories should also trigger curiosity.
+
+Example:
+
+"Знаеш ли защо това работи така?"
+
+This should lead to optional exploration.
+
+------------------------------------------------
+
+DAILY PLAN INTEGRATION
+
+Daily Plan may include:
+
+• Story lesson  
+• Practice lesson  
+• Mini quiz  
+
+Example daily plan:
+
+Story adventure  
+Practice problems  
+Mini test
+
+------------------------------------------------
+
+PERFORMANCE RULES
+
+Keep stories lightweight.
+
+Do not introduce heavy game engines.
+
+Use existing lesson/chat architecture where possible.
+
+------------------------------------------------
+
+PRESERVE
+
+Do NOT break:
+
+lesson engine  
+daily plan  
+adaptive learning brain  
+curiosity engine  
+chat  
+avatar reactions  
+rewards / XP  
+stage separation  
+
+------------------------------------------------
+
+RETURN FORMAT
+
+Before implementation return:
+
+AUDIT REPORT  
+1. Story system status  
+2. Files involved  
+3. Missing features  
+4. Duplication risks  
+5. Chosen path  
+
+After implementation return:
+
+IMPLEMENTATION REPORT  
+1. Files modified  
+2. New story features  
+3. Integration points  
+4. Example story lesson  
+5. Preview test steps  
+
+Feature name:
+
+AYA Story Learning Engine

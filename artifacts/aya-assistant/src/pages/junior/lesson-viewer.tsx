@@ -12,6 +12,7 @@ import type { Subject, Topic } from "@/lib/curriculum";
 import { XpToast, type XpReward } from "@/components/xp-toast";
 import { AyaAvatar, type AyaEmotion } from "@/components/AyaAvatar";
 import { getCuriosityCard, type CuriosityCard as CuriosityCardData } from "@/lib/curiosityEngine";
+import { StoryLessonEngine } from "./story-engine";
 
 /* ─── Adaptive profile ──────────────────────────────────────────── */
 
@@ -1008,7 +1009,7 @@ function InteractiveLessonEngine({
 
 /* ─── Public LessonViewer ───────────────────────────────────────── */
 
-export type LessonMode = "lesson" | "practice" | "quiz";
+export type LessonMode = "lesson" | "practice" | "quiz" | "story";
 
 export interface LessonViewerProps {
   subject: Subject;
@@ -1082,10 +1083,14 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
   ) => {
     if (!completeFiredRef.current) {
       completeFiredRef.current = true;
-      record("quiz", quizCorrect, quizTotal);
-      record("practice", practiceCorrect, practiceTotal);
+      if (initialMode === "story") {
+        record("practice", practiceCorrect, practiceTotal);
+      } else {
+        record("quiz", quizCorrect, quizTotal);
+        record("practice", practiceCorrect, practiceTotal);
+      }
     }
-  }, [record]);
+  }, [record, initialMode]);
 
   const handleRecordLesson = useCallback(() => {
     if (!lessonFiredRef.current) {
@@ -1124,6 +1129,17 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
           <p>{lang === "bg" ? "Грешка при зареждане. Опитай пак." : "Error loading lesson. Please try again."}</p>
           <button onClick={onBack} className="mt-4 text-sm underline hover:text-foreground">{l.back}</button>
         </div>
+      ) : initialMode === "story" ? (
+        <StoryLessonEngine
+          key={`story-${subject.id}-${topic.id}`}
+          data={data}
+          topic={topic}
+          subject={subject}
+          lang={lang}
+          grade={grade}
+          onComplete={handleComplete}
+          onBack={onBack}
+        />
       ) : (
         <InteractiveLessonEngine
           key={`${subject.id}-${topic.id}`}

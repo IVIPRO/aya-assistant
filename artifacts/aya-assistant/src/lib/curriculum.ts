@@ -266,10 +266,10 @@ export const STAGE_2: EducationStage = {
 
 export const EDUCATION_STAGES: EducationStage[] = [STAGE_1, STAGE_2];
 
-export const SUBJECT_ACTIONS_LABELS: Record<LangCode, { lessons: string; practice: string; quiz: string; askAya: string; comingSoon: string; chooseTopic: string; backToSubjects: string; noTopicNeeded: string }> = {
-  en: { lessons: "Lessons", practice: "Practice", quiz: "Quiz", askAya: "Ask AYA", comingSoon: "Coming Soon", chooseTopic: "Choose a topic", backToSubjects: "← All subjects", noTopicNeeded: "Chat about any topic" },
-  bg: { lessons: "Уроци", practice: "Упражнения", quiz: "Тест", askAya: "Питай AYA", comingSoon: "Скоро", chooseTopic: "Избери тема", backToSubjects: "← Всички предмети", noTopicNeeded: "Разговор без тема" },
-  es: { lessons: "Lecciones", practice: "Práctica", quiz: "Test", askAya: "Preguntar AYA", comingSoon: "Próximamente", chooseTopic: "Elige un tema", backToSubjects: "← Todos los temas", noTopicNeeded: "Conversar sin tema" },
-  de: { lessons: "Lektionen", practice: "Übung", quiz: "Quiz", askAya: "Frage AYA", comingSoon: "Kommt bald", chooseTopic: "Wähle ein Thema", backToSubjects: "← Alle Fächer", noTopicNeeded: "Über jedes Thema sprechen" },
-  fr: { lessons: "Leçons", practice: "Pratique", quiz: "Quiz", askAya: "Demande à AYA", comingSoon: "Bientôt", chooseTopic: "Choisis un sujet", backToSubjects: "← Tous les sujets", noTopicNeeded: "Parler de n'importe quel sujet" },
+export const SUBJECT_ACTIONS_LABELS: Record<LangCode, { lessons: string; practice: string; quiz: string; story: string; askAya: string; comingSoon: string; chooseTopic: string; backToSubjects: string; noTopicNeeded: string }> = {
+  en: { lessons: "Lessons", practice: "Practice", quiz: "Quiz", story: "Story", askAya: "Ask AYA", comingSoon: "Coming Soon", chooseTopic: "Choose a topic", backToSubjects: "← All subjects", noTopicNeeded: "Chat about any topic" },
+  bg: { lessons: "Уроци", practice: "Упражнения", quiz: "Тест", story: "История", askAya: "Питай AYA", comingSoon: "Скоро", chooseTopic: "Избери тема", backToSubjects: "← Всички предмети", noTopicNeeded: "Разговор без тема" },
+  es: { lessons: "Lecciones", practice: "Práctica", quiz: "Test", story: "Historia", askAya: "Preguntar AYA", comingSoon: "Próximamente", chooseTopic: "Elige un tema", backToSubjects: "← Todos los temas", noTopicNeeded: "Conversar sin tema" },
+  de: { lessons: "Lektionen", practice: "Übung", quiz: "Quiz", story: "Geschichte", askAya: "Frage AYA", comingSoon: "Kommt bald", chooseTopic: "Wähle ein Thema", backToSubjects: "← Alle Fächer", noTopicNeeded: "Über jedes Thema sprechen" },
+  fr: { lessons: "Leçons", practice: "Pratique", quiz: "Quiz", story: "Histoire", askAya: "Demande à AYA", comingSoon: "Bientôt", chooseTopic: "Choisis un sujet", backToSubjects: "← Tous les sujets", noTopicNeeded: "Parler de n'importe quel sujet" },
 };

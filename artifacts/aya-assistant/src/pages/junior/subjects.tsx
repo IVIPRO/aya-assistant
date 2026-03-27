@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, Pencil, Brain, MessageCircle, CheckCircle2, Circle, AlertTriangle } from "lucide-react";
+import { ArrowLeft, BookOpen, Pencil, Brain, MessageCircle, CheckCircle2, Circle, AlertTriangle, BookMarked } from "lucide-react";
 import { EDUCATION_STAGES, SUBJECT_ACTIONS_LABELS, type Subject, type Topic } from "@/lib/curriculum";
 import type { LangCode } from "@/lib/i18n";
 import { cn } from "@/components/layout";
@@ -257,12 +257,13 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
                         ))}
                       </div>
 
-                      <div className="grid grid-cols-4 border-t border-border/20">
+                      <div className="grid grid-cols-5 border-t border-border/20">
                         {(
                           [
                             { key: "lessons",  mode: "lesson"   as LessonMode, Icon: BookOpen,     label: labels.lessons },
                             { key: "practice", mode: "practice" as LessonMode, Icon: Pencil,       label: labels.practice },
                             { key: "quiz",     mode: "quiz"     as LessonMode, Icon: Brain,        label: labels.quiz },
+                            { key: "story",    mode: "story"    as LessonMode, Icon: BookMarked,   label: labels.story },
                             { key: "askAya",   mode: null,                     Icon: MessageCircle, label: labels.askAya },
                           ] as const
                         ).map(({ key, mode, Icon, label }) => (

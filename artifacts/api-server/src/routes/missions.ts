@@ -529,10 +529,22 @@ router.post("/missions/generate", requireAuth, async (req, res): Promise<void> =
     const grade = child.grade ?? 2;
     const country = child.country ?? "EN";
 
-    // Generate new missions via AI
-    const generated = await generateAIMissions(zone, grade, country, completedTitles);
+    // Gather recent avg score for adaptive difficulty
+    const recentProg = await db
+      .select()
+      .from(progressTable)
+      .where(eq(progressTable.childId, childIdNum))
+      .orderBy(desc(progressTable.createdAt))
+      .limit(10);
 
-    // Insert all generated missions into the DB
+    const avgScore = recentProg.length > 0
+      ? recentProg.reduce((sum, p) => sum + p.score, 0) / recentProg.length
+      : undefined;
+
+    // Generate new missions via AI (with adaptive difficulty hint)
+    const generated = await generateAIMissions(zone, grade, country, completedTitles, avgScore);
+
+    // Insert all generated missions into the DB with curriculum linkage
     const inserted = await db
       .insert(missionsTable)
       .values(
@@ -546,6 +558,9 @@ router.post("/missions/generate", requireAuth, async (req, res): Promise<void> =
           xpReward: m.xpReward,
           starReward: m.starReward,
           completed: false,
+          aiGenerated: true,
+          topicId: m.topicId ?? null,
+          subjectId: m.subjectId ?? null,
         })),
       )
       .returning();
@@ -554,7 +569,7 @@ router.post("/missions/generate", requireAuth, async (req, res): Promise<void> =
     MISSIONS_CACHE.delete(childIdNum);
 
     console.log(
-      `[MISSIONS_GENERATE] Inserted ${inserted.length} missions for childId=${childIdNum} zone="${zone}"`,
+      `[MISSIONS_GENERATE] Inserted ${inserted.length} missions for childId=${childIdNum} zone="${zone}" avgScore=${avgScore?.toFixed(1) ?? "n/a"}`,
     );
 
     res.json({ generated: inserted.length, missions: inserted });
@@ -562,6 +577,122 @@ router.post("/missions/generate", requireAuth, async (req, res): Promise<void> =
     console.error("[MISSIONS_GENERATE] Error:", err);
     res.status(500).json({ error: "Failed to generate missions", details: String(err) });
   }
+});
+
+// ─── POST /missions/auto-expand ───────────────────────────────────────────────
+// Called after a mission completes to auto-generate more when a zone runs low.
+// Body: { childId: number, zone: string, pendingThreshold?: number }
+// Responds immediately — generation runs in the background (fire and forget).
+
+const AUTO_EXPAND_IN_PROGRESS = new Set<string>();
+const AUTO_EXPAND_THRESHOLD = 3; // generate when pending < this
+
+router.post("/missions/auto-expand", requireAuth, async (req, res): Promise<void> => {
+  const { childId, zone, pendingThreshold } = req.body as {
+    childId?: number;
+    zone?: string;
+    pendingThreshold?: number;
+  };
+
+  if (!childId || !zone) {
+    res.status(400).json({ error: "childId and zone are required" });
+    return;
+  }
+
+  const childIdNum = Number(childId);
+  const threshold = Number(pendingThreshold) || AUTO_EXPAND_THRESHOLD;
+  const lockKey = `${childIdNum}:${zone}`;
+
+  if (AUTO_EXPAND_IN_PROGRESS.has(lockKey)) {
+    res.json({ triggered: false, reason: "generation already in progress" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, childIdNum), eq(childrenTable.familyId, familyId ?? -1)));
+
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  // Count pending (incomplete) missions in the zone
+  const pendingMissions = await db
+    .select()
+    .from(missionsTable)
+    .where(
+      and(
+        eq(missionsTable.childId, childIdNum),
+        eq(missionsTable.zone, zone),
+        eq(missionsTable.completed, false),
+      ),
+    );
+
+  if (pendingMissions.length >= threshold) {
+    res.json({ triggered: false, reason: `zone has ${pendingMissions.length} pending missions (threshold=${threshold})` });
+    return;
+  }
+
+  // Respond immediately — generation is fire-and-forget
+  res.json({ triggered: true, pendingCount: pendingMissions.length, threshold });
+
+  // Background generation
+  AUTO_EXPAND_IN_PROGRESS.add(lockKey);
+  (async () => {
+    try {
+      const existingMissions = await db
+        .select({ title: missionsTable.title })
+        .from(missionsTable)
+        .where(and(eq(missionsTable.childId, childIdNum), eq(missionsTable.zone, zone)));
+
+      const completedTitles = existingMissions.map((m) => m.title);
+      const grade = child.grade ?? 2;
+      const country = child.country ?? "EN";
+
+      const recentProg = await db
+        .select()
+        .from(progressTable)
+        .where(eq(progressTable.childId, childIdNum))
+        .orderBy(desc(progressTable.createdAt))
+        .limit(10);
+
+      const avgScore = recentProg.length > 0
+        ? recentProg.reduce((sum, p) => sum + p.score, 0) / recentProg.length
+        : undefined;
+
+      const generated = await generateAIMissions(zone, grade, country, completedTitles, avgScore);
+
+      await db
+        .insert(missionsTable)
+        .values(
+          generated.map((m) => ({
+            childId: childIdNum,
+            title: m.title,
+            description: m.description,
+            subject: m.subject,
+            zone: m.zone,
+            difficulty: m.difficulty,
+            xpReward: m.xpReward,
+            starReward: m.starReward,
+            completed: false,
+            aiGenerated: true,
+            topicId: m.topicId ?? null,
+            subjectId: m.subjectId ?? null,
+          })),
+        );
+
+      MISSIONS_CACHE.delete(childIdNum);
+      console.log(`[AUTO_EXPAND] Generated ${generated.length} missions for childId=${childIdNum} zone="${zone}"`);
+    } catch (err) {
+      console.error(`[AUTO_EXPAND] Error for childId=${childIdNum} zone="${zone}":`, err);
+    } finally {
+      AUTO_EXPAND_IN_PROGRESS.delete(lockKey);
+    }
+  })();
 });
 
 export default router;

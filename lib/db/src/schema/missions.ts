@@ -15,6 +15,10 @@ export const missionsTable = pgTable("missions", {
   completed: boolean("completed").notNull().default(false),
   completedAt: timestamp("completed_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  /* Phase C: Dynamic Mission Generator — curriculum linkage */
+  topicId: text("topic_id"),       /* links to curriculum Topic.id   (nullable) */
+  subjectId: text("subject_id"),   /* links to curriculum Subject.id (nullable) */
+  aiGenerated: boolean("ai_generated").notNull().default(false),
 });
 
 export const insertMissionSchema = createInsertSchema(missionsTable).omit({ id: true, createdAt: true });

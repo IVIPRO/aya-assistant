@@ -18,6 +18,8 @@ import type {
 
 import type {
   AuthResponse,
+  AutoExpandMissionsBody,
+  AutoExpandMissionsResponse,
   CalendarEvent,
   ChatMessage,
   ChatMessagePair,
@@ -1664,6 +1666,92 @@ export const useGenerateMissions = <
   TContext
 > => {
   return useMutation(getGenerateMissionsMutationOptions(options));
+};
+
+/**
+ * @summary Auto-expand missions in a zone when supply runs low (fire-and-forget)
+ */
+export const getAutoExpandMissionsUrl = () => {
+  return `/api/missions/auto-expand`;
+};
+
+export const autoExpandMissions = async (
+  autoExpandMissionsBody: AutoExpandMissionsBody,
+  options?: RequestInit,
+): Promise<AutoExpandMissionsResponse> => {
+  return customFetch<AutoExpandMissionsResponse>(getAutoExpandMissionsUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(autoExpandMissionsBody),
+  });
+};
+
+export const getAutoExpandMissionsMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof autoExpandMissions>>,
+    TError,
+    { data: BodyType<AutoExpandMissionsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof autoExpandMissions>>,
+  TError,
+  { data: BodyType<AutoExpandMissionsBody> },
+  TContext
+> => {
+  const mutationKey = ["autoExpandMissions"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof autoExpandMissions>>,
+    { data: BodyType<AutoExpandMissionsBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return autoExpandMissions(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AutoExpandMissionsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof autoExpandMissions>>
+>;
+export type AutoExpandMissionsMutationBody = BodyType<AutoExpandMissionsBody>;
+export type AutoExpandMissionsMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Auto-expand missions in a zone when supply runs low (fire-and-forget)
+ */
+export const useAutoExpandMissions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof autoExpandMissions>>,
+    TError,
+    { data: BodyType<AutoExpandMissionsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof autoExpandMissions>>,
+  TError,
+  { data: BodyType<AutoExpandMissionsBody> },
+  TContext
+> => {
+  return useMutation(getAutoExpandMissionsMutationOptions(options));
 };
 
 /**

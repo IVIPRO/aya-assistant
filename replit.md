@@ -106,6 +106,26 @@ Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHea
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.
 
+## Phase C: Dynamic Mission Generator (World Map)
+
+### Mission System Architecture
+- **`missionsTable`** schema: id, childId, title, description, subject, zone, difficulty, xpReward, starReward, completed, completedAt, createdAt, `topicId` (nullable), `subjectId` (nullable), `aiGenerated` (bool, default false)
+- **`POST /missions/generate`** — AI-generates 5 missions for a zone. Stores `topicId`/`subjectId`/`aiGenerated=true`. Reads recent progress for adaptive difficulty (gpt-4o-mini).
+- **`POST /missions/auto-expand`** — Fire-and-forget: if pending < threshold (default 3), triggers background AI generation. Returns `{ triggered, pendingCount, threshold }` immediately.
+- **Zone→Curriculum mapping** in `aiMissionGenerator.ts` maps each zone to a `subjectId` + topic pool matching `curriculum.ts` IDs.
+
+### World Map Mission Routing (world.tsx)
+- **Math missions** (titleToId lookup): hardcoded missions (m1–m5 in BG/EN/ES) → `MissionPlay` (integer task engine)
+- **AI-generated missions** (topicId/subjectId): click "Start Lesson 📖" → `LessonViewer` rendered inline with correct subject/topic
+- **Zone fallback**: if subjectId/topicId not set, uses zone-level default (e.g., Reading Forest → reading-literature/stories)
+- **Auto-expand trigger**: fires after any mission completes when pending < 3 in that zone; re-fetches after 12 s delay
+- **Generate More button**: visible when pending < 3 (not just when all done)
+
+### Phase B: Infinite Practice Mode (Exercise Pool)
+- **`exercisePoolTable`** — Pre-generated exercise batches per child/topic/difficulty. `refillInProgress` Set prevents duplicate AI calls.
+- **`exercisePoolManager.ts`** — `INITIAL_BATCH_SIZE=5` (sync on first call), `REFILL_BATCH_SIZE=30` (background), `LOW_POOL_THRESHOLD=5`.
+- **LessonViewer infinite practice** — "🔥 Безкрайна практика" button on lesson completion → pulls exercises from pool; auto-refills when exhausted; records results fire-and-forget.
+
 ## AYA Avatar System (Unified)
 
 AYA is the single teacher identity across the entire app. All animal mascot references have been removed from both frontend and backend:

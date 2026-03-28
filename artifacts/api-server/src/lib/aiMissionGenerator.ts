@@ -33,6 +33,37 @@ const ZONE_CONTEXT: Record<string, { en: string; bg: string; subjects: string[] 
   },
 };
 
+// ─── Phase C: Zone → curriculum topic mapping ─────────────────────────────────
+// Maps world zones to specific curriculum subject IDs and topic pools.
+// These IDs match the frontend curriculum.ts Subject.id / Topic.id values.
+
+const ZONE_TO_CURRICULUM: Record<string, { subjectId: string; topics: string[] }> = {
+  "Math Island": {
+    subjectId: "mathematics",
+    topics: ["addition", "subtraction", "multiplication", "division", "word-problems", "fractions", "geometry", "measurement"],
+  },
+  "Reading Forest": {
+    subjectId: "reading-literature",
+    topics: ["stories", "comprehension", "poetry", "main-idea", "characters", "retelling"],
+  },
+  "Logic Mountain": {
+    subjectId: "logic-thinking",
+    topics: ["patterns", "puzzles", "sorting", "sequencing", "comparisons"],
+  },
+  "English City": {
+    subjectId: "english-language",
+    topics: ["vocabulary", "greetings", "colors", "animals", "simple-sentences", "classroom"],
+  },
+  "Science Planet": {
+    subjectId: "science-nature",
+    topics: ["animals", "plants", "seasons", "weather", "human-body", "environment", "space"],
+  },
+};
+
+function pickRandom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
 // ─── Difficulty distribution by grade ────────────────────────────────────────
 
 function getDifficultySet(grade: number): string {
@@ -55,6 +86,7 @@ function buildMissionUserPrompt(
   grade: number,
   country: string,
   completedTitles: string[],
+  avgScore?: number,
 ): string {
   const isBG = country.toUpperCase().startsWith("BG");
   const langKey = isBG ? "bg" : "en";
@@ -73,11 +105,21 @@ function buildMissionUserPrompt(
     ? `\n\nCultural note: This is a Bulgarian child. Use Bulgarian examples, names, places, and curriculum context where fitting. Subject names should be in Bulgarian.`
     : "";
 
+  // Adaptive difficulty note based on recent performance
+  let adaptiveNote = "";
+  if (avgScore !== undefined) {
+    if (avgScore >= 85) {
+      adaptiveNote = `\n\nAdaptive note: This child is performing very well (avg score ${Math.round(avgScore)}%). Lean towards medium and hard missions to keep them challenged.`;
+    } else if (avgScore < 55) {
+      adaptiveNote = `\n\nAdaptive note: This child is finding things challenging (avg score ${Math.round(avgScore)}%). Lean towards easy missions to build confidence.`;
+    }
+  }
+
   return `Generate exactly 5 fresh, unique learning missions for a ${gradeLabel} student.
 
 Zone: "${zone}" — Focus topic: ${zoneDescription}
 Mission language: ${lang}
-Difficulty distribution: ${difficultySet}${avoidInstruction}${culturalNote}
+Difficulty distribution: ${difficultySet}${avoidInstruction}${culturalNote}${adaptiveNote}
 
 Each mission must:
 - Be specific and concrete (not generic like "learn math")
@@ -120,6 +162,7 @@ function validateAndSanitizeMissions(
   if (!Array.isArray(arr) || arr.length === 0) throw new Error("No missions array");
 
   const validDifficulties = new Set<string>(["easy", "medium", "hard"]);
+  const curriculumMapping = ZONE_TO_CURRICULUM[zone];
 
   return arr.slice(0, 5).map((item, i) => {
     const m = item as Record<string, unknown>;
@@ -131,7 +174,12 @@ function validateAndSanitizeMissions(
       : "easy";
     const xpReward = Math.min(Math.max(Math.round(Number(m["xpReward"]) || 40), 20), 80);
     const starReward = Number(m["starReward"]) === 2 ? 2 : 1;
-    return { title, description, subject, zone, difficulty, xpReward, starReward };
+
+    // Assign a random topic from this zone's curriculum pool
+    const topicId = curriculumMapping ? pickRandom(curriculumMapping.topics) : undefined;
+    const subjectId = curriculumMapping?.subjectId;
+
+    return { title, description, subject, zone, difficulty, xpReward, starReward, topicId, subjectId };
   });
 }
 
@@ -142,13 +190,14 @@ export async function generateAIMissions(
   grade: number,
   country: string,
   completedTitles: string[],
+  avgScore?: number,
 ): Promise<CurriculumMission[]> {
   if (!process.env.OPENAI_API_KEY) {
     throw new Error("OPENAI_API_KEY not set — cannot generate AI missions");
   }
 
   console.log(
-    `[AI_MISSIONS] Generating: zone="${zone}" grade=${grade} country=${country} completed=${completedTitles.length}`,
+    `[AI_MISSIONS] Generating: zone="${zone}" grade=${grade} country=${country} completed=${completedTitles.length} avgScore=${avgScore ?? "n/a"}`,
   );
 
   const response = await openaiClient.chat.completions.create({
@@ -156,7 +205,7 @@ export async function generateAIMissions(
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: buildMissionSystemPrompt() },
-      { role: "user", content: buildMissionUserPrompt(zone, grade, country, completedTitles) },
+      { role: "user", content: buildMissionUserPrompt(zone, grade, country, completedTitles, avgScore) },
     ],
     max_tokens: 1500,
     temperature: 0.9,

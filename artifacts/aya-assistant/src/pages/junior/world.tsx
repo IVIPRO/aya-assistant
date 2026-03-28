@@ -2,12 +2,15 @@ import { Layout } from "@/components/layout";
 import { Star, Trophy, ArrowLeft, CheckCircle2, Lock } from "lucide-react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { useListMissions, useCompleteMission, useListChildren, useGenerateMissions, getListMissionsQueryKey, getListChildrenQueryKey } from "@workspace/api-client-react";
+import { useListMissions, useCompleteMission, useListChildren, useGenerateMissions, useAutoExpandMissions, getListMissionsQueryKey, getListChildrenQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { MissionPlay } from "@/components/MissionPlay";
-import { useState, useRef, useEffect } from "react";
+import { LessonViewer } from "./lesson-viewer";
+import { elementarySubjects } from "@/lib/curriculum";
+import type { Subject, Topic } from "@/lib/curriculum";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import type { Mission } from "@workspace/api-client-react";
 import { resolveLang } from "@/lib/i18n";
@@ -380,6 +383,12 @@ export function WorldMap() {
   const [activeMissionId, setActiveMissionId] = useState<string | null>(null);
   const [activeMissionTitle, setActiveMissionTitle] = useState<string>("");
   const [activeMissionTasks, setActiveMissionTasks] = useState<number>(5);
+  const [activeLesson, setActiveLesson] = useState<{
+    subject: Subject;
+    topic: Topic;
+    missionId: number;
+    missionTitle: string;
+  } | null>(null);
   const zoneOpenedAtRef = useRef<number | null>(zoneFromUrl ? Date.now() : null);
 
   const handleSetZone = (zoneId: string | null) => {
@@ -411,6 +420,7 @@ export function WorldMap() {
 
   const completeMutation = useCompleteMission();
   const generateMissionsMutation = useGenerateMissions();
+  const autoExpandMutation = useAutoExpandMissions();
   const queryClient = useQueryClient();
   const activeChild = children.find(c => c.id === activeChildId);
   const childXp = activeChild?.xp ?? 0;
@@ -419,16 +429,15 @@ export function WorldMap() {
   const lbl = WORLD_LABELS[lang];
 
   const handleStartMission = (mission: Mission) => {
-    // Map mission titles to mission IDs (supports BG foundational + all languages)
+    // ── Foundational math missions: use MissionPlay (hardcoded task engine) ──
     const titleToId: Record<string, { id: string; tasks: number }> = {
-      // Bulgarian foundational missions
+      // Bulgarian
       "Събиране до 10": { id: "m1", tasks: 5 },
       "Изваждане до 10": { id: "m2", tasks: 5 },
       "Събиране до 20": { id: "m3", tasks: 6 },
       "Умножение на 2 и 3": { id: "m4", tasks: 5 },
       "Задача с думи": { id: "m5", tasks: 5 },
-      
-      // English variants
+      // English
       "Addition up to 10": { id: "m1", tasks: 5 },
       "Subtraction up to 10": { id: "m2", tasks: 5 },
       "Addition up to 20": { id: "m3", tasks: 6 },
@@ -436,8 +445,7 @@ export function WorldMap() {
       "Multiplication Table": { id: "m4", tasks: 5 },
       "Multiplication by 2 and 3": { id: "m4", tasks: 5 },
       "Word Problems": { id: "m5", tasks: 5 },
-      
-      // Spanish variants
+      // Spanish
       "Suma hasta 10": { id: "m1", tasks: 5 },
       "Resta hasta 10": { id: "m2", tasks: 5 },
       "Suma hasta 20": { id: "m3", tasks: 6 },
@@ -446,23 +454,71 @@ export function WorldMap() {
     };
 
     const config = titleToId[mission.title];
-    console.log(`[START_MISSION_CLICKED] mission_id=${mission.id}, title="${mission.title}", config=${JSON.stringify(config)}`);
-    
+    console.log(`[START_MISSION_CLICKED] mission_id=${mission.id}, title="${mission.title}", aiGenerated=${mission.aiGenerated}, config=${JSON.stringify(config)}`);
+
     if (config && activeChildId) {
-      console.log(`[START_MISSION_SUCCESS] Activating mission: ${config.id} (${mission.title})`);
+      // Hardcoded math mission → MissionPlay
+      console.log(`[START_MISSION_MATH] Activating: ${config.id} (${mission.title})`);
       setActiveMissionId(config.id);
       setActiveMissionTitle(mission.title);
       setActiveMissionTasks(config.tasks);
-    } else {
-      console.warn(`[START_MISSION_FAILED] No config found for title: "${mission.title}"`);
+      return;
+    }
+
+    // ── AI-generated missions (Phase C): route through LessonViewer ──
+    if (activeChildId) {
+      // Zone-level fallback curriculum links (when topicId/subjectId is not set)
+      const ZONE_FALLBACK: Record<string, { subjectId: string; topicId: string }> = {
+        "Math Island":    { subjectId: "mathematics",       topicId: "addition" },
+        "Reading Forest": { subjectId: "reading-literature", topicId: "stories" },
+        "Logic Mountain": { subjectId: "logic-thinking",    topicId: "patterns" },
+        "English City":   { subjectId: "english-language",  topicId: "vocabulary" },
+        "Science Planet": { subjectId: "science-nature",    topicId: "animals" },
+      };
+
+      const sid = mission.subjectId ?? ZONE_FALLBACK[getMissionZone(mission)]?.subjectId;
+      const tid = mission.topicId   ?? ZONE_FALLBACK[getMissionZone(mission)]?.topicId;
+
+      const subject = sid ? elementarySubjects.find(s => s.id === sid) : null;
+      const topic   = subject && tid ? subject.topics.find(t => t.id === tid) : null;
+
+      if (subject && topic) {
+        console.log(`[START_MISSION_LESSON] Linking to LessonViewer: ${subject.id}/${topic.id} for "${mission.title}"`);
+        setActiveLesson({ subject, topic, missionId: mission.id, missionTitle: mission.title });
+        return;
+      }
+
+      console.warn(`[START_MISSION_FAILED] No curriculum link for mission: "${mission.title}" (subjectId=${sid}, topicId=${tid})`);
     }
   };
 
-  const handleMissionComplete = () => {
+  const handleMissionComplete = useCallback(() => {
     setActiveMissionId(null);
     refetch();
     toast({ title: "Mission Completed! 🎉", description: "You earned XP and Stars!" });
-  };
+
+    // Auto-expand: if the current zone is running low on pending missions, generate more in the background
+    if (activeChildId && selectedZone) {
+      const pendingInZone = missions.filter(m => getMissionZone(m) === selectedZone && !m.completed);
+      if (pendingInZone.length <= 3) {
+        console.log(`[AUTO_EXPAND_TRIGGER] zone="${selectedZone}" pending=${pendingInZone.length} — triggering background generation`);
+        autoExpandMutation.mutate(
+          { data: { childId: activeChildId, zone: selectedZone } },
+          {
+            onSuccess: (result) => {
+              if (result.triggered) {
+                // Re-fetch after a short delay to give the AI time to generate
+                setTimeout(() => {
+                  queryClient.invalidateQueries({ queryKey: getListMissionsQueryKey({ childId: activeChildId }) });
+                  refetch();
+                }, 12000);
+              }
+            },
+          },
+        );
+      }
+    }
+  }, [activeChildId, selectedZone, missions, autoExpandMutation, queryClient, refetch, toast]);
 
   const handleComplete = async (id: number) => {
     const responseTimeMs = zoneOpenedAtRef.current ? Date.now() - zoneOpenedAtRef.current : undefined;
@@ -500,7 +556,7 @@ export function WorldMap() {
   const activeZone = selectedZone ? ZONES.find(z => z.id === selectedZone) : null;
   const activeMissions = selectedZone ? missions.filter(m => getMissionZone(m) === selectedZone) : [];
 
-  // If a mission is active, show the mission play interface
+  // If a hardcoded math mission is active, show MissionPlay
   if (activeMissionId && activeChildId) {
     return (
       <Layout isJunior>
@@ -521,6 +577,28 @@ export function WorldMap() {
           lang={fullLang}
           onBack={() => setActiveMissionId(null)}
           onComplete={handleMissionComplete}
+        />
+      </Layout>
+    );
+  }
+
+  // If an AI-generated mission lesson is active, show LessonViewer
+  if (activeLesson && activeChildId) {
+    const grade = activeChild?.grade ?? 2;
+    return (
+      <Layout isJunior>
+        <LessonViewer
+          subject={activeLesson.subject}
+          topic={activeLesson.topic}
+          initialMode="lesson"
+          grade={grade}
+          lang={fullLang}
+          childId={activeChildId}
+          onBack={() => {
+            setActiveLesson(null);
+            handleMissionComplete();
+          }}
+          onAskAya={() => setActiveLesson(null)}
         />
       </Layout>
     );
@@ -594,9 +672,11 @@ export function WorldMap() {
             <CompanionGuidance companionId={activeChild?.aiCharacter} zoneName={activeZone.id} lang={lang} />
 
             {(() => {
+              const pendingInZone = activeMissions.filter(m => !m.completed);
               const allDoneInZone = activeMissions.length > 0 && activeMissions.every(m => m.completed);
               const isGenerating = generateMissionsMutation.isPending;
-              const showGenerateBtn = activeChildId && (activeMissions.length === 0 || allDoneInZone);
+              // Show Generate More button when: no missions at all, all done, or fewer than 3 pending
+              const showGenerateBtn = activeChildId && (activeMissions.length === 0 || allDoneInZone || pendingInZone.length < 3);
               return (
                 <>
                   {showGenerateBtn && (
@@ -672,7 +752,9 @@ export function WorldMap() {
                         disabled={completeMutation.isPending}
                         className="w-full py-2.5 font-bold rounded-xl border-b-4 border-yellow-600 hover:border-b-0 hover:translate-y-1 transition-all text-sm bg-junior text-junior-foreground"
                       >
-                        Start Mission
+                        {mission.aiGenerated
+                          ? (lang === "bg" ? "Започни урок 📖" : lang === "es" ? "Iniciar lección 📖" : "Start Lesson 📖")
+                          : (lang === "bg" ? "Започни мисия" : lang === "es" ? "Iniciar misión" : "Start Mission")}
                       </button>
                     ) : (
                       <button disabled className="w-full py-2.5 bg-green-100 text-green-700 font-bold rounded-xl flex justify-center items-center gap-2 text-sm">

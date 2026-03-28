@@ -6,6 +6,9 @@ export interface CurriculumMission {
   difficulty: "easy" | "medium" | "hard";
   xpReward: number;
   starReward: number;
+  /* Phase C: curriculum linkage — optional, populated by AI generator */
+  topicId?: string;
+  subjectId?: string;
 }
 
 interface GradeCurriculum {

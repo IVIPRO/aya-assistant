@@ -13,7 +13,7 @@ import type { LangCode } from "@/lib/i18n";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { XpToast, type XpReward } from "@/components/xp-toast";
 import { AyaAvatar, type AyaEmotion } from "@/components/AyaAvatar";
-import { getCuriosityCard, type CuriosityCard as CuriosityCardData } from "@/lib/curiosityEngine";
+import { getCuriosityCard, getCuriosityFact, type CuriosityCard as CuriosityCardData } from "@/lib/curiosityEngine";
 import { StoryLessonEngine } from "./story-engine";
 
 /* ─── Adaptive profile ──────────────────────────────────────────── */
@@ -666,6 +666,8 @@ function InteractiveLessonEngine({
 
   /* ── curiosity card — stable per lesson session */
   const curiosityCard = useRef(getCuriosityCard(subject.id, lang)).current;
+  /* ── mid-lesson curiosity spark — facts/questions only, never disrupts weak-topic focus */
+  const explanationSpark = useRef(getCuriosityFact(subject.id, lang)).current;
 
   const examples = data.lesson.examples;
   const problems = data.practice.problems;
@@ -859,6 +861,19 @@ function InteractiveLessonEngine({
                 <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl px-5 py-4 text-sm text-amber-900 flex gap-3">
                   <span className="text-lg flex-shrink-0">{ctxD.hintPrefix || "💡"}</span>
                   <span className="leading-relaxed">{data.lesson.tip}</span>
+                </div>
+              )}
+              {/* ── Curiosity spark — non-blocking fact/question shown mid-lesson ── */}
+              {/* Only for normal/strong topics; struggling children need focus */}
+              {topicContext !== "weak" && explanationSpark && (
+                <div className="bg-violet-50 border border-violet-200 rounded-2xl px-5 py-3.5 flex gap-3 items-start">
+                  <span className="text-base flex-shrink-0 mt-0.5">{explanationSpark.emoji}</span>
+                  <div>
+                    <span className="text-xs font-semibold text-violet-500 uppercase tracking-wide block mb-0.5">
+                      {explanationSpark.title}
+                    </span>
+                    <p className="text-sm text-violet-900 leading-relaxed">{explanationSpark.content}</p>
+                  </div>
                 </div>
               )}
               <ActionBtn onClick={fromExplanation} subject={subject} testId="btn-understood">

@@ -1,0 +1,145 @@
+Audit and conditionally implement the AYA Curiosity Engine.
+
+CRITICAL RULE:
+Do NOT create duplicate curiosity or discovery systems.
+First inspect the codebase to see if a Curiosity / Discovery / Question Engine already exists.
+
+If it exists:
+• audit it
+• improve it if needed
+• stabilize it
+• connect it to lessons if missing
+
+If it does NOT exist:
+• implement a lightweight Curiosity Engine
+• integrate it safely with the lesson flow
+
+If the system already exists and works correctly:
+• do NOT rewrite it
+• do NOT duplicate it
+• only make minor improvements if necessary
+
+------------------------------------------------
+
+GOAL
+
+AYA should stimulate curiosity during learning.
+
+The Curiosity Engine should occasionally trigger:
+
+• interesting questions
+• discovery prompts
+• mini puzzles
+• observation questions
+• small thinking challenges
+
+These should appear naturally during or between lesson steps.
+
+------------------------------------------------
+
+PHASE 1 — SYSTEM AUDIT
+
+Search the project for curiosity-related systems such as:
+
+curiosity_engine  
+discovery_prompt  
+thinking_question  
+learning_prompt  
+exploration_question  
+mini_challenge  
+
+Return:
+
+1. whether a curiosity engine exists
+2. where it is implemented
+3. which files contain the logic
+4. how curiosity prompts are currently triggered
+
+Do NOT modify code yet.
+
+------------------------------------------------
+
+PHASE 2 — EVALUATION
+
+Evaluate whether the system supports:
+
+• curiosity questions during lessons
+• discovery prompts after explanations
+• simple puzzles for children
+• thinking questions related to lesson topics
+• encouragement to explore answers
+
+If these behaviors are missing, mark them for improvement.
+
+------------------------------------------------
+
+PHASE 3 — SAFE IMPROVEMENTS
+
+If improvements are needed, enhance the curiosity behavior.
+
+Examples of curiosity prompts:
+
+"Как мислиш, защо това работи така?"
+
+"Можеш ли да откриеш друг начин?"
+
+"Какво ще стане ако опитаме това?"
+
+"Забелязваш ли нещо интересно?"
+
+Prompts must be:
+
+• short
+• friendly
+• suitable for children in grades 1–4
+• in natural Bulgarian language
+
+------------------------------------------------
+
+PHASE 4 — CONNECT TO LESSON FLOW
+
+Ensure the curiosity system connects safely to:
+
+lesson_intro  
+lesson_explanation  
+guided_task  
+feedback  
+completion  
+
+Curiosity prompts should appear occasionally but not interrupt the lesson flow.
+
+------------------------------------------------
+
+PHASE 5 — PROTECTION RULES
+
+Do NOT break or modify:
+
+interactive lesson engine  
+speech system  
+avatar animation system  
+adaptive learning system  
+daily plan  
+subject routing  
+progress tracking  
+
+Avoid:
+
+duplicate curiosity engines  
+stacked prompt systems  
+parallel question generators
+
+------------------------------------------------
+
+PHASE 6 — VERIFICATION
+
+Return:
+
+1. whether Curiosity Engine existed
+2. improvements applied (if any)
+3. files modified
+4. how curiosity prompts are triggered
+5. preview test steps
+
+Feature name:
+
+AYA Curiosity Engine Audit & Safe Implementation

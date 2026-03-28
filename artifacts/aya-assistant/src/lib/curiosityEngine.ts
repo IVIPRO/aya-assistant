@@ -565,6 +565,245 @@ const POOL: Pool = {
     ],
   },
 
+  "reading-literature": {
+    bg: [
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "Знаеш ли?",
+        content: "Хората четат истории вече над 5000 години! Първите разкази са написани на глинени плочки в древна Месопотамия.",
+      },
+      {
+        kind: "question",
+        emoji: "🔍",
+        title: "Замисли се",
+        content: "Защо героите в историите правят грешки? Какво научаваме от техните грешки?",
+      },
+      {
+        kind: "riddle",
+        emoji: "🧩",
+        title: "Литературна загадка",
+        content: "В кои истории животните говорят, мислят и действат като хора?",
+        reveal: "Баснята! Езоп е писал такива истории преди 2600 години. Той учи за живота чрез животни!",
+      },
+      {
+        kind: "challenge",
+        emoji: "🎯",
+        title: "Мини предизвикателство",
+        content: "Измисли един герой — дай му име, едно добро качество и един страх. Имаш 30 секунди!",
+      },
+      {
+        kind: "question",
+        emoji: "🔍",
+        title: "Мисловен въпрос",
+        content: "Как се чувстваш, когато прочетеш история с тъжен край? Защо понякога обичаме тъжни истории?",
+      },
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "Интересен факт",
+        content: "Стихотворенията са измислени, за да ги помним по-лесно! Ритъмът помага на мозъка да запомня.",
+      },
+    ],
+    en: [
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "Did you know?",
+        content: "People have been telling stories for over 5000 years! The first written stories were on clay tablets in ancient Mesopotamia.",
+      },
+      {
+        kind: "question",
+        emoji: "🔍",
+        title: "Think about it",
+        content: "Why do story heroes make mistakes? What do we learn from their mistakes?",
+      },
+      {
+        kind: "riddle",
+        emoji: "🧩",
+        title: "Literature riddle",
+        content: "In which stories do animals speak, think and act like humans?",
+        reveal: "Fables! Aesop wrote them 2600 years ago. He taught life lessons through animals!",
+      },
+      {
+        kind: "challenge",
+        emoji: "🎯",
+        title: "Mini challenge",
+        content: "Invent a character — give them a name, one good quality, and one fear. You have 30 seconds!",
+      },
+    ],
+    es: [
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "¿Sabías que?",
+        content: "¡La gente lleva contando historias más de 5000 años! Las primeras historias escritas estaban en tablillas de arcilla.",
+      },
+      {
+        kind: "question",
+        emoji: "🔍",
+        title: "Reflexiona",
+        content: "¿Por qué los héroes de las historias cometen errores? ¿Qué aprendemos de sus errores?",
+      },
+      {
+        kind: "challenge",
+        emoji: "🎯",
+        title: "Mini desafío",
+        content: "¡Inventa un personaje — dale un nombre, una buena cualidad y un miedo. Tienes 30 segundos!",
+      },
+    ],
+    de: [
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "Wusstest du?",
+        content: "Menschen erzählen seit über 5000 Jahren Geschichten! Die ersten schriftlichen Geschichten standen auf Tontafeln.",
+      },
+      {
+        kind: "question",
+        emoji: "🔍",
+        title: "Denk mal nach",
+        content: "Warum machen Helden in Geschichten Fehler? Was lernen wir aus ihren Fehlern?",
+      },
+      {
+        kind: "challenge",
+        emoji: "🎯",
+        title: "Mini-Aufgabe",
+        content: "Erfinde eine Figur — gib ihr einen Namen, eine gute Eigenschaft und eine Angst. Du hast 30 Sekunden!",
+      },
+    ],
+    fr: [
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "Le savais-tu?",
+        content: "Les gens racontent des histoires depuis plus de 5000 ans! Les premières histoires écrites étaient sur des tablettes d'argile.",
+      },
+      {
+        kind: "question",
+        emoji: "🔍",
+        title: "Réfléchis",
+        content: "Pourquoi les héros des histoires font-ils des erreurs? Qu'est-ce qu'on apprend de leurs erreurs?",
+      },
+      {
+        kind: "challenge",
+        emoji: "🎯",
+        title: "Mini défi",
+        content: "Invente un personnage — donne-lui un nom, une bonne qualité et une peur. Tu as 30 secondes!",
+      },
+    ],
+  },
+
+  "social-studies": {
+    bg: [
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "Знаеш ли?",
+        content: "България е една от най-старите държави в Европа! Основана е през 681 г. — преди над 1300 години!",
+      },
+      {
+        kind: "question",
+        emoji: "🔍",
+        title: "Замисли се",
+        content: "Как мислиш, защо е важно да знаем историята на своето семейство и роден край?",
+      },
+      {
+        kind: "riddle",
+        emoji: "🧩",
+        title: "Загадка за България",
+        content: "Кой е символът на България, който е бял, зелен и червен?",
+        reveal: "Трицветното знаме! Бялото е мир, зеленото е природа, а червеното е смелост.",
+      },
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "Традиция",
+        content: "На Баба Марта (1 март) носим мартеници — бяло и червено за здраве и щастие! Тази традиция е само наша, българска.",
+      },
+      {
+        kind: "challenge",
+        emoji: "🎯",
+        title: "Мини предизвикателство",
+        content: "Назови 3 неща, заради които обичаш своето семейство или своя роден край. Имаш 20 секунди!",
+      },
+      {
+        kind: "question",
+        emoji: "🔍",
+        title: "Мисловен въпрос",
+        content: "Какви правила имате у дома? Защо смяташ, че правилата са важни в семейството и в класа?",
+      },
+    ],
+    en: [
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "Did you know?",
+        content: "Bulgaria is one of the oldest countries in Europe! It was founded in 681 AD — over 1300 years ago!",
+      },
+      {
+        kind: "question",
+        emoji: "🔍",
+        title: "Think about it",
+        content: "Why do you think it is important to know the history of your family and hometown?",
+      },
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "Tradition",
+        content: "On March 1st Bulgarians wear Martenitsi — red and white threads for health and happiness! This tradition is uniquely Bulgarian.",
+      },
+      {
+        kind: "challenge",
+        emoji: "🎯",
+        title: "Mini challenge",
+        content: "Name 3 things you love about your family or hometown. You have 20 seconds!",
+      },
+    ],
+    es: [
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "¿Sabías que?",
+        content: "¡Bulgaria es uno de los países más antiguos de Europa! Fue fundada en 681 d.C. — ¡hace más de 1300 años!",
+      },
+      {
+        kind: "question",
+        emoji: "🔍",
+        title: "Reflexiona",
+        content: "¿Por qué crees que es importante conocer la historia de tu familia y tu ciudad natal?",
+      },
+    ],
+    de: [
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "Wusstest du?",
+        content: "Bulgarien ist eines der ältesten Länder Europas! Es wurde 681 n. Chr. gegründet — vor über 1300 Jahren!",
+      },
+      {
+        kind: "question",
+        emoji: "🔍",
+        title: "Denk mal nach",
+        content: "Warum ist es wichtig, die Geschichte deiner Familie und deiner Heimatstadt zu kennen?",
+      },
+    ],
+    fr: [
+      {
+        kind: "fact",
+        emoji: "💡",
+        title: "Le savais-tu?",
+        content: "La Bulgarie est l'un des pays les plus anciens d'Europe! Elle a été fondée en 681 ap. J.-C. — il y a plus de 1300 ans!",
+      },
+      {
+        kind: "question",
+        emoji: "🔍",
+        title: "Réfléchis",
+        content: "Pourquoi penses-tu qu'il est important de connaître l'histoire de ta famille et de ta ville natale?",
+      },
+    ],
+  },
+
   general: {
     bg: [
       {
@@ -675,6 +914,10 @@ const SUBJECT_ALIAS: Record<string, string> = {
   "english-advanced": "english-language",
   "logic-math": "logic-thinking",
   "natural-world": "nature-science",
+  /* natural-science (middle/high) → same pool as nature-science (junior) */
+  "natural-science": "nature-science",
+  /* literature subject → reading-literature pool */
+  "literature": "reading-literature",
 };
 
 function resolveSubjectKey(subjectId: string): string {
@@ -699,6 +942,22 @@ export function getCuriosityCard(subjectId: string, lang: LangCode): CuriosityCa
     return pickRandom(POOL.general.en);
   }
   return pickRandom(langPool);
+}
+
+/**
+ * Get a curiosity "spark" card for mid-lesson display.
+ * Restricted to fact/question kinds — riddles and challenges require
+ * interaction and would disrupt the lesson flow.
+ * Falls back gracefully if no suitable card exists.
+ */
+export function getCuriosityFact(subjectId: string, lang: LangCode): CuriosityCard | null {
+  const key = resolveSubjectKey(subjectId);
+  const subjectPool = POOL[key] ?? POOL.general;
+  const langPool = subjectPool[lang] ?? subjectPool.en;
+  const pool = langPool ?? POOL.general.en;
+  const facts = pool.filter(c => c.kind === "fact" || c.kind === "question");
+  if (facts.length === 0) return null;
+  return pickRandom(facts);
 }
 
 /**

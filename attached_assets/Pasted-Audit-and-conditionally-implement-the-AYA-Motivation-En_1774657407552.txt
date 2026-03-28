@@ -1,0 +1,174 @@
+Audit and conditionally implement the AYA Motivation Engine.
+
+CRITICAL RULE:
+Do NOT create duplicate motivation, reward, celebration, streak, or encouragement systems.
+First inspect the codebase to determine whether a Motivation Engine or equivalent already exists.
+
+If it exists:
+• audit it
+• improve it if needed
+• connect missing parts
+• stabilize it
+• avoid rewriting working logic
+
+If it does NOT exist:
+• implement a clean Motivation Engine
+• integrate it safely with the existing lesson flow
+
+If it already exists and works correctly:
+• do NOT duplicate it
+• do NOT rewrite it
+• only apply minor improvements if truly needed
+
+------------------------------------------------
+
+GOAL
+
+AYA should motivate the child naturally during learning.
+
+The Motivation Engine should support:
+
+• praise after correct answers
+• supportive encouragement after wrong answers
+• progress celebration
+• mini achievements
+• streak feeling
+• lesson completion celebration
+• “you can do it” style teacher reinforcement
+
+AYA must feel like a warm, encouraging Bulgarian primary-school teacher.
+
+------------------------------------------------
+
+PHASE 1 — SYSTEM AUDIT
+
+Search the project for motivation-related systems such as:
+
+motivation_engine
+reward_system
+encouragement_logic
+celebration_logic
+streak_logic
+achievement_logic
+xp_reward
+badge_reward
+praise_messages
+lesson_completion_reward
+
+Return:
+
+1. whether a Motivation Engine already exists
+2. where it is implemented
+3. which files contain the logic
+4. what types of motivation are currently supported
+5. whether the system is already connected to lessons, Daily Plan, avatar, and speech
+
+Do NOT modify code yet.
+
+------------------------------------------------
+
+PHASE 2 — EVALUATION
+
+Evaluate the current system.
+
+Check whether AYA already supports:
+
+• praise after correct answer
+• gentle support after wrong answer
+• progress encouragement during a lesson
+• completion celebration
+• streak or continuity feeling
+• reward feedback after finishing tasks
+• voice-based praise or encouragement
+• avatar emotional reactions tied to motivation
+
+Identify missing or weak parts only.
+
+------------------------------------------------
+
+PHASE 3 — SAFE IMPROVEMENTS
+
+If improvements are needed, enhance the motivation behavior.
+
+Examples of motivation phrases in Bulgarian:
+
+Correct answer:
+• "Браво!"
+• "Чудесно!"
+• "Справи се много добре!"
+• "Продължаваме!"
+
+Wrong answer:
+• "Почти!"
+• "Нищо страшно."
+• "Опитай пак."
+• "Нека го направим заедно."
+
+Progress:
+• "Вече си напред!"
+• "Остава още малко."
+• "Справяш се чудесно."
+
+Completion:
+• "Браво! Завърши урока!"
+• "Страхотна работа!"
+• "Гордея се с теб!"
+
+RULES:
+• Keep phrases short
+• Keep them child-friendly
+• Avoid robotic repetition
+• Use variety but stay consistent
+• Use natural Bulgarian only
+
+------------------------------------------------
+
+PHASE 4 — CONNECT TO SYSTEMS
+
+Ensure the Motivation Engine connects safely to:
+
+• interactive lesson engine
+• spoken teaching engine
+• avatar reactions
+• daily plan
+• XP / rewards / badges if already present
+• adaptive learning flow
+
+Motivation should appear at the correct moments, not randomly.
+
+------------------------------------------------
+
+PHASE 5 — PROTECTION RULES
+
+Do NOT break or rewrite:
+
+• interactive lesson engine
+• speech system
+• avatar system
+• curiosity engine
+• adaptive learning logic
+• subject routing
+• progress tracking
+
+Avoid:
+
+• duplicate reward systems
+• stacked praise systems
+• multiple competing streak systems
+• duplicated completion handlers
+
+------------------------------------------------
+
+PHASE 6 — VERIFICATION
+
+Return:
+
+1. whether Motivation Engine already existed
+2. improvements applied (if any)
+3. files modified
+4. motivation behaviors now supported
+5. preview test steps
+
+Feature name:
+
+AYA Motivation Engine Audit & Safe Implementation

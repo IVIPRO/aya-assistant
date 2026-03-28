@@ -60,7 +60,7 @@ type Phase =
   | { kind: "hinting"; practiceIdx: number; attempts: number }
   | { kind: "celebrate"; nextPracticeIdx: number }
   | { kind: "quiz-intro" }
-  | { kind: "quiz"; idx: number; selected: number | null }
+  | { kind: "quiz"; idx: number; selected: number | null; correct: boolean | null }
   | { kind: "completion"; practiceCorrect: number; quizCorrect: number; total: { practice: number; quiz: number } };
 
 function phaseEmotion(p: Phase): AyaEmotion {
@@ -72,7 +72,7 @@ function phaseEmotion(p: Phase): AyaEmotion {
     case "hinting":     return "thinking";
     case "celebrate":   return "celebrate";
     case "quiz-intro":  return "happy";
-    case "quiz":        return p.selected === null ? "thinking" : "neutral";
+    case "quiz":        return p.selected === null ? "thinking" : p.correct ? "happy" : "encourage";
     case "completion":  return "celebrate";
   }
 }
@@ -791,7 +791,7 @@ function InteractiveLessonEngine({
     const correct = optIdx === questions[idx].correctIndex;
     if (correct) quizCorrectRef.current += 1;
     else lessonMistakesRef.current += 1;
-    setPhase({ kind: "quiz", idx, selected: optIdx });
+    setPhase({ kind: "quiz", idx, selected: optIdx, correct });
     /* Weak topics get a supportive wrong-answer message; others get generic */
     const wrongMsg = (topicContext === "weak" && ctxD.quizSupport)
       ? ctxD.quizSupport
@@ -802,7 +802,7 @@ function InteractiveLessonEngine({
   /* ── advance from quiz */
   const fromQuiz = (idx: number) => {
     if (idx + 1 < questions.length) {
-      go({ kind: "quiz", idx: idx + 1, selected: null }, pick(d.quizIntro));
+      go({ kind: "quiz", idx: idx + 1, selected: null, correct: null }, pick(d.quizIntro));
     } else {
       const pc = practiceCorrectRef.current;
       const qc = quizCorrectRef.current;
@@ -1123,7 +1123,7 @@ function InteractiveLessonEngine({
                   {lang === "bg" ? `${questions.length} въпроса` : `${questions.length} questions`}
                 </p>
               </div>
-              <ActionBtn onClick={() => go({ kind: "quiz", idx: 0, selected: null }, pick(d.quizIntro))} subject={subject} testId="btn-start-quiz">
+              <ActionBtn onClick={() => go({ kind: "quiz", idx: 0, selected: null, correct: null }, pick(d.quizIntro))} subject={subject} testId="btn-start-quiz">
                 {l.startQuiz} <Sparkles className="w-4 h-4" />
               </ActionBtn>
             </div>

@@ -32,12 +32,17 @@ import type {
   CreateProgressBody,
   DailyPlan,
   ErrorResponse,
+  ExercisePoolResponse,
+  ExercisePoolStats,
+  ExerciseResultBody,
   Family,
   FamilyTask,
   GenerateLessonParams,
   GenerateMissionsBody,
   GenerateMissionsResponse,
   GetDailyPlanParams,
+  GetExercisePoolParams,
+  GetExercisePoolStatsParams,
   GetLearningTeacherExportParams,
   GetLearningWeaknessesParams,
   GetLearningWeeklyInsightsParams,
@@ -53,6 +58,7 @@ import type {
   MessageResponse,
   Mission,
   Progress,
+  RecordExerciseResult200,
   RegisterBody,
   SendChatMessageBody,
   TeacherExport,
@@ -1850,6 +1856,286 @@ export function useGenerateLesson<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Get next exercises from the AI-generated pool (creates pool if needed)
+ */
+export const getGetExercisePoolUrl = (params: GetExercisePoolParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/lessons/exercises?${stringifiedParams}`
+    : `/api/lessons/exercises`;
+};
+
+export const getExercisePool = async (
+  params: GetExercisePoolParams,
+  options?: RequestInit,
+): Promise<ExercisePoolResponse> => {
+  return customFetch<ExercisePoolResponse>(getGetExercisePoolUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetExercisePoolQueryKey = (params?: GetExercisePoolParams) => {
+  return [`/api/lessons/exercises`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetExercisePoolQueryOptions = <
+  TData = Awaited<ReturnType<typeof getExercisePool>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetExercisePoolParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getExercisePool>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetExercisePoolQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getExercisePool>>> = ({
+    signal,
+  }) => getExercisePool(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getExercisePool>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetExercisePoolQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getExercisePool>>
+>;
+export type GetExercisePoolQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get next exercises from the AI-generated pool (creates pool if needed)
+ */
+
+export function useGetExercisePool<
+  TData = Awaited<ReturnType<typeof getExercisePool>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetExercisePoolParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getExercisePool>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetExercisePoolQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get pool stats without fetching exercises
+ */
+export const getGetExercisePoolStatsUrl = (
+  params: GetExercisePoolStatsParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/lessons/exercises/stats?${stringifiedParams}`
+    : `/api/lessons/exercises/stats`;
+};
+
+export const getExercisePoolStats = async (
+  params: GetExercisePoolStatsParams,
+  options?: RequestInit,
+): Promise<ExercisePoolStats> => {
+  return customFetch<ExercisePoolStats>(getGetExercisePoolStatsUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetExercisePoolStatsQueryKey = (
+  params?: GetExercisePoolStatsParams,
+) => {
+  return [`/api/lessons/exercises/stats`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetExercisePoolStatsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getExercisePoolStats>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetExercisePoolStatsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getExercisePoolStats>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetExercisePoolStatsQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getExercisePoolStats>>
+  > = ({ signal }) =>
+    getExercisePoolStats(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getExercisePoolStats>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetExercisePoolStatsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getExercisePoolStats>>
+>;
+export type GetExercisePoolStatsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get pool stats without fetching exercises
+ */
+
+export function useGetExercisePoolStats<
+  TData = Awaited<ReturnType<typeof getExercisePoolStats>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetExercisePoolStatsParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getExercisePoolStats>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetExercisePoolStatsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Record the child's answer to an exercise
+ */
+export const getRecordExerciseResultUrl = () => {
+  return `/api/lessons/exercises/result`;
+};
+
+export const recordExerciseResult = async (
+  exerciseResultBody: ExerciseResultBody,
+  options?: RequestInit,
+): Promise<RecordExerciseResult200> => {
+  return customFetch<RecordExerciseResult200>(getRecordExerciseResultUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(exerciseResultBody),
+  });
+};
+
+export const getRecordExerciseResultMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof recordExerciseResult>>,
+    TError,
+    { data: BodyType<ExerciseResultBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof recordExerciseResult>>,
+  TError,
+  { data: BodyType<ExerciseResultBody> },
+  TContext
+> => {
+  const mutationKey = ["recordExerciseResult"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof recordExerciseResult>>,
+    { data: BodyType<ExerciseResultBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return recordExerciseResult(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RecordExerciseResultMutationResult = NonNullable<
+  Awaited<ReturnType<typeof recordExerciseResult>>
+>;
+export type RecordExerciseResultMutationBody = BodyType<ExerciseResultBody>;
+export type RecordExerciseResultMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Record the child's answer to an exercise
+ */
+export const useRecordExerciseResult = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof recordExerciseResult>>,
+    TError,
+    { data: BodyType<ExerciseResultBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof recordExerciseResult>>,
+  TError,
+  { data: BodyType<ExerciseResultBody> },
+  TContext
+> => {
+  return useMutation(getRecordExerciseResultMutationOptions(options));
+};
 
 /**
  * @summary List family calendar events

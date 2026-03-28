@@ -538,6 +538,85 @@ export const GenerateLessonResponse = zod.object({
 });
 
 /**
+ * @summary Get next exercises from the AI-generated pool (creates pool if needed)
+ */
+export const getExercisePoolQueryGradeDefault = 2;
+export const getExercisePoolQueryLangDefault = `en`;
+export const getExercisePoolQueryCountDefault = 10;
+
+export const GetExercisePoolQueryParams = zod.object({
+  childId: zod.coerce.number(),
+  subjectId: zod.coerce.string(),
+  topicId: zod.coerce.string(),
+  grade: zod.coerce.number().default(getExercisePoolQueryGradeDefault),
+  lang: zod.coerce.string().default(getExercisePoolQueryLangDefault),
+  count: zod.coerce.number().default(getExercisePoolQueryCountDefault),
+});
+
+export const GetExercisePoolResponse = zod.object({
+  stats: zod.object({
+    total: zod.number(),
+    unused: zod.number(),
+    used: zod.number(),
+    correct: zod.number(),
+    wrong: zod.number(),
+  }),
+  exercises: zod.array(
+    zod.object({
+      id: zod.number(),
+      childId: zod.number(),
+      subjectId: zod.string(),
+      topicId: zod.string(),
+      grade: zod.number(),
+      lang: zod.string(),
+      difficulty: zod.enum(["easy", "medium", "hard"]),
+      question: zod.string(),
+      correctAnswer: zod.string(),
+      options: zod.array(zod.string()).nullish(),
+      hint: zod.string().nullish(),
+      explanation: zod.string().nullish(),
+      exerciseType: zod.enum(["multiple-choice", "open-ended"]),
+      batchId: zod.string(),
+      used: zod.boolean(),
+      correct: zod.boolean().nullish(),
+      userAnswer: zod.string().nullish(),
+      createdAt: zod.date(),
+      usedAt: zod.date().nullish(),
+    }),
+  ),
+});
+
+/**
+ * @summary Get pool stats without fetching exercises
+ */
+export const GetExercisePoolStatsQueryParams = zod.object({
+  childId: zod.coerce.number(),
+  subjectId: zod.coerce.string(),
+  topicId: zod.coerce.string(),
+});
+
+export const GetExercisePoolStatsResponse = zod.object({
+  total: zod.number(),
+  unused: zod.number(),
+  used: zod.number(),
+  correct: zod.number(),
+  wrong: zod.number(),
+});
+
+/**
+ * @summary Record the child's answer to an exercise
+ */
+export const RecordExerciseResultBody = zod.object({
+  exerciseId: zod.number(),
+  correct: zod.boolean(),
+  userAnswer: zod.string(),
+});
+
+export const RecordExerciseResultResponse = zod.object({
+  ok: zod.boolean(),
+});
+
+/**
  * @summary List family calendar events
  */
 export const ListCalendarEventsResponseItem = zod.object({

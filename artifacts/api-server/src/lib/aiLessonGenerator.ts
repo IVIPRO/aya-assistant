@@ -303,6 +303,150 @@ function validateLessonContent(raw: unknown): LessonContent {
   return raw as LessonContent;
 }
 
+// ─── Exercise Batch Types ─────────────────────────────────────────────────────
+
+export interface ExerciseItem {
+  question: string;
+  correctAnswer: string;
+  options: string[] | null;
+  hint: string | null;
+  explanation: string | null;
+  exerciseType: "multiple-choice" | "open-ended";
+  difficulty: "easy" | "medium" | "hard";
+}
+
+// ─── Exercise Batch Prompt ────────────────────────────────────────────────────
+
+function buildExerciseBatchPrompt(
+  subjectId: string,
+  topicId: string,
+  grade: number,
+  lang: LangCode,
+  mode: LessonMode,
+  count: number,
+): string {
+  const subjectLabel = getSubjectLabel(subjectId, lang);
+  const topicLabel = getTopicLabel(topicId, lang);
+  const gradeLabel = getGradeLabel(grade, lang);
+  const langName = getLangName(lang);
+
+  const difficultyInstruction =
+    mode === "weak"
+      ? `Generate mostly EASY exercises (70% easy, 20% medium, 10% hard). Keep problems simple and very short.`
+      : mode === "strong"
+      ? `Generate mostly HARD exercises (20% easy, 30% medium, 50% hard). Add some challenge.`
+      : `Mix difficulties evenly (33% easy, 34% medium, 33% hard).`;
+
+  const bulgarianNote =
+    lang === "bg"
+      ? `\nThis is a Bulgarian child following the МОН curriculum for ${gradeLabel}. Use Bulgarian text and culturally relevant examples.`
+      : "";
+
+  const isMath = subjectId === "mathematics";
+
+  return `Generate exactly ${count} practice exercises in ${langName} for:
+- Subject: ${subjectLabel}
+- Topic: ${topicLabel}
+- Grade: ${gradeLabel}
+- ${difficultyInstruction}${bulgarianNote}
+
+Return a JSON object with this exact structure:
+{
+  "exercises": [
+    {
+      "question": "string — clear, age-appropriate question",
+      "correctAnswer": "string — the correct answer",
+      "options": ["string", "string", "string", "string"] or null,
+      "hint": "string — short helpful hint, or null",
+      "explanation": "string — brief explanation of why the answer is correct, or null",
+      "exerciseType": "multiple-choice" or "open-ended",
+      "difficulty": "easy" or "medium" or "hard"
+    }
+  ]
+}
+
+Rules:
+- Generate EXACTLY ${count} items in the "exercises" array.
+- All text content must be in ${langName}.
+${isMath ? `- For mathematics: use actual numbers appropriate for ${gradeLabel}. Make every exercise a solvable math expression.
+- Use multiple-choice for about half, open-ended for the other half.
+- For multiple-choice math: options must be 4 different plausible numeric strings. One must be the correct answer.
+- Vary the topics slightly (${topicLabel} variations) across the batch.` : `- For language/literacy topics: use age-appropriate vocabulary, sentences, and comprehension.
+- Use multiple-choice exercises where possible (they are easier for young children to answer).
+- options must contain exactly 4 different string choices when exerciseType is "multiple-choice".`}
+- No placeholder options like "A", "B", "C", "D" — all options must be real answers.
+- Never duplicate questions.
+- Ensure ALL exercises are different from each other.`;
+}
+
+function validateExerciseBatch(raw: unknown, expectedCount: number): ExerciseItem[] {
+  if (typeof raw !== "object" || raw === null) throw new Error("Not an object");
+  const obj = raw as Record<string, unknown>;
+  const exercises = obj["exercises"];
+  if (!Array.isArray(exercises) || exercises.length === 0) throw new Error("No exercises array");
+
+  const result: ExerciseItem[] = [];
+  for (const e of exercises) {
+    const ex = e as Record<string, unknown>;
+    if (!ex.question || !ex.correctAnswer || !ex.exerciseType || !ex.difficulty) continue;
+    if (ex.exerciseType === "multiple-choice" && (!Array.isArray(ex.options) || ex.options.length < 2)) continue;
+    result.push({
+      question: String(ex.question),
+      correctAnswer: String(ex.correctAnswer),
+      options: Array.isArray(ex.options) ? (ex.options as string[]) : null,
+      hint: ex.hint ? String(ex.hint) : null,
+      explanation: ex.explanation ? String(ex.explanation) : null,
+      exerciseType: ex.exerciseType === "open-ended" ? "open-ended" : "multiple-choice",
+      difficulty: ex.difficulty === "hard" ? "hard" : ex.difficulty === "easy" ? "easy" : "medium",
+    });
+  }
+  if (result.length < Math.min(expectedCount * 0.5, 5)) {
+    throw new Error(`Only ${result.length} valid exercises parsed from ${exercises.length} raw`);
+  }
+  return result;
+}
+
+export async function generateExerciseBatch(
+  subjectId: string,
+  topicId: string,
+  grade: number,
+  lang: LangCode,
+  mode: LessonMode = "normal",
+  count = 30,
+): Promise<ExerciseItem[]> {
+  if (!process.env.OPENAI_API_KEY) {
+    console.warn("[EXERCISE_BATCH] No OPENAI_API_KEY — returning empty batch");
+    return [];
+  }
+
+  console.log(`[EXERCISE_BATCH] Generating ${count}: subject=${subjectId} topic=${topicId} grade=${grade} lang=${lang} mode=${mode}`);
+
+  try {
+    const response = await openaiClient.chat.completions.create({
+      model: "gpt-4o-mini",
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: buildLessonSystemPrompt() },
+        { role: "user", content: buildExerciseBatchPrompt(subjectId, topicId, grade, lang, mode, count) },
+      ],
+      max_tokens: 4096,
+      temperature: 0.9,
+    });
+
+    const raw = response.choices[0]?.message?.content;
+    if (!raw) throw new Error("Empty AI response");
+
+    const parsed: unknown = JSON.parse(raw);
+    const exercises = validateExerciseBatch(parsed, count);
+
+    console.log(`[EXERCISE_BATCH] Success: ${exercises.length} exercises generated`);
+    return exercises;
+  } catch (err) {
+    console.error("[EXERCISE_BATCH] Failed:", String(err));
+    return [];
+  }
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 export async function generateAILesson(

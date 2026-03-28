@@ -554,6 +554,64 @@ export interface LessonContent {
   quiz: LessonContentQuiz;
 }
 
+export type ExercisePoolItemDifficulty =
+  (typeof ExercisePoolItemDifficulty)[keyof typeof ExercisePoolItemDifficulty];
+
+export const ExercisePoolItemDifficulty = {
+  easy: "easy",
+  medium: "medium",
+  hard: "hard",
+} as const;
+
+export type ExercisePoolItemExerciseType =
+  (typeof ExercisePoolItemExerciseType)[keyof typeof ExercisePoolItemExerciseType];
+
+export const ExercisePoolItemExerciseType = {
+  "multiple-choice": "multiple-choice",
+  "open-ended": "open-ended",
+} as const;
+
+export interface ExercisePoolItem {
+  id: number;
+  childId: number;
+  subjectId: string;
+  topicId: string;
+  grade: number;
+  lang: string;
+  difficulty: ExercisePoolItemDifficulty;
+  question: string;
+  correctAnswer: string;
+  options?: string[] | null;
+  hint?: string | null;
+  explanation?: string | null;
+  exerciseType: ExercisePoolItemExerciseType;
+  batchId: string;
+  used: boolean;
+  correct?: boolean | null;
+  userAnswer?: string | null;
+  createdAt: string;
+  usedAt?: string | null;
+}
+
+export interface ExercisePoolStats {
+  total: number;
+  unused: number;
+  used: number;
+  correct: number;
+  wrong: number;
+}
+
+export interface ExercisePoolResponse {
+  stats: ExercisePoolStats;
+  exercises: ExercisePoolItem[];
+}
+
+export interface ExerciseResultBody {
+  exerciseId: number;
+  correct: boolean;
+  userAnswer: string;
+}
+
 export interface GenerateMissionsBody {
   /** ID of the child to generate missions for */
   childId: number;
@@ -639,6 +697,25 @@ export const GenerateLessonMode = {
   normal: "normal",
   strong: "strong",
 } as const;
+
+export type GetExercisePoolParams = {
+  childId: number;
+  subjectId: string;
+  topicId: string;
+  grade?: number;
+  lang?: string;
+  count?: number;
+};
+
+export type GetExercisePoolStatsParams = {
+  childId: number;
+  subjectId: string;
+  topicId: string;
+};
+
+export type RecordExerciseResult200 = {
+  ok: boolean;
+};
 
 export type ListProgressParams = {
   childId: number;

@@ -52,6 +52,19 @@ interface LessonContent {
 
 /* ─── Engine Phase state machine ────────────────────────────────── */
 
+/* ─── Exercise Pool item (inline type matching API) ─────────────── */
+
+interface PoolExercise {
+  id: number;
+  question: string;
+  correctAnswer: string;
+  options: string[] | null;
+  hint: string | null;
+  explanation: string | null;
+  exerciseType: "multiple-choice" | "open-ended";
+  difficulty: "easy" | "medium" | "hard";
+}
+
 type Phase =
   | { kind: "greeting" }
   | { kind: "explanation" }
@@ -61,7 +74,8 @@ type Phase =
   | { kind: "celebrate"; nextPracticeIdx: number }
   | { kind: "quiz-intro" }
   | { kind: "quiz"; idx: number; selected: number | null; correct: boolean | null }
-  | { kind: "completion"; practiceCorrect: number; quizCorrect: number; total: { practice: number; quiz: number } };
+  | { kind: "completion"; practiceCorrect: number; quizCorrect: number; total: { practice: number; quiz: number } }
+  | { kind: "infinite-practice"; exercises: PoolExercise[]; idx: number; correct: number; selected: number | null; inputVal: string; feedback: "none" | "correct" | "wrong"; revealed: boolean };
 
 function phaseEmotion(p: Phase): AyaEmotion {
   switch (p.kind) {
@@ -74,6 +88,7 @@ function phaseEmotion(p: Phase): AyaEmotion {
     case "quiz-intro":  return "happy";
     case "quiz":        return p.selected === null ? "thinking" : p.correct ? "happy" : "encourage";
     case "completion":  return "celebrate";
+    case "infinite-practice": return p.feedback === "correct" ? "happy" : p.feedback === "wrong" ? "encourage" : "thinking";
   }
 }
 
@@ -98,6 +113,14 @@ const L: Record<LangCode, {
   step: (c: number, t: number) => string;
   score: (c: number, t: number) => string;
   showAnswer: string;
+  keepPracticing: string;
+  infPracticeTitle: string;
+  infCorrect: string;
+  infWrong: string;
+  infScore: (c: number) => string;
+  infLoading: string;
+  infReveal: string;
+  infNext: string;
 }> = {
   bg: {
     back: "← Назад", loading: "Зареждам урока...",
@@ -109,6 +132,10 @@ const L: Record<LangCode, {
     hint: "Подсказка", question: (c, t) => `Въпрос ${c} от ${t}`,
     step: (c, t) => `Стъпка ${c} от ${t}`, score: (c, t) => `${c} от ${t} верни`,
     showAnswer: "Покажи верния отговор",
+    keepPracticing: "🔥 Безкрайна практика", infPracticeTitle: "Бонус задачи",
+    infCorrect: "✅ Правилно!", infWrong: "❌ Не съвсем…",
+    infScore: (c) => `Верни отговори: ${c}`, infLoading: "Зареждам задачи…",
+    infReveal: "Покажи отговора", infNext: "Следваща задача →",
   },
   en: {
     back: "← Back", loading: "Loading lesson...",
@@ -120,6 +147,10 @@ const L: Record<LangCode, {
     hint: "Hint", question: (c, t) => `Question ${c} of ${t}`,
     step: (c, t) => `Step ${c} of ${t}`, score: (c, t) => `${c} of ${t} correct`,
     showAnswer: "Show correct answer",
+    keepPracticing: "🔥 Infinite Practice", infPracticeTitle: "Bonus Exercises",
+    infCorrect: "✅ Correct!", infWrong: "❌ Not quite…",
+    infScore: (c) => `Correct answers: ${c}`, infLoading: "Loading exercises…",
+    infReveal: "Show answer", infNext: "Next exercise →",
   },
   es: {
     back: "← Atrás", loading: "Cargando lección...",
@@ -131,6 +162,10 @@ const L: Record<LangCode, {
     hint: "Pista", question: (c, t) => `Pregunta ${c} de ${t}`,
     step: (c, t) => `Paso ${c} de ${t}`, score: (c, t) => `${c} de ${t} correctas`,
     showAnswer: "Mostrar respuesta",
+    keepPracticing: "🔥 Práctica infinita", infPracticeTitle: "Ejercicios bonus",
+    infCorrect: "✅ ¡Correcto!", infWrong: "❌ No del todo…",
+    infScore: (c) => `Respuestas correctas: ${c}`, infLoading: "Cargando ejercicios…",
+    infReveal: "Mostrar respuesta", infNext: "Siguiente ejercicio →",
   },
   de: {
     back: "← Zurück", loading: "Lade Lektion...",
@@ -142,6 +177,10 @@ const L: Record<LangCode, {
     hint: "Hinweis", question: (c, t) => `Frage ${c} von ${t}`,
     step: (c, t) => `Schritt ${c} von ${t}`, score: (c, t) => `${c} von ${t} richtig`,
     showAnswer: "Richtige Antwort zeigen",
+    keepPracticing: "🔥 Unendlich üben", infPracticeTitle: "Bonus-Aufgaben",
+    infCorrect: "✅ Richtig!", infWrong: "❌ Nicht ganz…",
+    infScore: (c) => `Richtige Antworten: ${c}`, infLoading: "Aufgaben werden geladen…",
+    infReveal: "Antwort anzeigen", infNext: "Nächste Aufgabe →",
   },
   fr: {
     back: "← Retour", loading: "Chargement de la leçon...",
@@ -153,6 +192,10 @@ const L: Record<LangCode, {
     hint: "Indice", question: (c, t) => `Question ${c} sur ${t}`,
     step: (c, t) => `Étape ${c} sur ${t}`, score: (c, t) => `${c} sur ${t} correctes`,
     showAnswer: "Afficher la bonne réponse",
+    keepPracticing: "🔥 Pratique infinie", infPracticeTitle: "Exercices bonus",
+    infCorrect: "✅ Correct!", infWrong: "❌ Pas tout à fait…",
+    infScore: (c) => `Bonnes réponses: ${c}`, infLoading: "Chargement des exercices…",
+    infReveal: "Afficher la réponse", infNext: "Exercice suivant →",
   },
 };
 
@@ -626,7 +669,7 @@ interface EngineProps {
 }
 
 function InteractiveLessonEngine({
-  data, topic, subject, lang, grade, topicContext,
+  data, topic, subject, lang, grade, childId, topicContext,
   speak, isVoicePlaying,
   onComplete, onRecordLesson, onBack, onAskAya,
 }: EngineProps) {
@@ -645,6 +688,9 @@ function InteractiveLessonEngine({
   const [phase, setPhase] = useState<Phase>({ kind: "greeting" });
   const [dialogue, setDialogue] = useState<string>(greetingText);
   const [answerInput, setAnswerInput] = useState("");
+
+  /* ── infinite practice state */
+  const [infLoading, setInfLoading] = useState(false);
 
   /* ── score tracking */
   const practiceCorrectRef = useRef(0);
@@ -686,6 +732,7 @@ function InteractiveLessonEngine({
       case "quiz-intro": return 2 + examples.length + problems.length;
       case "quiz": return 2 + examples.length + problems.length + 1 + phase.idx;
       case "completion": return totalSteps - 1;
+      case "infinite-practice": return totalSteps - 1;
     }
   })();
 
@@ -816,6 +863,88 @@ function InteractiveLessonEngine({
         : d.completionLow(topicLabel);
       go({ kind: "completion", practiceCorrect: pc, quizCorrect: qc, total }, completionMsg);
       onComplete(pc, qc, problems.length, questions.length);
+    }
+  };
+
+  /* ── infinite practice: load exercises from pool */
+  const startInfinitePractice = async () => {
+    setInfLoading(true);
+    try {
+      const params = new URLSearchParams({
+        childId: String(childId),
+        subjectId: subject.id,
+        topicId: topic.id,
+        grade: String(grade),
+        lang,
+        count: "10",
+      });
+      const res = await fetch(`/api/lessons/exercises?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("aya_token") ?? ""}` },
+      });
+      if (!res.ok) throw new Error("fetch failed");
+      const body = await res.json() as { exercises: PoolExercise[] };
+      const exercises = body.exercises ?? [];
+      if (exercises.length === 0) throw new Error("empty");
+      setPhase({ kind: "infinite-practice", exercises, idx: 0, correct: 0, selected: null, inputVal: "", feedback: "none", revealed: false });
+      setDialogue(l.infPracticeTitle);
+    } catch {
+      setDialogue(l.infLoading);
+    } finally {
+      setInfLoading(false);
+    }
+  };
+
+  /* ── infinite practice: record result + advance */
+  const recordInfResult = async (ex: PoolExercise, isCorrect: boolean, userAnswer: string, p: Extract<Phase, { kind: "infinite-practice" }>) => {
+    try {
+      await fetch("/api/lessons/exercises/result", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("aya_token") ?? ""}`,
+        },
+        body: JSON.stringify({ exerciseId: ex.id, correct: isCorrect, userAnswer }),
+      });
+    } catch { /* fire-and-forget */ }
+    const newCorrect = p.correct + (isCorrect ? 1 : 0);
+    setPhase({ ...p, correct: newCorrect, feedback: isCorrect ? "correct" : "wrong", revealed: false });
+    setDialogue(isCorrect ? pick(d.practiceCorrect) : pick(d.practiceWrong));
+  };
+
+  /* ── infinite practice: advance to next exercise (with auto-refill) */
+  const nextInfExercise = async (p: Extract<Phase, { kind: "infinite-practice" }>) => {
+    const nextIdx = p.idx + 1;
+    if (nextIdx >= p.exercises.length) {
+      /* auto-refill */
+      setInfLoading(true);
+      try {
+        const params = new URLSearchParams({
+          childId: String(childId),
+          subjectId: subject.id,
+          topicId: topic.id,
+          grade: String(grade),
+          lang,
+          count: "10",
+        });
+        const res = await fetch(`/api/lessons/exercises?${params.toString()}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("aya_token") ?? ""}` },
+        });
+        if (!res.ok) throw new Error("fetch failed");
+        const body = await res.json() as { exercises: PoolExercise[] };
+        const fresh = body.exercises ?? [];
+        if (fresh.length > 0) {
+          setPhase({ ...p, exercises: fresh, idx: 0, selected: null, inputVal: "", feedback: "none", revealed: false });
+        } else {
+          setPhase({ ...p, idx: nextIdx, selected: null, inputVal: "", feedback: "none", revealed: false });
+        }
+      } catch {
+        setPhase({ ...p, idx: 0, selected: null, inputVal: "", feedback: "none", revealed: false });
+      } finally {
+        setInfLoading(false);
+      }
+    } else {
+      setPhase({ ...p, idx: nextIdx, selected: null, inputVal: "", feedback: "none", revealed: false });
+      setDialogue(l.infPracticeTitle);
     }
   };
 
@@ -1230,12 +1359,150 @@ function InteractiveLessonEngine({
                   </div>
                 </motion.div>
                 <CuriosityCardDisplay card={curiosityCard} lang={lang} />
+                <ActionBtn
+                  onClick={startInfinitePractice}
+                  subject={subject}
+                  testId="btn-keep-practicing"
+                  disabled={infLoading}
+                >
+                  {infLoading ? l.infLoading : l.keepPracticing}
+                </ActionBtn>
                 <ActionBtn onClick={onBack} subject={subject} testId="btn-continue-lesson">
                   <Star className="w-4 h-4" /> {d.continueLesson}
                 </ActionBtn>
                 <ActionBtn onClick={onAskAya} subject={subject} variant="ghost" testId="btn-ask-aya">
                   <Sparkles className="w-4 h-4" /> {d.askAya}
                 </ActionBtn>
+              </div>
+            );
+          })()}
+
+          {/* ── Infinite Practice ── */}
+          {phase.kind === "infinite-practice" && (() => {
+            const p = phase;
+            const ex = p.exercises[p.idx];
+            if (!ex) return null;
+            const isMultiple = ex.exerciseType === "multiple-choice" && ex.options && ex.options.length > 0;
+            const answered = p.feedback !== "none";
+            return (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className={cn("text-sm font-bold", subject.colorClass)}>
+                    {l.infPracticeTitle}
+                  </span>
+                  <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                    {l.infScore(p.correct)}
+                  </span>
+                </div>
+
+                <motion.div
+                  key={`inf-ex-${p.idx}`}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={cn("rounded-2xl border-2 p-5", subject.bgClass, subject.borderClass)}
+                >
+                  <p className="font-semibold text-foreground text-base leading-relaxed mb-4">{ex.question}</p>
+
+                  {isMultiple ? (
+                    <div className="grid grid-cols-2 gap-3">
+                      {ex.options!.map((opt, i) => {
+                        const isSelected = p.selected === i;
+                        const isCorrectOpt = opt === ex.correctAnswer;
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              if (answered) return;
+                              const isCorrect = opt === ex.correctAnswer;
+                              setPhase({ ...p, selected: i });
+                              void recordInfResult(ex, isCorrect, opt, { ...p, selected: i });
+                            }}
+                            disabled={answered}
+                            className={cn(
+                              "p-4 rounded-xl border-2 font-semibold text-sm text-center transition-all leading-relaxed",
+                              !answered && "hover:scale-[1.02] cursor-pointer border-border/40 bg-card",
+                              answered && isCorrectOpt && "border-green-400 bg-green-50 text-green-700",
+                              answered && isSelected && !isCorrectOpt && "border-red-400 bg-red-50 text-red-600",
+                              answered && !isSelected && !isCorrectOpt && "border-border/30 bg-muted/30 text-muted-foreground opacity-50",
+                            )}
+                          >
+                            {answered && isCorrectOpt && <span className="mr-1">✓</span>}
+                            {answered && isSelected && !isCorrectOpt && <span className="mr-1">✗</span>}
+                            {opt}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <input
+                        type="text"
+                        value={p.inputVal}
+                        onChange={(e) => !answered && setPhase({ ...p, inputVal: e.target.value })}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && p.inputVal.trim() && !answered) {
+                            const val = p.inputVal.trim();
+                            const isCorrect = val.toLowerCase() === ex.correctAnswer.toLowerCase();
+                            void recordInfResult(ex, isCorrect, val, p);
+                          }
+                        }}
+                        disabled={answered}
+                        placeholder={l.placeholder}
+                        className="w-full px-4 py-3 rounded-xl border-2 border-border/40 bg-card text-foreground placeholder:text-muted-foreground font-semibold focus:outline-none focus:border-current transition-colors disabled:opacity-60"
+                      />
+                      {!answered && (
+                        <ActionBtn
+                          onClick={() => {
+                            const val = p.inputVal.trim();
+                            if (!val) return;
+                            const isCorrect = val.toLowerCase() === ex.correctAnswer.toLowerCase();
+                            void recordInfResult(ex, isCorrect, val, p);
+                          }}
+                          subject={subject}
+                          testId="btn-inf-check"
+                          disabled={!p.inputVal.trim()}
+                        >
+                          {l.check}
+                        </ActionBtn>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+
+                {answered && (
+                  <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                    <p className={cn("font-bold text-center text-base", p.feedback === "correct" ? "text-green-600" : "text-red-500")}>
+                      {p.feedback === "correct" ? l.infCorrect : l.infWrong}
+                    </p>
+                    {p.feedback === "wrong" && !p.revealed && (
+                      <button
+                        onClick={() => setPhase({ ...p, revealed: true })}
+                        className="text-xs text-muted-foreground underline underline-offset-2 w-full text-center"
+                      >
+                        {l.infReveal}
+                      </button>
+                    )}
+                    {p.revealed && (
+                      <p className="text-sm text-center text-foreground/70">
+                        ✓ {ex.correctAnswer}
+                      </p>
+                    )}
+                    {ex.explanation && p.feedback === "wrong" && (
+                      <p className="text-xs text-muted-foreground text-center italic">{ex.explanation}</p>
+                    )}
+                    <ActionBtn
+                      onClick={() => void nextInfExercise(p)}
+                      subject={subject}
+                      testId="btn-inf-next"
+                      disabled={infLoading}
+                    >
+                      {infLoading ? l.infLoading : l.infNext}
+                    </ActionBtn>
+                    <ActionBtn onClick={onBack} subject={subject} variant="ghost" testId="btn-inf-back">
+                      {l.backToLessons}
+                    </ActionBtn>
+                  </motion.div>
+                )}
               </div>
             );
           })()}

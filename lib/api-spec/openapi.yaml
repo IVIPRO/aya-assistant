@@ -531,6 +531,120 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  # ─── Exercise Pool ─────────────────────────────────────────────────────────
+  /lessons/exercises:
+    get:
+      operationId: getExercisePool
+      tags: [lessons]
+      summary: Get next exercises from the AI-generated pool (creates pool if needed)
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: childId
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: subjectId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: topicId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: grade
+          in: query
+          schema: { type: integer, default: 2 }
+        - name: lang
+          in: query
+          schema: { type: string, default: "en" }
+        - name: count
+          in: query
+          schema: { type: integer, default: 10 }
+      responses:
+        "200":
+          description: Exercise pool response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExercisePoolResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /lessons/exercises/stats:
+    get:
+      operationId: getExercisePoolStats
+      tags: [lessons]
+      summary: Get pool stats without fetching exercises
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: childId
+          in: query
+          required: true
+          schema: { type: integer }
+        - name: subjectId
+          in: query
+          required: true
+          schema: { type: string }
+        - name: topicId
+          in: query
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Pool statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExercisePoolStats"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /lessons/exercises/result:
+    post:
+      operationId: recordExerciseResult
+      tags: [lessons]
+      summary: Record the child's answer to an exercise
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExerciseResultBody"
+      responses:
+        "200":
+          description: Result recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                required: [ok]
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   # ─── Calendar ──────────────────────────────────────────────────────────────
   /calendar:
     get:
@@ -1545,6 +1659,98 @@ components:
                 $ref: "#/components/schemas/QuizQuestion"
           required: [instructions, questions]
       required: [lesson, practice, quiz]
+
+    ExercisePoolItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        childId:
+          type: integer
+        subjectId:
+          type: string
+        topicId:
+          type: string
+        grade:
+          type: integer
+        lang:
+          type: string
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        question:
+          type: string
+        correctAnswer:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+          nullable: true
+        hint:
+          type: string
+          nullable: true
+        explanation:
+          type: string
+          nullable: true
+        exerciseType:
+          type: string
+          enum: [multiple-choice, open-ended]
+        batchId:
+          type: string
+        used:
+          type: boolean
+        correct:
+          type: boolean
+          nullable: true
+        userAnswer:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        usedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required: [id, childId, subjectId, topicId, grade, lang, difficulty, question, correctAnswer, exerciseType, batchId, used, createdAt]
+
+    ExercisePoolStats:
+      type: object
+      properties:
+        total:
+          type: integer
+        unused:
+          type: integer
+        used:
+          type: integer
+        correct:
+          type: integer
+        wrong:
+          type: integer
+      required: [total, unused, used, correct, wrong]
+
+    ExercisePoolResponse:
+      type: object
+      properties:
+        stats:
+          $ref: "#/components/schemas/ExercisePoolStats"
+        exercises:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExercisePoolItem"
+      required: [stats, exercises]
+
+    ExerciseResultBody:
+      type: object
+      properties:
+        exerciseId:
+          type: integer
+        correct:
+          type: boolean
+        userAnswer:
+          type: string
+      required: [exerciseId, correct, userAnswer]
 
     GenerateMissionsBody:
       type: object

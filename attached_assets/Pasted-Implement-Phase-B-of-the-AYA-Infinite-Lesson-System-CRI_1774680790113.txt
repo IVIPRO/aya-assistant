@@ -1,0 +1,131 @@
+Implement Phase B of the AYA Infinite Lesson System.
+
+CRITICAL RULES
+Before implementing anything, inspect the codebase and determine whether a lesson generator already exists.
+
+If a generator exists:
+upgrade and extend it.
+
+If it does not exist:
+implement a clean lesson generation module.
+
+Do NOT duplicate code or create parallel systems.
+
+Do NOT break existing hardcoded lessons.
+
+The new system must run alongside the existing one safely.
+
+------------------------------------------------
+
+GOAL
+
+Allow AYA to generate large sets of exercises per lesson using AI once, then reuse them without calling AI repeatedly.
+
+This reduces API cost while enabling effectively unlimited practice.
+
+------------------------------------------------
+
+STEP 1 — LESSON GENERATOR AUDIT
+
+Inspect:
+
+• lesson creation pipeline
+• mission → lesson routing
+• exercise generation
+• existing AI calls
+• database schema for lessons/tasks
+
+Return short summary internally before changes.
+
+------------------------------------------------
+
+STEP 2 — AI LESSON CONTENT GENERATION
+
+Create or extend a lesson generation service.
+
+When a lesson starts:
+
+AI should generate a batch of exercises (example: 20–40 tasks).
+
+Each task must include:
+
+• question
+• correct answer
+• optional hint
+• explanation
+• difficulty level
+• subject tag
+
+Start with mathematics first.
+
+------------------------------------------------
+
+STEP 3 — DATABASE CACHING
+
+Store generated exercises in the database.
+
+Example structure:
+
+lesson_instance
+exercise_set
+exercise_item
+
+When the child repeats a mission:
+
+reuse unused tasks from the stored pool.
+
+If pool runs out → generate a new batch.
+
+This avoids calling AI every time.
+
+------------------------------------------------
+
+STEP 4 — ADAPTIVE DIFFICULTY
+
+Connect generation to Adaptive Teacher Brain.
+
+If child struggles:
+
+generate easier variants.
+
+If child performs well:
+
+generate slightly harder tasks.
+
+------------------------------------------------
+
+STEP 5 — SYSTEM INTEGRATION
+
+Ensure compatibility with:
+
+• World Map missions
+• Adaptive Teacher Brain
+• Curiosity Engine
+• Motivation Engine
+• XP rewards
+• Speech explanations
+
+------------------------------------------------
+
+STEP 6 — SAFETY
+
+Do NOT remove hardcoded lessons.
+
+Do NOT break existing mission flows.
+
+Keep backward compatibility.
+
+------------------------------------------------
+
+STEP 7 — RETURN
+
+Return:
+
+• files created
+• files modified
+• generator location
+• database schema updates
+• preview test steps
+
+Feature name:
+AYA Adaptive Lesson Generator + Exercise Cache

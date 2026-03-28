@@ -378,6 +378,72 @@ function getLevelProgress(xp: number): number {
   return p.xpInLevel;
 }
 
+interface DailyQuest {
+  id: string;
+  icon: string;
+  title: string;
+  titleBg: string;
+  titleEs: string;
+  titleDe: string;
+  titleFr: string;
+  xpReward: number;
+  done: boolean;
+}
+
+interface DailyQuestsResponse {
+  quests: DailyQuest[];
+  completedCount: number;
+  totalCount: number;
+  streakDays: number;
+}
+
+function DailyQuestCard({ childId, lang }: { childId: number; lang: string }) {
+  const [data, setData] = useState<DailyQuestsResponse | null>(null);
+
+  useEffect(() => {
+    fetch(`/api/learning/daily-quests?childId=${childId}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token") ?? ""}` },
+    })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => d && setData(d))
+      .catch(() => {});
+  }, [childId]);
+
+  if (!data) return null;
+
+  const questTitle = (q: DailyQuest) => {
+    if (lang === "bg") return q.titleBg;
+    if (lang === "es") return q.titleEs;
+    if (lang === "de") return q.titleDe;
+    if (lang === "fr") return q.titleFr;
+    return q.title;
+  };
+
+  const headerLabel = lang === "bg" ? "Дневни задачи" : lang === "es" ? "Misiones diarias" : lang === "de" ? "Tägliche Aufgaben" : lang === "fr" ? "Quêtes du jour" : "Daily Quests";
+  const completedLabel = lang === "bg" ? `${data.completedCount}/${data.totalCount} завършени` : lang === "es" ? `${data.completedCount}/${data.totalCount} completadas` : `${data.completedCount}/${data.totalCount} done`;
+
+  return (
+    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl p-4 border-2 border-indigo-200 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🎯</span>
+          <span className="font-bold text-sm text-indigo-900">{headerLabel}</span>
+        </div>
+        <span className="text-xs font-semibold text-indigo-600 bg-indigo-100 px-2 py-0.5 rounded-full">{completedLabel}</span>
+      </div>
+      <div className="space-y-2">
+        {data.quests.map((q) => (
+          <div key={q.id} className={`flex items-center gap-3 rounded-xl px-3 py-2 border transition-all ${q.done ? "bg-green-50 border-green-200" : "bg-white border-indigo-100"}`}>
+            <span className="text-base">{q.done ? "✅" : q.icon}</span>
+            <span className={`text-xs font-medium flex-1 ${q.done ? "line-through text-muted-foreground" : "text-indigo-900"}`}>{questTitle(q)}</span>
+            <span className={`text-xs font-bold ${q.done ? "text-green-600" : "text-indigo-400"}`}>+{q.xpReward} XP</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ── Phase 1 Gamification: Calculate streak from progress dates ────── */
 function calculateStreakFromProgressDates(progressDates: Date[]): number {
   if (progressDates.length === 0) return 0;
@@ -596,6 +662,8 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
               <span>{lbl.xpToNextLevel(levelProgress)}</span>
             </div>
           </div>
+
+          <DailyQuestCard childId={child.id} lang={lang} />
 
           {badges.length > 0 && (
             <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-4 border-2 border-purple-200 shadow-sm">

@@ -13,11 +13,6 @@ import {
 import { detectWeakTopics } from "../lib/weaknessDetection";
 import { buildWeeklyInsights } from "../lib/weeklyInsights";
 import { buildTeacherExport } from "../lib/teacherExport";
-import {
-  calculateStreakFromProgress,
-  getEligibleBadges,
-  formatStreakDisplay,
-} from "../lib/gamificationHelpers";
 
 const router: IRouter = Router();
 
@@ -175,20 +170,7 @@ router.post("/learning/complete", requireAuth, async (req, res): Promise<void> =
   const existingBadges = (child.badgesEarned ?? []) as BadgeRecord[];
   const newBadges = evaluateLessonBadges(badgeStats, existingBadges);
 
-  /* ── Gamification: Daily Streak & Achievement Badges ────────────── */
-  const dailyStreak = calculateStreakFromProgress(recentActivity.map((r) => new Date(r.createdAt)));
-  const lessonsCompleted = allTopicProgress.filter(t => t.lessonDone).length;
-  const gamificationBadges = getEligibleBadges(lessonsCompleted, dailyStreak)
-    .map(badge => ({
-      id: badge.id,
-      title: badge.title,
-      icon: badge.icon,
-      description: badge.description ?? badge.title,
-      earnedAt: new Date().toISOString(),
-    } as BadgeRecord));
-  const streakDisplay = formatStreakDisplay(dailyStreak);
-
-  const mergedBadges: BadgeRecord[] = [...existingBadges, ...newBadges, ...gamificationBadges];
+  const mergedBadges: BadgeRecord[] = [...existingBadges, ...newBadges];
 
   const [updatedChild] = await db
     .update(childrenTable)
@@ -229,11 +211,7 @@ router.post("/learning/complete", requireAuth, async (req, res): Promise<void> =
     totalXp: updatedChild.xp,
     totalStars: updatedChild.stars,
     streakDays,
-    /* Gamification additions */
-    dailyStreak,
-    streakDisplay,
-    celebration: dailyStreak >= 3 ? { message: streakDisplay, emoji: "🎉" } : null,
-    achievementsEarned: gamificationBadges,
+    celebration: streakDays >= 3 ? { message: `${streakDays} days 🔥`, emoji: "🎉" } : null,
   });
 });
 
@@ -467,6 +445,92 @@ router.get("/learning/teacher-export", requireAuth, async (req, res): Promise<vo
 
   const exportData = await buildTeacherExport(childId, grade);
   res.json(exportData);
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   GET /api/learning/daily-quests?childId=
+   Return today's 3 daily quests for a child.
+   Deterministic — derived from existing progress data, no new DB table.
+───────────────────────────────────────────────────────────────── */
+router.get("/learning/daily-quests", requireAuth, async (req, res): Promise<void> => {
+  const childId = parseInt(req.query.childId as string, 10);
+  if (isNaN(childId)) {
+    res.status(400).json({ error: "childId is required" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
+
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const [todayActivity, recentActivity] = await Promise.all([
+    db.select().from(progressTable)
+      .where(and(eq(progressTable.childId, childId), gte(progressTable.createdAt, todayStart))),
+    db.select({ createdAt: progressTable.createdAt }).from(progressTable)
+      .where(and(eq(progressTable.childId, childId), gte(progressTable.createdAt, thirtyDaysAgo))),
+  ]);
+
+  const streakDays = computeStreak(recentActivity.map((r) => new Date(r.createdAt)));
+
+  const lessonDoneToday = todayActivity.some(a => a.notes?.startsWith("lesson:") || a.notes?.startsWith("quiz:"));
+  const correctAnswersToday = todayActivity.reduce((sum, a) => sum + (a.score ?? 0), 0);
+  const streakAlive = streakDays >= 1;
+
+  res.json({
+    quests: [
+      {
+        id: "daily_lesson",
+        icon: "📖",
+        title: "Complete a lesson",
+        titleBg: "Завърши урок",
+        titleEs: "Completa una lección",
+        titleDe: "Eine Lektion abschließen",
+        titleFr: "Terminer une leçon",
+        xpReward: 20,
+        done: lessonDoneToday,
+      },
+      {
+        id: "daily_practice",
+        icon: "✏️",
+        title: "Earn 15 XP practicing",
+        titleBg: "Спечели 15 XP в практика",
+        titleEs: "Gana 15 XP practicando",
+        titleDe: "Verdiene 15 XP beim Üben",
+        titleFr: "Gagne 15 XP en pratiquant",
+        xpReward: 15,
+        done: correctAnswersToday >= 15,
+      },
+      {
+        id: "daily_streak",
+        icon: "🔥",
+        title: "Keep your streak alive",
+        titleBg: "Поддържай серията си",
+        titleEs: "Mantén tu racha",
+        titleDe: "Halte deine Streak aufrecht",
+        titleFr: "Maintiens ta série",
+        xpReward: 10,
+        done: streakAlive,
+      },
+    ],
+    completedCount: [lessonDoneToday, correctAnswersToday >= 15, streakAlive].filter(Boolean).length,
+    totalCount: 3,
+    streakDays,
+  });
 });
 
 /* ─────────────────────────────────────────────────────────────────

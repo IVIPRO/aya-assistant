@@ -1,0 +1,82 @@
+Audit and consolidate Phase D systems in AYA.
+
+CRITICAL RULE:
+Do NOT create duplicate streak, XP, reward, badge, or quest systems.
+
+Before changing anything, inspect the codebase for existing systems related to:
+
+- xp
+- level
+- badge
+- reward
+- streak
+- daily quest
+- weekly insights
+- parent summary
+- gamification
+
+KNOWN EXISTING FILES TO INSPECT FIRST:
+- artifacts/api-server/src/lib/badges.ts
+- artifacts/api-server/src/lib/gamificationHelpers.ts
+- artifacts/api-server/src/lib/levelSystem.ts
+- artifacts/api-server/src/lib/weeklyInsights.ts
+- artifacts/api-server/src/lib/parentSummary.ts
+- artifacts/api-server/src/lib/tests/gamificationHelpers.test.ts
+- artifacts/api-server/src/lib/tests/weeklyInsights.test.ts
+- artifacts/aya-assistant/src/components/xp-toast.tsx
+- artifacts/aya-assistant/src/lib/levelSystem.ts
+
+GOAL:
+Determine what parts of Phase D already exist, what is missing, and only improve the missing or weak parts.
+
+PHASE 1 — AUDIT
+
+Check whether AYA already has:
+
+1. XP accumulation
+2. level progression
+3. badges / achievements
+4. reward feedback UI
+5. daily streak tracking
+6. daily quest generation
+7. weekly progress summaries
+8. parent-facing reward/progress visibility
+
+PHASE 2 — CONSOLIDATION
+
+If duplicate or overlapping logic exists:
+- unify it
+- keep the best implementation
+- remove or avoid parallel systems
+
+If a system exists but is incomplete:
+- upgrade it safely
+
+If a system is fully working:
+- leave it unchanged
+
+PHASE 3 — MISSING PARTS ONLY
+
+Only if missing, implement the smallest necessary additions for:
+
+- daily streak
+- daily quests
+- unified XP economy
+
+Do not redesign the whole app.
+
+PHASE 4 — RETURN
+
+Return exactly:
+
+1. which Phase D systems already existed
+2. which files currently implement them
+3. which parts were missing
+4. which files were modified
+5. whether daily streak exists now
+6. whether daily quests exist now
+7. whether XP / rewards / badges are now unified
+8. preview test steps
+
+Feature name:
+AYA Phase D Audit and Consolidation

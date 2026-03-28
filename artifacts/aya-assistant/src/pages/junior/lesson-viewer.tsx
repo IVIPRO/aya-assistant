@@ -233,7 +233,7 @@ const D: Record<LangCode, {
     practiceLead: ["Сега ти опитай! Вярвам в теб. 💪", "Твой ред! Покажи какво знаеш.", "Покажи какво умееш!"],
     practiceCorrect: ["Браво! Правилно! 🌟", "Отлично! Ти го направи!", "Перфектно! Продължавай така!", "Супер! Знаех, че можеш!"],
     practiceWrong: ["Почти! Помисли малко повече.", "Не съвсем — хайде да опитаме пак.", "Близо си! Погледни отново условието."],
-    practiceWrong2: ["Нека ти дам подсказка...", "Не се притеснявай — ето ти помощ:", "Заедно ще го намерим!"],
+    practiceWrong2: ["Нека ти дам подсказка.", "Не се притеснявай — ще ти помогна!", "Заедно ще го намерим!"],
     hinting: ["Нека помислим заедно — ето подсказка:", "Ще го разделим на малки стъпки.", "Ще ти покажа лесен начин."],
     retryAfterHint: ["Сега е твой ред! Опитай пак.", "Хайде — след подсказката ще успееш!", "Опитай отново. Ти можеш!"],
     celebrate: ["Две поредни верни! Справяш се чудесно! 🌟🌟", "Страхотно! Продължавай така! 🎉", "Чудесно! Вървиш много добре! ⭐"],
@@ -670,7 +670,7 @@ interface EngineProps {
 
 function InteractiveLessonEngine({
   data, topic, subject, lang, grade, childId, topicContext,
-  speak, isVoicePlaying,
+  speak, isVoicePlaying, voiceEnabled,
   onComplete, onRecordLesson, onBack, onAskAya,
 }: EngineProps) {
   const l = L[lang];
@@ -687,6 +687,8 @@ function InteractiveLessonEngine({
   /* ── phase state */
   const [phase, setPhase] = useState<Phase>({ kind: "greeting" });
   const [dialogue, setDialogue] = useState<string>(greetingText);
+  /* spokenText may include content suffix (explanation/problem/hint) beyond what the bubble shows */
+  const [spokenText, setSpokenText] = useState<string>(greetingText);
   const [answerInput, setAnswerInput] = useState("");
 
   /* ── infinite practice state */
@@ -700,10 +702,10 @@ function InteractiveLessonEngine({
   /* ── cumulative lesson mistake counter (across all practice problems) */
   const lessonMistakesRef = useRef(0);
 
-  /* ── voice: speak whenever dialogue changes ─────────────────── */
+  /* ── voice: speak whenever spokenText changes ─────────────────── */
   useEffect(() => {
-    speak(dialogue);
-  }, [dialogue]);
+    speak(spokenText);
+  }, [spokenText]);
 
   /* ── phase-specific cached pick refs */
   const explanationLeadRef = useRef(pick(d.explanationLead));
@@ -736,15 +738,25 @@ function InteractiveLessonEngine({
     }
   })();
 
-  const go = useCallback((next: Phase, text: string) => {
+  /* go() — phase transition: sets phase, dialogue (bubble), spokenText (TTS, may include content suffix) */
+  const go = useCallback((next: Phase, text: string, spokenSuffix?: string) => {
     setPhase(next);
     setDialogue(text);
+    setSpokenText(spokenSuffix ? `${text} ${spokenSuffix}`.trim() : text);
     setAnswerInput("");
+  }, []);
+
+  /* say() — update dialogue + spokenText without changing phase (for inline feedback) */
+  const say = useCallback((text: string, spokenSuffix?: string) => {
+    setDialogue(text);
+    setSpokenText(spokenSuffix ? `${text} ${spokenSuffix}`.trim() : text);
   }, []);
 
   /* ── advance from greeting */
   const fromGreeting = () => {
-    go({ kind: "explanation" }, `${topicIntroText} ${explanationLeadRef.current}`);
+    const warmMsg = `${topicIntroText} ${explanationLeadRef.current}`;
+    const contentSpoken = [data.lesson.explanation, data.lesson.tip].filter(Boolean).join('. ');
+    go({ kind: "explanation" }, warmMsg, contentSpoken || undefined);
     if (!lessonRecordedRef.current) {
       lessonRecordedRef.current = true;
       onRecordLesson();
@@ -754,26 +766,29 @@ function InteractiveLessonEngine({
   /* ── advance from explanation */
   const fromExplanation = () => {
     if (examples.length > 0) {
-      go({ kind: "example", idx: 0, revealed: false }, `${exampleLeadRef.current}`);
+      go({ kind: "example", idx: 0, revealed: false }, exampleLeadRef.current, examples[0].problem);
     } else if (problems.length > 0) {
-      go({ kind: "practice", idx: 0, attempts: 0, feedback: "none" }, pick(d.practiceLead));
+      go({ kind: "practice", idx: 0, attempts: 0, feedback: "none" }, pick(d.practiceLead), problems[0].question);
     } else {
       go({ kind: "quiz-intro" }, pick(d.quizIntro));
     }
   };
 
-  /* ── reveal example solution */
+  /* ── reveal example solution — speak the solution and hint aloud */
   const revealExample = (idx: number) => {
+    const ex = examples[idx];
+    const revealMsg = pick(d.exampleReveal);
+    const spokenSuffix = [ex.solution, ex.hint].filter(Boolean).join('. ');
     setPhase({ kind: "example", idx, revealed: true });
-    setDialogue(pick(d.exampleReveal));
+    say(revealMsg, spokenSuffix || undefined);
   };
 
   /* ── advance from example */
   const fromExample = (idx: number) => {
     if (idx + 1 < examples.length) {
-      go({ kind: "example", idx: idx + 1, revealed: false }, exampleLeadRef.current);
+      go({ kind: "example", idx: idx + 1, revealed: false }, exampleLeadRef.current, examples[idx + 1].problem);
     } else if (problems.length > 0) {
-      go({ kind: "practice", idx: 0, attempts: 0, feedback: "none" }, pick(d.practiceLead));
+      go({ kind: "practice", idx: 0, attempts: 0, feedback: "none" }, pick(d.practiceLead), problems[0].question);
     } else {
       go({ kind: "quiz-intro" }, pick(d.quizIntro));
     }
@@ -787,28 +802,27 @@ function InteractiveLessonEngine({
       practiceCorrectRef.current += 1;
       consecutiveCorrectRef.current += 1;
       setPhase({ kind: "practice", idx, attempts, feedback: "correct" });
-      setDialogue(pick(d.practiceCorrect));
+      say(pick(d.practiceCorrect));
     } else {
       consecutiveCorrectRef.current = 0;
       lessonMistakesRef.current += 1;
       const nextAttempts = attempts + 1;
-      /* First wrong in primary grades (1-4): go to hinting phase. */
+      /* First wrong in primary grades (1-4): go to hinting phase — speak hint text aloud */
       if (isPrimary && attempts === 0) {
-        go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts }, pick(d.hinting));
+        const hintEx = examples.find(e => e.hint) ?? examples[0];
+        const hintSpoken = hintEx?.hint ?? '';
+        go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts }, pick(d.hinting), hintSpoken || undefined);
       } else {
         setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong" });
-        if (topicContext === "weak") {
-          setDialogue(ctxD.practiceSupport);
-        } else {
-          setDialogue(pick(d.practiceWrong2));
-        }
+        const wrongMsg = topicContext === "weak" ? ctxD.practiceSupport : pick(d.practiceWrong2);
+        say(wrongMsg);
       }
     }
   };
 
-  /* ── from hinting → back to retry */
+  /* ── from hinting → back to retry — speak the problem question again */
   const fromHinting = (practiceIdx: number, attempts: number) => {
-    go({ kind: "practice", idx: practiceIdx, attempts, feedback: "none" }, pick(d.retryAfterHint));
+    go({ kind: "practice", idx: practiceIdx, attempts, feedback: "none" }, pick(d.retryAfterHint), problems[practiceIdx].question);
   };
 
   /* ── advance from practice */
@@ -819,7 +833,7 @@ function InteractiveLessonEngine({
       if (consecutiveCorrectRef.current >= 2) {
         go({ kind: "celebrate", nextPracticeIdx: nextIdx }, pick(d.celebrate));
       } else {
-        go({ kind: "practice", idx: nextIdx, attempts: 0, feedback: "none" }, pick(d.practiceLead));
+        go({ kind: "practice", idx: nextIdx, attempts: 0, feedback: "none" }, pick(d.practiceLead), problems[nextIdx].question);
       }
     } else {
       onComplete(practiceCorrectRef.current, quizCorrectRef.current, problems.length, questions.length);
@@ -827,10 +841,10 @@ function InteractiveLessonEngine({
     }
   };
 
-  /* ── from celebrate → next practice problem */
+  /* ── from celebrate → next practice problem — speak problem after celebration */
   const fromCelebrate = (nextIdx: number) => {
     consecutiveCorrectRef.current = 0;
-    go({ kind: "practice", idx: nextIdx, attempts: 0, feedback: "none" }, pick(d.celebrateLead));
+    go({ kind: "practice", idx: nextIdx, attempts: 0, feedback: "none" }, pick(d.celebrateLead), problems[nextIdx].question);
   };
 
   /* ── select quiz option */
@@ -843,13 +857,18 @@ function InteractiveLessonEngine({
     const wrongMsg = (topicContext === "weak" && ctxD.quizSupport)
       ? ctxD.quizSupport
       : pick(d.quizWrong);
-    setDialogue(correct ? pick(d.quizCorrect) : wrongMsg);
+    say(correct ? pick(d.quizCorrect) : wrongMsg);
   };
 
-  /* ── advance from quiz */
+  /* ── start quiz from intro — speak first question after intro */
+  const startQuiz = useCallback(() => {
+    go({ kind: "quiz", idx: 0, selected: null, correct: null }, pick(d.quizIntro), questions[0]?.question);
+  }, [go, d, questions]);
+
+  /* ── advance from quiz — speak next question after feedback */
   const fromQuiz = (idx: number) => {
     if (idx + 1 < questions.length) {
-      go({ kind: "quiz", idx: idx + 1, selected: null, correct: null }, pick(d.quizIntro));
+      go({ kind: "quiz", idx: idx + 1, selected: null, correct: null }, pick(d.quizIntro), questions[idx + 1].question);
     } else {
       const pc = practiceCorrectRef.current;
       const qc = quizCorrectRef.current;
@@ -886,9 +905,9 @@ function InteractiveLessonEngine({
       const exercises = body.exercises ?? [];
       if (exercises.length === 0) throw new Error("empty");
       setPhase({ kind: "infinite-practice", exercises, idx: 0, correct: 0, selected: null, inputVal: "", feedback: "none", revealed: false });
-      setDialogue(l.infPracticeTitle);
+      say(l.infPracticeTitle, exercises[0].question);
     } catch {
-      setDialogue(l.infLoading);
+      say(l.infLoading);
     } finally {
       setInfLoading(false);
     }
@@ -908,7 +927,7 @@ function InteractiveLessonEngine({
     } catch { /* fire-and-forget */ }
     const newCorrect = p.correct + (isCorrect ? 1 : 0);
     setPhase({ ...p, correct: newCorrect, feedback: isCorrect ? "correct" : "wrong", revealed: false });
-    setDialogue(isCorrect ? pick(d.practiceCorrect) : pick(d.practiceWrong));
+    say(isCorrect ? pick(d.practiceCorrect) : pick(d.practiceWrong));
   };
 
   /* ── infinite practice: advance to next exercise (with auto-refill) */
@@ -934,17 +953,21 @@ function InteractiveLessonEngine({
         const fresh = body.exercises ?? [];
         if (fresh.length > 0) {
           setPhase({ ...p, exercises: fresh, idx: 0, selected: null, inputVal: "", feedback: "none", revealed: false });
+          say(l.infPracticeTitle, fresh[0].question);
         } else {
           setPhase({ ...p, idx: nextIdx, selected: null, inputVal: "", feedback: "none", revealed: false });
+          say(l.infPracticeTitle);
         }
       } catch {
         setPhase({ ...p, idx: 0, selected: null, inputVal: "", feedback: "none", revealed: false });
+        say(l.infPracticeTitle);
       } finally {
         setInfLoading(false);
       }
     } else {
+      const nextEx = p.exercises[nextIdx];
       setPhase({ ...p, idx: nextIdx, selected: null, inputVal: "", feedback: "none", revealed: false });
-      setDialogue(l.infPracticeTitle);
+      say(l.infPracticeTitle, nextEx?.question);
     }
   };
 
@@ -969,8 +992,22 @@ function InteractiveLessonEngine({
           transition={{ duration: 0.25 }}
           className="space-y-6"
         >
-          {/* AYA speech */}
-          <AyaSpeech emotion={emotion} text={dialogue} speaking={isVoicePlaying} />
+          {/* AYA speech + replay */}
+          <div>
+            <AyaSpeech emotion={emotion} text={dialogue} speaking={isVoicePlaying} />
+            {voiceEnabled && !isVoicePlaying && (
+              <div className="flex justify-center -mt-1 mb-1">
+                <button
+                  onClick={() => speak(spokenText)}
+                  className="text-xs text-muted-foreground/60 hover:text-muted-foreground flex items-center gap-1 px-2 py-0.5 rounded-full hover:bg-muted/40 transition-colors"
+                  title={lang === "bg" ? "Изслушай пак" : lang === "de" ? "Nochmal hören" : lang === "fr" ? "Réécouter" : lang === "es" ? "Escuchar de nuevo" : "Replay"}
+                >
+                  <RotateCcw className="w-3 h-3" />
+                  <span>{lang === "bg" ? "Изслушай" : lang === "de" ? "Wiederholen" : lang === "fr" ? "Réécouter" : lang === "es" ? "Repetir" : "Replay"}</span>
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* ── Greeting ── */}
           {phase.kind === "greeting" && (
@@ -1131,7 +1168,7 @@ function InteractiveLessonEngine({
                     )}
                     <div className="flex gap-2">
                       <ActionBtn
-                        onClick={() => { go({ kind: "practice", idx: phase.idx, attempts: phase.attempts, feedback: "none" }, pick(d.practiceWrong)); }}
+                        onClick={() => { go({ kind: "practice", idx: phase.idx, attempts: phase.attempts, feedback: "none" }, pick(d.practiceWrong), prob.question); }}
                         subject={subject}
                         variant={(topicContext === "weak" && attempts >= 1) || attempts >= 2 ? "ghost" : "primary"}
                         testId="btn-retry"
@@ -1252,7 +1289,7 @@ function InteractiveLessonEngine({
                   {lang === "bg" ? `${questions.length} въпроса` : `${questions.length} questions`}
                 </p>
               </div>
-              <ActionBtn onClick={() => go({ kind: "quiz", idx: 0, selected: null, correct: null }, pick(d.quizIntro))} subject={subject} testId="btn-start-quiz">
+              <ActionBtn onClick={startQuiz} subject={subject} testId="btn-start-quiz">
                 {l.startQuiz} <Sparkles className="w-4 h-4" />
               </ActionBtn>
             </div>

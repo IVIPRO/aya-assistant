@@ -1,0 +1,107 @@
+Audit and complete the existing AYA lesson voice guidance system.
+
+CRITICAL RULES
+
+This system already exists partially.
+Do NOT create a new voice engine.
+Do NOT create duplicate TTS logic.
+Do NOT add parallel endpoints if existing ones already work.
+
+First inspect the current codebase and determine:
+
+- where lesson voice guidance already works
+- which lesson steps are still text-only
+- whether avatar speaking state is already connected
+- whether replay support already exists
+- whether Bulgarian spoken lines need cleanup
+
+Only improve the missing or weak parts.
+
+------------------------------------------------
+
+GOAL
+
+AYA already guides lessons with voice partially.
+Complete the voice guidance so lesson flow feels fully spoken and natural for grades 1–4.
+
+AYA should speak consistently during:
+
+- lesson intro
+- explanation
+- guided example
+- task instruction
+- hint
+- wrong-answer encouragement
+- correct-answer praise
+- completion message
+
+------------------------------------------------
+
+PHASE 1 — AUDIT
+
+Inspect the latest codebase and identify:
+
+1. existing TTS / voice systems
+2. lesson steps already covered by voice
+3. lesson steps missing voice
+4. where avatar speaking animation is triggered
+5. whether voice overlap prevention exists
+6. whether replay controls already exist
+
+------------------------------------------------
+
+PHASE 2 — COMPLETE MISSING LESSON STEPS
+
+Without replacing the working system, add voice only to the lesson steps that are still missing.
+
+Reuse the existing voice architecture.
+
+------------------------------------------------
+
+PHASE 3 — BULGARIAN SPEECH CLEANUP
+
+Normalize spoken Bulgarian for grades 1–4:
+
+- short sentences
+- warm teacher tone
+- clear child-friendly wording
+- remove awkward machine-like phrasing
+- remove English leftovers
+- make spoken text sound natural aloud
+
+------------------------------------------------
+
+PHASE 4 — AVATAR SYNC
+
+Where already supported, ensure:
+
+- avatar enters speaking state while voice is playing
+- no overlapping speech playback
+- replay of current spoken step works if already present or can be added safely
+
+------------------------------------------------
+
+PHASE 5 — SAFETY
+
+Do not break:
+
+- interactive lesson engine
+- dynamic missions
+- infinite practice
+- daily quests
+- current TTS endpoints
+- existing working lesson voice parts
+
+------------------------------------------------
+
+RETURN EXACTLY
+
+1. existing voice systems found
+2. lesson steps that already had voice
+3. lesson steps that were missing voice
+4. files modified
+5. spoken Bulgarian improvements made
+6. preview test steps
+
+Feature name:
+AYA Lesson Voice Completion Upgrade

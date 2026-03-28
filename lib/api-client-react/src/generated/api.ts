@@ -34,11 +34,16 @@ import type {
   ErrorResponse,
   Family,
   FamilyTask,
+  GenerateLessonParams,
+  GenerateMissionsBody,
+  GenerateMissionsResponse,
   GetDailyPlanParams,
   GetLearningTeacherExportParams,
   GetLearningWeaknessesParams,
   GetLearningWeeklyInsightsParams,
+  GetLessonContentParams,
   HealthStatus,
+  LessonContent,
   ListChatMessagesParams,
   ListMemoriesParams,
   ListMissionsParams,
@@ -1568,6 +1573,283 @@ export const useCompleteMission = <
 > => {
   return useMutation(getCompleteMissionMutationOptions(options));
 };
+
+/**
+ * @summary Generate new AI missions for a zone
+ */
+export const getGenerateMissionsUrl = () => {
+  return `/api/missions/generate`;
+};
+
+export const generateMissions = async (
+  generateMissionsBody: GenerateMissionsBody,
+  options?: RequestInit,
+): Promise<GenerateMissionsResponse> => {
+  return customFetch<GenerateMissionsResponse>(getGenerateMissionsUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(generateMissionsBody),
+  });
+};
+
+export const getGenerateMissionsMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateMissions>>,
+    TError,
+    { data: BodyType<GenerateMissionsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof generateMissions>>,
+  TError,
+  { data: BodyType<GenerateMissionsBody> },
+  TContext
+> => {
+  const mutationKey = ["generateMissions"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof generateMissions>>,
+    { data: BodyType<GenerateMissionsBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return generateMissions(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GenerateMissionsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof generateMissions>>
+>;
+export type GenerateMissionsMutationBody = BodyType<GenerateMissionsBody>;
+export type GenerateMissionsMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Generate new AI missions for a zone
+ */
+export const useGenerateMissions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof generateMissions>>,
+    TError,
+    { data: BodyType<GenerateMissionsBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof generateMissions>>,
+  TError,
+  { data: BodyType<GenerateMissionsBody> },
+  TContext
+> => {
+  return useMutation(getGenerateMissionsMutationOptions(options));
+};
+
+/**
+ * @summary Get hardcoded lesson content for a topic
+ */
+export const getGetLessonContentUrl = (params: GetLessonContentParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/lessons/content?${stringifiedParams}`
+    : `/api/lessons/content`;
+};
+
+export const getLessonContent = async (
+  params: GetLessonContentParams,
+  options?: RequestInit,
+): Promise<LessonContent> => {
+  return customFetch<LessonContent>(getGetLessonContentUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetLessonContentQueryKey = (
+  params?: GetLessonContentParams,
+) => {
+  return [`/api/lessons/content`, ...(params ? [params] : [])] as const;
+};
+
+export const getGetLessonContentQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLessonContent>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetLessonContentParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLessonContent>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetLessonContentQueryKey(params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getLessonContent>>
+  > = ({ signal }) => getLessonContent(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getLessonContent>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetLessonContentQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getLessonContent>>
+>;
+export type GetLessonContentQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Get hardcoded lesson content for a topic
+ */
+
+export function useGetLessonContent<
+  TData = Awaited<ReturnType<typeof getLessonContent>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GetLessonContentParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getLessonContent>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetLessonContentQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Generate an AI-powered lesson for a topic
+ */
+export const getGenerateLessonUrl = (params: GenerateLessonParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/lessons/generate?${stringifiedParams}`
+    : `/api/lessons/generate`;
+};
+
+export const generateLesson = async (
+  params: GenerateLessonParams,
+  options?: RequestInit,
+): Promise<LessonContent> => {
+  return customFetch<LessonContent>(getGenerateLessonUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGenerateLessonQueryKey = (params?: GenerateLessonParams) => {
+  return [`/api/lessons/generate`, ...(params ? [params] : [])] as const;
+};
+
+export const getGenerateLessonQueryOptions = <
+  TData = Awaited<ReturnType<typeof generateLesson>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GenerateLessonParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof generateLesson>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGenerateLessonQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof generateLesson>>> = ({
+    signal,
+  }) => generateLesson(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof generateLesson>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GenerateLessonQueryResult = NonNullable<
+  Awaited<ReturnType<typeof generateLesson>>
+>;
+export type GenerateLessonQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Generate an AI-powered lesson for a topic
+ */
+
+export function useGenerateLesson<
+  TData = Awaited<ReturnType<typeof generateLesson>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: GenerateLessonParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof generateLesson>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGenerateLessonQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary List family calendar events

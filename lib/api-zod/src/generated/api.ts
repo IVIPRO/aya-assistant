@@ -404,6 +404,140 @@ export const CompleteMissionResponse = zod.object({
 });
 
 /**
+ * @summary Generate new AI missions for a zone
+ */
+export const GenerateMissionsBody = zod.object({
+  childId: zod.number().describe("ID of the child to generate missions for"),
+  zone: zod
+    .string()
+    .describe('Zone name (e.g. \"Math Island\", \"Reading Forest\")'),
+});
+
+export const generateMissionsResponseMissionsItemDifficultyDefault = `easy`;
+
+export const GenerateMissionsResponse = zod.object({
+  generated: zod.number().describe("Number of missions generated and inserted"),
+  missions: zod.array(
+    zod.object({
+      id: zod.number(),
+      childId: zod.number(),
+      title: zod.string(),
+      description: zod.string(),
+      subject: zod.string(),
+      zone: zod.string().nullish(),
+      difficulty: zod
+        .enum(["easy", "medium", "hard"])
+        .default(generateMissionsResponseMissionsItemDifficultyDefault),
+      xpReward: zod.number(),
+      starReward: zod.number(),
+      completed: zod.boolean(),
+      completedAt: zod.date().nullable(),
+      createdAt: zod.date(),
+    }),
+  ),
+});
+
+/**
+ * @summary Get hardcoded lesson content for a topic
+ */
+export const getLessonContentQueryGradeDefault = 2;
+export const getLessonContentQueryLangDefault = `en`;
+
+export const GetLessonContentQueryParams = zod.object({
+  subjectId: zod.coerce.string(),
+  topicId: zod.coerce.string(),
+  grade: zod.coerce.number().default(getLessonContentQueryGradeDefault),
+  lang: zod.enum(["en", "bg", "es"]).default(getLessonContentQueryLangDefault),
+});
+
+export const GetLessonContentResponse = zod.object({
+  lesson: zod.object({
+    title: zod.string(),
+    explanation: zod.string(),
+    examples: zod.array(
+      zod.object({
+        problem: zod.string(),
+        solution: zod.string(),
+        hint: zod.string(),
+      }),
+    ),
+    tip: zod.string(),
+  }),
+  practice: zod.object({
+    instructions: zod.string(),
+    problems: zod.array(
+      zod.object({
+        question: zod.string(),
+        answer: zod.string(),
+      }),
+    ),
+  }),
+  quiz: zod.object({
+    instructions: zod.string(),
+    questions: zod.array(
+      zod.object({
+        question: zod.string(),
+        options: zod.array(zod.string()),
+        correctIndex: zod.number(),
+      }),
+    ),
+  }),
+});
+
+/**
+ * @summary Generate an AI-powered lesson for a topic
+ */
+export const generateLessonQueryGradeDefault = 2;
+export const generateLessonQueryLangDefault = `en`;
+export const generateLessonQueryModeDefault = `normal`;
+
+export const GenerateLessonQueryParams = zod.object({
+  subjectId: zod.coerce.string(),
+  topicId: zod.coerce.string(),
+  grade: zod.coerce.number().default(generateLessonQueryGradeDefault),
+  lang: zod
+    .enum(["en", "bg", "es", "de", "fr"])
+    .default(generateLessonQueryLangDefault),
+  mode: zod
+    .enum(["weak", "normal", "strong"])
+    .default(generateLessonQueryModeDefault),
+});
+
+export const GenerateLessonResponse = zod.object({
+  lesson: zod.object({
+    title: zod.string(),
+    explanation: zod.string(),
+    examples: zod.array(
+      zod.object({
+        problem: zod.string(),
+        solution: zod.string(),
+        hint: zod.string(),
+      }),
+    ),
+    tip: zod.string(),
+  }),
+  practice: zod.object({
+    instructions: zod.string(),
+    problems: zod.array(
+      zod.object({
+        question: zod.string(),
+        answer: zod.string(),
+      }),
+    ),
+  }),
+  quiz: zod.object({
+    instructions: zod.string(),
+    questions: zod.array(
+      zod.object({
+        question: zod.string(),
+        options: zod.array(zod.string()),
+        correctIndex: zod.number(),
+      }),
+    ),
+  }),
+});
+
+/**
  * @summary List family calendar events
  */
 export const ListCalendarEventsResponseItem = zod.object({
@@ -577,7 +711,9 @@ export const GetLearningWeeklyInsightsQueryParams = zod.object({
   childId: zod.coerce.number(),
 });
 
-export const GetLearningWeeklyInsightsResponse = zod.unknown();
+export const GetLearningWeeklyInsightsResponse = zod
+  .record(zod.string(), zod.unknown())
+  .describe("Weekly learning insights for a child");
 
 /**
  * @summary Get teacher-ready export data for a child
@@ -587,7 +723,9 @@ export const GetLearningTeacherExportQueryParams = zod.object({
   grade: zod.coerce.number().optional(),
 });
 
-export const GetLearningTeacherExportResponse = zod.unknown();
+export const GetLearningTeacherExportResponse = zod
+  .record(zod.string(), zod.unknown())
+  .describe("Teacher-ready export data for a child");
 
 /**
  * @summary Get or generate today's daily learning plan for a child

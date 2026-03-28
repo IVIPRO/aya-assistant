@@ -22,6 +22,7 @@ function setCachedMissions(childId: number, missions: any[]): void {
   MISSIONS_CACHE.set(childId, { missions, timestamp: Date.now() });
 }
 import { evaluateBadges, type BadgeStats } from "../lib/badges";
+import { generateAIMissions } from "../lib/aiMissionGenerator";
 import { 
   generateMissionTasks, 
   MISSIONS, 
@@ -483,6 +484,83 @@ router.post("/missions/tasks/:taskId/answer", requireAuth, async (req, res): Pro
   } catch (error) {
     console.error(`[ANSWER_ERROR] Error processing answer:`, error);
     res.status(500).json({ error: "Failed to process answer", details: String(error) });
+  }
+});
+
+// ─── POST /missions/generate ──────────────────────────────────────────────────
+// Generates 5 new AI missions for a zone and inserts them into the DB.
+// Body: { childId: number, zone: string }
+
+router.post("/missions/generate", requireAuth, async (req, res): Promise<void> => {
+  const { childId, zone } = req.body as { childId?: number; zone?: string };
+
+  if (!childId || !zone) {
+    res.status(400).json({ error: "childId and zone are required" });
+    return;
+  }
+
+  const childIdNum = Number(childId);
+  if (isNaN(childIdNum)) {
+    res.status(400).json({ error: "Invalid childId" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, childIdNum), eq(childrenTable.familyId, familyId ?? -1)));
+
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  try {
+    // Gather titles of existing missions in this zone (to avoid AI repeating them)
+    const existingMissions = await db
+      .select({ title: missionsTable.title })
+      .from(missionsTable)
+      .where(and(eq(missionsTable.childId, childIdNum), eq(missionsTable.zone, zone)));
+
+    const completedTitles = existingMissions.map((m) => m.title);
+
+    const grade = child.grade ?? 2;
+    const country = child.country ?? "EN";
+
+    // Generate new missions via AI
+    const generated = await generateAIMissions(zone, grade, country, completedTitles);
+
+    // Insert all generated missions into the DB
+    const inserted = await db
+      .insert(missionsTable)
+      .values(
+        generated.map((m) => ({
+          childId: childIdNum,
+          title: m.title,
+          description: m.description,
+          subject: m.subject,
+          zone: m.zone,
+          difficulty: m.difficulty,
+          xpReward: m.xpReward,
+          starReward: m.starReward,
+          completed: false,
+        })),
+      )
+      .returning();
+
+    // Invalidate the cache so the next GET /missions re-fetches from DB
+    MISSIONS_CACHE.delete(childIdNum);
+
+    console.log(
+      `[MISSIONS_GENERATE] Inserted ${inserted.length} missions for childId=${childIdNum} zone="${zone}"`,
+    );
+
+    res.json({ generated: inserted.length, missions: inserted });
+  } catch (err) {
+    console.error("[MISSIONS_GENERATE] Error:", err);
+    res.status(500).json({ error: "Failed to generate missions", details: String(err) });
   }
 });
 

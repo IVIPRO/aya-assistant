@@ -27,6 +27,8 @@ tags:
     description: Family tasks and reminders
   - name: progress
     description: Learning progress tracking
+  - name: lessons
+    description: Lesson content and AI-generated lessons
 paths:
   /healthz:
     get:
@@ -393,6 +395,137 @@ paths:
                 $ref: "#/components/schemas/CompleteMissionResponse"
         "404":
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /missions/generate:
+    post:
+      operationId: generateMissions
+      tags: [missions]
+      summary: Generate new AI missions for a zone
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateMissionsBody"
+      responses:
+        "200":
+          description: Generated missions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateMissionsResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Access denied
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  # ─── Lessons ─────────────────────────────────────────────────────────────
+  /lessons/content:
+    get:
+      operationId: getLessonContent
+      tags: [lessons]
+      summary: Get hardcoded lesson content for a topic
+      parameters:
+        - name: subjectId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: topicId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: grade
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 2
+        - name: lang
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [en, bg, es]
+            default: en
+      responses:
+        "200":
+          description: Lesson content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonContent"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /lessons/generate:
+    get:
+      operationId: generateLesson
+      tags: [lessons]
+      summary: Generate an AI-powered lesson for a topic
+      parameters:
+        - name: subjectId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: topicId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: grade
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 2
+        - name: lang
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [en, bg, es, de, fr]
+            default: en
+        - name: mode
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [weak, normal, strong]
+            default: normal
+      responses:
+        "200":
+          description: AI-generated lesson content (same schema as /lessons/content)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonContent"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: Generation failed
           content:
             application/json:
               schema:
@@ -1332,3 +1465,106 @@ components:
         status:
           $ref: "#/components/schemas/DailyPlanTaskStatus"
       required: [status]
+
+    WeeklyInsights:
+      type: object
+      description: Weekly learning insights for a child
+      additionalProperties: true
+
+    TeacherExport:
+      type: object
+      description: Teacher-ready export data for a child
+      additionalProperties: true
+
+    # ─── Lessons / AI Engine ─────────────────────────────────────────────────
+    LessonExample:
+      type: object
+      properties:
+        problem:
+          type: string
+        solution:
+          type: string
+        hint:
+          type: string
+      required: [problem, solution, hint]
+
+    QuizQuestion:
+      type: object
+      properties:
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctIndex:
+          type: integer
+      required: [question, options, correctIndex]
+
+    LessonContent:
+      type: object
+      properties:
+        lesson:
+          type: object
+          properties:
+            title:
+              type: string
+            explanation:
+              type: string
+            examples:
+              type: array
+              items:
+                $ref: "#/components/schemas/LessonExample"
+            tip:
+              type: string
+          required: [title, explanation, examples, tip]
+        practice:
+          type: object
+          properties:
+            instructions:
+              type: string
+            problems:
+              type: array
+              items:
+                type: object
+                properties:
+                  question:
+                    type: string
+                  answer:
+                    type: string
+                required: [question, answer]
+          required: [instructions, problems]
+        quiz:
+          type: object
+          properties:
+            instructions:
+              type: string
+            questions:
+              type: array
+              items:
+                $ref: "#/components/schemas/QuizQuestion"
+          required: [instructions, questions]
+      required: [lesson, practice, quiz]
+
+    GenerateMissionsBody:
+      type: object
+      properties:
+        childId:
+          type: integer
+          description: ID of the child to generate missions for
+        zone:
+          type: string
+          description: Zone name (e.g. "Math Island", "Reading Forest")
+      required: [childId, zone]
+
+    GenerateMissionsResponse:
+      type: object
+      properties:
+        generated:
+          type: integer
+          description: Number of missions generated and inserted
+        missions:
+          type: array
+          items:
+            $ref: "#/components/schemas/Mission"
+      required: [generated, missions]

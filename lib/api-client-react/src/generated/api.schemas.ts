@@ -500,6 +500,73 @@ export interface UpdateDailyPlanTaskBody {
   status: DailyPlanTaskStatus;
 }
 
+/**
+ * Weekly learning insights for a child
+ */
+export interface WeeklyInsights {
+  [key: string]: unknown;
+}
+
+/**
+ * Teacher-ready export data for a child
+ */
+export interface TeacherExport {
+  [key: string]: unknown;
+}
+
+export interface LessonExample {
+  problem: string;
+  solution: string;
+  hint: string;
+}
+
+export interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctIndex: number;
+}
+
+export type LessonContentLesson = {
+  title: string;
+  explanation: string;
+  examples: LessonExample[];
+  tip: string;
+};
+
+export type LessonContentPracticeProblemsItem = {
+  question: string;
+  answer: string;
+};
+
+export type LessonContentPractice = {
+  instructions: string;
+  problems: LessonContentPracticeProblemsItem[];
+};
+
+export type LessonContentQuiz = {
+  instructions: string;
+  questions: QuizQuestion[];
+};
+
+export interface LessonContent {
+  lesson: LessonContentLesson;
+  practice: LessonContentPractice;
+  quiz: LessonContentQuiz;
+}
+
+export interface GenerateMissionsBody {
+  /** ID of the child to generate missions for */
+  childId: number;
+  /** Zone name (e.g. "Math Island", "Reading Forest") */
+  zone: string;
+}
+
+export interface GenerateMissionsResponse {
+  /** Number of missions generated and inserted */
+  generated: number;
+  missions: Mission[];
+}
+
 export type ListChatMessagesParams = {
   module: ListChatMessagesModule;
   /**
@@ -528,6 +595,50 @@ export type ListMemoriesParams = {
 export type ListMissionsParams = {
   childId: number;
 };
+
+export type GetLessonContentParams = {
+  subjectId: string;
+  topicId: string;
+  grade?: number;
+  lang?: GetLessonContentLang;
+};
+
+export type GetLessonContentLang =
+  (typeof GetLessonContentLang)[keyof typeof GetLessonContentLang];
+
+export const GetLessonContentLang = {
+  en: "en",
+  bg: "bg",
+  es: "es",
+} as const;
+
+export type GenerateLessonParams = {
+  subjectId: string;
+  topicId: string;
+  grade?: number;
+  lang?: GenerateLessonLang;
+  mode?: GenerateLessonMode;
+};
+
+export type GenerateLessonLang =
+  (typeof GenerateLessonLang)[keyof typeof GenerateLessonLang];
+
+export const GenerateLessonLang = {
+  en: "en",
+  bg: "bg",
+  es: "es",
+  de: "de",
+  fr: "fr",
+} as const;
+
+export type GenerateLessonMode =
+  (typeof GenerateLessonMode)[keyof typeof GenerateLessonMode];
+
+export const GenerateLessonMode = {
+  weak: "weak",
+  normal: "normal",
+  strong: "strong",
+} as const;
 
 export type ListProgressParams = {
   childId: number;

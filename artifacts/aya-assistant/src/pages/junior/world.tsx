@@ -2,7 +2,8 @@ import { Layout } from "@/components/layout";
 import { Star, Trophy, ArrowLeft, CheckCircle2, Lock } from "lucide-react";
 import { Link } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { useListMissions, useCompleteMission, useListChildren, getListMissionsQueryKey, getListChildrenQueryKey } from "@workspace/api-client-react";
+import { useListMissions, useCompleteMission, useListChildren, useGenerateMissions, getListMissionsQueryKey, getListChildrenQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
 import { MissionPlay } from "@/components/MissionPlay";
@@ -53,6 +54,9 @@ const WORLD_LABELS: Record<WorldLang, {
   unlockAt: (xp: number, need: number) => string;
   companionSays: (name: string) => string;
   defaultCompanionMsg: string;
+  generateMore: string;
+  generating: string;
+  generateSuccess: (n: number) => string;
 }> = {
   en: {
     backToLearning: "Back to Learning",
@@ -71,6 +75,9 @@ const WORLD_LABELS: Record<WorldLang, {
     companionSays: (name) => `${name} says:`,
     defaultCompanionMsg: "Let's explore this zone together and learn something amazing!",
     missionsCount: (done, total) => `${done}/${total} missions`,
+    generateMore: "✨ Generate New Missions",
+    generating: "Generating...",
+    generateSuccess: (n) => `${n} new missions added!`,
   },
   bg: {
     backToLearning: "Назад към ученето",
@@ -89,6 +96,9 @@ const WORLD_LABELS: Record<WorldLang, {
     companionSays: (name) => `${name} казва:`,
     defaultCompanionMsg: "Нека изследваме тази зона заедно и научим нещо невероятно!",
     missionsCount: (done, total) => `${done}/${total} мисии`,
+    generateMore: "✨ Генерирай нови мисии",
+    generating: "Генерирам...",
+    generateSuccess: (n) => `${n} нови мисии добавени!`,
   },
   es: {
     backToLearning: "Volver al aprendizaje",
@@ -107,6 +117,9 @@ const WORLD_LABELS: Record<WorldLang, {
     companionSays: (name) => `${name} dice:`,
     defaultCompanionMsg: "¡Exploremos esta zona juntos y aprendamos algo increíble!",
     missionsCount: (done, total) => `${done}/${total} misiones`,
+    generateMore: "✨ Generar más misiones",
+    generating: "Generando...",
+    generateSuccess: (n) => `¡${n} misiones nuevas añadidas!`,
   },
 };
 
@@ -397,6 +410,8 @@ export function WorldMap() {
   }, [missions, activeChildId]);
 
   const completeMutation = useCompleteMission();
+  const generateMissionsMutation = useGenerateMissions();
+  const queryClient = useQueryClient();
   const activeChild = children.find(c => c.id === activeChildId);
   const childXp = activeChild?.xp ?? 0;
   const lang = getLang(activeChild?.language);
@@ -457,6 +472,23 @@ export function WorldMap() {
       refetch();
     } catch {
       toast({ title: "Error", variant: "destructive" });
+    }
+  };
+
+  const handleGenerateMissions = async (zoneName: string) => {
+    if (!activeChildId) return;
+    try {
+      const result = await generateMissionsMutation.mutateAsync({
+        data: { childId: activeChildId, zone: zoneName },
+      });
+      await queryClient.invalidateQueries({ queryKey: getListMissionsQueryKey({ childId: activeChildId }) });
+      await refetch();
+      toast({
+        title: lbl.generateSuccess(result.generated),
+        description: `${zoneName} has fresh challenges waiting!`,
+      });
+    } catch {
+      toast({ title: "Could not generate missions", variant: "destructive" });
     }
   };
 
@@ -560,6 +592,40 @@ export function WorldMap() {
             </div>
 
             <CompanionGuidance companionId={activeChild?.aiCharacter} zoneName={activeZone.id} lang={lang} />
+
+            {(() => {
+              const allDoneInZone = activeMissions.length > 0 && activeMissions.every(m => m.completed);
+              const isGenerating = generateMissionsMutation.isPending;
+              const showGenerateBtn = activeChildId && (activeMissions.length === 0 || allDoneInZone);
+              return (
+                <>
+                  {showGenerateBtn && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mb-5"
+                    >
+                      {allDoneInZone && (
+                        <div className="mb-3 text-center text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-2xl py-2 px-4">
+                          🎉 {lbl.allDone}
+                        </div>
+                      )}
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleGenerateMissions(activeZone!.id); }}
+                        disabled={isGenerating}
+                        className={`w-full py-3 font-bold rounded-2xl border-b-4 transition-all text-sm flex items-center justify-center gap-2 ${
+                          isGenerating
+                            ? "bg-purple-100 text-purple-400 border-purple-200 cursor-wait"
+                            : "bg-purple-500 hover:bg-purple-600 text-white border-purple-700 hover:border-b-0 hover:translate-y-1"
+                        }`}
+                      >
+                        {isGenerating ? lbl.generating : lbl.generateMore}
+                      </button>
+                    </motion.div>
+                  )}
+                </>
+              );
+            })()}
 
             {activeMissions.length === 0 ? (
               <div className="py-16 text-center bg-muted/20 rounded-3xl border border-dashed">

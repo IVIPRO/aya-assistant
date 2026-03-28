@@ -1,0 +1,147 @@
+Run a full duplicate-system and dead-code diagnostic across the entire AYA codebase, then safely consolidate overlapping implementations.
+
+CRITICAL RULES
+
+Before changing any code:
+
+1. Inspect the whole repository first.
+2. Detect duplicate systems, overlapping features, dead code, superseded files, parallel helpers, duplicate routes, duplicate schemas, duplicate state logic, and unused modules.
+3. Do NOT blindly delete code.
+4. Do NOT rewrite working systems.
+5. Keep the strongest existing implementation and remove or disconnect weaker duplicates only if they are clearly superseded.
+6. Preserve backward compatibility wherever needed.
+7. Minimize risk: audit first, then consolidate carefully.
+
+THIS TASK EXISTS TO PREVENT FURTHER DUPLICATION COSTS.
+Treat this as a codebase cleanup and architecture consolidation task.
+
+------------------------------------------------
+
+PRIMARY GOAL
+
+Find and clean duplication in AYA so that:
+
+- only one active implementation exists per feature
+- dead code is removed or isolated
+- overlapping systems are unified
+- future prompts do not build on duplicate foundations
+
+------------------------------------------------
+
+PHASE 1 — FULL CODEBASE AUDIT
+
+Scan the full repository and identify duplication or overlap in areas such as:
+
+- lesson generators
+- mission generators
+- math task generators
+- streak systems
+- XP / level systems
+- badge systems
+- gamification helpers
+- parent summary / weekly insights
+- reward handlers
+- AI response helpers
+- avatar state logic
+- speech / TTS integration
+- daily plan logic
+- adaptive learning logic
+- curiosity logic
+- motivation logic
+- world map / mission routing
+- duplicate routes
+- duplicate schema models
+- duplicate frontend components
+- duplicate utility functions
+- duplicate localization structures
+- unused files
+- dead code
+- superseded modules
+
+Return an internal audit before changing anything.
+
+------------------------------------------------
+
+PHASE 2 — CLASSIFY FINDINGS
+
+For every duplicate or overlap found, classify it as one of:
+
+A. ACTIVE PRIMARY SYSTEM
+B. DUPLICATE / SECONDARY SYSTEM
+C. DEAD CODE
+D. PARTIAL IMPLEMENTATION WORTH MERGING
+E. SAFE TO LEAVE ALONE FOR NOW
+
+Prefer consolidation only where the duplication is clear.
+
+------------------------------------------------
+
+PHASE 3 — SAFE CONSOLIDATION
+
+Consolidate only the clearly duplicated systems.
+
+Rules:
+
+- keep the strongest implementation
+- remove weaker duplicate wiring
+- remove duplicate calls
+- remove duplicate exports/imports
+- remove dead routes
+- remove dead helpers
+- unify references so all consumers point to the primary implementation
+- avoid changing external behavior unless needed
+
+If something is too risky to remove safely right now:
+- leave it
+- mark it clearly in the report
+
+------------------------------------------------
+
+PHASE 4 — HIGH PRIORITY CLEANUP TARGETS
+
+Pay special attention to:
+
+- multiple badge systems
+- multiple streak functions
+- overlapping XP / gamification helpers
+- parentSummary.ts vs weeklyInsights.ts wiring
+- superseded gamificationHelpers.ts vs levelSystem.ts
+- duplicate lesson / mission generation paths
+- any duplicate routes introduced by recent phases
+- duplicated UI states or duplicate “entry points” to the same feature
+
+------------------------------------------------
+
+PHASE 5 — VALIDATION
+
+After cleanup, verify:
+
+- backend TypeScript builds cleanly
+- frontend TypeScript builds cleanly
+- main routes still work
+- lesson flow still works
+- mission flow still works
+- XP / badges / streak still work
+- parent dashboard still works
+- infinite practice still works
+- dynamic mission generation still works
+
+Do not publish breaking cleanup.
+
+------------------------------------------------
+
+FINAL RETURN FORMAT
+
+Return exactly:
+
+1. duplicate systems found
+2. dead code found
+3. files modified
+4. files removed or disconnected
+5. systems consolidated
+6. systems intentionally left unchanged for safety
+7. build/test status
+8. preview test steps
+
+Feature name:
+AYA Duplicate System Audit and Safe Consolidation

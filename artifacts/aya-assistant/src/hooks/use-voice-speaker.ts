@@ -14,7 +14,7 @@ export function useVoiceSpeaker({ childId, lang, onError }: UseVoiceSpeakerOptio
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const blobUrlRef = useRef<string | null>(null);
 
-  const speak = useCallback(async (text: string, id: string) => {
+  const speak = useCallback(async (text: string, id: string, emotion?: string) => {
     if (!text.trim()) return;
 
     if (state !== "idle") {
@@ -50,7 +50,7 @@ export function useVoiceSpeaker({ childId, lang, onError }: UseVoiceSpeakerOptio
         method: "POST",
         credentials: "include" as const,
         headers,
-        body: JSON.stringify({ text, lang: lang ?? "en", childId: childId ?? undefined }),
+        body: JSON.stringify({ text, lang: lang ?? "en", childId: childId ?? undefined, emotion }),
       };
       console.log("[VOICE_SPEAKER] fetch config", { 
         url: "/api/voice/speak", 

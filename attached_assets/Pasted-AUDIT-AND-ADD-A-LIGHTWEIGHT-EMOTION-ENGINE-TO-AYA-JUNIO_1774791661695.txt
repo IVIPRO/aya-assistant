@@ -1,0 +1,111 @@
+AUDIT AND ADD A LIGHTWEIGHT EMOTION ENGINE TO AYA JUNIOR VOICE SYSTEM
+
+CRITICAL RULES
+	1.	First inspect the latest codebase.
+	2.	Check whether emotional speech shaping already exists in:
+      •   voice.ts
+      •   use-aya-lesson-voice.ts
+      •   useTextToSpeech.ts
+      •   lesson viewer speech calls
+	3.	If an emotion-like layer already exists, extend it instead of replacing it.
+	4.	Do NOT create a second TTS engine.
+	5.	Do NOT duplicate speech pipelines.
+	6.	Do NOT break replay, avatar speaking sync, Bulgarian language lock, or lesson flow.
+
+GOAL
+
+AYA should sound more alive and expressive during lessons, similar to a child-friendly educational companion like Duolingo.
+
+This is NOT a new voice engine.
+This is a lightweight emotional delivery layer on top of the existing TTS system.
+
+TARGET EMOTION MODES
+
+Support these spoken modes:
+	1.	intro
+warm, welcoming, slightly excited
+	2.	explain
+calm, clear, teacher-like
+	3.	praise
+cheerful, brighter, rewarding
+	4.	hint
+gentle, supportive, reassuring
+	5.	retry
+calm, encouraging, never negative
+	6.	celebration
+happy, energetic, short burst of excitement
+	7.	completion
+proud, warm, satisfying ending
+
+PHASE 1 — AUDIT
+
+Inspect and report internally:
+   •   where speech instructions are currently generated
+   •   whether instruction text already varies by situation
+   •   where praise, hint, retry, intro, completion speech is triggered
+   •   whether rate, pitch, or punctuation are already adjusted
+   •   whether emotion changes can be added safely through existing instruction prompts
+
+PHASE 2 — IMPLEMENT LIGHTWEIGHT EMOTION ENGINE
+
+Reuse the current TTS architecture.
+
+Add a small emotion mapping layer that changes spoken delivery by context.
+
+Preferred implementation:
+
+lessonStep → emotionMode
+
+Emotion mode injects speech instructions into the existing TTS call.
+
+Do NOT create parallel logic if step-based routing already exists.
+
+PHASE 3 — SAFE DELIVERY TUNING
+
+Tune speech behavior slightly by mode.
+
+Examples:
+
+intro → warmer tone
+explain → steady and clear
+praise → brighter and cheerful
+hint → softer and slightly slower
+retry → calm and patient
+celebration → more lively but still short
+completion → warm and proud
+
+Do NOT exaggerate emotions.
+Keep the voice natural and child-friendly.
+
+PHASE 4 — BULGARIAN FIRST
+
+For Bulgarian lesson speech:
+   •   keep all wording natural Bulgarian
+   •   never mix Russian words
+   •   avoid robotic phrasing
+   •   emotional delivery must sound like a friendly Bulgarian teacher for children
+
+PHASE 5 — SAFETY
+
+Do not break:
+   •   gpt-4o-mini-tts setup
+   •   nova voice
+   •   browser fallback speech
+   •   replay button
+   •   avatar speaking sync
+   •   lesson voice completion system
+   •   dynamic missions
+   •   infinite practice
+
+PHASE 6 — RETURN
+
+Return exactly:
+	1.	existing voice emotion logic found
+	2.	whether an emotion layer already existed
+	3.	emotion modes added
+	4.	files modified
+	5.	how speech behavior now differs by mode
+	6.	preview test steps
+
+Feature name:
+AYA Junior Emotion Engine

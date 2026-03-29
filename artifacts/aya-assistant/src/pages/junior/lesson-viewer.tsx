@@ -6,7 +6,7 @@ import {
   ChevronRight, RotateCcw, Loader2, Trophy, Star, Sparkles,
   Volume2, VolumeX,
 } from "lucide-react";
-import { useAyaLessonVoice } from "@/hooks/use-aya-lesson-voice";
+import { useAyaLessonVoice, type EmotionMode } from "@/hooks/use-aya-lesson-voice";
 import { cn } from "@/components/layout";
 import { getListChildrenQueryKey, updateDailyPlanTask } from "@workspace/api-client-react";
 import type { LangCode } from "@/lib/i18n";
@@ -89,6 +89,22 @@ function phaseEmotion(p: Phase): AyaEmotion {
     case "quiz":        return p.selected === null ? "thinking" : p.correct ? "happy" : "encourage";
     case "completion":  return "celebrate";
     case "infinite-practice": return p.feedback === "correct" ? "happy" : p.feedback === "wrong" ? "encourage" : "thinking";
+  }
+}
+
+/** Maps lesson phase → voice emotion mode for TTS delivery style */
+function phaseToVoiceEmotion(p: Phase): EmotionMode {
+  switch (p.kind) {
+    case "greeting":          return "intro";
+    case "explanation":       return "intro";
+    case "example":           return "explain";
+    case "practice":          return "explain";
+    case "hinting":           return "hint";
+    case "celebrate":         return "celebration";
+    case "quiz-intro":        return "explain";
+    case "quiz":              return "explain";
+    case "completion":        return "completion";
+    case "infinite-practice": return "explain";
   }
 }
 
@@ -690,6 +706,8 @@ function InteractiveLessonEngine({
   /* spokenText may include content suffix (explanation/problem/hint) beyond what the bubble shows */
   const [spokenText, setSpokenText] = useState<string>(greetingText);
   const [answerInput, setAnswerInput] = useState("");
+  /* voiceEmotion: AYA's delivery style for the current TTS line */
+  const [voiceEmotion, setVoiceEmotion] = useState<EmotionMode>("intro");
 
   /* ── infinite practice state */
   const [infLoading, setInfLoading] = useState(false);
@@ -702,9 +720,9 @@ function InteractiveLessonEngine({
   /* ── cumulative lesson mistake counter (across all practice problems) */
   const lessonMistakesRef = useRef(0);
 
-  /* ── voice: speak whenever spokenText changes ─────────────────── */
+  /* ── voice: speak whenever spokenText changes, with current emotion mode ── */
   useEffect(() => {
-    speak(spokenText);
+    speak(spokenText, voiceEmotion);
   }, [spokenText]);
 
   /* ── phase-specific cached pick refs */
@@ -738,17 +756,19 @@ function InteractiveLessonEngine({
     }
   })();
 
-  /* go() — phase transition: sets phase, dialogue (bubble), spokenText (TTS, may include content suffix) */
+  /* go() — phase transition: sets phase, dialogue (bubble), spokenText (TTS) + voice emotion from next phase */
   const go = useCallback((next: Phase, text: string, spokenSuffix?: string) => {
     setPhase(next);
     setDialogue(text);
+    setVoiceEmotion(phaseToVoiceEmotion(next));
     setSpokenText(spokenSuffix ? `${text} ${spokenSuffix}`.trim() : text);
     setAnswerInput("");
   }, []);
 
-  /* say() — update dialogue + spokenText without changing phase (for inline feedback) */
-  const say = useCallback((text: string, spokenSuffix?: string) => {
+  /* say() — update dialogue + spokenText without changing phase; emotion defaults to "explain" */
+  const say = useCallback((text: string, spokenSuffix?: string, emotion?: EmotionMode) => {
     setDialogue(text);
+    setVoiceEmotion(emotion ?? "explain");
     setSpokenText(spokenSuffix ? `${text} ${spokenSuffix}`.trim() : text);
   }, []);
 
@@ -802,7 +822,7 @@ function InteractiveLessonEngine({
       practiceCorrectRef.current += 1;
       consecutiveCorrectRef.current += 1;
       setPhase({ kind: "practice", idx, attempts, feedback: "correct" });
-      say(pick(d.practiceCorrect));
+      say(pick(d.practiceCorrect), undefined, "praise");
     } else {
       consecutiveCorrectRef.current = 0;
       lessonMistakesRef.current += 1;
@@ -815,7 +835,7 @@ function InteractiveLessonEngine({
       } else {
         setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong" });
         const wrongMsg = topicContext === "weak" ? ctxD.practiceSupport : pick(d.practiceWrong2);
-        say(wrongMsg);
+        say(wrongMsg, undefined, "retry");
       }
     }
   };
@@ -857,7 +877,7 @@ function InteractiveLessonEngine({
     const wrongMsg = (topicContext === "weak" && ctxD.quizSupport)
       ? ctxD.quizSupport
       : pick(d.quizWrong);
-    say(correct ? pick(d.quizCorrect) : wrongMsg);
+    say(correct ? pick(d.quizCorrect) : wrongMsg, undefined, correct ? "praise" : "retry");
   };
 
   /* ── start quiz from intro — speak first question after intro */
@@ -927,7 +947,7 @@ function InteractiveLessonEngine({
     } catch { /* fire-and-forget */ }
     const newCorrect = p.correct + (isCorrect ? 1 : 0);
     setPhase({ ...p, correct: newCorrect, feedback: isCorrect ? "correct" : "wrong", revealed: false });
-    say(isCorrect ? pick(d.practiceCorrect) : pick(d.practiceWrong));
+    say(isCorrect ? pick(d.practiceCorrect) : pick(d.practiceWrong), undefined, isCorrect ? "praise" : "retry");
   };
 
   /* ── infinite practice: advance to next exercise (with auto-refill) */
@@ -998,7 +1018,7 @@ function InteractiveLessonEngine({
             {voiceEnabled && !isVoicePlaying && (
               <div className="flex justify-center -mt-1 mb-1">
                 <button
-                  onClick={() => speak(spokenText)}
+                  onClick={() => speak(spokenText, voiceEmotion)}
                   className="text-xs text-muted-foreground/60 hover:text-muted-foreground flex items-center gap-1 px-2 py-0.5 rounded-full hover:bg-muted/40 transition-colors"
                   title={lang === "bg" ? "Изслушай пак" : lang === "de" ? "Nochmal hören" : lang === "fr" ? "Réécouter" : lang === "es" ? "Escuchar de nuevo" : "Replay"}
                 >

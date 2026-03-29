@@ -221,10 +221,11 @@ router.post("/voice/transcribe", requireAuth, async (req, res): Promise<void> =>
    Returns: audio/mpeg binary
 ───────────────────────────────────────────────────────────────── */
 router.post("/voice/speak", requireAuth, async (req, res): Promise<void> => {
-  const { text, lang, childId } = req.body as {
+  const { text, lang, childId, emotion } = req.body as {
     text?: string;
     lang?: string;
     childId?: number;
+    emotion?: string;
   };
 
   if (!text || text.trim().length === 0) {
@@ -245,28 +246,93 @@ router.post("/voice/speak", requireAuth, async (req, res): Promise<void> => {
   // nova: warm, energetic, child-friendly — best fit for educational Junior mode
   const voice = "nova";
 
-  // Child-friendly speaking style instructions per language.
-  // gpt-4o-mini-tts supports the `instructions` field to guide voice style.
-  // This is the primary lever for Duolingo-style warmth/clarity.
-  const ttsInstructions: Record<string, string> = {
-    bg: "Говори топло, весело и ясно, като приятелски учител за деца от 6 до 10 години. " +
-        "Темпото да е умерено бавно — не бързай. " +
-        "Звучи насърчаваща, позитивна и нежна. " +
-        "Прави кратка пауза между изреченията. Никога монотонно или строго.",
-    es: "Speak warmly and clearly in Spanish, like a friendly teacher for children aged 6 to 10. " +
-        "Keep a gentle, encouraging pace — not too fast. " +
-        "Sound cheerful, kind, and supportive. Pause naturally between sentences.",
-    en: "Speak warmly and clearly, like a friendly teacher for children aged 6 to 10. " +
-        "Keep a gentle, encouraging pace — not too fast. " +
-        "Sound cheerful, kind, and supportive. Pause naturally between sentences.",
+  // Emotion-aware TTS instructions — 7 modes × 3 languages.
+  // gpt-4o-mini-tts `instructions` field controls tone, pace, and warmth.
+  // Each emotion mode shapes AYA's delivery to match the lesson moment.
+  const EMOTION_INSTRUCTIONS: Record<string, Record<string, string>> = {
+    intro: {
+      bg: "Говори топло и с радост, като приятелски учител, който посреща детето в нов урок. " +
+          "Усмихнат, нежен и леко вълнуван тон. Умерено темпо. Звучи добре дошло и окуражаващо.",
+      es: "Speak warmly and joyfully in Spanish, like a friendly teacher welcoming a child to a new lesson. " +
+          "Gentle, kind, and slightly excited. Moderate pace. Sound welcoming and encouraging.",
+      en: "Speak warmly and joyfully, like a friendly teacher welcoming a child to a new lesson. " +
+          "Gentle, kind, and slightly excited. Moderate pace. Sound welcoming and encouraging.",
+    },
+    explain: {
+      bg: "Говори спокойно и ясно, като добър учител, който обяснява нещо ново. " +
+          "Умерено темпо. Разбираемо и търпеливо. Никога прибързано.",
+      es: "Speak calmly and clearly in Spanish, like a teacher explaining something new. " +
+          "Moderate pace, easy to understand, patient.",
+      en: "Speak calmly and clearly, like a teacher explaining something new. " +
+          "Moderate pace, easy to understand, patient.",
+    },
+    praise: {
+      bg: "Говори весело и с истинска радост! Детето е постигнало нещо чудесно. " +
+          "Топло, насърчаващо и похвалящо — малко по-живо и ентусиазирано. " +
+          "Звучи като гордост и удоволствие.",
+      es: "Speak cheerfully and with genuine joy in Spanish! The child did something wonderful. " +
+          "Warm, encouraging, and rewarding — a little brighter and more enthusiastic.",
+      en: "Speak cheerfully and with genuine joy! The child did something wonderful. " +
+          "Warm, encouraging, and rewarding — a little brighter and more enthusiastic.",
+    },
+    hint: {
+      bg: "Говори нежно и подкрепящо, малко по-бавно от обикновено. " +
+          "Детето се нуждае от помощ. Никога осъдително — само ободряващо и помагащо. " +
+          "Тихо, топло и търпеливо.",
+      es: "Speak gently and supportively in Spanish, slightly slower than usual. " +
+          "The child needs help. Never judgmental — only encouraging and helpful. " +
+          "Quiet, warm, and patient.",
+      en: "Speak gently and supportively, slightly slower than usual. " +
+          "The child needs help. Never judgmental — only encouraging and helpful. " +
+          "Quiet, warm, and patient.",
+    },
+    retry: {
+      bg: "Говори спокойно и търпеливо. Детето опитва отново. " +
+          "Никога негативно — само тихо насърчаване. Тонът е: 'Можеш, не се отказвай!'",
+      es: "Speak calmly and patiently in Spanish. The child is trying again. " +
+          "Never negative — just quiet encouragement. 'You can do it!'",
+      en: "Speak calmly and patiently. The child is trying again. " +
+          "Never negative — just quiet encouragement. Tone: 'You can do it, keep going!'",
+    },
+    celebration: {
+      bg: "Говори с радост и енергия! Кратко и забавно! " +
+          "Детето е постигнало нещо страхотно! Ентусиазирано и живо — но не прекалено.",
+      es: "Speak with joy and energy in Spanish! Short and fun! " +
+          "The child achieved something amazing! Enthusiastic and lively — but not over the top.",
+      en: "Speak with joy and energy! Short and fun! " +
+          "The child achieved something amazing! Enthusiastic and lively — but not over the top.",
+    },
+    completion: {
+      bg: "Говори топло и с гордост. Урокът е завършен. " +
+          "Удовлетворяващ, успокояващ, горд завършек. Тонът е топъл и обичащ.",
+      es: "Speak warmly and with pride in Spanish. The lesson is complete. " +
+          "A satisfying, warm, proud ending. Tone: warm and caring.",
+      en: "Speak warmly and with pride. The lesson is complete. " +
+          "A satisfying, warm, proud ending. Tone: warm and caring.",
+    },
   };
-  const instructions = ttsInstructions[resolvedLang] ?? ttsInstructions.en;
+
+  // Resolve emotion → per-language instruction string.
+  // Fall back to generic child-friendly instructions when emotion is unknown.
+  const FALLBACK_INSTRUCTIONS: Record<string, string> = {
+    bg: "Говори топло, весело и ясно, като приятелски учител за деца от 6 до 10 години. " +
+        "Темпото да е умерено бавно. Звучи насърчаваща, позитивна и нежна.",
+    es: "Speak warmly and clearly in Spanish, like a friendly teacher for children aged 6 to 10. " +
+        "Keep a gentle, encouraging pace — not too fast.",
+    en: "Speak warmly and clearly, like a friendly teacher for children aged 6 to 10. " +
+        "Keep a gentle, encouraging pace — not too fast. Sound cheerful, kind, and supportive.",
+  };
+
+  const emotionKey = emotion && EMOTION_INSTRUCTIONS[emotion] ? emotion : null;
+  const instructions = emotionKey
+    ? (EMOTION_INSTRUCTIONS[emotionKey][resolvedLang] ?? EMOTION_INSTRUCTIONS[emotionKey].en)
+    : (FALLBACK_INSTRUCTIONS[resolvedLang] ?? FALLBACK_INSTRUCTIONS.en);
 
   // Prevent clipped sentence endings — append a trailing period if absent.
   const trimmedInput = text.slice(0, 4000).trimEnd();
   const safeInput = /[.!?…]$/.test(trimmedInput) ? trimmedInput : trimmedInput + ".";
 
-  console.log("[TTS] SDK_PATH_ACTIVE", { lang: resolvedLang, voice, hasInstructions: true });
+  console.log("[TTS] SDK_PATH_ACTIVE", { lang: resolvedLang, voice, emotion: emotionKey ?? "fallback" });
 
   let speechResponse: Awaited<ReturnType<typeof ttsClient.audio.speech.create>>;
   try {

@@ -20,6 +20,16 @@ import { preprocessBulgarianSpeech } from "@/lib/bulgarian-speech";
 
 const STORAGE_KEY = "aya_lesson_voice_enabled";
 
+/** Voice emotion modes — map lesson phase to AYA's speaking style */
+export type EmotionMode =
+  | "intro"        // warm, welcoming, slightly excited (greeting + first explanation)
+  | "explain"      // calm, clear, teacher-like (examples, practice lead, quiz)
+  | "praise"       // cheerful, brighter, rewarding (correct answer)
+  | "hint"         // gentle, supportive, slightly slower (hinting phase)
+  | "retry"        // calm, encouraging, never negative (wrong answer retry)
+  | "celebration"  // happy, energetic burst (2+ consecutive correct)
+  | "completion";  // proud, warm, satisfying ending
+
 const LANG_TO_BCP47: Record<string, string> = {
   bg: "bg-BG",
   en: "en-US",
@@ -47,7 +57,7 @@ function preprocessForSpeech(text: string, lang: string): string {
 }
 
 export interface AyaLessonVoiceReturn {
-  speak: (text: string) => void;
+  speak: (text: string, emotion?: EmotionMode) => void;
   stop: () => void;
   isPlaying: boolean;
   voiceEnabled: boolean;
@@ -101,7 +111,7 @@ export function useAyaLessonVoice(
     openAiTts.speakerState !== "idle" || browserTts.isSpeaking;
 
   const speak = useCallback(
-    (text: string) => {
+    (text: string, emotion?: EmotionMode) => {
       if (!voiceEnabled || !text.trim()) return;
 
       const id = ++speakIdRef.current;
@@ -112,7 +122,7 @@ export function useAyaLessonVoice(
       browserTts.stop();
 
       pendingFallbackRef.current = processed;
-      openAiTts.speak(processed, `lesson-${id}`);
+      openAiTts.speak(processed, `lesson-${id}`, emotion);
     },
     [voiceEnabled, lang, openAiTts, browserTts],
   );

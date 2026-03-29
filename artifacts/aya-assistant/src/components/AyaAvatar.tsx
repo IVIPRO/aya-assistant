@@ -408,6 +408,26 @@ function AyaCharacterSVG({
         fill={C.hair} opacity="0.5"
       />
 
+      {/* ── HAIR TOP — sits between back panels and face ── */}
+      {/* Center-parted dome — locks into back crown, drawn before face */}
+      <path
+        d="M 27 44 C 25 34 30 20 44 15 C 51 12 55 11 60 11
+           C 65 11 69 12 76 15 C 90 20 95 34 93 44
+           C 87 34 78 25 67 22 C 63 21 61 21 60 21
+           C 59 21 57 21 53 22 C 42 25 33 34 27 44 Z"
+        fill={C.hair}
+      />
+      {/* Center part crease */}
+      <path
+        d="M 60 11 C 60 14 60 17 60 21"
+        fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.45"
+      />
+      {/* Flow arcs — left and right from part */}
+      <path d="M 30 36 C 35 28 44 22 54 21" fill="none" stroke={C.hairLight} strokeWidth="1.5" strokeLinecap="round" opacity="0.28" />
+      <path d="M 90 36 C 85 28 76 22 66 21" fill="none" stroke={C.hairLight} strokeWidth="1.5" strokeLinecap="round" opacity="0.28" />
+      {/* Crown shine */}
+      <path d="M 44 20 Q 52 15 60 15 Q 68 15 76 20 Q 68 17 60 17 Q 52 17 44 20 Z" fill={C.white} opacity="0.14" />
+
       {/* ── FACE ── */}
       <ellipse cx="61" cy="72" rx="34" ry="40" fill={C.skinDark} opacity="0.2" />
       <ellipse cx="59" cy="70" rx="34" ry="40" fill={C.skin} />
@@ -418,59 +438,25 @@ function AyaCharacterSVG({
       <ellipse cx="95" cy="71" rx="7" ry="9" fill={C.skinDark} />
       <ellipse cx="95" cy="71" rx="5" ry="7" fill={C.skin} />
 
-      {/* ── FRONT HAIR — natural long wavy, center-parted ── */}
-      {/* Smooth top dome — slight center part, flows to forehead */}
-      <path
-        d="M 27 44 C 25 34 30 20 44 15 C 51 12 55 11 60 11
-           C 65 11 69 12 76 15 C 90 20 95 34 93 44
-           C 87 34 78 25 67 22 C 63 21 61 21 60 21
-           C 59 21 57 21 53 22 C 42 25 33 34 27 44 Z"
-        fill={C.hair}
-      />
-      {/* Left front strand — wider soft fall, tapered open shoulder end */}
+      {/* ── HAIR FRONT STRANDS — drawn after face so they frame/overlap the face edges ── */}
+      {/* Left front strand — inner edge overlaps face by ~6px to clearly frame the cheek */}
       <path
         d="M 27 44 C 20 57 17 74 17 90 C 17 108 20 122 25 132
-           C 29 138 37 141 42 138
-           C 36 126 30 110 28 92 C 26 74 26 58 27 46 Z"
+           C 29 138 37 141 43 138
+           C 37 126 33 110 31 92 C 29 74 28 58 27 46 Z"
         fill={C.hair}
       />
-      {/* Right front strand — wider soft fall, tapered open shoulder end */}
+      {/* Right front strand — mirrored, inner edge overlaps face by ~6px */}
       <path
         d="M 93 44 C 100 57 103 74 103 90 C 103 108 100 122 95 132
-           C 91 138 83 141 78 138
-           C 84 126 90 110 92 92 C 94 74 94 58 93 46 Z"
+           C 91 138 83 141 77 138
+           C 83 126 87 110 89 92 C 91 74 92 58 93 46 Z"
         fill={C.hair}
       />
-      {/* Center part — subtle light crease */}
-      <path
-        d="M 60 11 C 60 14 60 17 60 21"
-        fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.45"
-      />
-      {/* Natural flow lines — left arc */}
-      <path
-        d="M 30 36 C 35 28 44 22 54 21"
-        fill="none" stroke={C.hairLight} strokeWidth="1.5" strokeLinecap="round" opacity="0.28"
-      />
-      {/* Natural flow lines — right arc */}
-      <path
-        d="M 90 36 C 85 28 76 22 66 21"
-        fill="none" stroke={C.hairLight} strokeWidth="1.5" strokeLinecap="round" opacity="0.28"
-      />
-      {/* Wave stroke — left strand, gentle S-curve full length */}
-      <path
-        d="M 21 56 C 19 68 19 82 21 96 C 20 108 20 120 22 130"
-        fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.22"
-      />
-      {/* Wave stroke — right strand, gentle S-curve full length */}
-      <path
-        d="M 99 56 C 101 68 101 82 99 96 C 100 108 100 120 98 130"
-        fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.22"
-      />
-      {/* Soft shine highlight */}
-      <path
-        d="M 44 20 Q 52 15 60 15 Q 68 15 76 20 Q 68 17 60 17 Q 52 17 44 20 Z"
-        fill={C.white} opacity="0.14"
-      />
+      {/* Wave stroke — left strand, gentle S-curve */}
+      <path d="M 21 56 C 19 68 19 82 21 96 C 20 108 20 120 22 130" fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.22" />
+      {/* Wave stroke — right strand */}
+      <path d="M 99 56 C 101 68 101 82 99 96 C 100 108 100 120 98 130" fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.22" />
 
       {/* ── EYES (behind glasses) ── */}
       <g id="aya-eyes">

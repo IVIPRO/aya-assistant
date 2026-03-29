@@ -1,0 +1,108 @@
+X10THINK TASK — FIX AYA AVATAR HAIR STRUCTURE (NOT STYLE)
+
+CRITICAL RULE
+
+First inspect the current avatar SVG or component structure.
+
+The problem is NOT the style but the HAIR LAYER POSITION.
+
+Hair is currently placed behind the head instead of framing the face.
+
+This must be corrected.
+
+-------------------------------------
+
+GOAL
+
+Create a natural long hairstyle inspired by Magdalena’s hair:
+
+• soft
+• slightly wavy
+• shoulder-length
+• dark brown
+• parted near the middle
+
+But most importantly:
+
+Hair must FRAME the face from the sides.
+
+-------------------------------------
+
+CORRECT HAIR STRUCTURE
+
+The avatar must contain these layers:
+
+1. hair_back
+2. hair_left_front
+3. hair_right_front
+4. hair_top
+5. face
+
+Layer order must be:
+
+hair_back
+hair_top
+face
+hair_left_front
+hair_right_front
+
+Front strands must overlap slightly over the face edges.
+
+-------------------------------------
+
+CRITICAL FIXES
+
+1. Move hair shapes forward so they are not behind the head.
+2. Add two soft front strands falling along the sides of the face.
+3. Remove any hair connecting under the chin.
+4. Ensure the face remains fully visible.
+5. Hair should stop near shoulder level.
+
+-------------------------------------
+
+SHAPE REQUIREMENTS
+
+Hair should look like:
+
+• soft
+• natural
+• child-like
+• slightly wavy
+
+Avoid:
+
+• hood shapes
+• helmet hair
+• flat curtain hair
+• hair behind head only
+• hair under chin
+
+-------------------------------------
+
+VISUAL TARGET
+
+AYA should look like a friendly girl with long hair framing her face.
+
+Not like:
+
+• a bald head
+• a hood
+• a helmet
+
+-------------------------------------
+
+IMPLEMENTATION
+
+1. Locate the shared avatar SVG/component.
+2. Adjust hair layers and shapes.
+3. Keep the face, glasses, and body unchanged.
+4. Update the single shared avatar used across the app.
+
+-------------------------------------
+
+RETURN
+
+1. file modified
+2. preview screenshot
+3. confirmation hair layers are correct
+4. confirmation face/glasses unchanged

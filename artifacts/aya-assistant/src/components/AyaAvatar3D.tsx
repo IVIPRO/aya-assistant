@@ -19,6 +19,7 @@ interface AyaAvatar3DProps {
   size?: "sm" | "md" | "lg";
   className?: string;
   visible?: boolean;
+  text?: string;
 }
 
 const SIZE_MAP = { sm: 90, md: 130, lg: 180 };
@@ -29,6 +30,7 @@ export function AyaAvatar3D({
   size = "md",
   className,
   visible = true,
+  text: _text,
 }: AyaAvatar3DProps) {
   const [blinking, setBlinking] = useState(false);
   const blinkRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -374,3 +376,6 @@ function AyaMouth({
   }
   return <path d="M 49 93 Q 60 102 71 93" fill="none" stroke={stroke} strokeWidth="2.5" strokeLinecap="round" />;
 }
+
+// Backward-compat type alias — consumers can import AyaEmotion from here
+export type AyaEmotion = EmotionMode3D;

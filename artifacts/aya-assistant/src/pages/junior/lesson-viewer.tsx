@@ -12,7 +12,7 @@ import { getListChildrenQueryKey, updateDailyPlanTask } from "@workspace/api-cli
 import type { LangCode } from "@/lib/i18n";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { XpToast, type XpReward } from "@/components/xp-toast";
-import { AyaAvatar, type AyaEmotion } from "@/components/AyaAvatar";
+import { AyaAvatar3D as AyaAvatar, type AyaEmotion } from "@/components/AyaAvatar3D";
 import { getCuriosityCard, getCuriosityFact, CURIOSITY_BRIDGES, type CuriosityCard as CuriosityCardData } from "@/lib/curiosityEngine";
 import { StoryLessonEngine } from "./story-engine";
 

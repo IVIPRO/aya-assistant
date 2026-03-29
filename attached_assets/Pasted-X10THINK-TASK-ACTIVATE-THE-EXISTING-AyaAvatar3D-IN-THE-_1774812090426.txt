@@ -1,0 +1,121 @@
+X10THINK TASK — ACTIVATE THE EXISTING AyaAvatar3D IN THE LIVE APPLICATION
+
+IMPORTANT
+AyaAvatar3D already exists in the project.  
+The problem is that the UI is still rendering the old AyaAvatar component.
+
+Do NOT create another avatar.  
+Do NOT redesign the avatar.  
+Do NOT generate a new component.
+
+The task is ONLY to activate AyaAvatar3D so the live UI renders it.
+
+------------------------------------------------
+
+STEP 1 — AUDIT THE CODEBASE
+
+Inspect the project and locate:
+
+1. AyaAvatar3D component file
+2. AyaAvatar component file
+3. all imports of AyaAvatar
+4. all places where AyaAvatar is rendered
+
+Check especially:
+
+- welcome screen
+- dashboard card
+- lesson screen
+- assistant bubble
+- mini avatars
+
+------------------------------------------------
+
+STEP 2 — CHECK COMPONENT COMPATIBILITY
+
+Verify that AyaAvatar3D supports the same props interface as AyaAvatar.
+
+Expected props:
+
+emotion
+size
+speaking
+visible
+
+If props differ, adapt AyaAvatar3D so it accepts the same props.
+
+Do NOT change the UI layout.
+
+------------------------------------------------
+
+STEP 3 — ACTIVATE AyaAvatar3D
+
+Replace the usage of AyaAvatar with AyaAvatar3D in the active UI.
+
+Possible cases:
+
+Case A — Shared Wrapper Exists  
+If a shared avatar wrapper or barrel export exists (example: Avatar.tsx or index.ts), change the exported component so AyaAvatar3D becomes the active avatar.
+
+Case B — Direct Imports  
+If components import AyaAvatar directly, replace those imports with AyaAvatar3D.
+
+Example transformation:
+
+import AyaAvatar from ...
+
+becomes
+
+import AyaAvatar3D from ...
+
+Then replace the rendered component accordingly.
+
+------------------------------------------------
+
+STEP 4 — ENSURE SAFE REPLACEMENT
+
+Do NOT change:
+
+layout  
+spacing  
+container size  
+UI styling  
+
+Only swap the avatar component.
+
+------------------------------------------------
+
+STEP 5 — VERIFY PREVIEW
+
+After replacement verify:
+
+AYAAvatar3D appears in preview in these locations:
+
+welcome card  
+dashboard card  
+assistant bubble  
+mini avatar usages  
+
+Check that:
+
+avatar renders correctly  
+no clipping occurs  
+no layout breaks occur  
+emotion states still work  
+speaking state still works
+
+------------------------------------------------
+
+STEP 6 — RETURN RESULTS
+
+Return exactly:
+
+1. AyaAvatar3D file path
+2. AyaAvatar file path
+3. files where imports were switched
+4. whether a shared wrapper/export was modified
+5. confirmation that AyaAvatar3D is now visible in preview
+6. which screens now render AyaAvatar3D
+
+Feature name:
+AYA Avatar3D Activation

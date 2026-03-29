@@ -381,13 +381,21 @@ function AyaCharacterSVG({
            C 48 7 53 6 60 6
            C 67 6 72 7 82 13
            C 97 20 100 40 95 54
-           C 88 38 76 30 60 30
-           C 44 30 32 38 25 54 Z"
+           C 90 46 82 38 72 36
+           C 67 34 62 33 60 33
+           C 58 33 53 34 48 36
+           C 38 38 30 46 25 54 Z"
         fill={C.hair}
       />
-      {/* Subtle center-part crease */}
-      <path d="M 60 6 C 60 12 60 20 60 30" fill="none" stroke={C.hairLight} strokeWidth="1.4" strokeLinecap="round" opacity="0.35" />
-      {/* Subtle crown shine */}
+      {/* Natural hairline boundary — soft arch where hair meets forehead */}
+      <path
+        d="M 26 54 C 31 47 39 39 49 37 C 54 35 58 34 60 33
+           C 62 34 66 35 71 37 C 81 39 89 47 94 54"
+        fill="none" stroke={C.skin} strokeWidth="2.5" strokeLinecap="round" opacity="0.35"
+      />
+      {/* Center-part crease — crown to hairline */}
+      <path d="M 60 6 C 60 14 60 22 60 33" fill="none" stroke={C.hairLight} strokeWidth="1.4" strokeLinecap="round" opacity="0.38" />
+      {/* Crown shine */}
       <path d="M 46 18 Q 53 13 60 13 Q 67 13 74 18 Q 67 15 60 15 Q 53 15 46 18 Z" fill={C.white} opacity="0.13" />
 
       {/* ── FACE ── */}

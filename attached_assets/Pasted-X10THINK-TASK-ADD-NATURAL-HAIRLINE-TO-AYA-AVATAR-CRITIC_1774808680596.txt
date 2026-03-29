@@ -1,0 +1,103 @@
+X10THINK TASK — ADD NATURAL HAIRLINE TO AYA AVATAR
+
+CRITICAL RULES
+
+1. Inspect the current avatar hair implementation first.
+2. Modify ONLY the hairline and top hair structure.
+3. Do NOT change:
+   - face
+   - glasses
+   - avatar proportions
+   - hairstyle length
+
+------------------------------------------------
+
+PROBLEM
+
+The current AYA hair lacks a natural hairline.
+
+The top hair looks like a helmet placed on the head.
+
+This creates a wig effect.
+
+Magdalena's real hair has a visible natural hairline and soft center part.
+
+------------------------------------------------
+
+GOAL
+
+Add a natural child-like hairline so the hair appears to grow from the head.
+
+Hair must start directly at the forehead curve.
+
+------------------------------------------------
+
+HAIRLINE DESIGN
+
+Create a soft rounded hairline:
+
+• slight center part
+• gentle curve across the forehead
+• two soft front strands beginning near the temples
+
+Hairline must follow the skull shape.
+
+------------------------------------------------
+
+TOP HAIR
+
+Top hair should:
+
+• follow the curve of the head
+• sit smoothly on the skull
+• slightly rise for natural volume
+
+Avoid flat helmet shapes.
+
+------------------------------------------------
+
+SIDE STRANDS
+
+Side strands should:
+
+• start from the temples
+• fall naturally along the cheeks
+• end near shoulder level
+
+------------------------------------------------
+
+COLOR
+
+Keep the current dark brown tone.
+
+Do not add black shading.
+
+------------------------------------------------
+
+VISUAL TARGET
+
+AYA should look like a friendly girl with natural hair growing from the head.
+
+Not like:
+
+• helmet hair
+• wig
+• smooth cap
+
+------------------------------------------------
+
+IMPLEMENTATION
+
+1. Locate the avatar SVG/component.
+2. Add a natural hairline path above the forehead.
+3. Adjust top hair to follow the skull curve.
+4. Keep all other elements unchanged.
+
+------------------------------------------------
+
+RETURN
+
+1. file modified
+2. preview screenshot
+3. confirmation hairline added
+4. confirmation no helmet effect

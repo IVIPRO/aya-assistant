@@ -3,7 +3,7 @@
  *
  * Unified AYA identity — one avatar everywhere.
  * Visual design matches the official AYA SVG assets:
- *   - Curly brown hair
+ *   - Natural long wavy brown hair, center-parted, shoulder length
  *   - Dark rounded-rectangle glasses (#444, light-blue tinted lenses)
  *   - Warm skin tone, round face
  *   - Soft expression, pink cheeks
@@ -373,16 +373,29 @@ function AyaCharacterSVG({
       {/* ── NECK ── */}
       <rect x="51" y="108" width="18" height="12" rx="4" fill={C.skin} />
 
-      {/* ── BACK HAIR (behind face) ── */}
-      <ellipse cx="60" cy="62" rx="42" ry="48" fill={C.hairDark} />
-      {/* Ponytail */}
-      <ellipse cx="97" cy="68" rx="10" ry="8" fill={C.hair} />
-      <ellipse cx="101" cy="61" rx="8" ry="6" fill={C.hairDark} />
-      <path d="M 97 74 C 106 81 110 92 106 102" fill="none" stroke={C.hairDark} strokeWidth="5" strokeLinecap="round" />
-      <path d="M 104 84 C 110 91 109 100 104 106" fill="none" stroke={C.hair} strokeWidth="3.5" strokeLinecap="round" opacity="0.7" />
-      {/* Hair tie — neutral brown, no red */}
-      <circle cx="97" cy="70" r="4.5" fill={C.hairDark} />
-      <circle cx="97" cy="70" r="2.8" fill={C.hair} />
+      {/* ── BACK HAIR (behind face) — medium-long natural wavy ── */}
+      {/* Main dark volume — top of head down to shoulders */}
+      <path
+        d="M 19 52 C 16 40 20 22 36 15 C 45 11 52 10 60 10 C 68 10 75 11 84 15
+           C 100 22 104 40 101 52 C 106 72 107 100 103 120
+           C 99 133 86 142 60 142 C 34 142 21 133 17 120
+           C 13 100 14 72 19 52 Z"
+        fill={C.hairDark}
+      />
+      {/* Left shoulder-length side panel — gentle wave */}
+      <path
+        d="M 19 52 C 14 66 12 88 15 110 C 17 122 23 133 32 139
+           C 27 123 22 104 20 82 C 19 68 19 58 19 52 Z"
+        fill={C.hair}
+        opacity="0.55"
+      />
+      {/* Right shoulder-length side panel — gentle wave */}
+      <path
+        d="M 101 52 C 106 66 108 88 105 110 C 103 122 97 133 88 139
+           C 93 123 98 104 100 82 C 101 68 101 58 101 52 Z"
+        fill={C.hair}
+        opacity="0.55"
+      />
 
       {/* ── FACE ── */}
       <ellipse cx="61" cy="72" rx="34" ry="40" fill={C.skinDark} opacity="0.2" />
@@ -394,19 +407,57 @@ function AyaCharacterSVG({
       <ellipse cx="95" cy="71" rx="7" ry="9" fill={C.skinDark} />
       <ellipse cx="95" cy="71" rx="5" ry="7" fill={C.skin} />
 
-      {/* ── FRONT HAIR — CURLY ── */}
-      {/* Main curly mass */}
-      <ellipse cx="60" cy="28" rx="38" ry="22" fill={C.hair} />
-      <circle cx="26" cy="41" r="13" fill={C.hair} />
-      <circle cx="94" cy="41" r="13" fill={C.hair} />
-      <circle cx="18" cy="55" r="10" fill={C.hair} />
-      <circle cx="102" cy="55" r="10" fill={C.hair} />
-      {/* Curl bumps top */}
-      <circle cx="40" cy="17" r="9" fill={C.hair} />
-      <circle cx="60" cy="13" r="9" fill={C.hair} />
-      <circle cx="80" cy="17" r="9" fill={C.hair} />
-      {/* Hair highlights */}
-      <path d="M 38 28 Q 53 23 67 25 Q 55 26 41 32 Z" fill={C.white} opacity="0.15" />
+      {/* ── FRONT HAIR — natural long wavy, center-parted ── */}
+      {/* Smooth top dome — slight center part, flows to forehead */}
+      <path
+        d="M 27 44 C 25 34 30 20 44 15 C 51 12 55 11 60 11
+           C 65 11 69 12 76 15 C 90 20 95 34 93 44
+           C 87 34 78 25 67 22 C 63 21 61 21 60 21
+           C 59 21 57 21 53 22 C 42 25 33 34 27 44 Z"
+        fill={C.hair}
+      />
+      {/* Left side panel — soft wave beside face */}
+      <path
+        d="M 27 44 C 23 52 21 62 22 72 C 22 80 23 88 22 95
+           C 28 87 28 75 28 63 C 28 54 28 49 27 44 Z"
+        fill={C.hair}
+      />
+      {/* Right side panel — soft wave beside face */}
+      <path
+        d="M 93 44 C 97 52 99 62 98 72 C 98 80 97 88 98 95
+           C 92 87 92 75 92 63 C 92 54 92 49 93 44 Z"
+        fill={C.hair}
+      />
+      {/* Center part — subtle light crease */}
+      <path
+        d="M 60 11 C 60 14 60 17 60 21"
+        fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.45"
+      />
+      {/* Natural flow lines — left arc */}
+      <path
+        d="M 30 36 C 35 28 44 22 54 21"
+        fill="none" stroke={C.hairLight} strokeWidth="1.5" strokeLinecap="round" opacity="0.28"
+      />
+      {/* Natural flow lines — right arc */}
+      <path
+        d="M 90 36 C 85 28 76 22 66 21"
+        fill="none" stroke={C.hairLight} strokeWidth="1.5" strokeLinecap="round" opacity="0.28"
+      />
+      {/* Wave stroke — left temple */}
+      <path
+        d="M 23 52 C 21 60 21 68 23 76 C 22 82 22 89 23 95"
+        fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.2"
+      />
+      {/* Wave stroke — right temple */}
+      <path
+        d="M 97 52 C 99 60 99 68 97 76 C 98 82 98 89 97 95"
+        fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.2"
+      />
+      {/* Soft shine highlight */}
+      <path
+        d="M 44 20 Q 52 15 60 15 Q 68 15 76 20 Q 68 17 60 17 Q 52 17 44 20 Z"
+        fill={C.white} opacity="0.14"
+      />
 
       {/* ── EYES (behind glasses) ── */}
       <g id="aya-eyes">

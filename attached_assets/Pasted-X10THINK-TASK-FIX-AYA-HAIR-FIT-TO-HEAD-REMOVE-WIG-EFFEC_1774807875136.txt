@@ -1,0 +1,118 @@
+X10THINK TASK — FIX AYA HAIR FIT TO HEAD (REMOVE "WIG" EFFECT)
+
+CRITICAL RULES
+
+1. Inspect the current avatar hair structure before editing.
+2. Modify ONLY the hair positioning and hairline.
+3. Do NOT change:
+   - face
+   - glasses
+   - avatar proportions
+   - overall illustration style
+
+------------------------------------------------
+
+PROBLEM
+
+AYA hair currently appears detached from the head.
+
+It looks like:
+
+• a wig placed behind the head
+• hair floating away from the skull
+• visible gap between head and hair
+
+This breaks the natural look.
+
+------------------------------------------------
+
+GOAL
+
+Make the hair sit naturally on the head like real hair.
+
+Hair must:
+
+• start directly from the hairline
+• follow the curve of the skull
+• sit close to the head
+• slightly expand outward only after the cheek level
+
+------------------------------------------------
+
+CORRECT STRUCTURE
+
+Hair layers should follow this structure:
+
+hair_top
+hair_left
+hair_right
+face
+
+Hair must overlap slightly over the forehead curve.
+
+------------------------------------------------
+
+HAIRLINE
+
+Create a natural hairline:
+
+• soft rounded curve
+• slightly parted near the middle
+• hair begins immediately above the forehead
+
+There must be NO gap between hair and head.
+
+------------------------------------------------
+
+VOLUME RULE
+
+Hair should:
+
+• stay close to the head near the crown
+• widen slightly near cheek level
+• softly curve outward near the shoulders
+
+Avoid:
+
+• floating hair
+• helmet hair
+• wig-like separation
+• big gap between skull and hair
+
+------------------------------------------------
+
+COLOR
+
+Hair must remain a single dark brown tone.
+
+No black shading.
+
+------------------------------------------------
+
+VISUAL TARGET
+
+AYA should look like a friendly girl with natural long hair resting on her head.
+
+Not like:
+
+• bald head with hair behind it
+• wig
+• helmet
+
+------------------------------------------------
+
+IMPLEMENTATION
+
+1. Locate the shared avatar SVG/component.
+2. Adjust hair paths so they follow the head contour.
+3. Remove the visible gap between head and hair.
+4. Keep the existing hairstyle shape but move it closer to the head.
+
+------------------------------------------------
+
+RETURN
+
+1. modified avatar file
+2. preview screenshot
+3. confirmation hair now sits on the head
+4. confirmation wig effect removed

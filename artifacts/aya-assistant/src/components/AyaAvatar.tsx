@@ -373,60 +373,22 @@ function AyaCharacterSVG({
       {/* ── NECK ── */}
       <rect x="51" y="108" width="18" height="12" rx="4" fill={C.skin} />
 
-      {/* ── BACK HAIR — top crown + two iconic side panels ── */}
-      {/* Crown — wide rounded top, sits behind the face */}
+      {/* ── HAIR TOP — hugs skull, single dark-brown, drawn before face ── */}
+      {/* Outer edge follows skull curve closely; inner hairline dips to y=34 to sit on forehead */}
       <path
-        d="M 20 52 C 18 38 22 18 38 13 C 47 10 53 9 60 9
-           C 67 9 73 10 82 13 C 98 18 102 38 100 52
-           C 88 42 74 36 60 36 C 46 36 32 42 20 52 Z"
-        fill={C.hairDark}
-      />
-      {/* Left side panel — teardrop silhouette, outer edge bows wide for volume */}
-      <path
-        d="M 22 50 C 11 62 5 80 5 100 C 5 120 10 132 19 140
-           C 25 144 34 145 40 142
-           C 34 131 27 116 25 98 C 23 78 23 62 24 52 Z"
-        fill={C.hairDark}
-      />
-      {/* Left panel — lighter outer sheen for natural volume depth */}
-      <path
-        d="M 11 68 C 7 84 7 102 10 118 C 12 128 17 136 23 141
-           C 18 130 16 116 16 100 C 15 84 13 74 11 68 Z"
-        fill={C.hair} opacity="0.5"
-      />
-      {/* Right side panel — mirrored teardrop */}
-      <path
-        d="M 98 50 C 109 62 115 80 115 100 C 115 120 110 132 101 140
-           C 95 144 86 145 80 142
-           C 86 131 93 116 95 98 C 97 78 97 62 96 52 Z"
-        fill={C.hairDark}
-      />
-      {/* Right panel — lighter outer sheen */}
-      <path
-        d="M 109 68 C 113 84 113 102 110 118 C 108 128 103 136 97 141
-           C 102 130 104 116 104 100 C 105 84 107 74 109 68 Z"
-        fill={C.hair} opacity="0.5"
-      />
-
-      {/* ── HAIR TOP — sits between back panels and face ── */}
-      {/* Center-parted dome — locks into back crown, drawn before face */}
-      <path
-        d="M 27 44 C 25 34 30 20 44 15 C 51 12 55 11 60 11
-           C 65 11 69 12 76 15 C 90 20 95 34 93 44
-           C 87 34 78 25 67 22 C 63 21 61 21 60 21
-           C 59 21 57 21 53 22 C 42 25 33 34 27 44 Z"
+        d="M 25 54
+           C 20 40 23 20 38 13
+           C 48 7 53 6 60 6
+           C 67 6 72 7 82 13
+           C 97 20 100 40 95 54
+           C 88 38 76 30 60 30
+           C 44 30 32 38 25 54 Z"
         fill={C.hair}
       />
-      {/* Center part crease */}
-      <path
-        d="M 60 11 C 60 14 60 17 60 21"
-        fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.45"
-      />
-      {/* Flow arcs — left and right from part */}
-      <path d="M 30 36 C 35 28 44 22 54 21" fill="none" stroke={C.hairLight} strokeWidth="1.5" strokeLinecap="round" opacity="0.28" />
-      <path d="M 90 36 C 85 28 76 22 66 21" fill="none" stroke={C.hairLight} strokeWidth="1.5" strokeLinecap="round" opacity="0.28" />
-      {/* Crown shine */}
-      <path d="M 44 20 Q 52 15 60 15 Q 68 15 76 20 Q 68 17 60 17 Q 52 17 44 20 Z" fill={C.white} opacity="0.14" />
+      {/* Subtle center-part crease */}
+      <path d="M 60 6 C 60 12 60 20 60 30" fill="none" stroke={C.hairLight} strokeWidth="1.4" strokeLinecap="round" opacity="0.35" />
+      {/* Subtle crown shine */}
+      <path d="M 46 18 Q 53 13 60 13 Q 67 13 74 18 Q 67 15 60 15 Q 53 15 46 18 Z" fill={C.white} opacity="0.13" />
 
       {/* ── FACE ── */}
       <ellipse cx="61" cy="72" rx="34" ry="40" fill={C.skinDark} opacity="0.2" />
@@ -438,25 +400,29 @@ function AyaCharacterSVG({
       <ellipse cx="95" cy="71" rx="7" ry="9" fill={C.skinDark} />
       <ellipse cx="95" cy="71" rx="5" ry="7" fill={C.skin} />
 
-      {/* ── HAIR FRONT STRANDS — drawn after face so they frame/overlap the face edges ── */}
-      {/* Left front strand — inner edge overlaps face by ~6px to clearly frame the cheek */}
+      {/* ── HAIR LEFT — connects at temple, falls close to head, inner frames cheek ── */}
       <path
-        d="M 27 44 C 20 57 17 74 17 90 C 17 108 20 122 25 132
-           C 29 138 37 141 43 138
-           C 37 126 33 110 31 92 C 29 74 28 58 27 46 Z"
+        d="M 25 54
+           C 18 66 16 84 16 102
+           C 16 120 19 132 26 139
+           C 31 143 40 143 44 140
+           C 38 129 34 114 32 96
+           C 30 78 29 63 26 54 Z"
         fill={C.hair}
       />
-      {/* Right front strand — mirrored, inner edge overlaps face by ~6px */}
+      {/* ── HAIR RIGHT — mirrored ── */}
       <path
-        d="M 93 44 C 100 57 103 74 103 90 C 103 108 100 122 95 132
-           C 91 138 83 141 77 138
-           C 83 126 87 110 89 92 C 91 74 92 58 93 46 Z"
+        d="M 95 54
+           C 102 66 104 84 104 102
+           C 104 120 101 132 94 139
+           C 89 143 80 143 76 140
+           C 82 129 86 114 88 96
+           C 90 78 91 63 94 54 Z"
         fill={C.hair}
       />
-      {/* Wave stroke — left strand, gentle S-curve */}
-      <path d="M 21 56 C 19 68 19 82 21 96 C 20 108 20 120 22 130" fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.22" />
-      {/* Wave stroke — right strand */}
-      <path d="M 99 56 C 101 68 101 82 99 96 C 100 108 100 120 98 130" fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.22" />
+      {/* Subtle wave strokes for texture */}
+      <path d="M 19 68 C 17 82 17 96 19 110 C 18 122 19 132 21 139" fill="none" stroke={C.hairLight} strokeWidth="1.6" strokeLinecap="round" opacity="0.2" />
+      <path d="M 101 68 C 103 82 103 96 101 110 C 102 122 101 132 99 139" fill="none" stroke={C.hairLight} strokeWidth="1.6" strokeLinecap="round" opacity="0.2" />
 
       {/* ── EYES (behind glasses) ── */}
       <g id="aya-eyes">

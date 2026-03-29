@@ -242,19 +242,39 @@ router.post("/voice/speak", requireAuth, async (req, res): Promise<void> => {
 
   const resolvedLang = langToLocale(lang ?? "en");
 
-  const voice =
-    resolvedLang === "bg" ? "nova" :
-    resolvedLang === "es" ? "nova" :
-    "nova";
+  // nova: warm, energetic, child-friendly — best fit for educational Junior mode
+  const voice = "nova";
 
-  console.log("[TTS] SDK_PATH_ACTIVE");
+  // Child-friendly speaking style instructions per language.
+  // gpt-4o-mini-tts supports the `instructions` field to guide voice style.
+  // This is the primary lever for Duolingo-style warmth/clarity.
+  const ttsInstructions: Record<string, string> = {
+    bg: "Говори топло, весело и ясно, като приятелски учител за деца от 6 до 10 години. " +
+        "Темпото да е умерено бавно — не бързай. " +
+        "Звучи насърчаваща, позитивна и нежна. " +
+        "Прави кратка пауза между изреченията. Никога монотонно или строго.",
+    es: "Speak warmly and clearly in Spanish, like a friendly teacher for children aged 6 to 10. " +
+        "Keep a gentle, encouraging pace — not too fast. " +
+        "Sound cheerful, kind, and supportive. Pause naturally between sentences.",
+    en: "Speak warmly and clearly, like a friendly teacher for children aged 6 to 10. " +
+        "Keep a gentle, encouraging pace — not too fast. " +
+        "Sound cheerful, kind, and supportive. Pause naturally between sentences.",
+  };
+  const instructions = ttsInstructions[resolvedLang] ?? ttsInstructions.en;
+
+  // Prevent clipped sentence endings — append a trailing period if absent.
+  const trimmedInput = text.slice(0, 4000).trimEnd();
+  const safeInput = /[.!?…]$/.test(trimmedInput) ? trimmedInput : trimmedInput + ".";
+
+  console.log("[TTS] SDK_PATH_ACTIVE", { lang: resolvedLang, voice, hasInstructions: true });
 
   let speechResponse: Awaited<ReturnType<typeof ttsClient.audio.speech.create>>;
   try {
     speechResponse = await ttsClient.audio.speech.create({
       model: "gpt-4o-mini-tts",
       voice,
-      input: text.slice(0, 4000),
+      input: safeInput,
+      instructions,
       response_format: "mp3",
     });
   } catch (err: unknown) {

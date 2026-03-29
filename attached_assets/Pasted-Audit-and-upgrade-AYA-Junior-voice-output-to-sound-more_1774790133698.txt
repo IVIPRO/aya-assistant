@@ -1,0 +1,97 @@
+Audit and upgrade AYA Junior voice output to sound more child-friendly, similar in feel to Duolingo-style educational narration.
+
+CRITICAL RULES
+
+1. First inspect the existing AYA voice / TTS pipeline.
+2. Do NOT create a second voice engine.
+3. Do NOT duplicate TTS endpoints.
+4. Do NOT break the existing lesson voice guidance system.
+5. Reuse the current speech architecture and only improve the voice profile / playback behavior.
+
+GOAL
+
+Make AYA sound more like a friendly child-focused educational guide:
+- warm
+- lively
+- clear
+- slightly playful
+- easy for children in grades 1–4 to listen to
+
+This should feel closer to a Duolingo-like educational voice experience,
+WITHOUT copying branding or requiring a full re-architecture.
+
+PHASE 1 — AUDIT
+
+Inspect the current voice system and report internally:
+
+1. what TTS provider / browser voice system is currently used
+2. whether voice selection is already configurable
+3. whether multiple voices are already available
+4. whether Bulgarian child-friendly voices exist in the current environment
+5. whether speech rate / pitch / volume can be adjusted
+6. whether current replay and avatar speaking sync already depend on the existing voice instance
+
+PHASE 2 — SAFE VOICE UPGRADE
+
+If the current system supports voice tuning:
+
+- prefer a Bulgarian voice
+- choose the most child-friendly available Bulgarian voice
+- slightly increase warmth and liveliness through safe tuning
+- optimize:
+  - rate
+  - pitch
+  - volume
+  - pauses between lines
+
+Target style:
+- natural Bulgarian
+- friendly for children
+- not robotic
+- not too fast
+- not too serious
+
+If multiple Bulgarian voices are available:
+- choose the best one for Junior lessons
+
+If no true child-like Bulgarian voice exists:
+- keep Bulgarian
+- tune the best existing Bulgarian voice to sound softer and more engaging
+
+PHASE 3 — LESSON EXPERIENCE POLISH
+
+Where safe and already supported, improve:
+
+- small pause before explanation
+- smoother pause after praise
+- cleaner transition between lesson steps
+- prevent clipped sentence endings
+- maintain replay button behavior
+- maintain avatar speaking sync
+
+PHASE 4 — SAFETY
+
+Do not break:
+- lesson viewer
+- replay button
+- Bulgarian language enforcement
+- avatar speaking state
+- dynamic missions
+- infinite practice
+- daily quests
+
+Do not introduce a new TTS endpoint unless absolutely necessary.
+
+PHASE 5 — RETURN
+
+Return exactly:
+
+1. current voice system found
+2. whether Bulgarian voice selection is configurable
+3. which voice/profile was chosen
+4. tuning changes made
+5. files modified
+6. preview test steps
+
+Feature name:
+AYA Junior Child-Friendly Voice Upgrade

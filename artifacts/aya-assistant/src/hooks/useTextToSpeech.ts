@@ -76,8 +76,8 @@ export function useTextToSpeech(): UseTextToSpeechReturn {
 
     const utterance = new SpeechSynthesisUtterance(processedText);
     
-    utterance.rate = options?.rate ?? 0.95;
-    utterance.pitch = options?.pitch ?? 1;
+    utterance.rate = options?.rate ?? 0.9;
+    utterance.pitch = options?.pitch ?? 1.05;
     utterance.volume = options?.volume ?? 1;
 
     // Set language - enforce it to ensure correct voice is used

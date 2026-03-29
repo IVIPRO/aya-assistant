@@ -81,8 +81,10 @@ export function useAyaLessonVoice(
         const bcp47 = LANG_TO_BCP47[lang] ?? "en-US";
         browserTts.speak(text, {
           lang: bcp47,
-          rate: lang === "bg" ? 0.88 : 0.92,
-          pitch: 1.05,
+          // Slightly slower + marginally higher pitch = clearer, warmer for children
+          rate: lang === "bg" ? 0.82 : 0.87,
+          pitch: lang === "bg" ? 1.1 : 1.05,
+          volume: 1,
         });
       }
     },

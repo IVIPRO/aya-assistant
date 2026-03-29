@@ -1,0 +1,179 @@
+X10THINK TASK — REDESIGN AYA AVATAR HAIR TO MATCH MAGDALENA STYLE
+AND MAKE IT ICONIC FOR BRANDING
+
+CRITICAL RULES
+
+1. FIRST inspect the current shared AYA avatar implementation before changing anything.
+2. Modify ONLY the hair design and hair silhouette.
+3. Do NOT change:
+   - face shape
+   - glasses
+   - eyes
+   - smile
+   - skin tone
+   - body proportions
+   - overall cartoon/vector style
+4. Do NOT create a second avatar version.
+5. Update the ONE shared avatar source used everywhere in AYA.
+6. Keep the avatar child-friendly, simple, and recognizable.
+7. The new hair must be inspired by Magdalena’s real hairstyle, but adapted into a clean mascot style suitable for branding.
+
+------------------------------------------------
+
+PROBLEM
+
+The current hair redesign is wrong.
+
+It does NOT look like natural hair from the Magdalena reference photo.
+
+Current problems:
+- dark mass wraps around the face
+- hair continues under the chin
+- looks like a hood / scarf / hijab instead of hair
+- silhouette is too closed and too solid
+- does not feel like open long girl hair
+
+This must be corrected.
+
+------------------------------------------------
+
+GOAL
+
+Redesign AYA’s hair so it feels:
+
+- inspired by Magdalena’s hairstyle
+- natural
+- soft
+- open around the face
+- iconic and memorable as a mascot
+- suitable for toys, mugs, dolls, stickers, and app branding
+
+AYA should become more recognizable by hair silhouette alone.
+
+------------------------------------------------
+
+REFERENCE — MAGDALENA HAIR CHARACTERISTICS
+
+Use the provided Magdalena photo as hairstyle reference only.
+
+Hair should have these traits:
+
+- medium-long to long
+- dark brown
+- natural soft waves
+- slight fluffy volume
+- parted near the middle
+- loose hair, not tied
+- falls down both sides
+- ends around shoulder level
+- face remains fully open and visible
+- no hair under the chin
+- no closed oval around the face
+
+------------------------------------------------
+
+BRAND / MASCOT REQUIREMENTS
+
+The hairstyle must work not only in the app, but also as:
+
+- icon
+- sticker
+- doll
+- mug print
+- notebook print
+- mascot illustration
+
+So the shape must be:
+
+- simple
+- iconic
+- recognizable
+- clean at small size
+- still clearly feminine and child-like
+
+Preferred silhouette:
+
+- rounded soft top
+- slightly parted hair on top
+- two natural side falls
+- slight outward softness near shoulder level
+- subtle wave feeling, not detailed realistic strands
+
+------------------------------------------------
+
+WHAT TO AVOID
+
+Do NOT create:
+
+- hood shape
+- scarf shape
+- hijab-like wrap
+- helmet hair
+- hard geometric block hair
+- hair under the chin
+- flat straight curtains with zero volume
+- strong curly hair
+- heavy black mass around the face
+
+------------------------------------------------
+
+DESIGN TARGET
+
+AYA hair should visually feel like this:
+
+TOP:
+soft rounded crown with slight middle part
+
+SIDES:
+two soft hanging sections of hair framing the face
+
+BOTTOM:
+natural open ends around shoulder level, slightly curved outward
+
+IMPORTANT:
+The bottom of the face and chin area must remain open.
+Hair should stop at the sides, not connect underneath.
+
+------------------------------------------------
+
+IMPLEMENTATION
+
+1. Find the single shared avatar asset/component.
+2. Redesign only the hair paths/shapes.
+3. Keep all other avatar elements unchanged.
+4. Ensure all usages update automatically everywhere:
+   - welcome card
+   - lesson avatar
+   - floating avatar
+   - mini avatar
+   - profile/assistant avatar
+5. Keep one source of truth.
+
+------------------------------------------------
+
+QUALITY CHECK BEFORE FINISHING
+
+Before finishing, verify:
+
+- face is still open
+- no dark shape under chin
+- hairstyle reads clearly as hair, not cloth
+- hairstyle resembles Magdalena’s soft long wavy hair
+- avatar remains readable at small size
+- app style remains consistent
+
+------------------------------------------------
+
+RETURN
+
+Return exactly:
+
+1. shared avatar file modified
+2. confirmation no second avatar was created
+3. confirmation only hair was changed
+4. preview screenshot of updated avatar
+5. short description of the new silhouette
+6. confirmation it is suitable for branding/merch use
+
+Feature name:
+AYA Signature Hair Redesign

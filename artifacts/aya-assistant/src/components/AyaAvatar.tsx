@@ -373,38 +373,38 @@ function AyaCharacterSVG({
       {/* ── NECK ── */}
       <rect x="51" y="108" width="18" height="12" rx="4" fill={C.skin} />
 
-      {/* ── BACK HAIR — top cap + two open hanging side strands ── */}
-      {/* Top cap — sits behind the face, above forehead */}
+      {/* ── BACK HAIR — top crown + two iconic side panels ── */}
+      {/* Crown — wide rounded top, sits behind the face */}
       <path
-        d="M 22 52 C 20 38 24 20 40 14 C 48 11 54 10 60 10
-           C 66 10 72 11 80 14 C 96 20 100 38 98 52
-           C 86 42 74 37 60 37 C 46 37 34 42 22 52 Z"
+        d="M 20 52 C 18 38 22 18 38 13 C 47 10 53 9 60 9
+           C 67 9 73 10 82 13 C 98 18 102 38 100 52
+           C 88 42 74 36 60 36 C 46 36 32 42 20 52 Z"
         fill={C.hairDark}
       />
-      {/* Left hanging strand — open bottom, does NOT cross under chin */}
+      {/* Left side panel — teardrop silhouette, outer edge bows wide for volume */}
       <path
-        d="M 22 50 C 14 60 10 76 10 96 C 10 114 13 127 20 136
-           C 26 141 34 142 38 139
-           C 32 128 26 114 24 96 C 22 76 22 62 24 52 Z"
+        d="M 22 50 C 11 62 5 80 5 100 C 5 120 10 132 19 140
+           C 25 144 34 145 40 142
+           C 34 131 27 116 25 98 C 23 78 23 62 24 52 Z"
         fill={C.hairDark}
       />
-      {/* Left strand lighter inner sheen */}
+      {/* Left panel — lighter outer sheen for natural volume depth */}
       <path
-        d="M 24 54 C 20 68 18 86 19 104 C 20 118 24 130 30 137
-           C 26 126 24 110 24 92 C 24 74 24 62 24 54 Z"
+        d="M 11 68 C 7 84 7 102 10 118 C 12 128 17 136 23 141
+           C 18 130 16 116 16 100 C 15 84 13 74 11 68 Z"
         fill={C.hair} opacity="0.5"
       />
-      {/* Right hanging strand — open bottom, does NOT cross under chin */}
+      {/* Right side panel — mirrored teardrop */}
       <path
-        d="M 98 50 C 106 60 110 76 110 96 C 110 114 107 127 100 136
-           C 94 141 86 142 82 139
-           C 88 128 94 114 96 96 C 98 76 98 62 96 52 Z"
+        d="M 98 50 C 109 62 115 80 115 100 C 115 120 110 132 101 140
+           C 95 144 86 145 80 142
+           C 86 131 93 116 95 98 C 97 78 97 62 96 52 Z"
         fill={C.hairDark}
       />
-      {/* Right strand lighter inner sheen */}
+      {/* Right panel — lighter outer sheen */}
       <path
-        d="M 96 54 C 100 68 102 86 101 104 C 100 118 96 130 90 137
-           C 94 126 96 110 96 92 C 96 74 96 62 96 54 Z"
+        d="M 109 68 C 113 84 113 102 110 118 C 108 128 103 136 97 141
+           C 102 130 104 116 104 100 C 105 84 107 74 109 68 Z"
         fill={C.hair} opacity="0.5"
       />
 
@@ -427,18 +427,18 @@ function AyaCharacterSVG({
            C 59 21 57 21 53 22 C 42 25 33 34 27 44 Z"
         fill={C.hair}
       />
-      {/* Left front strand — hangs down beside face to shoulder, open at bottom */}
+      {/* Left front strand — wider soft fall, tapered open shoulder end */}
       <path
-        d="M 27 44 C 22 55 20 70 20 86 C 20 104 22 118 26 130
-           C 30 136 36 138 40 136
-           C 34 124 30 108 28 90 C 26 72 26 58 27 46 Z"
+        d="M 27 44 C 20 57 17 74 17 90 C 17 108 20 122 25 132
+           C 29 138 37 141 42 138
+           C 36 126 30 110 28 92 C 26 74 26 58 27 46 Z"
         fill={C.hair}
       />
-      {/* Right front strand — hangs down beside face to shoulder, open at bottom */}
+      {/* Right front strand — wider soft fall, tapered open shoulder end */}
       <path
-        d="M 93 44 C 98 55 100 70 100 86 C 100 104 98 118 94 130
-           C 90 136 84 138 80 136
-           C 86 124 90 108 92 90 C 94 72 94 58 93 46 Z"
+        d="M 93 44 C 100 57 103 74 103 90 C 103 108 100 122 95 132
+           C 91 138 83 141 78 138
+           C 84 126 90 110 92 92 C 94 74 94 58 93 46 Z"
         fill={C.hair}
       />
       {/* Center part — subtle light crease */}

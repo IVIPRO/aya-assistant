@@ -11,6 +11,7 @@ import {
   computeStreak,
 } from "../lib/levelSystem";
 import { detectWeakTopics } from "../lib/weaknessDetection";
+import { getCurriculumTopics } from "../lib/bgCurriculum.js";
 import { buildWeeklyInsights } from "../lib/weeklyInsights";
 import { buildTeacherExport } from "../lib/teacherExport";
 
@@ -387,6 +388,135 @@ router.get("/learning/weaknesses", requireAuth, async (req, res): Promise<void> 
   const weakTopics = detectWeakTopics(topics);
 
   res.json({ weakTopics, childId });
+});
+
+/* ─────────────────────────────────────────────────────────────────
+   GET /api/learning/recommendation?childId=
+   AYA Adaptive Learning Path — recommend the next learning focus.
+
+   Logic (in priority order):
+   1. Weakest topic from childTopicProgressTable (via detectWeakTopics)
+   2. Next unstarted topic in BG curriculum order (for mathematics /
+      bulgarian_language subjects)
+   3. Topic with most wrong answers across all subjects (reinforcement)
+   4. Fallback: first BG curriculum topic for grade
+
+   Reuses: detectWeakTopics, getCurriculumTopics, learningPathTable
+   No new tables or scoring engines.
+───────────────────────────────────────────────────────────────── */
+router.get("/learning/recommendation", requireAuth, async (req, res): Promise<void> => {
+  const childId = parseInt(req.query.childId as string, 10);
+  if (isNaN(childId)) {
+    res.status(400).json({ error: "childId is required" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
+
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const grade = child.grade ?? 2;
+
+  const allTopics = await db
+    .select()
+    .from(childTopicProgressTable)
+    .where(eq(childTopicProgressTable.childId, childId));
+
+  /* ── Step 1: weakness detection (authoritative, reuses existing engine) ── */
+  const weakTopics = detectWeakTopics(allTopics);
+
+  type RecommendationReason =
+    | "weak_topic"
+    | "needs_more_practice"
+    | "recommended_review"
+    | "next_in_curriculum"
+    | "reinforcement"
+    | "first_topic";
+
+  let subjectId = "mathematics";
+  let topicId = "addition_to_10";
+  let recommendationReason: RecommendationReason = "first_topic";
+  let suggestedPracticeCount = 2;
+
+  if (weakTopics.length > 0) {
+    /* ── Case 1: Weakest topic — already sorted ascending by successRate ── */
+    const top = weakTopics[0];
+    subjectId = top.subjectId;
+    topicId = top.topicId;
+    recommendationReason = top.label as RecommendationReason;
+    suggestedPracticeCount =
+      top.label === "weak_topic" ? 5 :
+      top.label === "needs_more_practice" ? 3 : 2;
+
+  } else {
+    /* ── Case 2: No weaknesses — find next unstarted topic in BG curriculum ─ */
+    const bgSubjects = ["mathematics", "bulgarian_language"] as const;
+    const studiedSet = new Set(allTopics.map(r => `${r.subjectId}::${r.topicId}`));
+
+    let found = false;
+    for (const subj of bgSubjects) {
+      const curriculumTopics = getCurriculumTopics(grade, subj);
+      const nextTopic = curriculumTopics.find(ct => !studiedSet.has(`${subj}::${ct.topicId}`));
+      if (nextTopic) {
+        subjectId = subj;
+        topicId = nextTopic.topicId;
+        recommendationReason = "next_in_curriculum";
+        suggestedPracticeCount = 2;
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      /* ── Case 3: All curriculum topics started — pick topic with most wrong answers ── */
+      if (allTopics.length > 0) {
+        const worst = [...allTopics].sort(
+          (a, b) => (b.wrongAnswers ?? 0) - (a.wrongAnswers ?? 0)
+        )[0];
+        subjectId = worst.subjectId;
+        topicId = worst.topicId;
+        recommendationReason = "reinforcement";
+        suggestedPracticeCount = 3;
+      } else {
+        /* ── Case 4: No activity yet — first BG curriculum topic for grade ── */
+        const first = getCurriculumTopics(grade, "mathematics")[0];
+        subjectId = "mathematics";
+        topicId = first?.topicId ?? "addition_to_10";
+        recommendationReason = "first_topic";
+        suggestedPracticeCount = 2;
+      }
+    }
+  }
+
+  /* ── Build suggested lessons list ── */
+  const suggestedLessons = [{ subjectId, topicId }];
+
+  /* ── Persist to learningPathTable (reuse existing table) ── */
+  const recommendation = {
+    subjectId,
+    topicId,
+    recommendationReason,
+    suggestedLessons,
+    suggestedPracticeCount,
+    generatedAt: new Date().toISOString(),
+  };
+
+  await db.insert(learningPathTable).values({
+    childId,
+    priorityTopic: `${subjectId}:${topicId}`,
+    generatedPractice: recommendation,
+  }).catch(() => {});
+
+  res.json(recommendation);
 });
 
 /* ─────────────────────────────────────────────────────────────────

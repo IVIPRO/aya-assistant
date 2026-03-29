@@ -1,0 +1,135 @@
+Audit and extend the existing learning progress system to support AYA Adaptive Learning Path.
+
+CRITICAL RULES
+
+Before implementing anything:
+
+1. Inspect the current codebase first.
+2. Identify existing systems related to:
+   - progress tracking
+   - lesson completion
+   - XP accumulation
+   - streak tracking
+   - weakness statistics
+   - curriculum mapping
+3. If an adaptive recommendation system already exists in any form, extend it rather than creating a new one.
+4. Do NOT introduce duplicate logic for:
+   - progress evaluation
+   - topic weakness detection
+   - lesson routing
+5. Reuse existing tables and data structures whenever possible.
+6. Avoid creating new database tables unless absolutely necessary.
+
+------------------------------------------------
+
+GOAL
+
+Allow AYA to automatically recommend the next learning focus for a child based on their recent performance.
+
+AYA should analyze:
+
+- recent lesson results
+- error frequency by topic
+- hint usage
+- response speed (if available)
+- completed missions and practice
+- XP patterns
+
+Based on this, AYA determines a recommended learning focus.
+
+------------------------------------------------
+
+PHASE 1 — AUDIT
+
+Inspect and report internally:
+
+1. Which tables store learning progress (e.g., progressTable, weaknessStats).
+2. Where XP and lesson completion are recorded.
+3. Whether any weakness detection already exists.
+4. How curriculum topics are structured.
+5. Where missions and lessons are currently selected from.
+
+------------------------------------------------
+
+PHASE 2 — WEAKNESS DETECTION
+
+Using existing progress data, compute a simple topic priority score.
+
+Example factors:
+
+- wrong answers count
+- repeated hint usage
+- slow completion
+- recent failures
+
+Use the curriculum topicId as the grouping key.
+
+Do not create a new scoring engine if something similar already exists.
+
+------------------------------------------------
+
+PHASE 3 — DAILY RECOMMENDATION
+
+Generate a simple recommended learning focus:
+
+Example structure:
+
+Recommended Focus:
+- topicId
+- subjectId
+- recommendedPracticeCount
+- optional recommendedMission
+
+This recommendation should be based on:
+
+1. weakest topic from recent history
+2. or next logical topic if mastery is detected
+
+------------------------------------------------
+
+PHASE 4 — API ENDPOINT
+
+If no similar endpoint exists, add a safe endpoint:
+
+GET /api/learning/recommendation?childId=...
+
+Returns:
+
+{
+  subjectId,
+  topicId,
+  recommendationReason,
+  suggestedLessons,
+  suggestedPracticeCount
+}
+
+Reuse existing curriculum mapping and lesson generators.
+
+------------------------------------------------
+
+PHASE 5 — SAFETY
+
+Do not break:
+
+- dynamic mission generator
+- infinite practice
+- daily quests
+- XP system
+- lesson viewer
+- parent dashboard
+
+This feature should only add an optional recommendation layer.
+
+------------------------------------------------
+
+RETURN EXACTLY
+
+1. existing progress systems found
+2. tables used
+3. whether weaknessStats was used or extended
+4. scoring logic implemented
+5. API endpoint added or reused
+6. files modified
+
+Feature name:
+AYA Adaptive Learning Path

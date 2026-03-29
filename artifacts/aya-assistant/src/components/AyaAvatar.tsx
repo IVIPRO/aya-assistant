@@ -377,10 +377,10 @@ function AyaCharacterSVG({
       {/* Outer edge follows skull curve closely; inner hairline dips to y=34 to sit on forehead */}
       <path
         d="M 25 54
-           C 20 40 23 20 38 13
-           C 48 7 53 6 60 6
-           C 67 6 72 7 82 13
-           C 97 20 100 40 95 54
+           C 19 39 22 17 37 11
+           C 47 6 52 5 60 5
+           C 68 5 73 6 83 11
+           C 98 17 101 39 95 54
            C 90 46 82 38 72 36
            C 67 34 62 33 60 33
            C 58 33 53 34 48 36
@@ -408,29 +408,30 @@ function AyaCharacterSVG({
       <ellipse cx="95" cy="71" rx="7" ry="9" fill={C.skinDark} />
       <ellipse cx="95" cy="71" rx="5" ry="7" fill={C.skin} />
 
-      {/* ── HAIR LEFT — connects at temple, falls close to head, inner frames cheek ── */}
+      {/* ── HAIR LEFT — gentle S-curve outer, natural soft tip ── */}
       <path
         d="M 25 54
-           C 18 66 16 84 16 102
-           C 16 120 19 132 26 139
-           C 31 143 40 143 44 140
-           C 38 129 34 114 32 96
-           C 30 78 29 63 26 54 Z"
+           C 17 62 13 78 14 94
+           C 15 110 18 124 24 133
+           C 28 140 36 143 42 141
+           C 37 130 33 114 31 96
+           C 29 78 28 63 26 54 Z"
         fill={C.hair}
       />
-      {/* ── HAIR RIGHT — mirrored ── */}
+      {/* ── HAIR RIGHT — deliberately different curve + shorter tip for asymmetry ── */}
       <path
         d="M 95 54
-           C 102 66 104 84 104 102
-           C 104 120 101 132 94 139
-           C 89 143 80 143 76 140
-           C 82 129 86 114 88 96
-           C 90 78 91 63 94 54 Z"
+           C 103 62 107 80 106 96
+           C 105 112 102 124 96 133
+           C 92 140 85 143 79 140
+           C 83 130 87 114 89 96
+           C 91 78 92 63 94 54 Z"
         fill={C.hair}
       />
-      {/* Subtle wave strokes for texture */}
-      <path d="M 19 68 C 17 82 17 96 19 110 C 18 122 19 132 21 139" fill="none" stroke={C.hairLight} strokeWidth="1.6" strokeLinecap="round" opacity="0.2" />
-      <path d="M 101 68 C 103 82 103 96 101 110 C 102 122 101 132 99 139" fill="none" stroke={C.hairLight} strokeWidth="1.6" strokeLinecap="round" opacity="0.2" />
+      {/* Wave texture — left strand, slightly more pronounced */}
+      <path d="M 17 66 C 15 82 15 98 17 114 C 18 126 20 136 22 141" fill="none" stroke={C.hairLight} strokeWidth="1.6" strokeLinecap="round" opacity="0.22" />
+      {/* Wave texture — right strand, slightly different rhythm */}
+      <path d="M 103 68 C 105 84 105 100 103 114 C 102 126 100 134 98 139" fill="none" stroke={C.hairLight} strokeWidth="1.6" strokeLinecap="round" opacity="0.2" />
 
       {/* ── EYES (behind glasses) ── */}
       <g id="aya-eyes">

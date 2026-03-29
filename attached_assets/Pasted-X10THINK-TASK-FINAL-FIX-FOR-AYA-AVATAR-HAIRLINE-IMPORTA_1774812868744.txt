@@ -1,0 +1,146 @@
+X10THINK TASK — FINAL FIX FOR AYA AVATAR HAIRLINE
+
+IMPORTANT RULES
+
+1. AyaAvatar3D is already active in the UI.
+2. Do NOT redesign the avatar.
+3. Do NOT create a new avatar component.
+4. Do NOT change the face, glasses, eyes, proportions, or layout.
+5. Only fix the incorrect hairline rendering.
+
+------------------------------------------------
+
+PROBLEM
+
+The current avatar shows two thin hair strokes on the forehead.
+
+These lines look like “moustache strokes” on the skin.
+
+They were created previously as "fringe wisps".
+
+This creates an unnatural look.
+
+Hair should never appear as thin lines drawn on skin.
+
+------------------------------------------------
+
+GOAL
+
+Create a clean and natural hairline.
+
+Hair must appear to grow from the scalp.
+
+The forehead must be clean with no decorative lines.
+
+------------------------------------------------
+
+STEP 1 — LOCATE THE SOURCE
+
+Search inside AyaAvatar3D component and related layers for:
+
+• SVG path elements representing fringe
+• extra hair strokes
+• pseudo-elements (::before / ::after)
+• canvas stroke drawing commands
+• additional overlay layers
+
+Specifically look for elements named like:
+
+fringe
+wisp
+hairLine
+hairStroke
+hairFront
+hairDetail
+
+------------------------------------------------
+
+STEP 2 — REMOVE FRINGE LINES
+
+Remove ONLY the elements responsible for the forehead strokes.
+
+Delete the SVG paths or strokes that draw the two curved lines over the forehead.
+
+Do NOT remove the main hair shape.
+
+------------------------------------------------
+
+STEP 3 — CLEAN HAIRLINE SHAPE
+
+After removing the lines, adjust the top hair shape slightly so the hairline feels natural.
+
+Hair should:
+
+• start slightly lower on the head
+• softly overlap the top of the forehead
+• follow the natural curve of the skull
+
+Avoid:
+
+• sharp straight edges
+• floating hair
+• visible gaps between hair and head
+
+Hair should be one continuous shape.
+
+------------------------------------------------
+
+STEP 4 — COLOR CONSISTENCY
+
+Ensure hair uses a single chestnut brown tone.
+
+Hair color should remain:
+
+#5D3A1A
+
+Remove any darker or black strokes.
+
+------------------------------------------------
+
+STEP 5 — VERIFY AVATAR IN UI
+
+Confirm AyaAvatar3D still renders correctly in:
+
+• welcome screen
+• dashboard card
+• mini avatar
+• floating assistant bubble
+• lesson overlay
+
+Check that:
+
+• forehead is clean
+• no lines appear on skin
+• hair sits naturally on the head
+• glasses unchanged
+• face unchanged
+• layout unchanged
+
+------------------------------------------------
+
+STEP 6 — FINAL VISUAL RESULT
+
+The avatar should now have:
+
+• clean forehead
+• natural hairline
+• soft hair shape
+• no fringe strokes
+• no “moustache” lines
+
+AYA should look like a friendly 3D-style learning mascot.
+
+------------------------------------------------
+
+STEP 7 — RETURN
+
+Return exactly:
+
+1. elements removed from AyaAvatar3D
+2. files modified
+3. description of the corrected hairline
+4. confirmation that the forehead is clean
+5. confirmation avatar renders correctly in preview
+
+Feature name:
+AYA Hairline Cleanup

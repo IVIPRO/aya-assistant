@@ -1,0 +1,173 @@
+AUDIT AND FIX BULGARIAN MATH TTS NORMALIZATION IN AYA JUNIOR
+WITH BULGARIAN LANGUAGE GUARDRAIL
+
+CRITICAL RULES
+
+1. First inspect the latest codebase before making any changes.
+2. Do NOT create a second TTS engine.
+3. Do NOT duplicate lesson voice logic.
+4. Reuse the existing speech pipeline.
+5. Modify only the speech preprocessing stage before TTS playback.
+6. Do NOT break replay, avatar speaking sync, lesson flow, XP, missions, or badges.
+
+------------------------------------------------
+
+PROBLEM
+
+During Junior math lessons, symbolic expressions are sometimes spoken incorrectly.
+
+Example:
+
+8 + 16 = ?
+
+AYA currently says something like:
+
+"осем плюс едно шест равно куешчън марк"
+
+This mixes Bulgarian with English and reads symbols literally.
+
+This is incorrect for Bulgarian children.
+
+------------------------------------------------
+
+GOAL
+
+Ensure that all math expressions are converted into natural Bulgarian spoken language before being sent to TTS.
+
+AYA must sound like a Bulgarian primary-school teacher speaking to a child.
+
+------------------------------------------------
+
+PHASE 1 — AUDIT
+
+Inspect the speech pipeline and report internally:
+
+1. Where lesson text enters the TTS pipeline
+2. Whether math expressions are currently passed as raw symbolic text
+3. Whether any speech preprocessing already exists
+4. Where the safest insertion point is for math speech normalization
+
+Check files related to:
+
+voice.ts  
+use-aya-lesson-voice.ts  
+useTextToSpeech.ts  
+lesson-viewer.tsx  
+any speech preprocessing utilities
+
+------------------------------------------------
+
+PHASE 2 — IMPLEMENT MATH SPEECH NORMALIZATION
+
+Add a lightweight normalization layer BEFORE speech playback.
+
+Requirements:
+
+Detect simple math expressions and convert them to natural Bulgarian speech.
+
+Examples:
+
+8 + 16 = ?
+→ Колко е осем плюс шестнадесет?
+
+21 + 6 = ?
+→ Колко е двадесет и едно плюс шест?
+
+15 - 4 = ?
+→ Колко е петнадесет минус четири?
+
+3 × 7 = ?
+→ Колко е три по седем?
+
+12 ÷ 3 = ?
+→ Колко е дванадесет разделено на три?
+
+Rules:
+
++ → плюс  
+- → минус  
+× → по  
+÷ → разделено на  
+
+Convert "= ?" into a natural question format:
+
+Колко е ...
+
+Never read symbols literally.
+
+------------------------------------------------
+
+PHASE 3 — BULGARIAN NUMBER NORMALIZATION
+
+Numbers must be spoken as natural Bulgarian numbers.
+
+Examples:
+
+16 → шестнадесет  
+21 → двадесет и едно  
+34 → тридесет и четири  
+108 → сто и осем  
+
+Never read numbers digit-by-digit.
+
+Wrong:
+"едно шест"
+
+Correct:
+"шестнадесет"
+
+------------------------------------------------
+
+PHASE 4 — BULGARIAN LANGUAGE GUARDRAIL
+
+Add a lightweight speech guardrail so AYA always speaks clean Bulgarian.
+
+Rules:
+
+AYA must always speak and write natural Bulgarian.
+
+Never use Russian vocabulary or Russian grammar.
+
+Never mix English words inside lessons.
+
+Never read punctuation or symbols literally.
+
+Math questions must always be spoken as natural teacher sentences.
+
+Example:
+
+8 + 16 = ?
+→ "Колко е осем плюс шестнадесет?"
+
+AYA should sound like a friendly Bulgarian primary-school teacher speaking to a child.
+
+------------------------------------------------
+
+PHASE 5 — SAFETY
+
+Do not break:
+
+lesson viewer  
+quiz flow  
+infinite practice  
+replay button  
+avatar speaking sync  
+emotion engine  
+current TTS endpoint  
+mission system
+
+------------------------------------------------
+
+PHASE 6 — RETURN
+
+Return exactly:
+
+1. where math text enters the speech pipeline
+2. whether raw symbolic math was previously spoken
+3. normalization layer added
+4. files modified
+5. examples before/after
+6. preview test steps
+
+Feature name:
+AYA Bulgarian Math Speech Normalization

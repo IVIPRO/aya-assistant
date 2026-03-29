@@ -381,20 +381,20 @@ function AyaCharacterSVG({
            C 47 6 52 5 60 5
            C 68 5 73 6 83 11
            C 98 17 101 39 95 54
-           C 90 46 82 38 72 36
-           C 67 34 62 33 60 33
-           C 58 33 53 34 48 36
-           C 38 38 30 46 25 54 Z"
+           C 90 46 82 41 72 39
+           C 67 38 62 38 60 38
+           C 58 38 53 38 48 39
+           C 38 41 30 46 25 54 Z"
         fill={C.hair}
       />
-      {/* Natural hairline boundary — soft arch where hair meets forehead */}
+      {/* Hairline boundary — lowered to y=38-42, less forehead visible */}
       <path
-        d="M 26 54 C 31 47 39 39 49 37 C 54 35 58 34 60 33
-           C 62 34 66 35 71 37 C 81 39 89 47 94 54"
+        d="M 26 54 C 31 49 40 43 50 41 C 55 39 58 38 60 38
+           C 62 38 65 39 70 41 C 80 43 89 49 94 54"
         fill="none" stroke={C.skin} strokeWidth="2.5" strokeLinecap="round" opacity="0.35"
       />
-      {/* Center-part crease — crown to hairline */}
-      <path d="M 60 6 C 60 14 60 22 60 33" fill="none" stroke={C.hairLight} strokeWidth="1.4" strokeLinecap="round" opacity="0.38" />
+      {/* Center-part crease — crown to new lower hairline */}
+      <path d="M 60 5 C 60 14 60 24 60 38" fill="none" stroke={C.hairLight} strokeWidth="1.4" strokeLinecap="round" opacity="0.38" />
       {/* Crown shine */}
       <path d="M 46 18 Q 53 13 60 13 Q 67 13 74 18 Q 67 15 60 15 Q 53 15 46 18 Z" fill={C.white} opacity="0.13" />
 
@@ -407,6 +407,26 @@ function AyaCharacterSVG({
       <ellipse cx="25" cy="71" rx="5" ry="7" fill={C.skin} />
       <ellipse cx="95" cy="71" rx="7" ry="9" fill={C.skinDark} />
       <ellipse cx="95" cy="71" rx="5" ry="7" fill={C.skin} />
+
+      {/* ── FRINGE WISPS — drawn after face, soft fall over upper forehead ── */}
+      {/* Left wisp — slightly wider, tapers to open rounded end near cheek */}
+      <path
+        d="M 55 38
+           C 49 40 43 44 40 50
+           C 38 55 39 58 43 58
+           C 45 55 45 51 47 47
+           C 50 43 54 40 57 38 Z"
+        fill={C.hair} opacity="0.82"
+      />
+      {/* Right wisp — slightly shorter for asymmetry */}
+      <path
+        d="M 65 38
+           C 71 40 77 44 80 50
+           C 82 54 80 57 77 57
+           C 75 54 75 50 73 46
+           C 70 42 66 40 63 38 Z"
+        fill={C.hair} opacity="0.78"
+      />
 
       {/* ── HAIR LEFT — gentle S-curve outer, natural soft tip ── */}
       <path

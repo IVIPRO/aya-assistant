@@ -1,0 +1,110 @@
+X10THINK — FINAL AYA BRAND MASCOT HAIR REFINEMENT
+
+GOAL  
+Refine the AYA avatar hair so the character becomes a stronger and more natural brand mascot suitable for an educational app.
+
+IMPORTANT RULES  
+Modify ONLY the hair and hairline.  
+Do NOT change:
+- face shape  
+- glasses  
+- eyes  
+- skin tone  
+- body proportions  
+- character colors  
+
+Keep the same visual identity.
+
+------------------------------------------------
+
+FOREHEAD ADJUSTMENT
+
+The forehead currently appears too large.
+
+Reduce the visible forehead slightly.
+
+Hair should start lower and gently overlap the top of the forehead.
+
+Hair must look like it naturally grows from the scalp, not floating above the head.
+
+------------------------------------------------
+
+FRINGE / HAIR FALL
+
+Add a very soft natural front fall.
+
+Hair should slightly fall toward the forehead, similar to natural children's hair.
+
+This fall must be subtle:
+- not bangs
+- not covering the eyes
+- only soft framing of the forehead.
+
+------------------------------------------------
+
+TOP HAIR SHAPE
+
+The top of the hair should form a soft rounded dome.
+
+Avoid flat top shapes.
+
+Hair must follow the skull curve naturally.
+
+------------------------------------------------
+
+SIDE STRANDS
+
+Side strands should:
+
+• frame the face naturally  
+• slightly curve inward near the cheeks  
+• then curve slightly outward near the bottom  
+
+Avoid perfectly straight vertical lines.
+
+------------------------------------------------
+
+COLOR
+
+Hair color must remain a single dark chestnut brown.
+
+Remove any black tones or dual color shading.
+
+Only one consistent hair color.
+
+------------------------------------------------
+
+BRAND SILHOUETTE
+
+The hair silhouette must stay simple and recognizable.
+
+AYA should remain identifiable even at small icon sizes (24px–64px).
+
+------------------------------------------------
+
+REALISM GOAL
+
+Hair should look:
+
+• natural  
+• soft  
+• child-friendly  
+• integrated with the head  
+
+Avoid the "wig effect".
+
+Hair must sit directly on the scalp with a natural hairline.
+
+------------------------------------------------
+
+FINAL CHECK
+
+Confirm:
+
+• smaller visible forehead  
+• soft hair falling slightly toward the forehead  
+• hair attached naturally to the head  
+• face and glasses unchanged  
+• consistent hair color  
+
+Return preview screenshot after modification.

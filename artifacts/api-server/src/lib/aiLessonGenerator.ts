@@ -180,10 +180,14 @@ function getGradeLabel(grade: number, lang: LangCode): string {
 
 // ─── Prompt builder ───────────────────────────────────────────────────────────
 
-function buildLessonSystemPrompt(): string {
+function buildLessonSystemPrompt(lang?: LangCode): string {
+  const bgLock =
+    lang === "bg"
+      ? `\nCRITICAL LANGUAGE RULE: You MUST generate ALL text in Bulgarian (Български език). Do NOT use Russian. Bulgarian and Russian both use the Cyrillic script but are completely different languages with different words and grammar. Every single word in the JSON output must be Bulgarian — not Russian, not a mix. When in doubt, use simple, short Bulgarian words suitable for primary school children.`
+      : "";
   return `You are AYA, a warm and encouraging AI teacher for primary school children (ages 6–10).
 Your lessons are clear, kind, age-appropriate, and educationally sound.
-Return only valid JSON — no markdown, no commentary, just the JSON object.`;
+Return only valid JSON — no markdown, no commentary, just the JSON object.${bgLock}`;
 }
 
 function buildLessonUserPrompt(
@@ -210,7 +214,7 @@ function buildLessonUserPrompt(
 
   const bulgarianNote =
     lang === "bg"
-      ? `\nThis is a Bulgarian child following the МОН (Ministry of Education) curriculum for ${gradeLabel}. Use Bulgarian vocabulary and examples from Bulgarian everyday life, nature, or culture where appropriate.`
+      ? `\nThis is a Bulgarian child following the МОН (Ministry of Education) curriculum for ${gradeLabel}. Write ONLY in Bulgarian (Български). Do NOT write in Russian. Bulgarian and Russian share the Cyrillic alphabet but are different languages — use Bulgarian words, Bulgarian grammar, and Bulgarian curriculum examples. Never mix in Russian words or phrases.`
       : "";
 
   return `Generate a complete lesson in ${langName} for:
@@ -339,7 +343,7 @@ function buildExerciseBatchPrompt(
 
   const bulgarianNote =
     lang === "bg"
-      ? `\nThis is a Bulgarian child following the МОН curriculum for ${gradeLabel}. Use Bulgarian text and culturally relevant examples.`
+      ? `\nThis is a Bulgarian child following the МОН curriculum for ${gradeLabel}. Write ONLY in Bulgarian (Български). Do NOT write in Russian. Bulgarian and Russian share the Cyrillic alphabet but are completely different languages. Use Bulgarian words, Bulgarian grammar, and age-appropriate Bulgarian examples. Never use Russian words or phrases.`
       : "";
 
   const isMath = subjectId === "mathematics";
@@ -426,7 +430,7 @@ export async function generateExerciseBatch(
       model: "gpt-4o-mini",
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: buildLessonSystemPrompt() },
+        { role: "system", content: buildLessonSystemPrompt(lang) },
         { role: "user", content: buildExerciseBatchPrompt(subjectId, topicId, grade, lang, mode, count) },
       ],
       max_tokens: 4096,
@@ -469,7 +473,7 @@ export async function generateAILesson(
       model: "gpt-4o-mini",
       response_format: { type: "json_object" },
       messages: [
-        { role: "system", content: buildLessonSystemPrompt() },
+        { role: "system", content: buildLessonSystemPrompt(lang) },
         { role: "user", content: buildLessonUserPrompt(subjectId, topicId, grade, lang, mode) },
       ],
       max_tokens: 2048,

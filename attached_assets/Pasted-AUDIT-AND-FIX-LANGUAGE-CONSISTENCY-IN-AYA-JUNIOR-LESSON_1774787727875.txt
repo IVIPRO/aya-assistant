@@ -1,0 +1,140 @@
+AUDIT AND FIX LANGUAGE CONSISTENCY IN AYA JUNIOR LESSON SYSTEM
+
+CONTEXT
+
+During Junior lessons AYA sometimes switches from Bulgarian to Russian while speaking or displaying text.
+
+Example problem:
+AYA encouragement or lesson speech suddenly appears in Russian while the interface and lesson are Bulgarian.
+
+The Junior app must ALWAYS speak and display clean Bulgarian language.
+
+This task is strictly a language consistency audit and fix.
+
+CRITICAL SAFETY RULES
+
+1. DO NOT modify:
+   - lesson logic
+   - XP system
+   - scoring
+   - badges
+   - navigation
+   - UI layout
+
+2. DO NOT create new lesson structures.
+
+3. DO NOT regenerate lesson content from scratch.
+
+4. ONLY audit and normalize language to Bulgarian.
+
+5. Keep existing lesson flow intact.
+
+GOAL
+
+Ensure that all speech and lesson text used by AYA Junior is Bulgarian only.
+
+No Russian phrases must appear anywhere in the lesson pipeline.
+
+AUDIT AREAS
+
+Search the entire project for any Russian text used in:
+
+- lesson explanation
+- example explanations
+- hint messages
+- encouragement messages
+- quiz prompts
+- practice instructions
+- fallback messages
+- system messages used by lesson viewer
+- speech prompts used by TTS
+
+Check both:
+
+• hardcoded strings  
+• JSON lesson content  
+• fallback template messages
+
+LANGUAGE NORMALIZATION
+
+If Russian phrases are found:
+
+1. Replace them with natural Bulgarian phrasing suitable for children.
+2. Keep sentences short and friendly.
+3. Avoid literal translation from Russian.
+
+Examples:
+
+Replace Russian style phrases like:
+"Молодец! Продолжай!"
+"Давай попробуем ещё"
+"Правильно!"
+
+With Bulgarian equivalents:
+
+"Браво!"
+"Нека опитаме още веднъж."
+"Точно така!"
+
+TTS LANGUAGE LOCK
+
+Ensure the speech system is locked to Bulgarian.
+
+Verify that TTS configuration uses:
+
+language = "bg"
+locale = "bg-BG"
+
+If any TTS calls are missing language configuration,
+explicitly enforce Bulgarian.
+
+LESSON VIEWER CHECK
+
+Verify the following steps always use Bulgarian text:
+
+• lesson introduction  
+• explanation  
+• example  
+• hint  
+• practice prompt  
+• quiz question  
+• encouragement messages  
+• correct answer feedback  
+• incorrect answer feedback  
+• lesson completion message  
+
+FILES TO AUDIT
+
+Search files related to:
+
+lesson viewer  
+lesson speech generator  
+practice generator  
+quiz prompts  
+encouragement messages  
+hint templates  
+fallback message system  
+
+EXPECTED RESULT
+
+AYA Junior lessons are 100% Bulgarian.
+
+No Russian text appears in:
+
+• speech  
+• hints  
+• encouragement  
+• lesson explanations  
+• quiz prompts  
+
+RETURN
+
+Provide:
+
+1. List of files where Russian text was found  
+2. Lines replaced with Bulgarian  
+3. Confirmation that TTS is locked to bg-BG  
+4. Test instructions to verify Bulgarian-only behavior
+
+Feature name:
+AYA Bulgarian Language Enforcement

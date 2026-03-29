@@ -13,7 +13,7 @@ import type { LangCode } from "@/lib/i18n";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { XpToast, type XpReward } from "@/components/xp-toast";
 import { AyaAvatar, type AyaEmotion } from "@/components/AyaAvatar";
-import { getCuriosityCard, getCuriosityFact, type CuriosityCard as CuriosityCardData } from "@/lib/curiosityEngine";
+import { getCuriosityCard, getCuriosityFact, CURIOSITY_BRIDGES, type CuriosityCard as CuriosityCardData } from "@/lib/curiosityEngine";
 import { StoryLessonEngine } from "./story-engine";
 
 /* ─── Adaptive profile ──────────────────────────────────────────── */
@@ -752,6 +752,27 @@ function InteractiveLessonEngine({
       : pick(pool);
   };
 
+  /* ─── Curiosity Loop ────────────────────────────────────────────────────────
+   * Triggers a short curiosity moment every 4–6 correctly solved tasks.
+   * Non-blocking: fires between tasks without creating a new phase.
+   * Disabled for weak-topic sessions so struggling children can stay focused.
+   */
+  const curiositySolvedRef = useRef(0);
+  // Randomize threshold so children don't notice a fixed pattern (4, 5, or 6)
+  const curiosityThresholdRef = useRef(4 + Math.floor(Math.random() * 3));
+
+  const maybeTriggerCuriosity = (): string | null => {
+    if (topicContext === "weak") return null; // struggling children need focus, not detours
+    if (curiositySolvedRef.current < curiosityThresholdRef.current) return null;
+    // Threshold reached — compose the curiosity moment
+    curiositySolvedRef.current = 0;
+    curiosityThresholdRef.current = 4 + Math.floor(Math.random() * 3);
+    const fact = getCuriosityFact(subject.id, lang);
+    if (!fact) return null;
+    const bridges = CURIOSITY_BRIDGES[lang] ?? CURIOSITY_BRIDGES.en;
+    return `${pick(bridges)} ${fact.content}`;
+  };
+
   /* ── voice: speak whenever spokenText changes, with current emotion mode ── */
   useEffect(() => {
     speak(spokenText, voiceEmotion);
@@ -854,6 +875,7 @@ function InteractiveLessonEngine({
       trackAnswer(true);
       practiceCorrectRef.current += 1;
       consecutiveCorrectRef.current += 1;
+      curiositySolvedRef.current += 1; // count toward curiosity loop threshold
       setPhase({ kind: "practice", idx, attempts, feedback: "correct" });
       say(selectConsistentPraise(d.practiceCorrect, d.praiseRecovery), undefined, "praise");
     } else {
@@ -887,7 +909,17 @@ function InteractiveLessonEngine({
       if (consecutiveCorrectRef.current >= 2) {
         go({ kind: "celebrate", nextPracticeIdx: nextIdx }, pick(d.celebrate));
       } else {
-        go({ kind: "practice", idx: nextIdx, attempts: 0, feedback: "none" }, pick(d.practiceLead), problems[nextIdx].question);
+        /* Curiosity loop: every 4-6 correct answers AYA shares a real-world fact */
+        const curiosityMoment = maybeTriggerCuriosity();
+        if (curiosityMoment) {
+          go(
+            { kind: "practice", idx: nextIdx, attempts: 0, feedback: "none" },
+            curiosityMoment,
+            `${curiosityMoment} ${problems[nextIdx].question}`,
+          );
+        } else {
+          go({ kind: "practice", idx: nextIdx, attempts: 0, feedback: "none" }, pick(d.practiceLead), problems[nextIdx].question);
+        }
       }
     } else {
       onComplete(practiceCorrectRef.current, quizCorrectRef.current, problems.length, questions.length);
@@ -905,8 +937,12 @@ function InteractiveLessonEngine({
   const selectQuiz = (idx: number, optIdx: number) => {
     const correct = optIdx === questions[idx].correctIndex;
     trackAnswer(correct);
-    if (correct) quizCorrectRef.current += 1;
-    else lessonMistakesRef.current += 1;
+    if (correct) {
+      quizCorrectRef.current += 1;
+      curiositySolvedRef.current += 1; // count toward curiosity loop threshold
+    } else {
+      lessonMistakesRef.current += 1;
+    }
     setPhase({ kind: "quiz", idx, selected: optIdx, correct });
     /* Weak topics get a supportive wrong-answer message; others get generic */
     const wrongMsg = (topicContext === "weak" && ctxD.quizSupport)
@@ -924,7 +960,18 @@ function InteractiveLessonEngine({
   /* ── advance from quiz — speak next question after feedback */
   const fromQuiz = (idx: number) => {
     if (idx + 1 < questions.length) {
-      go({ kind: "quiz", idx: idx + 1, selected: null, correct: null }, pick(d.quizIntro), questions[idx + 1].question);
+      /* Curiosity loop fires between quiz questions too (only if threshold reached) */
+      const curiosityMoment = maybeTriggerCuriosity();
+      const nextQ = questions[idx + 1].question;
+      if (curiosityMoment) {
+        go(
+          { kind: "quiz", idx: idx + 1, selected: null, correct: null },
+          curiosityMoment,
+          `${curiosityMoment} ${nextQ}`,
+        );
+      } else {
+        go({ kind: "quiz", idx: idx + 1, selected: null, correct: null }, pick(d.quizIntro), nextQ);
+      }
     } else {
       const pc = practiceCorrectRef.current;
       const qc = quizCorrectRef.current;

@@ -1,0 +1,145 @@
+AUDIT AND UPGRADE AYA CURIOSITY ENGINE INTO A CURIOSITY LOOP
+
+CRITICAL RULES
+
+1. FIRST inspect the latest codebase before making any changes.
+2. Check if a Curiosity Engine already exists.
+3. If a Curiosity Engine already performs curiosity interruptions during lessons, DO NOT duplicate the system.
+4. Extend or refine the existing system instead.
+5. If the functionality is already sufficient, do not modify the code.
+
+------------------------------------------------
+
+CONTEXT
+
+AYA Junior already contains a module called Curiosity Engine.
+
+The goal is to ensure that AYA occasionally introduces small curiosity moments during learning.
+
+These curiosity moments should:
+
+- make the lesson more engaging
+- connect math to the real world
+- trigger interest without interrupting the lesson flow
+
+------------------------------------------------
+
+GOAL
+
+Ensure AYA uses a **Curiosity Loop** during lessons.
+
+A curiosity loop means:
+
+After several solved tasks, AYA briefly introduces an interesting fact or real-world connection.
+
+Example:
+
+Student solves:
+7 + 5
+
+AYA responds:
+
+"Браво!  
+Знаеш ли нещо интересно?  
+12 е броят на месеците в годината."
+
+Then the lesson continues normally.
+
+------------------------------------------------
+
+PHASE 1 — AUDIT
+
+Inspect the codebase and report:
+
+1. Whether curiosityEngine.ts already triggers curiosity moments during lessons.
+2. Where curiosity content is generated.
+3. Whether curiosity moments are already inserted into lesson flow.
+4. Whether curiosity timing already exists.
+
+------------------------------------------------
+
+PHASE 2 — CURIOSITY LOOP
+
+If not already implemented:
+
+Add a lightweight curiosity loop.
+
+Rule:
+
+Trigger curiosity moment every **4–6 solved tasks**.
+
+Requirements:
+
+- Must not interrupt learning flow.
+- Must be short (1–2 sentences).
+- Must relate to the current topic when possible.
+
+Example topics:
+
+math facts  
+real-world numbers  
+small science facts  
+patterns in nature  
+
+------------------------------------------------
+
+PHASE 3 — LESSON INTEGRATION
+
+Ensure curiosity moments appear between lesson steps such as:
+
+task solved  
+practice completion  
+mini milestone  
+
+Do not trigger during:
+
+initial explanation  
+hint moments  
+error correction  
+
+------------------------------------------------
+
+PHASE 4 — KEEP SYSTEM LIGHTWEIGHT
+
+Do NOT introduce new architecture.
+
+Reuse:
+
+curiosityEngine.ts  
+lesson viewer hooks  
+existing lesson step logic  
+
+Prefer a small function like:
+
+maybeTriggerCuriosity()
+
+------------------------------------------------
+
+PHASE 5 — SAFETY
+
+Do not break:
+
+lesson flow  
+voice pipeline  
+emotion engine  
+math speech normalization  
+missions system  
+XP rewards  
+adaptive learning  
+memory engine  
+
+------------------------------------------------
+
+PHASE 6 — RETURN
+
+Return exactly:
+
+1. whether Curiosity Engine already existed
+2. whether curiosity loop already existed
+3. improvements added (if any)
+4. files modified
+5. examples of curiosity moments
+6. preview test steps
+
+Feature name:
+AYA Curiosity Loop

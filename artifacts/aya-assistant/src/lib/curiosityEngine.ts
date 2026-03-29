@@ -1100,3 +1100,46 @@ export const DAILY_CURIOSITY_HOOKS: Record<LangCode, string[]> = {
 export function getDailyHook(lang: LangCode): string {
   return pickRandom(DAILY_CURIOSITY_HOOKS[lang] ?? DAILY_CURIOSITY_HOOKS.en);
 }
+
+/**
+ * Short bridge phrases AYA uses to introduce a mid-lesson curiosity moment.
+ * Spoken after the Nth solved task to keep lessons engaging.
+ * Designed to feel like a natural teacher aside, not an interruption.
+ */
+export const CURIOSITY_BRIDGES: Record<LangCode, string[]> = {
+  bg: [
+    "Знаеш ли нещо интересно?",
+    "Ей, слушай това —",
+    "Малко интересен факт:",
+    "Знаеш ли, че",
+    "Преди следващата задача — интересно нещо:",
+  ],
+  en: [
+    "Did you know?",
+    "Here's something cool —",
+    "Fun fact:",
+    "Before the next task —",
+    "Quick interesting fact:",
+  ],
+  es: [
+    "¿Sabías que",
+    "Aquí algo genial —",
+    "Dato curioso:",
+    "Antes de seguir —",
+    "¡Escucha esto!",
+  ],
+  de: [
+    "Wusstest du das?",
+    "Hier etwas Tolles —",
+    "Kleiner Wissensfakt:",
+    "Kurz etwas Interessantes:",
+    "Bevor wir weitermachen —",
+  ],
+  fr: [
+    "Le savais-tu?",
+    "Voici quelque chose de cool —",
+    "Petit fait amusant:",
+    "Avant la prochaine tâche —",
+    "Écoute ça:",
+  ],
+};

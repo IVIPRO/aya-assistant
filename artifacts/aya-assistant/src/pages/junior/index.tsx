@@ -667,24 +667,37 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
 
           {badges.length > 0 && (
             <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-2xl p-4 border-2 border-purple-200 shadow-sm">
-              <div className="flex items-center gap-2 mb-3">
-                <Trophy className="w-4 h-4 text-purple-600" />
-                <span className="font-bold text-sm text-purple-900">Badges Unlocked</span>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-purple-600" />
+                  <span className="font-bold text-sm text-purple-900">Badges Unlocked</span>
+                </div>
+                {badges.length > 3 && (
+                  <span className="text-xs font-bold bg-purple-200 text-purple-900 px-2 py-1 rounded-full">
+                    +{badges.length - 3} more
+                  </span>
+                )}
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                {badges.map(badge => (
+              <div className="flex gap-2 items-center">
+                {badges.slice(0, 3).map(badge => (
                   <motion.div
                     key={badge.id}
                     initial={{ scale: 0, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    whileHover={{ scale: 1.05 }}
-                    className="bg-white rounded-xl p-3 border border-purple-100 text-center shadow-sm"
+                    whileHover={{ scale: 1.1 }}
+                    className="flex-1 bg-white rounded-xl p-2 border border-purple-100 text-center shadow-sm hover:shadow-md transition-shadow"
+                    title={badge.title}
                   >
-                    <div className="text-2xl mb-1">{badge.icon}</div>
-                    <div className="text-xs font-semibold text-purple-900 line-clamp-2">{badge.title}</div>
+                    <div className="text-2xl">{badge.icon}</div>
+                    <div className="text-xs font-semibold text-purple-900 line-clamp-1 mt-0.5">{badge.title}</div>
                   </motion.div>
                 ))}
               </div>
+              {badges.length > 3 && (
+                <Link href="/junior/badges" className="text-xs font-bold text-purple-600 hover:text-purple-700 mt-3 inline-block">
+                  Виж всички →
+                </Link>
+              )}
             </div>
           )}
 

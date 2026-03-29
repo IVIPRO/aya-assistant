@@ -11,6 +11,7 @@ import { Dashboard } from "@/pages/dashboard";
 import { Junior } from "@/pages/junior";
 import { Missions } from "@/pages/junior/missions";
 import { WorldMap } from "@/pages/junior/world";
+import { JuniorBadgesPage } from "@/pages/junior/badges";
 import { Student } from "@/pages/student";
 import { Family } from "@/pages/family";
 import { Psychology } from "@/pages/psychology";
@@ -50,6 +51,7 @@ function Router() {
       <Route path="/junior" component={() => <ProtectedRoute component={Junior} />} />
       <Route path="/junior/missions" component={() => <ProtectedRoute component={Missions} />} />
       <Route path="/junior/world" component={() => <ProtectedRoute component={WorldMap} />} />
+      <Route path="/junior/badges" component={() => <ProtectedRoute component={JuniorBadgesPage} />} />
       <Route path="/student" component={() => <ProtectedRoute component={Student} />} />
       <Route path="/family" component={() => <ProtectedRoute component={Family} />} />
       <Route path="/psychology" component={() => <ProtectedRoute component={Psychology} />} />

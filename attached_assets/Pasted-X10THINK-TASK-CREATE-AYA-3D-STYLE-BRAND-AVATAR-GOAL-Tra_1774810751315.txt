@@ -1,0 +1,123 @@
+X10THINK TASK — CREATE AYA 3D STYLE BRAND AVATAR
+
+GOAL  
+Transform the current AYA avatar into a friendly 3D-style educational mascot suitable for a children learning application.
+
+IMPORTANT RULES  
+Do NOT break the existing UI layout.
+
+The avatar must remain compatible with the current dashboard component.
+
+Keep the same character identity.
+
+------------------------------------------------
+
+CHARACTER IDENTITY
+
+AYA must remain recognizable with:
+
+• round glasses  
+• chestnut brown hair  
+• friendly smile  
+• warm educational personality
+
+------------------------------------------------
+
+3D STYLE
+
+Convert the avatar into a soft 3D-style illustration.
+
+The character should look like:
+
+• Pixar-inspired  
+• Duolingo-level mascot style  
+• rounded shapes  
+• soft lighting feel
+
+Avoid flat SVG look.
+
+Simulate depth using:
+
+• soft shadows  
+• subtle highlights  
+• layered shapes
+
+------------------------------------------------
+
+PROPORTIONS
+
+Adjust proportions for mascot design:
+
+• head ≈ 65-70% of total character
+• body ≈ 30-35%
+
+This creates a more friendly child-like mascot.
+
+------------------------------------------------
+
+FACE
+
+Keep the existing facial expression but slightly enhance:
+
+• eyes 5-10% larger
+• softer cheeks
+• warm smile
+
+Do NOT change glasses style.
+
+Glasses remain the main recognition element.
+
+------------------------------------------------
+
+HAIR
+
+Hair must be:
+
+• chestnut brown (#5D3A1A)
+• soft rounded volume
+• slightly falling toward the forehead
+
+Avoid:
+
+• hard hairline
+• floating hair
+• wig effect
+
+Hair must appear to grow naturally from the head.
+
+------------------------------------------------
+
+BRAND SIMPLICITY
+
+The character silhouette must remain simple and recognizable.
+
+AYA must still be readable at small sizes:
+
+• 24px
+• 32px
+• 48px
+
+------------------------------------------------
+
+TECH IMPLEMENTATION
+
+Create the avatar as a reusable component:
+
+AYAAvatar3D
+
+Compatible with:
+
+React / Next / frontend UI
+
+Use layered vector shapes or canvas rendering to simulate 3D.
+
+------------------------------------------------
+
+OUTPUT
+
+Return:
+
+1. updated avatar preview
+2. confirmation UI layout unchanged
+3. confirmation mascot silhouette readable
+4. component name AYAAvatar3D

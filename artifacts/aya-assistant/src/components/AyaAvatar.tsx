@@ -373,28 +373,39 @@ function AyaCharacterSVG({
       {/* ── NECK ── */}
       <rect x="51" y="108" width="18" height="12" rx="4" fill={C.skin} />
 
-      {/* ── BACK HAIR (behind face) — medium-long natural wavy ── */}
-      {/* Main dark volume — top of head down to shoulders */}
+      {/* ── BACK HAIR — top cap + two open hanging side strands ── */}
+      {/* Top cap — sits behind the face, above forehead */}
       <path
-        d="M 19 52 C 16 40 20 22 36 15 C 45 11 52 10 60 10 C 68 10 75 11 84 15
-           C 100 22 104 40 101 52 C 106 72 107 100 103 120
-           C 99 133 86 142 60 142 C 34 142 21 133 17 120
-           C 13 100 14 72 19 52 Z"
+        d="M 22 52 C 20 38 24 20 40 14 C 48 11 54 10 60 10
+           C 66 10 72 11 80 14 C 96 20 100 38 98 52
+           C 86 42 74 37 60 37 C 46 37 34 42 22 52 Z"
         fill={C.hairDark}
       />
-      {/* Left shoulder-length side panel — gentle wave */}
+      {/* Left hanging strand — open bottom, does NOT cross under chin */}
       <path
-        d="M 19 52 C 14 66 12 88 15 110 C 17 122 23 133 32 139
-           C 27 123 22 104 20 82 C 19 68 19 58 19 52 Z"
-        fill={C.hair}
-        opacity="0.55"
+        d="M 22 50 C 14 60 10 76 10 96 C 10 114 13 127 20 136
+           C 26 141 34 142 38 139
+           C 32 128 26 114 24 96 C 22 76 22 62 24 52 Z"
+        fill={C.hairDark}
       />
-      {/* Right shoulder-length side panel — gentle wave */}
+      {/* Left strand lighter inner sheen */}
       <path
-        d="M 101 52 C 106 66 108 88 105 110 C 103 122 97 133 88 139
-           C 93 123 98 104 100 82 C 101 68 101 58 101 52 Z"
-        fill={C.hair}
-        opacity="0.55"
+        d="M 24 54 C 20 68 18 86 19 104 C 20 118 24 130 30 137
+           C 26 126 24 110 24 92 C 24 74 24 62 24 54 Z"
+        fill={C.hair} opacity="0.5"
+      />
+      {/* Right hanging strand — open bottom, does NOT cross under chin */}
+      <path
+        d="M 98 50 C 106 60 110 76 110 96 C 110 114 107 127 100 136
+           C 94 141 86 142 82 139
+           C 88 128 94 114 96 96 C 98 76 98 62 96 52 Z"
+        fill={C.hairDark}
+      />
+      {/* Right strand lighter inner sheen */}
+      <path
+        d="M 96 54 C 100 68 102 86 101 104 C 100 118 96 130 90 137
+           C 94 126 96 110 96 92 C 96 74 96 62 96 54 Z"
+        fill={C.hair} opacity="0.5"
       />
 
       {/* ── FACE ── */}
@@ -416,16 +427,18 @@ function AyaCharacterSVG({
            C 59 21 57 21 53 22 C 42 25 33 34 27 44 Z"
         fill={C.hair}
       />
-      {/* Left side panel — soft wave beside face */}
+      {/* Left front strand — hangs down beside face to shoulder, open at bottom */}
       <path
-        d="M 27 44 C 23 52 21 62 22 72 C 22 80 23 88 22 95
-           C 28 87 28 75 28 63 C 28 54 28 49 27 44 Z"
+        d="M 27 44 C 22 55 20 70 20 86 C 20 104 22 118 26 130
+           C 30 136 36 138 40 136
+           C 34 124 30 108 28 90 C 26 72 26 58 27 46 Z"
         fill={C.hair}
       />
-      {/* Right side panel — soft wave beside face */}
+      {/* Right front strand — hangs down beside face to shoulder, open at bottom */}
       <path
-        d="M 93 44 C 97 52 99 62 98 72 C 98 80 97 88 98 95
-           C 92 87 92 75 92 63 C 92 54 92 49 93 44 Z"
+        d="M 93 44 C 98 55 100 70 100 86 C 100 104 98 118 94 130
+           C 90 136 84 138 80 136
+           C 86 124 90 108 92 90 C 94 72 94 58 93 46 Z"
         fill={C.hair}
       />
       {/* Center part — subtle light crease */}
@@ -443,15 +456,15 @@ function AyaCharacterSVG({
         d="M 90 36 C 85 28 76 22 66 21"
         fill="none" stroke={C.hairLight} strokeWidth="1.5" strokeLinecap="round" opacity="0.28"
       />
-      {/* Wave stroke — left temple */}
+      {/* Wave stroke — left strand, gentle S-curve full length */}
       <path
-        d="M 23 52 C 21 60 21 68 23 76 C 22 82 22 89 23 95"
-        fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.2"
+        d="M 21 56 C 19 68 19 82 21 96 C 20 108 20 120 22 130"
+        fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.22"
       />
-      {/* Wave stroke — right temple */}
+      {/* Wave stroke — right strand, gentle S-curve full length */}
       <path
-        d="M 97 52 C 99 60 99 68 97 76 C 98 82 98 89 97 95"
-        fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.2"
+        d="M 99 56 C 101 68 101 82 99 96 C 100 108 100 120 98 130"
+        fill="none" stroke={C.hairLight} strokeWidth="1.8" strokeLinecap="round" opacity="0.22"
       />
       {/* Soft shine highlight */}
       <path

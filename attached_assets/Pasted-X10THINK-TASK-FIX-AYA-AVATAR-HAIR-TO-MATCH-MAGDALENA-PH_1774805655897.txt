@@ -1,0 +1,120 @@
+X10THINK TASK — FIX AYA AVATAR HAIR TO MATCH MAGDALENA PHOTO NATURALLY
+
+CRITICAL RULES
+
+1. First inspect the current avatar implementation before editing.
+2. Modify ONLY the hair shape and hair silhouette.
+3. Do NOT change:
+   - face shape
+   - glasses
+   - skin tone
+   - smile
+   - body proportions
+   - overall illustration style
+4. Keep the same AYA vector/cartoon design language.
+5. Do NOT create a second avatar version.
+6. Update the single shared avatar used across AYA.
+
+------------------------------------------------
+
+PROBLEM
+
+The current AYA hair update looks wrong.
+
+It does NOT resemble natural hair from the Magdalena reference photo.
+
+Current issue:
+- dark shape wraps around the face and under the chin
+- looks like a hood / scarf / hijab
+- hair mass is too solid and helmet-like
+- does not look like real long child hair
+
+This must be corrected.
+
+------------------------------------------------
+
+GOAL
+
+Make AYA’s hair resemble Magdalena’s hair from the provided photo:
+
+- natural
+- long
+- softly wavy
+- loose
+- child-like
+- realistic in silhouette, but still simplified in vector/cartoon style
+
+------------------------------------------------
+
+REFERENCE HAIR CHARACTERISTICS
+
+Use the photo as hairstyle reference only.
+
+Hair should be:
+
+- medium-long to long
+- falling naturally down both sides
+- slightly wavy, not curly
+- slightly fluffy / soft volume
+- parted near the middle
+- dark brown
+- ending around shoulder level
+- open hair, not tied
+- no hair wrapping under the chin
+- no closed dark oval around the face
+
+Important:
+The face must stay open and visible.
+Hair should frame the face naturally from the sides only.
+
+------------------------------------------------
+
+WHAT TO AVOID
+
+Do NOT create:
+
+- hood shape
+- scarf shape
+- hijab-like silhouette
+- helmet hair
+- perfectly symmetrical block hair
+- hair under the chin
+- very straight flat hair with no softness
+- strong curls
+
+------------------------------------------------
+
+DESIGN TARGET
+
+AYA should look like:
+
+- a warm child-friendly mascot
+- visually inspired by Magdalena’s hairstyle
+- suitable for app branding, toys, mugs, dolls, and printed materials
+
+The hairstyle should feel iconic and recognizable, but still simple enough for branding.
+
+------------------------------------------------
+
+IMPLEMENTATION
+
+1. Find the shared AYA avatar asset/component.
+2. Replace the current hair paths/shapes with a new natural open hairstyle.
+3. Ensure all avatar usages update automatically everywhere:
+   - welcome card
+   - lesson avatar
+   - small floating avatar
+   - profile/mini avatar
+4. Keep one single avatar source of truth.
+
+------------------------------------------------
+
+RETURN
+
+Return exactly:
+
+1. shared avatar file modified
+2. confirmation no second avatar was created
+3. preview screenshot of updated hair
+4. confirmation face/glasses stayed unchanged
+5. short note describing the new hairstyle shape

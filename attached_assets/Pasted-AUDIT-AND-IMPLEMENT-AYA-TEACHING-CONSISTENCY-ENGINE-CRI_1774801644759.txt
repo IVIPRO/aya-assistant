@@ -1,0 +1,170 @@
+AUDIT AND IMPLEMENT AYA TEACHING CONSISTENCY ENGINE
+
+CRITICAL RULES
+
+1. FIRST inspect the latest codebase before making any changes.
+2. Do NOT create duplicate logic if a similar system already exists.
+3. Reuse existing systems whenever possible:
+   - Adaptive Learning
+   - Curiosity Engine
+   - Memory Engine
+   - Weekly Insights
+   - Lesson Generator
+4. Do NOT break the current lesson flow, missions, XP, or speech pipeline.
+5. Do NOT introduce a second recommendation system.
+
+------------------------------------------------
+
+PROBLEM
+
+AYA currently has multiple intelligent systems:
+
+- lesson generation
+- adaptive learning
+- curiosity prompts
+- memory tracking
+- speech explanations
+
+However, these systems may operate independently.
+
+This can lead to situations where:
+
+AYA praise does not match real performance.
+
+Example:
+AYA says "Браво!" even if the child made multiple mistakes.
+
+Or:
+
+AYA recommends the next topic without considering recent errors.
+
+This creates inconsistency between:
+
+what AYA says
+and
+what AYA knows about the student.
+
+------------------------------------------------
+
+GOAL
+
+Create a lightweight **Teaching Consistency Layer** that ensures:
+
+AYA speech, task difficulty, and recommendations are aligned with actual student performance.
+
+AYA must behave like a consistent teacher.
+
+------------------------------------------------
+
+PHASE 1 — AUDIT EXISTING SYSTEMS
+
+Inspect whether similar logic already exists in:
+
+- adaptive learning logic
+- weekly insights
+- memory engine
+- lesson generator
+- progress tracking
+
+Check files such as:
+
+adaptiveLearning.ts
+weeklyInsights.ts
+memoryEngine.ts
+aiLessonGenerator.ts
+mathTaskGenerator.ts
+
+Determine:
+
+1. where student performance is calculated
+2. where difficulty is adjusted
+3. where AYA praise text is generated
+4. whether feedback logic already uses performance metrics
+
+------------------------------------------------
+
+PHASE 2 — DESIGN CONSISTENCY CHECK
+
+Before AYA:
+
+- gives praise
+- generates a new task
+- suggests next topic
+- changes difficulty
+
+Add a small internal consistency check.
+
+The check should consider:
+
+recent mistakes  
+hint usage  
+time to answer  
+correct answer rate  
+recent lesson completion
+
+------------------------------------------------
+
+PHASE 3 — ALIGN TEACHING BEHAVIOR
+
+Ensure that AYA behavior matches student performance.
+
+Examples:
+
+High accuracy → increase difficulty gradually.
+
+Medium accuracy → maintain difficulty.
+
+Low accuracy → simplify explanation and repeat similar tasks.
+
+Praise should be proportional:
+
+High success → enthusiastic praise  
+Medium success → encouraging tone  
+Low success → supportive guidance
+
+------------------------------------------------
+
+PHASE 4 — KEEP SYSTEM LIGHTWEIGHT
+
+Do NOT introduce heavy new architecture.
+
+Prefer a small coordination function such as:
+
+teachingConsistencyCheck()
+
+This function can reuse existing metrics from:
+
+adaptive learning
+progress tracking
+memory engine
+
+------------------------------------------------
+
+PHASE 5 — SAFETY
+
+Do not break:
+
+lesson viewer  
+voice pipeline  
+emotion engine  
+math speech normalization  
+missions system  
+XP rewards  
+badges  
+daily plan  
+
+------------------------------------------------
+
+PHASE 6 — RETURN
+
+Return exactly:
+
+1. whether consistency logic already existed
+2. where performance metrics are calculated
+3. what coordination layer was added (if any)
+4. files modified
+5. examples of improved behavior
+6. preview test steps
+
+Feature name:
+AYA Teaching Consistency Engine

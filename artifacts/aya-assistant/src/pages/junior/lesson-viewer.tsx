@@ -234,6 +234,7 @@ const D: Record<LangCode, {
   quizIntro: string[];
   quizCorrect: string[];
   quizWrong: string[];
+  praiseRecovery: string[];
   completionHigh: (topic: string) => string;
   completionMid: (topic: string) => string;
   completionLow: (topic: string) => string;
@@ -257,6 +258,7 @@ const D: Record<LangCode, {
     quizIntro: ["Готов ли си за малък тест? 📝", "Хайде да видим какво научи!", "Нека проверим знанията ти — смело!"],
     quizCorrect: ["Браво!", "Правилно! 🌟", "Отлично!", "Верно!"],
     quizWrong: ["Не съвсем — продължаваме напред!", "Близо! Ето верния отговор:", "Следващия път ще е по-лесно."],
+    praiseRecovery: ["Браво! Намери го! 💛", "Добре! Виждам, че разбра.", "Намери го! Продължавай така."],
     completionHigh: (t) => `🏆 Невероятно! Усвои „${t}" перфектно! Гордея се с теб!`,
     completionMid: (t) => `⭐ Браво! Научи „${t}". Практикувай още малко и ще го владееш напълно!`,
     completionLow: (t) => `💪 Добро начало с „${t}"! Прегледай урока и опитай пак — заедно ще успеем!`,
@@ -280,6 +282,7 @@ const D: Record<LangCode, {
     quizIntro: ["Ready for a mini quiz? 📝", "Let's see what you learned!", "Let's check your knowledge — don't worry!"],
     quizCorrect: ["Great!", "Correct! 🌟", "Excellent!", "Right!"],
     quizWrong: ["Not quite — but no worries!", "Close! Here's the right answer:", "Next time will be easier."],
+    praiseRecovery: ["You got it! 💛", "Well done — I saw you figure it out.", "There you go! Keep going."],
     completionHigh: (t) => `🏆 Amazing! You mastered "${t}" perfectly! I'm so proud of you!`,
     completionMid: (t) => `⭐ Well done! You learned "${t}". Practice a little more for full mastery!`,
     completionLow: (t) => `💪 Good start with "${t}"! Review the lesson and try again — we'll get there!`,
@@ -303,6 +306,7 @@ const D: Record<LangCode, {
     quizIntro: ["¿Lista para un mini quiz? 📝", "¡Veamos qué aprendiste!", "¡Comprobemos tu conocimiento — sin miedo!"],
     quizCorrect: ["¡Bien!", "¡Correcto! 🌟", "¡Excelente!", "¡Acertaste!"],
     quizWrong: ["No del todo — ¡pero no te preocupes!", "¡Cerca! Aquí está la respuesta correcta:", "La próxima vez será más fácil."],
+    praiseRecovery: ["¡Lo lograste! 💛", "¡Bien! Vi que lo entendiste.", "¡Ahí está! Sigue adelante."],
     completionHigh: (t) => `🏆 ¡Increíble! ¡Dominaste "${t}" perfectamente!`,
     completionMid: (t) => `⭐ ¡Bien hecho! Aprendiste "${t}". ¡Practica un poco más!`,
     completionLow: (t) => `💪 ¡Buen comienzo con "${t}"! Repasa y vuelve a intentarlo.`,
@@ -326,6 +330,7 @@ const D: Record<LangCode, {
     quizIntro: ["Bereit für ein Mini-Quiz? 📝", "Mal sehen, was du gelernt hast!", "Lass uns dein Wissen testen!"],
     quizCorrect: ["Super!", "Richtig! 🌟", "Ausgezeichnet!", "Korrekt!"],
     quizWrong: ["Nicht ganz — aber kein Problem!", "Nah dran! Hier ist die richtige Antwort:", "Beim nächsten Mal wird's leichter."],
+    praiseRecovery: ["Geschafft! 💛", "Gut — ich sehe, du hast es verstanden.", "Da ist es! Weiter so."],
     completionHigh: (t) => `🏆 Fantastisch! Du hast „${t}" perfekt gemeistert!`,
     completionMid: (t) => `⭐ Gut gemacht! Du hast „${t}" gelernt. Üb noch ein bisschen!`,
     completionLow: (t) => `💪 Guter Anfang mit „${t}"! Wiederhol die Lektion und versuch es nochmal.`,
@@ -349,6 +354,7 @@ const D: Record<LangCode, {
     quizIntro: ["Prêt pour un mini quiz? 📝", "Voyons ce que tu as appris!", "Testons tes connaissances!"],
     quizCorrect: ["Super!", "Correct! 🌟", "Excellent!", "Juste!"],
     quizWrong: ["Pas tout à fait — mais pas de souci!", "Proche! Voici la bonne réponse:", "La prochaine fois sera plus facile."],
+    praiseRecovery: ["Tu l'as eu! 💛", "Bien — je vois que tu as compris.", "Voilà! Continue comme ça."],
     completionHigh: (t) => `🏆 Incroyable! Tu as maîtrisé "${t}" parfaitement!`,
     completionMid: (t) => `⭐ Bien joué! Tu as appris "${t}". Pratique encore un peu!`,
     completionLow: (t) => `💪 Bon début avec "${t}"! Relis la leçon et réessaie.`,
@@ -675,7 +681,7 @@ interface EngineProps {
   grade: number;
   childId: number;
   topicContext: TopicContext;
-  speak: (text: string) => void;
+  speak: (text: string, emotion?: EmotionMode) => void;
   isVoicePlaying: boolean;
   voiceEnabled: boolean;
   onComplete: (practiceCorrect: number, quizCorrect: number, practiceTotal: number, quizTotal: number) => void;
@@ -719,6 +725,32 @@ function InteractiveLessonEngine({
   const consecutiveCorrectRef = useRef(0);
   /* ── cumulative lesson mistake counter (across all practice problems) */
   const lessonMistakesRef = useRef(0);
+
+  /* ─── Teaching Consistency Layer ───────────────────────────────────────────
+   * Tracks in-session performance so AYA praise matches real student state.
+   * wrongStreak  — consecutive wrong answers in this session
+   * correctStreak — consecutive correct answers in this session
+   * "Recovery" = first correct after ≥2 wrong → calm genuine praise, not hype
+   */
+  const sessionPerfRef = useRef({ wrongStreak: 0, correctStreak: 0 });
+
+  const trackAnswer = (correct: boolean) => {
+    const s = sessionPerfRef.current;
+    if (correct) { s.wrongStreak = 0; s.correctStreak += 1; }
+    else         { s.correctStreak = 0; s.wrongStreak += 1; }
+  };
+
+  /**
+   * Select context-appropriate praise for a CORRECT answer.
+   * - recovery (wrong×2+ → correct): calm, genuine recognition
+   * - high streak (correct×3+): already handled by celebrate phase, so same as normal here
+   * - normal: enthusiastic random pick
+   */
+  const selectConsistentPraise = (pool: string[], recoveryPool: string[]): string => {
+    return sessionPerfRef.current.wrongStreak >= 2
+      ? pick(recoveryPool)
+      : pick(pool);
+  };
 
   /* ── voice: speak whenever spokenText changes, with current emotion mode ── */
   useEffect(() => {
@@ -819,11 +851,13 @@ function InteractiveLessonEngine({
     const correct = problems[idx].answer.trim().toLowerCase();
     const given = answerInput.trim().toLowerCase();
     if (given === correct) {
+      trackAnswer(true);
       practiceCorrectRef.current += 1;
       consecutiveCorrectRef.current += 1;
       setPhase({ kind: "practice", idx, attempts, feedback: "correct" });
-      say(pick(d.practiceCorrect), undefined, "praise");
+      say(selectConsistentPraise(d.practiceCorrect, d.praiseRecovery), undefined, "praise");
     } else {
+      trackAnswer(false);
       consecutiveCorrectRef.current = 0;
       lessonMistakesRef.current += 1;
       const nextAttempts = attempts + 1;
@@ -870,6 +904,7 @@ function InteractiveLessonEngine({
   /* ── select quiz option */
   const selectQuiz = (idx: number, optIdx: number) => {
     const correct = optIdx === questions[idx].correctIndex;
+    trackAnswer(correct);
     if (correct) quizCorrectRef.current += 1;
     else lessonMistakesRef.current += 1;
     setPhase({ kind: "quiz", idx, selected: optIdx, correct });
@@ -877,7 +912,8 @@ function InteractiveLessonEngine({
     const wrongMsg = (topicContext === "weak" && ctxD.quizSupport)
       ? ctxD.quizSupport
       : pick(d.quizWrong);
-    say(correct ? pick(d.quizCorrect) : wrongMsg, undefined, correct ? "praise" : "retry");
+    const praiseMsg = selectConsistentPraise(d.quizCorrect, d.praiseRecovery);
+    say(correct ? praiseMsg : wrongMsg, undefined, correct ? "praise" : "retry");
   };
 
   /* ── start quiz from intro — speak first question after intro */
@@ -945,9 +981,13 @@ function InteractiveLessonEngine({
         body: JSON.stringify({ exerciseId: ex.id, correct: isCorrect, userAnswer }),
       });
     } catch { /* fire-and-forget */ }
+    trackAnswer(isCorrect);
     const newCorrect = p.correct + (isCorrect ? 1 : 0);
     setPhase({ ...p, correct: newCorrect, feedback: isCorrect ? "correct" : "wrong", revealed: false });
-    say(isCorrect ? pick(d.practiceCorrect) : pick(d.practiceWrong), undefined, isCorrect ? "praise" : "retry");
+    const infPraise = isCorrect
+      ? selectConsistentPraise(d.practiceCorrect, d.praiseRecovery)
+      : pick(d.practiceWrong);
+    say(infPraise, undefined, isCorrect ? "praise" : "retry");
   };
 
   /* ── infinite practice: advance to next exercise (with auto-refill) */

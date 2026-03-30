@@ -1,0 +1,56 @@
+Audit and fix the active mascot wiring in the Junior lesson screen.
+
+Problem:
+After phase 2, the mascot in lessons still only shows the old pulse effect.
+Cursor-follow, blink, speaking and happy reaction are not visibly active.
+
+Goal:
+Make sure the active lesson screen truly uses AyaMascot and not any old static avatar wrapper.
+
+Tasks:
+
+1. Find the exact avatar rendering in the Junior lesson screen
+- inspect lesson-viewer / lesson screen / floating assistant rendering
+- identify whether it renders:
+  - AyaMascot
+  - old avatar image
+  - old wrapper with pulse animation
+  - any fallback component
+
+2. Remove old avatar behavior from the active lesson UI
+- remove old pulse-only avatar logic if it is still active
+- remove old PNG/static avatar rendering from lesson screen if AyaMascot should be used there
+
+3. Ensure AyaMascot is the actual rendered component in the lesson screen
+
+4. Wire props correctly:
+- followCursor={true} in lesson screen on desktop
+- speaking={true} while AYA is speaking or generating lesson narration
+- happy={true} briefly after correct answer / celebration events
+
+5. Keep idle state when not speaking
+- no constant fake reactions
+- subtle idle only
+
+6. Add a temporary visible debug check in code only if needed:
+- console.log once when AyaMascot renders in lesson screen
+- console.log prop values for speaking / happy / followCursor
+Then remove noisy logs and keep only clean final code
+
+7. Verify blink is implemented on the eye groups only
+- not whole head squash
+- not overlay band
+- if blink exists but is too subtle, slightly increase visibility safely
+
+8. Keep layout unchanged
+9. Keep TypeScript clean
+10. Test only in Preview
+
+Expected result:
+In lesson screen, the active mascot must actually be AyaMascot.
+It should:
+- follow the cursor with pupils
+- blink naturally
+- animate mouth / glow while speaking
+- react briefly on correct answers
+and should no longer behave like the old pulse-only avatar.

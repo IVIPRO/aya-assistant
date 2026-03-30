@@ -1,0 +1,63 @@
+Audit the active backend/runtime used by login and identify the real source of truth.
+
+Problem:
+Login now fails with "Invalid credentials" in both Preview and Published.
+Workflows show that a different backend process is active now:
+- api-server-live
+- artifacts/api-server: API Server
+The old API server appears to be managed/disabled, and login behavior changed.
+
+Goal:
+Determine exactly which backend process is currently serving authentication,
+which database/session store it is using,
+and why the previously working login now fails with invalid credentials.
+
+Tasks:
+
+1. Identify the actual auth backend in use right now
+- which workflow/process handles login requests
+- whether frontend points to api-server-live or another API server
+- whether the old API server is obsolete or intentionally managed by api-server-live
+
+2. Trace the login request end-to-end
+- login form submit handler
+- request URL used in Preview
+- request URL used in Published
+- backend route that receives login
+- backend process/workflow serving that route
+
+3. Audit environment/config differences
+- database URL / connection
+- session store
+- auth secrets
+- preview vs published env
+- any workflow-specific env overrides
+
+4. Determine whether "Invalid credentials" means:
+- user record not found in current DB
+- password hash mismatch
+- wrong database connected
+- wrong auth service active
+- request hitting a different backend than expected
+
+5. Verify whether the known test user exists in the currently active database
+- do not expose secrets
+- only verify existence/path of auth data
+- identify if current runtime uses a different DB than before
+
+6. Explain clearly:
+- which backend is active
+- whether api-server-live is the real active API
+- whether artifacts/api-server should remain off
+- what exact root cause is producing Invalid credentials now
+
+7. Make no destructive changes yet.
+- Do not reset users
+- Do not rewrite auth flow
+- Do not republish
+Only audit and report the exact cause first.
+
+Expected result:
+A precise explanation of which backend/workflow is serving auth now,
+which DB it uses,
+and why login now returns Invalid credentials in both Preview and Published.

@@ -5,30 +5,13 @@ import avatarMini from "@/assets/aya-avatar-mini.png";
 
 const AVATAR_STYLES = `
 @keyframes avatarFloat {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-3px); }
-}
-
-@keyframes avatarBreath {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-}
-
-@keyframes avatarGlow {
-  0%, 100% { filter: drop-shadow(0 0 0px rgba(255, 140, 64, 0)); }
-  50% { filter: drop-shadow(0 0 6px rgba(255, 140, 64, 0.2)); }
-}
-
-@keyframes avatarBlink {
-  0%, 96%, 100% { transform: scaleY(1); }
-  97%, 99% { transform: scaleY(0.92); }
+  0% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-3px) scale(1.02); }
+  100% { transform: translateY(0px) scale(1); }
 }
 
 .aya-avatar-animated {
-  animation: avatarFloat 4s ease-in-out infinite, 
-             avatarBreath 3s ease-in-out infinite,
-             avatarGlow 2.5s ease-in-out infinite,
-             avatarBlink 6s ease-in-out infinite;
+  animation: avatarFloat 4s ease-in-out infinite;
 }
 `;
 

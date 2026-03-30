@@ -20,29 +20,15 @@ const AVATAR_STYLES = `
 }
 
 @keyframes avatarBlink {
-  0%, 95%, 100% { transform: scaleY(0); }
-  96%, 98% { transform: scaleY(1); }
+  0%, 96%, 100% { transform: scaleY(1); }
+  97%, 99% { transform: scaleY(0.92); }
 }
 
 .aya-avatar-animated {
-  position: relative;
   animation: avatarFloat 4s ease-in-out infinite, 
              avatarBreath 3s ease-in-out infinite,
-             avatarGlow 2.5s ease-in-out infinite;
-}
-
-.aya-avatar-animated::after {
-  content: "";
-  position: absolute;
-  left: 30%;
-  top: 38%;
-  width: 40%;
-  height: 15%;
-  background: rgba(93, 58, 26, 0.8);
-  border-radius: 50%;
-  animation: avatarBlink 6s ease-in-out infinite;
-  pointer-events: none;
-  z-index: 10;
+             avatarGlow 2.5s ease-in-out infinite,
+             avatarBlink 6s ease-in-out infinite;
 }
 `;
 

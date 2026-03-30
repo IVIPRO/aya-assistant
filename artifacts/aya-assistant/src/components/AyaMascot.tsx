@@ -1,7 +1,9 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// AYaMascot — Clean SVG mascot component inspired by Duolingo style
+// AYaMascot — Animated SVG mascot with cursor-follow, blink, speaking
 // Friendly girl with chestnut brown hair, red glasses, cream hoodie
 // ─────────────────────────────────────────────────────────────────────────────
+
+import { useState, useEffect, useRef } from "react";
 
 interface AyaMascotProps {
   size?: "sm" | "md" | "lg";
@@ -17,22 +19,130 @@ const SIZE_MAP = {
   lg: 180,
 };
 
+const ANIMATION_STYLES = `
+@keyframes ayaBlink {
+  0%, 95%, 100% { transform: scaleY(1); }
+  96%, 99% { transform: scaleY(0.1); }
+}
+
+@keyframes ayaBounce {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes ayaGlow {
+  0%, 100% { 
+    filter: drop-shadow(0 0 0px rgba(255, 200, 80, 0));
+  }
+  50% { 
+    filter: drop-shadow(0 0 8px rgba(255, 200, 80, 0.3));
+  }
+}
+
+.aya-mascot-blink {
+  animation: ayaBlink 5.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.aya-mascot-bounce {
+  animation: ayaBounce 0.6s ease-in-out;
+}
+
+.aya-mascot-speaking {
+  animation: ayaGlow 1.8s ease-in-out infinite;
+}
+`;
+
+// Inject styles once
+if (typeof document !== "undefined" && !document.getElementById("aya-mascot-styles")) {
+  const styleEl = document.createElement("style");
+  styleEl.id = "aya-mascot-styles";
+  styleEl.textContent = ANIMATION_STYLES;
+  document.head.appendChild(styleEl);
+}
+
 export function AyaMascot({
   size = "md",
   speaking = false,
   happy = false,
-  followCursor = false,
+  followCursor = true,
   className,
 }: AyaMascotProps) {
   const px = SIZE_MAP[size];
+  const [pupilOffset, setPupilOffset] = useState({ x: 0, y: 0 });
+  const [bounceKey, setBounceKey] = useState(0);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const rafRef = useRef<number | null>(null);
+
+  // Blink animation (handled by CSS, just trigger it)
+  // Pupils follow cursor
+  useEffect(() => {
+    if (!followCursor) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!svgRef.current) return;
+
+      const rect = svgRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const dx = e.clientX - centerX;
+      const dy = e.clientY - centerY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      // Only apply effect if cursor reasonably close
+      if (dist > 200) {
+        setPupilOffset({ x: 0, y: 0 });
+        return;
+      }
+
+      // Calculate angle and apply max movement caps
+      const angle = Math.atan2(dy, dx);
+      const maxDist = 100;
+      const cappedDist = Math.min(dist, maxDist);
+      const ratio = cappedDist / maxDist;
+
+      // Max offsets: 3px horizontal, 2px vertical
+      const x = Math.cos(angle) * 3 * ratio;
+      const y = Math.sin(angle) * 2 * ratio;
+
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(() => {
+        setPupilOffset({ x, y });
+      });
+    };
+
+    const handleMouseLeave = () => {
+      setPupilOffset({ x: 0, y: 0 });
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [followCursor]);
+
+  // Trigger bounce animation on happy change
+  useEffect(() => {
+    if (happy) {
+      setBounceKey((k) => k + 1);
+    }
+  }, [happy]);
 
   return (
     <svg
+      ref={svgRef}
       viewBox="0 0 120 160"
       xmlns="http://www.w3.org/2000/svg"
       width={px}
       height={px}
-      className={className}
+      className={`${className || ""} ${happy ? "aya-mascot-bounce" : ""} ${speaking ? "aya-mascot-speaking" : ""}`}
+      key={`bounce-${bounceKey}`}
       style={{ display: "block", overflow: "visible" }}
       aria-hidden="true"
     >
@@ -127,28 +237,44 @@ export function AyaMascot({
         <ellipse cx="100" cy="70" rx="7" ry="9" fill="#FFCC99" />
         <ellipse cx="100" cy="70" rx="4" ry="6" fill="#FFAA77" />
 
-        {/* ── EYES ── */}
-        <g id="leftEye">
+        {/* ── EYES WITH BLINKING ── */}
+        <g id="leftEye" className="aya-mascot-blink">
           <ellipse cx="38" cy="72" rx="7" ry="8" fill="white" />
-          <circle cx="38" cy="72" r="4.5" fill="#2C1810" />
-          <circle cx="39" cy="70" r="2" fill="white" />
+          <circle cx="38" cy="72" r="4.5" fill={happy ? "#1a1a1a" : "#2C1810"} opacity={happy ? 1 : 0.9} />
+          <circle cx="39" cy="70" r="2" fill="white" opacity={happy ? 0.9 : 1} />
+          {/* Pupil that follows cursor */}
+          <circle
+            cx={38 + pupilOffset.x}
+            cy={72 + pupilOffset.y}
+            r="3"
+            fill="#1a1a1a"
+            style={{ transition: "cx 80ms ease-out, cy 80ms ease-out" }}
+          />
         </g>
-        <g id="rightEye">
+        <g id="rightEye" className="aya-mascot-blink">
           <ellipse cx="82" cy="72" rx="7" ry="8" fill="white" />
-          <circle cx="82" cy="72" r="4.5" fill="#2C1810" />
-          <circle cx="83" cy="70" r="2" fill="white" />
+          <circle cx="82" cy="72" r="4.5" fill={happy ? "#1a1a1a" : "#2C1810"} opacity={happy ? 1 : 0.9} />
+          <circle cx="83" cy="70" r="2" fill="white" opacity={happy ? 0.9 : 1} />
+          {/* Pupil that follows cursor */}
+          <circle
+            cx={82 + pupilOffset.x}
+            cy={72 + pupilOffset.y}
+            r="3"
+            fill="#1a1a1a"
+            style={{ transition: "cx 80ms ease-out, cy 80ms ease-out" }}
+          />
         </g>
 
         {/* ── EYEBROWS ── */}
         <path
-          d="M 32 60 Q 38 56 44 60"
+          d={happy ? "M 32 58 Q 38 54 44 58" : "M 32 60 Q 38 56 44 60"}
           stroke="#6B4423"
           strokeWidth="2.5"
           fill="none"
           strokeLinecap="round"
         />
         <path
-          d="M 76 60 Q 82 56 88 60"
+          d={happy ? "M 76 58 Q 82 54 88 58" : "M 76 60 Q 82 56 88 60"}
           stroke="#6B4423"
           strokeWidth="2.5"
           fill="none"
@@ -176,9 +302,15 @@ export function AyaMascot({
         <ellipse cx="60" cy="82" rx="3" ry="2.5" fill="#E8A876" opacity="0.7" />
 
         {/* ── MOUTH ── */}
-        {happy ? (
+        {speaking ? (
+          // Talking mouth (open)
           <>
-            {/* Happy smile with teeth peek */}
+            <ellipse cx="60" cy="94" rx="10" ry="7" fill="#C85A50" />
+            <rect x="52" y="91" width="16" height="5" rx="2" fill="white" opacity="0.5" />
+          </>
+        ) : happy ? (
+          // Happy smile with teeth peek
+          <>
             <path
               d="M 48 92 Q 60 104 72 92"
               fill="#FFB3A7"
@@ -189,7 +321,7 @@ export function AyaMascot({
             <rect x="50" y="90" width="20" height="4" rx="1.5" fill="white" opacity="0.7" />
           </>
         ) : (
-          /* Neutral gentle smile */
+          // Neutral gentle smile
           <path
             d="M 48 92 Q 60 100 72 92"
             fill="none"
@@ -200,8 +332,8 @@ export function AyaMascot({
         )}
 
         {/* ── BLUSH ── */}
-        <ellipse cx="28" cy="88" rx="9" ry="6" fill="#FFB3A7" opacity="0.5" />
-        <ellipse cx="92" cy="88" rx="9" ry="6" fill="#FFB3A7" opacity="0.5" />
+        <ellipse cx="28" cy="88" rx="9" ry="6" fill="#FFB3A7" opacity={happy ? 0.7 : 0.5} />
+        <ellipse cx="92" cy="88" rx="9" ry="6" fill="#FFB3A7" opacity={happy ? 0.7 : 0.5} />
 
         {/* ── FACE HIGHLIGHT (forehead shine) ── */}
         <ellipse cx="45" cy="48" rx="14" ry="9" fill="white" opacity="0.1" transform="rotate(-25,45,48)" />

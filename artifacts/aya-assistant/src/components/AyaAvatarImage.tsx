@@ -10,8 +10,34 @@ const AVATAR_STYLES = `
   100% { transform: translateY(0px) scale(1); }
 }
 
+@keyframes avatarSpeaking {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+}
+
 .aya-avatar-animated {
+  position: relative;
   animation: avatarFloat 4s ease-in-out infinite;
+}
+
+.aya-avatar-animated.avatar-speaking::before {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 200, 80, 0.45), transparent 70%);
+  animation: avatarSpeaking 1.6s ease-in-out infinite;
+  z-index: -1;
 }
 `;
 
@@ -52,7 +78,7 @@ export function AyaAvatarImage({
   className,
   visible = true,
   text: _text,
-  speaking: _speaking,
+  speaking = false,
 }: AyaAvatarImageProps) {
   if (!visible) return null;
 
@@ -61,7 +87,7 @@ export function AyaAvatarImage({
 
   return (
     <div
-      className={`aya-avatar-animated ${className || ""}`}
+      className={`aya-avatar-animated ${speaking ? "avatar-speaking" : ""} ${className || ""}`}
       style={{
         width: px,
         height: px,

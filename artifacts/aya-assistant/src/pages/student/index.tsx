@@ -5,7 +5,7 @@ import { StageSelector } from "@/pages/junior/stage-selector";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, BookOpen, Sparkles, MessageCircle } from "lucide-react";
-import { AyaAvatar3D as AyaAvatar } from "@/components/AyaAvatar3D";
+import { AyaAvatarImage as AyaAvatar } from "@/components/AyaAvatarImage";
 import { useAuth } from "@/hooks/use-auth";
 import { useListChildren, getListChildrenQueryKey } from "@workspace/api-client-react";
 import { resolveLang } from "@/lib/i18n";

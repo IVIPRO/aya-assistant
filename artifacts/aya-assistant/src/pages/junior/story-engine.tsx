@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronRight, Star, RotateCcw } from "lucide-react";
 import { cn } from "@/components/layout";
-import { AyaAvatar3D as AyaAvatar, type AyaEmotion } from "@/components/AyaAvatar3D";
+import { AyaAvatarImage as AyaAvatar, type AyaEmotion } from "@/components/AyaAvatarImage";
 import type { LangCode } from "@/lib/i18n";
 import type { Subject, Topic } from "@/lib/curriculum";
 

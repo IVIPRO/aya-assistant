@@ -3,6 +3,37 @@ import avatarMd from "@/assets/aya-avatar-md.png";
 import avatarSm from "@/assets/aya-avatar-sm.png";
 import avatarMini from "@/assets/aya-avatar-mini.png";
 
+const AVATAR_STYLES = `
+@keyframes avatarFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes avatarBreath {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+@keyframes avatarGlow {
+  0%, 100% { filter: drop-shadow(0 0 0px rgba(255, 140, 64, 0)); }
+  50% { filter: drop-shadow(0 0 6px rgba(255, 140, 64, 0.2)); }
+}
+
+.aya-avatar-animated {
+  animation: avatarFloat 4s ease-in-out infinite, 
+             avatarBreath 3s ease-in-out infinite,
+             avatarGlow 2.5s ease-in-out infinite;
+}
+`;
+
+// Inject styles once
+if (typeof document !== "undefined" && !document.getElementById("aya-avatar-styles")) {
+  const styleEl = document.createElement("style");
+  styleEl.id = "aya-avatar-styles";
+  styleEl.textContent = AVATAR_STYLES;
+  document.head.appendChild(styleEl);
+}
+
 export type AyaEmotion = "neutral" | "happy" | "thinking" | "encourage" | "celebrate";
 
 interface AyaAvatarImageProps {
@@ -41,7 +72,7 @@ export function AyaAvatarImage({
 
   return (
     <div
-      className={className}
+      className={`aya-avatar-animated ${className || ""}`}
       style={{
         width: px,
         height: px,

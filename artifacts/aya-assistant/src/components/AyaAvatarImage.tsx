@@ -1,3 +1,4 @@
+import { useState, useEffect, useRef } from "react";
 import avatarLg from "@/assets/aya-avatar-lg.png";
 import avatarMd from "@/assets/aya-avatar-md.png";
 import avatarSm from "@/assets/aya-avatar-sm.png";
@@ -82,11 +83,60 @@ export function AyaAvatarImage({
 }: AyaAvatarImageProps) {
   if (!visible) return null;
 
+  const [cursorFollow, setCursorFollow] = useState({ x: 0, y: 0, rot: 0 });
+  const avatarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!avatarRef.current) return;
+
+      const rect = avatarRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const dx = e.clientX - centerX;
+      const dy = e.clientY - centerY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      // Only apply effect if cursor is reasonably close (within ~200px)
+      if (dist > 200) {
+        setCursorFollow({ x: 0, y: 0, rot: 0 });
+        return;
+      }
+
+      // Calculate angle and apply max movement caps
+      const angle = Math.atan2(dy, dx);
+      const maxDist = 80; // max distance to calculate effect
+      const cappedDist = Math.min(dist, maxDist);
+      const ratio = cappedDist / maxDist;
+
+      // Max offsets: 6px horizontal, 4px vertical, 3deg rotation
+      const x = Math.cos(angle) * 6 * ratio;
+      const y = Math.sin(angle) * 4 * ratio;
+      const rot = Math.sin(angle) * 3 * ratio;
+
+      setCursorFollow({ x, y, rot });
+    };
+
+    const handleMouseLeave = () => {
+      setCursorFollow({ x: 0, y: 0, rot: 0 });
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseleave", handleMouseLeave);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []);
+
   const src = AVATAR_MAP[size];
   const px = SIZE_PX[size];
 
   return (
     <div
+      ref={avatarRef}
       className={`aya-avatar-animated ${speaking ? "avatar-speaking" : ""} ${className || ""}`}
       style={{
         width: px,
@@ -97,6 +147,8 @@ export function AyaAvatarImage({
         alignItems: "center",
         justifyContent: "center",
         flexShrink: 0,
+        transform: `translate(${cursorFollow.x}px, ${cursorFollow.y}px) rotate(${cursorFollow.rot}deg)`,
+        transition: "transform 120ms ease-out",
       }}
     >
       <img

@@ -53,7 +53,8 @@ window.fetch = async (...args) => {
       plainHeaders['Authorization'] = `Bearer ${token}`;
     }
     
-    const newConfig = { ...(config || {}), headers: plainHeaders };
+    // Include credentials to send session cookies with every request
+    const newConfig = { ...(config || {}), headers: plainHeaders, credentials: 'include' as const };
     
     if (isVoiceRequest) {
       console.log("[FETCH_INTERCEPTOR_VOICE]", {
@@ -99,10 +100,14 @@ window.fetch = async (...args) => {
     }
   }
 
-  // No token or not an API request — pass through unchanged
-  if (!token && isApiRequest) {
-    console.warn("[AUTH_INTERCEPTOR] API request with no token in localStorage", { url: resource });
+  // No token — still include credentials in case session cookie exists
+  if (isApiRequest && !token) {
+    const baseConfig = config || {};
+    const configWithCredentials = { ...baseConfig, credentials: 'include' as const };
+    return originalFetch(resource, configWithCredentials);
   }
+  
+  // Not an API request — pass through unchanged
   return originalFetch(...args);
 };
 

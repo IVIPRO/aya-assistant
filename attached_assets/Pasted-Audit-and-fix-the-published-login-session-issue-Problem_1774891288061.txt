@@ -1,0 +1,67 @@
+Audit and fix the published login/session issue.
+
+Problem:
+In the online published app, login appears to succeed, but after entering the app it immediately returns to login / published flow again.
+
+Important:
+- Do NOT redesign the login page
+- Do NOT change unrelated UI
+- Focus only on authentication/session persistence
+- Test in Preview first, not published mode
+- Keep TypeScript clean
+
+Tasks:
+
+1. Audit the login flow end-to-end
+- find the login submit handler
+- find where auth/session/user state is stored after successful login
+- find route guards / protected route checks
+- find logout/redirect logic
+
+2. Check whether the app uses:
+- cookie session
+- localStorage
+- sessionStorage
+- in-memory auth state
+Identify the exact current mechanism.
+
+3. If cookies are used:
+- verify credentials are included in frontend requests
+- verify fetch/axios uses credentials: "include" where needed
+- verify backend CORS allows credentials
+- verify cookie settings are correct for published environment:
+  - secure
+  - sameSite
+  - domain/path if used
+
+4. If token/localStorage is used:
+- verify token is actually written after login
+- verify auth guard reads the same storage key
+- verify app initialization restores auth state before redirecting
+
+5. Audit protected route logic
+- identify why the user is being redirected back after login
+- fix race conditions where auth check runs before session restore completes
+
+6. Add temporary console logging only if needed:
+- login success result
+- stored auth/session state
+- auth guard decision
+- redirect reason
+Then keep final code clean.
+
+7. Verify environment differences between Preview and Published
+- API base URL
+- auth URL
+- CORS allowlist
+- cookie behavior
+- env variables
+
+8. Fix the issue so that:
+- after successful login, session persists
+- protected routes stay accessible
+- app does not immediately redirect back to login
+
+Expected result:
+Login should remain active after entering the app, especially in Preview first.
+Then published mode should behave the same.

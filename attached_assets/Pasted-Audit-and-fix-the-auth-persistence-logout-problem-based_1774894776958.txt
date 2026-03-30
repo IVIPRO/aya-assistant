@@ -1,0 +1,57 @@
+Audit and fix the auth persistence/logout problem based on the current runtime behavior.
+
+Observed behavior:
+- Login succeeds in Preview
+- Many API requests return [AUTH] JWT OK
+- Then one request fails with 401 on /learning/daily-quests
+- After that, the app redirects/logs the user out
+- In Published, login still fails / behaves inconsistently
+
+Goal:
+Fix the auth flow so that:
+1. successful login remains active
+2. one failing endpoint does NOT trigger global logout
+3. all protected requests consistently include the auth token
+4. Preview works first, then Published uses the same logic
+
+Tasks:
+
+1. Audit all authenticated frontend requests
+- find the shared API client / fetch wrapper
+- verify every protected request attaches the same auth token from localStorage aya_token
+- specifically inspect the request to /learning/daily-quests
+- compare it to working requests like /families, /memories, /children, /learning/progress
+
+2. Fix inconsistent token attachment
+- if /learning/daily-quests is not using the shared auth client, make it use the shared auth client
+- ensure Authorization: Bearer <token> is attached consistently on all protected requests
+
+3. Audit global logout / auth failure handling
+- find where a 401 response triggers logout or redirect to /login
+- change this logic so a single feature endpoint 401 does NOT destroy the whole authenticated session
+- only logout if the primary auth/session validation endpoint confirms the token is invalid
+- feature-level 401s should surface as local errors, not full logout
+
+4. Audit app initialization / route guard
+- ensure auth guard validates token/session correctly
+- do not redirect to /login just because one secondary API call failed
+
+5. Audit Published auth config
+- verify Published frontend uses the same API base/auth logic as Preview
+- verify no stale preview-only URL or stale published auth config remains
+
+6. Add temporary targeted logs if needed
+- which requests include Authorization header
+- which request triggers logout
+- why redirect to /login happens
+Then leave final code clean.
+
+7. Keep layout unchanged
+8. Keep TypeScript clean
+9. Test in Preview only first
+
+Expected result:
+- Login succeeds and stays active in Preview
+- /learning/daily-quests uses the auth token correctly
+- one endpoint failure no longer logs out the whole user
+- after Preview works, Published should use the same corrected auth logic

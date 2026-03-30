@@ -402,7 +402,7 @@ function DailyQuestCard({ childId, lang }: { childId: number; lang: string }) {
 
   useEffect(() => {
     fetch(`/api/learning/daily-quests?childId=${childId}`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token") ?? ""}` },
+      headers: { Authorization: `Bearer ${localStorage.getItem("aya_token") ?? ""}` },
     })
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => d && setData(d))

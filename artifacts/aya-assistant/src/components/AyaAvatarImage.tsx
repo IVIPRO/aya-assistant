@@ -40,13 +40,31 @@ export function AyaAvatarImage({
   const px = SIZE_PX[size];
 
   return (
-    <img
-      src={src}
-      alt="AYA Avatar"
-      width={px}
-      height={px}
+    <div
       className={className}
-      style={{ display: "block" }}
-    />
+      style={{
+        width: px,
+        height: px,
+        borderRadius: "50%",
+        overflow: "hidden",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+      }}
+    >
+      <img
+        src={src}
+        alt="AYA Avatar"
+        width={px}
+        height={px}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          display: "block",
+        }}
+      />
+    </div>
   );
 }

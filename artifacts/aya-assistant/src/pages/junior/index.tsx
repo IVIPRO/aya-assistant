@@ -6,7 +6,8 @@ import { LessonViewer } from "./lesson-viewer";
 import type { LessonMode } from "./lesson-viewer";
 import { DailyPlanCard } from "@/components/DailyPlanCard";
 import { VideoTeacher } from "@/components/VideoTeacher";
-import { AyaMascot } from "@/components/AyaMascot";
+import { AyaAvatarImage as AyaAvatar } from "@/components/AyaAvatarImage";
+import type { AyaEmotion } from "@/components/AyaAvatarImage";
 import { ListeningMode } from "@/components/ListeningMode";
 import { CelebrationCard } from "@/components/CelebrationCard";
 import { teacherStateToVideoKey } from "@/lib/videoTeacherMap";
@@ -503,6 +504,25 @@ function getGradeLabel(grade: number, country: string): string {
 
 type JuniorView = "welcome" | "map" | "stages" | "subjects" | "chat" | "lesson";
 
+/**
+ * AYA Junior Avatar — lesson state → avatar emotion mapping.
+ * Reuses the existing teacher state signal; no new state logic.
+ *   lesson_start  (talking)     → neutral
+ *   correct_answer (happy)      → happy      ✓
+ *   wrong_answer  (encouraging) → encourage  ✓ (was wrong: was "thinking")
+ *   AYA_processing (thinking)   → thinking   ✓ (was wrong: was "encourage")
+ *   celebration_active flag     → celebrate  (via celebrationActive)
+ */
+function teacherStateToAyaEmotion(state: TeacherState): AyaEmotion {
+  switch (state) {
+    case "happy":       return "happy";      // correct answer → happy face
+    case "encouraging": return "encourage";  // wrong answer, try again → encourage face
+    case "thinking":    return "thinking";   // AYA processing → thinking face
+    case "talking":     return "neutral";    // AYA speaking → calm face
+    default:            return "neutral";
+  }
+}
+
 function CharacterPicker({ child, onSelect, onClose }: { child: Child; onSelect: (char: UpdateChildBodyAiCharacter) => void; onClose: () => void }) {
   const lang = getLang(child.language);
   const lbl = JUNIOR_LABELS[lang];
@@ -570,7 +590,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
           <div className="bg-gradient-to-r from-junior/80 to-junior/60 px-8 pt-8 pb-6 text-center">
           <motion.div initial={{ scale: 0.8 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 200 }}
             className="mb-4 flex justify-center">
-            <AyaMascot size="lg" followCursor={true} />
+            <AyaAvatar emotion="neutral" visible size="lg" />
           </motion.div>
           <h1 className="text-3xl font-display font-bold text-junior-foreground mb-1">
             {lbl.welcomeBack} {child.name}!
@@ -581,7 +601,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
         <div className="px-8 py-6 space-y-5">
           {character && (
             <div className={`flex items-start gap-4 p-4 rounded-2xl border-2 ${character.color}`}>
-              <AyaMascot size="sm" followCursor={false} />
+              <AyaAvatar emotion="neutral" visible size="sm" />
               <div>
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
                   <div className="font-bold text-base">AYA</div>
@@ -1376,14 +1396,15 @@ export function Junior() {
 
             {/* ── AYA Junior Avatar ─────────────────────────────── */}
             <div className="flex items-center gap-3 mb-3 bg-white/60 border border-yellow-200 rounded-2xl px-4 py-3 shadow-sm overflow-visible" style={{ minHeight: 72 }}>
-              {activeChild && (
-                <AyaMascot
-                  size="md"
-                  speaking={teacherState === "talking"}
-                  happy={celebrationActive}
-                  followCursor={true}
-                />
-              )}
+              <AyaAvatar
+                emotion={
+                  celebrationActive
+                    ? "celebrate"
+                    : teacherStateToAyaEmotion(teacherState)
+                }
+                visible={!!activeChild}
+                speaking={teacherState === "talking"}
+              />
               <div className="flex-1 min-w-0">
                 <div className="text-[11px] font-bold text-yellow-700 uppercase tracking-wide leading-none mb-1">
                   AYA Junior Guide
@@ -1473,11 +1494,19 @@ export function Junior() {
 
       {activeChild && view !== "chat" && view !== "lesson" && !lessonActive && (
         <div className="fixed bottom-6 right-5 z-50">
-          <AyaMascot
-            size="lg"
+          <AyaAvatar
+            emotion={celebrationActive ? "celebrate" : teacherStateToAyaEmotion(teacherState)}
+            visible={true}
             speaking={teacherState === "talking"}
-            happy={celebrationActive}
-            followCursor={true}
+            text={
+              celebrationActive
+                ? (juniorLang === "bg" ? "Страхотна работа! 🎉" : "Amazing work! 🎉")
+                : teacherState === "happy"
+                ? (juniorLang === "bg" ? "Браво! ⭐" : "Well done! ⭐")
+                : teacherState === "encouraging"
+                ? (juniorLang === "bg" ? "Опитай пак 🙂" : "Try again! 🙂")
+                : undefined
+            }
           />
         </div>
       )}

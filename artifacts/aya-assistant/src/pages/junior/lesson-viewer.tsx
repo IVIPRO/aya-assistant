@@ -12,7 +12,7 @@ import { getListChildrenQueryKey, updateDailyPlanTask } from "@workspace/api-cli
 import type { LangCode } from "@/lib/i18n";
 import type { Subject, Topic } from "@/lib/curriculum";
 import { XpToast, type XpReward } from "@/components/xp-toast";
-import { AyaMascot } from "@/components/AyaMascot";
+import { AyaAvatarImage as AyaAvatar, type AyaEmotion } from "@/components/AyaAvatarImage";
 import { getCuriosityCard, getCuriosityFact, CURIOSITY_BRIDGES, type CuriosityCard as CuriosityCardData } from "@/lib/curiosityEngine";
 import { StoryLessonEngine } from "./story-engine";
 
@@ -76,6 +76,21 @@ type Phase =
   | { kind: "quiz"; idx: number; selected: number | null; correct: boolean | null }
   | { kind: "completion"; practiceCorrect: number; quizCorrect: number; total: { practice: number; quiz: number } }
   | { kind: "infinite-practice"; exercises: PoolExercise[]; idx: number; correct: number; selected: number | null; inputVal: string; feedback: "none" | "correct" | "wrong"; revealed: boolean };
+
+function phaseEmotion(p: Phase): AyaEmotion {
+  switch (p.kind) {
+    case "greeting":    return "happy";
+    case "explanation": return "neutral";
+    case "example":     return p.revealed ? "encourage" : "thinking";
+    case "practice":    return p.feedback === "correct" ? "happy" : p.feedback === "wrong" ? "encourage" : "neutral";
+    case "hinting":     return "thinking";
+    case "celebrate":   return "celebrate";
+    case "quiz-intro":  return "happy";
+    case "quiz":        return p.selected === null ? "thinking" : p.correct ? "happy" : "encourage";
+    case "completion":  return "celebrate";
+    case "infinite-practice": return p.feedback === "correct" ? "happy" : p.feedback === "wrong" ? "encourage" : "thinking";
+  }
+}
 
 /** Maps lesson phase → voice emotion mode for TTS delivery style */
 function phaseToVoiceEmotion(p: Phase): EmotionMode {
@@ -553,10 +568,10 @@ function ProgressDots({ current, total, colorClass }: { current: number; total: 
 
 /* ─── AYA Speech Bubble ─────────────────────────────────────────── */
 
-function AyaSpeech({ text, speaking }: { text: string; speaking?: boolean }) {
+function AyaSpeech({ emotion, text, speaking }: { emotion: AyaEmotion; text: string; speaking?: boolean }) {
   return (
     <div className="flex flex-col items-center gap-4 mb-4">
-      <AyaMascot size="md" speaking={speaking} followCursor={true} />
+      <AyaAvatar emotion={emotion} visible={true} speaking={speaking} />
       <motion.div
         key={text}
         initial={{ opacity: 0, scale: 0.95, y: 4 }}
@@ -1084,7 +1099,7 @@ function InteractiveLessonEngine({
         >
           {/* AYA speech + replay */}
           <div>
-            <AyaSpeech text={dialogue} speaking={isVoicePlaying} />
+            <AyaSpeech emotion={phaseEmotion(phase)} text={dialogue} speaking={isVoicePlaying} />
             {voiceEnabled && !isVoicePlaying && (
               <div className="flex justify-center -mt-1 mb-1">
                 <button

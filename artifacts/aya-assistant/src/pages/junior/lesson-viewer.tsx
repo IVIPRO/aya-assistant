@@ -904,6 +904,61 @@ function InteractiveLessonEngine({
   };
 
   /* ── check practice answer */
+  
+  /* ── Unified math problem type detector ── */
+  interface MathProblemType {
+    type: "addition" | "subtraction" | "multiplication" | "division" | "decimal-fractions" | "fractions" | "other";
+    hasDecimals: boolean;
+    hasFractions: boolean;
+  }
+  
+  const detectMathProblemType = (problem: string): MathProblemType => {
+    // Check for fractions first (contains "/")
+    if (problem.includes("/") && problem.match(/\d+\/\d+/)) {
+      return { type: "fractions", hasDecimals: false, hasFractions: true };
+    }
+    
+    // Check for decimals (contains ".")
+    const hasDecimals = /\d+\.\d+/.test(problem);
+    
+    // Detect operator
+    if (problem.includes("+")) {
+      return { type: "addition", hasDecimals, hasFractions: false };
+    } else if (problem.includes("−") || (problem.includes("-") && !problem.startsWith("-"))) {
+      return { type: "subtraction", hasDecimals, hasFractions: false };
+    } else if (problem.includes("×") || problem.includes("*")) {
+      return { type: "multiplication", hasDecimals, hasFractions: false };
+    } else if (problem.includes("÷") || problem.includes("/")) {
+      return { type: "division", hasDecimals, hasFractions: false };
+    }
+    
+    return { type: "other", hasDecimals, hasFractions: false };
+  };
+
+  /* ── Unified math explanation router ── */
+  const getMathExplanation = (problem: string, correct: string, studentAnswer?: string, grade?: number): string | undefined => {
+    const problemType = detectMathProblemType(problem);
+    
+    // Route to appropriate explanation generator
+    if (problemType.hasFractions) {
+      return getDecimalFractionsExplanation(problem, correct, studentAnswer);
+    }
+    
+    if (problemType.hasDecimals && topic.id === "decimal-fractions") {
+      return getDecimalFractionsExplanation(problem, correct, studentAnswer);
+    }
+    
+    // For elementary grades (1-4), use simpler explanations
+    if (isPrimary && (problemType.type === "addition" || problemType.type === "subtraction")) {
+      return getElementaryMathExplanation(problem, correct, studentAnswer);
+    }
+    
+    // For higher grades, add more explanation types as needed
+    // (Currently we only have decimal-fractions and elementary-math)
+    
+    return undefined;
+  };
+
   /* ── Generate explanation for elementary math (grades 1-4) ── */
   const getElementaryMathExplanation = (problem: string, correct: string, studentAnswer?: string): string | undefined => {
     // Addition explanations
@@ -1086,12 +1141,7 @@ function InteractiveLessonEngine({
         const hintSpoken = hintEx?.hint ?? '';
         go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts }, pick(d.hinting), hintSpoken || undefined);
       } else {
-        let explanation: string | undefined;
-        if (topic.id === "decimal-fractions") {
-          explanation = getDecimalFractionsExplanation(problems[idx].question, problems[idx].answer, given);
-        } else if (isPrimary && (topic.id === "addition" || topic.id === "subtraction")) {
-          explanation = getElementaryMathExplanation(problems[idx].question, problems[idx].answer, given);
-        }
+        const explanation = getMathExplanation(problems[idx].question, problems[idx].answer, given, grade);
         setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong", explanation });
         const wrongMsg = topicContext === "weak" ? ctxD.practiceSupport : pick(d.practiceWrong2);
         say(wrongMsg, undefined, "retry");

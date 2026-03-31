@@ -172,7 +172,7 @@ export const lowerSecondarySubjects: Subject[] = [
       { id: "algebra-basics",   label: { en: "Algebra basics",     bg: "Алгебра",              es: "Álgebra básica",       de: "Algebra-Grundlagen", fr: "Algèbre de base" } },
       { id: "equations",        label: { en: "Equations",          bg: "Уравнения",            es: "Ecuaciones",           de: "Gleichungen",         fr: "Équations" } },
       { id: "geometry-adv",     label: { en: "Geometry",           bg: "Геометрия",            es: "Geometría",            de: "Geometrie",           fr: "Géométrie" } },
-      { id: "fractions-adv",    label: { en: "Fractions & ratios", bg: "Дроби и пропорции",    es: "Fracciones y razones", de: "Brüche und Verhältnisse", fr: "Fractions et ratios" } },
+      { id: "fractions-adv",    label: { en: "Fractions", bg: "Дроби",    es: "Fracciones", de: "Brüche", fr: "Fractions" } },
       { id: "percentage",       label: { en: "Percentages",        bg: "Проценти",             es: "Porcentajes",          de: "Prozentsätze",        fr: "Pourcentages" } },
       { id: "statistics",       label: { en: "Statistics",         bg: "Статистика",           es: "Estadística",          de: "Statistik",           fr: "Statistiques" } },
       { id: "word-problems-adv",label: { en: "Word problems",      bg: "Текстови задачи",      es: "Problemas",            de: "Textaufgaben",        fr: "Problèmes" } },

@@ -113,6 +113,30 @@ function algebraProb(grade: number): MathProblem {
   }
 }
 
+function fractionsProb(grade: number): MathProblem {
+  // Fractions problems: identify fractions, simplify, or compare
+  const type = rnd(0, 2);
+  if (type === 0) {
+    // Identify fraction: "What fraction is X out of Y?"
+    const total = rnd(4, 12);
+    const shaded = rnd(1, total - 1);
+    return { question: `What fraction is ${shaded} out of ${total} equal parts?`, answer: `${shaded}/${total}` };
+  } else if (type === 1) {
+    // Simplify fraction: "Simplify X/Y"
+    const pairs = [[2,4], [2,6], [3,6], [3,9], [4,8], [4,12], [5,10], [6,9]];
+    const [num, den] = pairs[rnd(0, pairs.length - 1)];
+    const gcd = num === den ? num : num === 2 && den === 4 ? 2 : num === 2 && den === 6 ? 2 : num === 3 && den === 6 ? 3 : num === 3 && den === 9 ? 3 : num === 4 && den === 8 ? 4 : num === 4 && den === 12 ? 4 : num === 5 && den === 10 ? 5 : num === 6 && den === 9 ? 3 : 1;
+    const simpNum = num / gcd;
+    const simpDen = den / gcd;
+    return { question: `Simplify ${num}/${den}`, answer: `${simpNum}/${simpDen}` };
+  } else {
+    // Equivalent fractions: "Are X/Y and A/B equal?"
+    const pairs = [[1,2,2,4], [1,3,2,6], [2,3,4,6], [1,4,2,8], [3,4,6,8]];
+    const [n1, d1, n2, d2] = pairs[rnd(0, pairs.length - 1)];
+    return { question: `Are ${n1}/${d1} and ${n2}/${d2} equal?`, answer: "Yes" };
+  }
+}
+
 function wordProb(grade: number, lang: LangCode): MathProblem {
   const a = rnd(3, range(grade)[1]);
   const b = rnd(2, a - 1);
@@ -148,6 +172,7 @@ function mathProblemFn(topicId: string, grade: number, lang: LangCode): () => Ma
     case "division":       return () => divProb(grade);
     case "word-problems":  return () => wordProb(grade, lang);
     case "algebra-basics": return () => algebraProb(grade);
+    case "fractions-adv":  return () => fractionsProb(grade);
     default:               return () => addProb(grade);
   }
 }
@@ -3106,6 +3131,76 @@ function getTopicText(subjectId: string, topicId: string, grade: number, lang: L
       },
     },
 
+    /* ── MATHEMATICS-ADVANCED / FRACTIONS-ADV ── */
+    "mathematics-advanced/fractions-adv": {
+      en: {
+        low: {
+          title: "Fractions",
+          explanation: "A fraction is a part of a whole. It shows how many equal parts we have out of the total. A fraction has two parts: the numerator (top number) tells us how many parts we have, and the denominator (bottom number) tells us how many equal parts the whole is divided into. For example, 3/4 means we have 3 out of 4 equal parts.",
+          examples: [
+            { problem: "What fraction is shaded in a circle divided into 4 equal parts with 1 part shaded?", solution: "1/4", hint: "Count the shaded parts (1) and total parts (4). Write as 1/4." },
+            { problem: "If a pizza is cut into 8 slices and you eat 2 slices, what fraction did you eat?", solution: "2/8 or 1/4", hint: "Shaded parts = 2, Total parts = 8. So 2/8 (simplified to 1/4)." },
+            { problem: "What fraction is 3 out of 5 equal parts?", solution: "3/5", hint: "Parts we have = 3, Total parts = 5. Write as 3/5." },
+          ],
+          tip: "🔢 Remember: the line between the numbers means 'out of' — so 3/5 means 3 out of 5 parts!",
+        },
+        high: {
+          title: "Fractions",
+          explanation: "Fractions represent parts of a whole. The numerator is the top number (how many parts we have), and the denominator is the bottom number (how many equal parts the whole is divided into). Equal fractions are fractions that represent the same amount, like 1/2 and 2/4. We can simplify fractions by dividing both the numerator and denominator by their greatest common factor.",
+          examples: [
+            { problem: "Simplify the fraction 4/8.", solution: "1/2", hint: "Both 4 and 8 are divisible by 4. 4÷4=1, 8÷4=2. So 4/8 = 1/2." },
+            { problem: "Are the fractions 2/3 and 4/6 equal? Show your work.", solution: "Yes, they are equal", hint: "Multiply 2/3 by 2/2: (2×2)/(3×2) = 4/6. Or simplify 4/6 by dividing by 2: 4÷2=2, 6÷2=3, so 4/6 = 2/3." },
+            { problem: "What is the fraction in simplest form for 6/9?", solution: "2/3", hint: "Both numbers are divisible by 3. 6÷3=2, 9÷3=3. So 6/9 = 2/3 in simplest form." },
+          ],
+          tip: "📐 A fraction in simplest form has no common factors between numerator and denominator (except 1)!",
+        },
+      },
+      bg: {
+        low: {
+          title: "Дроби",
+          explanation: "Дробта показва част от едно цяло. Тя има две части: числител (горното число) показва колко части имаме, а знаменател (долното число) показва на колко равни части е разделено цялото. Например, 3/4 означава, че имаме 3 от 4 равни части.",
+          examples: [
+            { problem: "Каква дроб е оцветена в кръг, разделен на 4 равни части с 1 оцветена част?", solution: "1/4", hint: "Преброй оцветените части (1) и всички части (4). Пиши като 1/4." },
+            { problem: "Ако пица е нарязана на 8 парчета и ти изяла 2 парчета, каква дроб си изяла?", solution: "2/8 или 1/4", hint: "Оцветени части = 2, Всички части = 8. Значи 2/8 (опростено 1/4)." },
+            { problem: "Каква дроб е 3 от 5 равни части?", solution: "3/5", hint: "Части, които имаме = 3, Всички части = 5. Пиши като 3/5." },
+          ],
+          tip: "🔢 Помни: линията между числата означава 'от' — 3/5 означава 3 от 5 части!",
+        },
+        high: {
+          title: "Дроби",
+          explanation: "Дробата показва част от едно цяло. Числителят е горното число (колко части имаме), а знаменателят е долното число (на колко равни части е разделено цялото). Равни дроби са дроби, които представляват един и същ размер, как 1/2 и 2/4. Можем да опростим дробите чрез делене на числител и знаменател на техния най-голям общ делител.",
+          examples: [
+            { problem: "Опрости дробта 4/8.", solution: "1/2", hint: "И 4, и 8 се делят на 4. 4÷4=1, 8÷4=2. Значи 4/8 = 1/2." },
+            { problem: "Дробите 2/3 и 4/6 равни ли са? Покажи как си сигурен.", solution: "Да, те са равни", hint: "Умножи 2/3 по 2/2: (2×2)/(3×2) = 4/6. Или опрости 4/6 чрез деление на 2: 4÷2=2, 6÷2=3, значи 4/6 = 2/3." },
+            { problem: "Каква е дробта в най-проста форма за 6/9?", solution: "2/3", hint: "И двете числа се делят на 3. 6÷3=2, 9÷3=3. Значи 6/9 = 2/3 в най-проста форма." },
+          ],
+          tip: "📐 Дроба в най-проста форма няма общи делители между числител и знаменател (освен 1)!",
+        },
+      },
+      es: {
+        low: {
+          title: "Fracciones",
+          explanation: "Una fracción es una parte de un todo. Muestra cuántas partes iguales tenemos del total. Una fracción tiene dos partes: el numerador (número de arriba) nos dice cuántas partes tenemos, y el denominador (número de abajo) nos dice en cuántas partes iguales se divide el todo. Por ejemplo, 3/4 significa que tenemos 3 de 4 partes iguales.",
+          examples: [
+            { problem: "¿Qué fracción está sombreada en un círculo dividido en 4 partes iguales con 1 parte sombreada?", solution: "1/4", hint: "Cuenta las partes sombreadas (1) y todas las partes (4). Escribe como 1/4." },
+            { problem: "Si una pizza se corta en 8 rebanadas y comes 2, ¿qué fracción comiste?", solution: "2/8 o 1/4", hint: "Partes sombreadas = 2, Todas las partes = 8. Entonces 2/8 (simplificado a 1/4)." },
+            { problem: "¿Qué fracción es 3 de 5 partes iguales?", solution: "3/5", hint: "Partes que tenemos = 3, Todas las partes = 5. Escribe como 3/5." },
+          ],
+          tip: "🔢 ¡Recuerda: la línea entre los números significa 'de' — 3/5 significa 3 de 5 partes!",
+        },
+        high: {
+          title: "Fracciones",
+          explanation: "Las fracciones representan partes de un todo. El numerador es el número de arriba (cuántas partes tenemos), y el denominador es el número de abajo (en cuántas partes iguales se divide el todo). Las fracciones equivalentes son fracciones que representan la misma cantidad, como 1/2 y 2/4. Podemos simplificar fracciones dividiendo el numerador y el denominador por su máximo común divisor.",
+          examples: [
+            { problem: "Simplifica la fracción 4/8.", solution: "1/2", hint: "Tanto 4 como 8 son divisibles por 4. 4÷4=1, 8÷4=2. Entonces 4/8 = 1/2." },
+            { problem: "¿Las fracciones 2/3 y 4/6 son iguales? Muestra tu trabajo.", solution: "Sí, son iguales", hint: "Multiplica 2/3 por 2/2: (2×2)/(3×2) = 4/6. O simplifica 4/6 dividiendo por 2: 4÷2=2, 6÷2=3, entonces 4/6 = 2/3." },
+            { problem: "¿Cuál es la fracción en forma simplificada para 6/9?", solution: "2/3", hint: "Ambos números son divisibles por 3. 6÷3=2, 9÷3=3. Entonces 6/9 = 2/3 en forma simplificada." },
+          ],
+          tip: "📐 ¡Una fracción en forma simplificada no tiene factores comunes entre numerador y denominador (excepto 1)!",
+        },
+      },
+    },
+
     /* ── NATURAL-SCIENCE / WATER-AIR ── */
     "natural-science/water-air": {
       en: {
@@ -4925,7 +5020,7 @@ function mathQuizQuestions(topicId: string, grade: number): QuizQuestion[] {
 
 /* ─── Main export ─────────────────────────────────────────────── */
 
-const MATH_SUBJECTS = new Set(["addition", "subtraction", "multiplication", "division", "word-problems", "algebra-basics"]);
+const MATH_SUBJECTS = new Set(["addition", "subtraction", "multiplication", "division", "word-problems", "algebra-basics", "fractions-adv"]);
 
 export function getLessonContent(
   subjectId: string,

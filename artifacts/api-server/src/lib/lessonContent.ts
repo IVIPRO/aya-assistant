@@ -163,14 +163,32 @@ function commonFractionsProb(grade: number): MathProblem {
 }
 
 function decimalFractionsProb(grade: number): MathProblem {
-  const type = rnd(0, 1);
+  const type = rnd(0, 4);
   if (type === 0) {
-    const d = [0.5, 0.25, 0.75, 0.1, 0.2];
-    const dec = d[rnd(0, d.length - 1)];
-    return { question: `What is ${dec} × 10?`, answer: String(dec * 10) };
+    // Addition of decimals
+    const a = rnd(1, 5), b = rnd(1, 9), c = rnd(1, 5), d = rnd(1, 9);
+    const result = (a + b/10 + c + d/10).toFixed(1);
+    return { question: `Събери: ${a}.${b} + ${c}.${d}`, answer: result };
+  } else if (type === 1) {
+    // Subtraction of decimals
+    const a = rnd(4, 8), b = rnd(1, 9), c = rnd(1, 4), d = rnd(1, 9);
+    const result = (a + b/10 - c - d/10).toFixed(1);
+    return { question: `Извади: ${a}.${b} − ${c}.${d}`, answer: result };
+  } else if (type === 2) {
+    // Comparison of decimals
+    const nums = [[3.4, "3.04"], [2.5, "2.50"], [1.8, "1.80"], [4.6, "4.06"], [5.2, "5.20"]];
+    const [n1, n2] = nums[rnd(0, nums.length - 1)];
+    return { question: `Кое число е по-голямо: ${n1} или ${n2}?`, answer: String(n1) };
+  } else if (type === 3) {
+    // Rounding decimals
+    const a = rnd(2, 9), b = rnd(1, 9);
+    const rounded = Math.round(a + b/10);
+    return { question: `Закръгли ${a}.${b} до най-близкото цяло число.`, answer: String(rounded) };
   } else {
-    const a = rnd(2, 6), b = rnd(2, 10);
-    return { question: `What is ${a}.${b} rounded to the nearest whole number?`, answer: String(Math.round(a + b/10)) };
+    // Decimal to fraction conversion
+    const pairs = [[0.5, "1/2"], [0.25, "1/4"], [0.75, "3/4"], [0.2, "1/5"], [0.1, "1/10"]];
+    const [dec, frac] = pairs[rnd(0, pairs.length - 1)];
+    return { question: `Преобразувай ${dec} в обикновена дроб.`, answer: frac };
   }
 }
 

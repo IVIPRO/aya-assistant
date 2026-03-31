@@ -64,6 +64,73 @@ function range(grade: number): [number, number] {
   return [50, 499];
 }
 
+/* ─── Smart hint generation for addition ─────────────────────────── */
+function generateAdditionHint(problem: string, answer: string, lang: string, grade: number): string {
+  // Extract numbers from problem like "13 + 26"
+  const match = problem.match(/(\d+)\s*\+\s*(\d+)/);
+  if (!match) return "";
+  
+  const a = parseInt(match[1]);
+  const b = parseInt(match[2]);
+  
+  if (lang === "bg") {
+    // One-digit addition (grade 1)
+    if (a < 10 && b < 10) {
+      if (a === b) {
+        return `Две еднакви групи от ${a} — това е ${answer}!`;
+      }
+      return `Събери ${a} и ${b}. Можеш да броиш на пръсти или да ния́сяш от ${a}.`;
+    }
+    
+    // Two-digit addition (grade 2+)
+    const aOnes = a % 10;
+    const aTens = Math.floor(a / 10);
+    const bOnes = b % 10;
+    const bTens = Math.floor(b / 10);
+    
+    const onesSum = aOnes + bOnes;
+    const tensSum = aTens + bTens;
+    const hasCarry = onesSum >= 10;
+    
+    if (hasCarry) {
+      return `${a} = ${aTens} дес. и ${aOnes} един., ${b} = ${bTens} дес. и ${bOnes} един.` +
+             `\nЕдиници: ${aOnes} + ${bOnes} = ${onesSum} (пиши ${onesSum % 10}, пренасяй 1)` +
+             `\nДесетици: ${aTens} + ${bTens} + 1 = ${tensSum + 1}` +
+             `\nОтговор: ${answer}`;
+    } else {
+      return `${a} = ${aTens} дес. и ${aOnes} един., ${b} = ${bTens} дес. и ${bOnes} един.` +
+             `\nЕдиници: ${aOnes} + ${bOnes} = ${onesSum}` +
+             `\nДесетици: ${aTens} + ${bTens} = ${tensSum}` +
+             `\nОтговор: ${answer}`;
+    }
+  }
+  
+  // English fallback
+  if (a < 10 && b < 10) {
+    if (a === b) {
+      return `Two equal groups of ${a} — that's ${answer}!`;
+    }
+    return `Count ${a} and ${b} together.`;
+  }
+  
+  const aOnes = a % 10;
+  const aTens = Math.floor(a / 10);
+  const bOnes = b % 10;
+  const bTens = Math.floor(b / 10);
+  const onesSum = aOnes + bOnes;
+  const hasCarry = onesSum >= 10;
+  
+  if (hasCarry) {
+    return `${a} = ${aTens} tens and ${aOnes}, ${b} = ${bTens} tens and ${bOnes}.` +
+           ` Add ones: ${aOnes} + ${bOnes} = ${onesSum} (write ${onesSum % 10}, carry 1).` +
+           ` Add tens: ${aTens} + ${bTens} + 1 = ${Math.floor(answer as any / 10)}.`;
+  }
+  
+  return `${a} = ${aTens} tens and ${aOnes}, ${b} = ${bTens} tens and ${bOnes}.` +
+         ` Add ones: ${aOnes} + ${bOnes} = ${onesSum}.` +
+         ` Add tens: ${aTens} + ${bTens} = ${Math.floor(answer as any / 10)}.`;
+}
+
 /* ─── Math problem generators ─────────────────────────────────── */
 
 type MathProblem = { question: string; answer: string };
@@ -326,8 +393,11 @@ function getTopicText(subjectId: string, topicId: string, grade: number, lang: L
             { problem: "3 + 4", solution: "= 7", hint: "Нарисувай 3 точки, после 4 точки. Преброй всичко заедно." },
             { problem: "6 + 2", solution: "= 8", hint: "Стартирай от 6 и преброй напред 2: 7, 8." },
             { problem: "5 + 5", solution: "= 10", hint: "Две еднакви групи от 5 — това е 10!" },
+            { problem: "13 + 26", solution: "= 39", hint: "13 = 1 дес. и 3 един., 26 = 2 дес. и 6 един.\nЕдиници: 3 + 6 = 9\nДесетици: 1 + 2 = 3\nОтговор: 39", steps: ["Разложи числата по разряди", "Събери единиците: 3 + 6 = 9", "Събери десетиците: 1 + 2 = 3", "Получаваш: 30 + 9 = 39"] },
+            { problem: "24 + 15", solution: "= 39", hint: "24 = 2 дес. и 4 един., 15 = 1 дес. и 5 един.\nЕдиници: 4 + 5 = 9\nДесетици: 2 + 1 = 3\nОтговор: 39", steps: ["Разложи числата по разряди", "Събери единиците: 4 + 5 = 9", "Събери десетиците: 2 + 1 = 3", "Получаваш: 30 + 9 = 39"] },
+            { problem: "18 + 17", solution: "= 35", hint: "18 = 1 дес. и 8 един., 17 = 1 дес. и 7 един.\nЕдиници: 8 + 7 = 15 (пиши 5, пренасяй 1)\nДесетици: 1 + 1 + 1 = 3\nОтговор: 35", steps: ["Разложи числата по разряди", "Събери единиците: 8 + 7 = 15", "Единиците: пиши 5, пренасяй 1 в десетиците", "Десетици: 1 + 1 + 1 = 3", "Получаваш: 30 + 5 = 35"] },
           ],
-          tip: "🖐️ При малки числа можеш да броиш на пръсти!",
+          tip: "🖐️ При малки числа можеш да броиш на пръсти! При по-големи ги раздели по разряди.",
         },
         high: {
           title: "Събиране",

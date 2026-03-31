@@ -1,0 +1,171 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- First inspect the current code carefully
+- Do NOT duplicate logic
+- Reuse existing analytics and activity tracking if already present
+- Do NOT add dependencies
+- Do NOT change existing UI structure unless absolutely required
+- Keep all fallback logic intact
+- Keep TypeScript clean
+
+Goal:
+Check whether the system already tracks daily learning streaks and motivational activity metrics for each child.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the codebase and report whether the system already tracks:
+
+1. Daily learning streak
+   - consecutive learning days
+   - last active day
+   - streak reset conditions
+
+2. Activity timeline
+   - activity timestamps
+   - session timestamps
+   - lesson completion timestamps
+   - task completion timestamps
+
+3. Engagement metrics such as:
+   - sessions per day
+   - lessons per day
+   - tasks solved today
+   - active days in last 7 days
+
+4. Parent-visible motivation indicators like:
+   - "X days in a row"
+   - "Учено днес"
+   - "Активен тази седмица"
+
+5. Identify:
+   - exact files tracking activity
+   - where timestamps are stored
+   - whether timestamps are persisted per child
+   - whether they survive refresh/login
+
+6. Verify:
+   - streak logic does NOT mix children
+   - streak logic respects per-child isolation
+   - streak logic does NOT reset incorrectly
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If streak/activity tracking already exists:
+- do NOT rewrite anything
+- do NOT add parallel tracking
+- return audit summary only
+
+If activity tracking exists but streak logic is missing:
+- reuse activity timestamps to compute streaks
+- do NOT create new event pipelines
+
+If neither exists:
+- minimally add per-child activity tracking
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION (ONLY IF MISSING)
+==================================================
+
+Add lightweight per-child learning streak tracking:
+
+Core metrics:
+
+1. lastActivityDate
+2. currentStreakDays
+3. activeDaysLast7
+4. activeDaysLast30
+
+Rules:
+
+currentStreakDays increases when:
+- child has activity today
+- previous activity was yesterday
+
+currentStreakDays resets when:
+- more than 1 day gap between activities
+
+Activity counts when:
+- lesson started
+- lesson completed
+- practice task solved
+- explanation opened
+
+Important:
+- store activity per child
+- reuse existing persistence system
+- do NOT duplicate storage structures
+- fallback if data missing
+
+==================================================
+STEP 4 — OPTIONAL PARENT DISPLAY (ONLY IF EASY)
+==================================================
+
+If safe and minimal:
+
+Expose streak info to Родител page:
+
+Example blocks:
+
+🔥 "Учиш вече 3 дни подред"
+
+📅 "Активен 5 дни през последната седмица"
+
+If insufficient data:
+"Все още няма достатъчно данни."
+
+Do NOT fabricate streak numbers.
+
+==================================================
+STEP 5 — TESTS
+==================================================
+
+Verify:
+
+Child A activity today → streak increases  
+Child A activity tomorrow → streak continues  
+
+Skip 2 days → streak resets  
+
+Switch to Child B → independent streak  
+
+Refresh page → streak preserved  
+
+Login/logout → streak preserved  
+
+No TypeScript errors  
+No duplicated logic  
+Fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+FILES / FUNCTIONS
+- exact files involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- minimal streak system added
+
+FINAL STATUS
+- TypeScript clean
+- fallback intact
+- no duplicated logic
+- per-child isolation preserved
+- analytics reuse confirmed

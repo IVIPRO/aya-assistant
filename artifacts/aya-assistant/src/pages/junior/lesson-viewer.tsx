@@ -874,22 +874,37 @@ function InteractiveLessonEngine({
   /* ── check practice answer */
   /* ── Generate explanation for wrong decimal fractions answers ── */
   const getDecimalFractionsExplanation = (problem: string, correct: string, studentAnswer?: string): string | undefined => {
-    // Case 1: Addition with potential merged digits or decimal point error
+    // Case 1: Addition with visual alignment
     if (problem.includes("+")) {
-      if (studentAnswer) {
-        const correctNum = parseFloat(correct);
-        const studentNum = parseFloat(studentAnswer);
-        // Detect merged digits (e.g., student wrote 6.41 instead of 6.5)
-        if (studentAnswer.includes(".") && correct.includes(".")) {
-          const correctDec = correct.split(".")[1]?.length || 0;
-          const studentDec = studentAnswer.split(".")[1]?.length || 0;
-          if (studentDec > correctDec) {
-            return "Изглежда, че цифрите са слепени. Когато събираме десетични числа, подравняваме запетаята и събираме по колони.";
+      // Extract numbers from problem for visual alignment
+      const addMatch = problem.match(/[\d.]+\s*\+\s*([\d.]+)/);
+      if (addMatch) {
+        const nums = problem.match(/[\d.]+/g);
+        if (nums && nums.length >= 2) {
+          const num1 = nums[0];
+          const num2 = nums[1];
+          // Create visual alignment
+          const space = " ".repeat(Math.max(num1.length, num2.length) + 1 - num1.length);
+          const space2 = " ".repeat(Math.max(num1.length, num2.length) + 1 - num2.length);
+          const alignment = `Нека подредим числата по десетичната запетая:\n${space}${num1}\n+${space2}${num2}\n${"─".repeat(Math.max(num1.length, num2.length) + 3)}\n${" ".repeat(Math.max(num1.length, num2.length) + 1 - correct.length)}${correct}`;
+          
+          if (studentAnswer) {
+            const correctNum = parseFloat(correct);
+            const studentNum = parseFloat(studentAnswer);
+            // Detect merged digits (e.g., student wrote 6.41 instead of 6.5)
+            if (studentAnswer.includes(".") && correct.includes(".")) {
+              const correctDec = correct.split(".")[1]?.length || 0;
+              const studentDec = studentAnswer.split(".")[1]?.length || 0;
+              if (studentDec > correctDec) {
+                return `${alignment}\n\nПървo събираме десетите: ${num1.split(".")[1]} + ${num2.split(".")[1]}\nПосле събираме целите числа: ${Math.floor(parseFloat(num1))} + ${Math.floor(parseFloat(num2))}`;
+              }
+            }
+            // Detect decimal point ignored
+            if (studentNum > correctNum * 1.2) {
+              return `${alignment}\n\nПървo събираме десетите: ${num1.split(".")[1]} + ${num2.split(".")[1]} = ${parseFloat(correct).toString().split(".")[1]}\nПосле събираме целите числа: ${Math.floor(parseFloat(num1))} + ${Math.floor(parseFloat(num2))} = ${Math.floor(parseFloat(correct))}`;
+            }
           }
-        }
-        // Detect decimal point ignored (e.g., student wrote 7.5 instead of 6.5)
-        if (studentNum > correctNum * 1.2) {
-          return "Провери десетичната запетая. Първо събираме десетите, после целите числа.";
+          return `${alignment}\n\nПървo събираме десетите, после целите числа.`;
         }
       }
       return "Когато събираме десетични числа, подравняваме десетичната запетая и събираме цифра по цифра.";
@@ -1387,7 +1402,11 @@ function InteractiveLessonEngine({
                     {phase.kind === "practice" && phase.explanation && (
                       <div className="bg-blue-50 border-l-4 border-blue-300 rounded px-4 py-3 text-sm text-blue-800">
                         <p className="font-semibold text-blue-900 mb-1">{lang === "bg" ? "Обяснение:" : "Explanation:"}</p>
-                        <p>{phase.explanation}</p>
+                        {phase.explanation.includes("\n") ? (
+                          <pre className="font-mono text-xs bg-white bg-opacity-50 p-2 rounded mb-2 overflow-x-auto whitespace-pre-wrap">{phase.explanation}</pre>
+                        ) : (
+                          <p>{phase.explanation}</p>
+                        )}
                       </div>
                     )}
                     {/* Weak topics: reveal correct answer after 1st wrong; others after 2nd */}

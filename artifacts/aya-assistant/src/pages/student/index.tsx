@@ -168,42 +168,42 @@ export function Student() {
           >
             {/* Stage hero banner */}
             <div className="rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-student/20 via-student/10 to-transparent border border-student/20 p-8 mb-8">
-              {/* Title section */}
-              <div className="mb-6">
-                <div className="inline-flex items-center gap-2 bg-student/10 text-student text-xs font-bold px-3 py-1 rounded-full mb-2">
-                  <span>🎓</span>
-                  {childLang === "bg"
-                    ? "5–7 клас"
-                    : childLang === "de"
-                    ? "Klassen 5–7"
-                    : `Grades 5–7`}
-                </div>
-                <h1 className="text-3xl font-display font-bold text-student mb-1">
-                  {lbl.stageTitle}
-                </h1>
-                <p className="text-muted-foreground mb-4">{lbl.stageDesc}</p>
-              </div>
-
-              {/* AYA greeting with avatar */}
-              <div className="flex flex-col md:flex-row items-start gap-4">
-                {/* Avatar - left side */}
-                <div className="flex-shrink-0">
-                  <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-student/20 to-student/5 border-2 border-student/30 flex items-center justify-center shadow-lg overflow-visible">
-                    <div className="scale-[2.0] mt-2">
-                      <AyaAvatar emotion="happy" visible={true} />
-                    </div>
+              {/* Hero row: left (title+CTA) | right (avatar) */}
+              <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-6">
+                {/* Left: Title section with CTA */}
+                <div className="flex-1">
+                  <div className="inline-flex items-center gap-2 bg-student/10 text-student text-xs font-bold px-3 py-1 rounded-full mb-2">
+                    <span>🎓</span>
+                    {childLang === "bg"
+                      ? "5–7 клас"
+                      : childLang === "de"
+                      ? "Klassen 5–7"
+                      : `Grades 5–7`}
                   </div>
-                </div>
-
-                {/* Speech bubble - right side */}
-                <div className="flex-1 bg-white/80 backdrop-blur-sm rounded-2xl border border-student/20 p-4 text-sm text-foreground">
-                  <p className="font-medium text-student mb-1">👧 AYA</p>
-                  <p>{lbl.greeting}</p>
-                  <div className="mt-4 inline-flex items-center gap-2 bg-student/10 text-student font-semibold px-4 py-2 rounded-xl text-sm">
+                  <h1 className="text-3xl font-display font-bold text-student mb-1">
+                    {lbl.stageTitle}
+                  </h1>
+                  <p className="text-muted-foreground mb-4">{lbl.stageDesc}</p>
+                  <div className="inline-flex items-center gap-2 bg-student/10 text-student font-semibold px-4 py-2 rounded-xl text-sm">
                     <Sparkles className="w-4 h-4" />
                     {lbl.ayaReady}
                   </div>
                 </div>
+
+                {/* Right: Avatar */}
+                <div className="flex-shrink-0">
+                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-student/20 to-student/5 border-2 border-student/30 flex items-center justify-center shadow-lg overflow-visible">
+                    <div className="scale-[2.2] mt-3">
+                      <AyaAvatar emotion="happy" visible={true} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Speech bubble - full width below */}
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-student/20 p-4 text-sm text-foreground">
+                <p className="font-medium text-student mb-1">👧 AYA</p>
+                <p>{lbl.greeting}</p>
               </div>
             </div>
 

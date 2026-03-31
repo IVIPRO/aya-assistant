@@ -190,8 +190,8 @@ export function Student() {
                   </div>
                 </div>
 
-                {/* Right: Avatar */}
-                <div className="flex-shrink-0">
+                {/* Right: Avatar with right padding */}
+                <div className="flex-shrink-0 pr-6 md:pr-0">
                   <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-student/20 to-student/5 border-2 border-student/30 flex items-center justify-center shadow-lg overflow-visible">
                     <div className="scale-[2.2] mt-3">
                       <AyaAvatar emotion="happy" visible={true} />

@@ -1,0 +1,136 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Do NOT duplicate streak logic
+- Reuse existing streak computation
+- Do NOT modify backend logic
+- UI enhancement only
+- Keep TypeScript clean
+- Keep fallback logic intact
+
+Goal:
+Check whether the current UI already displays the learning streak and weekly activity for each child.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the UI and determine whether the following metrics are already displayed:
+
+1. Current learning streak
+   example:
+   "🔥 Учиш вече 3 дни подред"
+
+2. Activity this week
+   example:
+   "📅 Активен 5 дни през последната седмица"
+
+3. Today's activity
+   example:
+   "✔ Учено днес"
+
+4. Parent page streak visibility
+
+Check the following screens:
+
+- Табло
+- Прогимназия
+- Родител
+- Начален екран
+
+Verify that streak data comes from the existing backend streak system.
+
+Identify:
+
+- files rendering the dashboard
+- components receiving activity data
+- whether streak is already exposed via API/state
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If streak UI already exists:
+- return audit summary only
+- do NOT modify anything
+
+If streak logic exists but UI does not show it:
+
+Implement minimal UI display.
+
+==================================================
+STEP 3 — MINIMAL UI DISPLAY
+==================================================
+
+Add streak display blocks using existing streak values:
+
+Example components:
+
+🔥 Учиш вече {currentStreakDays} дни подред
+
+📅 Активен {activeDaysLast7} дни тази седмица
+
+✔ Учено днес
+
+Rules:
+
+- Do NOT calculate streak in UI
+- Use backend streak values only
+- Do NOT fabricate data
+- If streak data missing show:
+
+"Все още няма достатъчно данни."
+
+==================================================
+STEP 4 — UI LOCATION
+==================================================
+
+Place streak display in one safe location:
+
+Preferred order:
+
+1️⃣ Табло dashboard  
+or  
+2️⃣ Родител page  
+
+Do NOT change navigation.
+
+==================================================
+STEP 5 — TESTS
+==================================================
+
+Verify:
+
+Child A streak visible  
+Child B different streak  
+
+Refresh page → streak persists  
+
+No TypeScript errors  
+No duplicated logic  
+Fallback safe
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already displayed / not displayed
+
+FILES FOUND
+- UI components
+
+ACTION
+- no changes needed
+OR
+- streak UI added
+
+FINAL STATUS
+- TypeScript clean
+- no duplicated logic
+- streak logic reused
+- UI stable

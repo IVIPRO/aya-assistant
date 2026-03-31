@@ -1,0 +1,143 @@
+Activate Phase 5: connect the already-built curriculum-based task generation system to the live lesson/task UI.
+
+Important:
+- Keep this LIGHTWEIGHT (Lite only)
+- Do NOT use Agent
+- Do NOT create new architecture
+- Do NOT rebuild the app
+- Reuse the already created files:
+  - curriculumMap.ts
+  - curriculumUtils.ts
+  - taskTemplates.ts
+  - generationValidator.ts
+  - curriculumIntegration.ts
+- Do NOT duplicate logic that already exists
+- Prefer wiring/integration over rewriting
+
+Goal:
+Make the current live lesson/task screens actually use the curriculum engine where appropriate.
+
+Scope for activation:
+1. Начален етап → 2 клас → Математика
+2. Прогимназия → 5 клас → Математика
+
+Only activate for these 2 flows now.
+Do NOT activate globally for all subjects/grades yet.
+
+--------------------------------
+WHAT TO DO
+--------------------------------
+
+Integrate the curriculum engine into the existing lesson/task generation flow in the UI.
+
+Where the current screen loads/generates:
+- solved examples
+- practice tasks
+- test tasks
+- word problems
+
+replace the direct generation path with the safe wrapper from curriculumIntegration.ts.
+
+Use the already prepared safe pattern, for example:
+- detect grade
+- detect subject
+- detect topic
+- request curriculum task through the safe integration wrapper
+- if wrapper returns null/fallback needed, continue using the previous logic
+
+Use the existing safe integration helper already created:
+- tryGenerateCurriculumTask(...) or equivalent ready wrapper from curriculumIntegration.ts
+
+Do NOT invent a second integration path.
+
+--------------------------------
+EXPECTED BEHAVIOR
+--------------------------------
+
+For Grade 2 Math:
+- only allowed MON-appropriate content
+- no decimals
+- no fractions
+- no algebra
+- examples/practice/tests/word problems must match grade 2 level
+
+For Grade 5 Math:
+- allowed operations for grade 5
+- decimals/fractions/algebra only when topic allows
+- examples/practice/tests/word problems must match current topic and grade
+
+--------------------------------
+UI RULES
+--------------------------------
+
+- Keep the current UI exactly as it is
+- Keep avatar, voice, bubbles, buttons, progress and layouts unchanged
+- Only change the data source behind the task generation
+- No visual redesign
+- No new pages
+- No new components unless absolutely required for tiny glue code
+
+--------------------------------
+SAFETY RULES
+--------------------------------
+
+1. If curriculum generation succeeds:
+   use it
+
+2. If validation rejects the request or curriculum task is unavailable:
+   silently fall back to the existing old logic
+
+3. Never leave the student with an empty screen
+
+4. Never break:
+   - “Следващ пример”
+   - “Следваща задача”
+   - “Опитай пак”
+   - answer checking
+   - explanation rendering
+   - solved-step rendering
+
+5. Preserve all current working mechanics from both:
+   - Прогимназия math
+   - Начален етап math
+
+--------------------------------
+TEST CASES TO VERIFY
+--------------------------------
+
+Verify all of these after integration:
+
+A. Начален етап / 2 клас / Математика / Събиране
+- solved examples load
+- practice tasks load
+- wrong answer explanations still work
+- no decimals/fractions appear
+
+B. Начален етап / 2 клас / Математика / Текстови задачи
+- word problems are age-appropriate
+- explanations are meaningful
+- no impossible/illogical wording
+
+C. Прогимназия / 5 клас / Математика / Алгебра
+- algebra still works
+- step-by-step explanations still render correctly
+
+D. Прогимназия / 5 клас / Математика / Десетични дроби
+- Bulgarian content only
+- correct explanations
+- wrong-answer explanation still works
+
+--------------------------------
+OUTPUT REQUIREMENT
+--------------------------------
+
+When finished, report only:
+
+1. Which existing UI/task flow files were connected
+2. Which old generation calls were replaced/wrapped
+3. Whether fallback remained intact
+4. Whether TypeScript is clean
+5. Which exact Grade 2 and Grade 5 scenarios were tested
+
+Do NOT say “ready for future use”.
+Actually connect the live UI flow now.

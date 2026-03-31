@@ -15,6 +15,7 @@ import { XpToast, type XpReward } from "@/components/xp-toast";
 import { AyaAvatarImage as AyaAvatar, type AyaEmotion } from "@/components/AyaAvatarImage";
 import { getCuriosityCard, getCuriosityFact, CURIOSITY_BRIDGES, type CuriosityCard as CuriosityCardData } from "@/lib/curiosityEngine";
 import { StoryLessonEngine } from "./story-engine";
+import { tryGenerateCurriculumTask, shouldUseCurriculumSystem, detectCurrentGrade } from "@/lib/curriculumIntegration";
 
 /* ─── Weak topic tracking ────────────────────────────────────────────── */
 const WEAK_TOPIC_THRESHOLD = 3;
@@ -1008,8 +1009,43 @@ function InteractiveLessonEngine({
     return undefined;
   };
 
+  /* ── Curriculum-aware explanation wrapper (Phase 5 integration) ── */
+  const getCurriculumAwareExplanation = (problem: string, correct: string, studentAnswer?: string): string | undefined => {
+    // Try curriculum system first for grades 2 & 5 math
+    const curriculumGrade = detectCurrentGrade();
+    if (curriculumGrade && (curriculumGrade === 2 || curriculumGrade === 5) && subject.id === "mathematics") {
+      // Attempt to generate explanation via curriculum system
+      try {
+        const curriculumTask = tryGenerateCurriculumTask(
+          curriculumGrade,
+          topic.id,
+          "solved-example"
+        );
+        
+        if (curriculumTask && "explanation" in curriculumTask) {
+          return curriculumTask.explanation;
+        }
+        if (curriculumTask && "stepByStep" in curriculumTask && Array.isArray(curriculumTask.stepByStep)) {
+          return curriculumTask.stepByStep.join("\n");
+        }
+      } catch (e) {
+        // Silent fallback on curriculum error (never crash)
+        console.debug("[Curriculum] Explanation generation failed, using fallback");
+      }
+    }
+    
+    // Fall back to existing explanation system (getMathExplanation)
+    return undefined; // Will trigger existing system
+  };
+
   /* ── Unified math explanation router ── */
   const getMathExplanation = (problem: string, correct: string, studentAnswer?: string, grade?: number): string | undefined => {
+    // Try curriculum system first
+    const curriculumExplanation = getCurriculumAwareExplanation(problem, correct, studentAnswer);
+    if (curriculumExplanation) {
+      return curriculumExplanation;
+    }
+    
     // Check for word problems first (Bulgarian text)
     const wordProblemOp = detectWordProblemOperation(problem);
     if (wordProblemOp) {

@@ -1,0 +1,75 @@
+Implement Phase 4: generation rules validation for the new curriculum/task-template system.
+
+Important:
+- Keep this lightweight (Lite)
+- Do NOT use Agent mode
+- Do NOT redesign the app
+- Do NOT touch unrelated sections
+- Reuse the existing files:
+  - curriculumMap.ts
+  - curriculumUtils.ts
+  - taskTemplates.ts
+- Do NOT duplicate logic
+- Do NOT activate full UI rollout yet
+- This phase is validation and safe wiring only
+
+Goal:
+Validate that generated tasks are allowed for the selected:
+- stage
+- grade
+- subject
+- topic
+- difficulty
+
+Scope:
+Focus only on the reference implementations:
+1. Начален етап → 2 клас → Математика
+2. Прогимназия → 5 клас → Математика
+
+Tasks:
+
+1. Add validation before task generation.
+Before a task is returned, verify:
+- topic is allowed for the grade
+- task type is allowed for the topic
+- difficulty is allowed for the grade
+- content format is allowed for the grade
+
+2. Prevent invalid content.
+
+Examples:
+- Grade 2 math must NOT receive:
+  - decimals
+  - fractions
+  - algebra
+  - progymnasium-only content
+- Grade 5 math MAY receive:
+  - decimals
+  - introductory algebra
+  - division with remainder
+  - more advanced word problems
+
+3. Reuse existing helpers where possible, including:
+- getTopicsForGradeAndSubject()
+- isTopicAvailableForGrade()
+- isContentTypeAllowed()
+- isTemplateValidForGrade()
+
+4. If invalid content is requested:
+- do NOT crash
+- do NOT return wrong material
+- safely fallback to the nearest valid topic/template for that grade
+
+Example:
+If Grade 2 requests decimal fractions,
+fallback to a valid Grade 2 math topic like addition/subtraction/word problems.
+
+5. Add a small validation layer or utility, not a heavy new system.
+
+6. Add clear internal comments so later Phase 5 can connect safely.
+
+7. Do NOT yet modify the visible UI screens.
+This phase should prepare the system safely, not fully roll it out.
+
+Expected result:
+The curriculum/template engine now validates generated content before use, so AYA cannot accidentally serve the wrong grade/topic/difficulty.

@@ -2,7 +2,7 @@ import { Layout } from "@/components/layout";
 import { Chat } from "@/components/chat";
 import { SubjectPanel } from "@/pages/junior/subjects";
 import { StageSelector } from "@/pages/junior/stage-selector";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, BookOpen, Sparkles, MessageCircle } from "lucide-react";
 import { AyaAvatarImage as AyaAvatar } from "@/components/AyaAvatarImage";
@@ -27,6 +27,8 @@ const LABELS: Record<LangCode, {
   ayaReady: string;
   noChildFound: string;
   noChildFoundHint: string;
+  selectGrade: string;
+  helpFor: string;
 }> = {
   bg: {
     stageTitle: "Прогимназия",
@@ -40,6 +42,8 @@ const LABELS: Record<LangCode, {
     ayaReady: "Готова съм да помагам!",
     noChildFound: "Не е намерен профил",
     noChildFoundHint: "Моля, свържи детски профил",
+    selectGrade: "В кой клас си?",
+    helpFor: "Помощ за:",
   },
   en: {
     stageTitle: "Lower Secondary",
@@ -53,6 +57,8 @@ const LABELS: Record<LangCode, {
     ayaReady: "Ready to help!",
     noChildFound: "No profile found",
     noChildFoundHint: "Please connect a child profile",
+    selectGrade: "What grade are you in?",
+    helpFor: "Help for:",
   },
   es: {
     stageTitle: "Secundaria",
@@ -66,6 +72,8 @@ const LABELS: Record<LangCode, {
     ayaReady: "¡Lista para ayudar!",
     noChildFound: "Perfil no encontrado",
     noChildFoundHint: "Por favor conecta un perfil infantil",
+    selectGrade: "¿En qué grado estás?",
+    helpFor: "Ayuda para:",
   },
   de: {
     stageTitle: "Mittelschule",
@@ -79,6 +87,8 @@ const LABELS: Record<LangCode, {
     ayaReady: "Bereit zu helfen!",
     noChildFound: "Kein Profil gefunden",
     noChildFoundHint: "Bitte verbinde ein Kinderprofil",
+    selectGrade: "In welcher Klasse bist du?",
+    helpFor: "Hilfe für:",
   },
   fr: {
     stageTitle: "Collège",
@@ -92,6 +102,8 @@ const LABELS: Record<LangCode, {
     ayaReady: "Prête à aider !",
     noChildFound: "Profil introuvable",
     noChildFoundHint: "Veuillez connecter un profil enfant",
+    selectGrade: "En quelle classe es-tu?",
+    helpFor: "Aide pour:",
   },
 };
 
@@ -108,6 +120,23 @@ export function Student() {
   const activeChild = children.find(c => c.id === activeChildId) ?? children[0] ?? null;
   const childLang = resolveLang(activeChild?.language ?? null);
   const lbl = LABELS[childLang];
+
+  // Load saved grade from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("aya_progym_grade");
+    if (saved) {
+      const grade = parseInt(saved, 10);
+      if ([5, 6, 7].includes(grade)) {
+        setSelectedGrade(grade);
+      }
+    }
+  }, []);
+
+  // Handle grade selection and save to localStorage
+  const handleGradeSelect = (grade: number) => {
+    setSelectedGrade(grade);
+    localStorage.setItem("aya_progym_grade", String(grade));
+  };
 
   const activeChildIdResolved = activeChild?.id ?? null;
 
@@ -183,6 +212,11 @@ export function Student() {
                   <h1 className="text-3xl font-display font-bold text-student mb-1">
                     {lbl.stageTitle}
                   </h1>
+                  {selectedGrade && (
+                    <p className="text-sm text-student/70 mb-2">
+                      {lbl.helpFor} {selectedGrade} {childLang === "bg" ? "клас" : childLang === "de" ? "Klasse" : childLang === "fr" ? "classe" : childLang === "es" ? "grado" : "grade"}
+                    </p>
+                  )}
                   <p className="text-muted-foreground mb-4">{lbl.stageDesc}</p>
                   <div className="inline-flex items-center gap-2 bg-student/10 text-student font-semibold px-4 py-2 rounded-xl text-sm">
                     <Sparkles className="w-4 h-4" />
@@ -201,9 +235,29 @@ export function Student() {
               </div>
 
               {/* Speech bubble - full width below */}
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-student/20 p-4 text-sm text-foreground">
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-student/20 p-4 text-sm text-foreground mb-6">
                 <p className="font-medium text-student mb-1">👧 AYA</p>
                 <p>{lbl.greeting}</p>
+              </div>
+
+              {/* Grade selector */}
+              <div className="bg-white/50 backdrop-blur-sm rounded-xl border border-student/10 p-4">
+                <p className="text-sm font-medium text-student mb-3">{lbl.selectGrade}</p>
+                <div className="flex flex-wrap gap-2">
+                  {[5, 6, 7].map(grade => (
+                    <button
+                      key={grade}
+                      onClick={() => handleGradeSelect(grade)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                        selectedGrade === grade
+                          ? "bg-student text-white border-2 border-student"
+                          : "bg-student/5 text-student border-2 border-student/20 hover:border-student/50"
+                      }`}
+                    >
+                      {grade} {childLang === "bg" ? "клас" : childLang === "de" ? "Klasse" : childLang === "fr" ? "classe" : childLang === "es" ? "grado" : "grade"}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 

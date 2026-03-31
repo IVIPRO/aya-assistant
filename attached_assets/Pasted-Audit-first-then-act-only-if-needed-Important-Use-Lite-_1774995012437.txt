@@ -1,0 +1,95 @@
+Audit first, then act only if needed.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- First inspect the current codebase and the already implemented logic
+- Do NOT duplicate code
+- Do NOT create a second diagnosis system if one already exists
+- Do NOT change UI layout
+- Do NOT add OpenAI or external AI
+- Do NOT add new dependencies
+
+Goal:
+Before doing anything, verify whether Phase 5.2 (rule-based wrong-answer diagnosis) is already fully implemented and active for:
+1. Начален етап → 2 клас → Математика
+2. Прогимназия → 5 клас → Математика
+
+--------------------------------
+STEP 1 — AUDIT FIRST
+--------------------------------
+
+Inspect the existing code and report:
+
+1. Is there already a wrong-answer diagnosis helper/function?
+2. In which file(s) is it implemented?
+3. Is it already inserted into the wrong-answer flow?
+4. For which grades/topics is it currently active?
+5. Are the diagnosis messages already shown in Bulgarian?
+6. Does the system already classify mistake types such as:
+   - wrong operation
+   - carry/regrouping mistake
+   - decimal alignment mistake
+   - algebra sign mistake
+   - fraction confusion
+   - word-problem misunderstanding
+
+7. Is fallback preserved?
+8. Is there any duplicated or overlapping diagnosis logic?
+
+--------------------------------
+STEP 2 — DECISION RULE
+--------------------------------
+
+If Phase 5.2 is already fully implemented and active:
+- do NOT rewrite it
+- do NOT duplicate anything
+- do NOT create new files unnecessarily
+- only return a short audit summary proving what already exists
+
+If Phase 5.2 is only partially implemented:
+- complete ONLY the missing parts
+- reuse the existing files and existing logic
+- patch the system minimally
+- keep TypeScript clean
+- keep current UI untouched
+
+--------------------------------
+STEP 3 — IF PATCHING IS NEEDED
+--------------------------------
+
+Only if missing parts are found, patch the current implementation so that:
+
+- wrong-answer diagnosis is active in the current wrong-answer flow
+- diagnosis appears before final answer reveal
+- explanations are in Bulgarian
+- rule-based only
+- no OpenAI
+- no external services
+
+Keep this scope limited to:
+- Grade 2 Math
+- Grade 5 Math
+
+--------------------------------
+OUTPUT FORMAT
+--------------------------------
+
+Return only:
+
+AUDIT RESULT
+- already implemented: yes/no
+- files involved
+- where it is connected in the flow
+- what mistake categories are already covered
+- whether duplication was found
+
+ACTION TAKEN
+- no code changes needed
+OR
+- minimal patch applied
+
+FINAL STATUS
+- TypeScript clean: yes/no
+- fallback intact: yes/no
+- UI changed: yes/no

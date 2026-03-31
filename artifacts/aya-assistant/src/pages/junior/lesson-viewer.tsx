@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Eye, CheckCircle2, XCircle,
   ChevronRight, RotateCcw, Loader2, Trophy, Star, Sparkles,
-  Volume2, VolumeX,
+  Volume2, VolumeX, AlertCircle,
 } from "lucide-react";
 import { useAyaLessonVoice, type EmotionMode } from "@/hooks/use-aya-lesson-voice";
 import { cn } from "@/components/layout";
@@ -15,6 +15,37 @@ import { XpToast, type XpReward } from "@/components/xp-toast";
 import { AyaAvatarImage as AyaAvatar, type AyaEmotion } from "@/components/AyaAvatarImage";
 import { getCuriosityCard, getCuriosityFact, CURIOSITY_BRIDGES, type CuriosityCard as CuriosityCardData } from "@/lib/curiosityEngine";
 import { StoryLessonEngine } from "./story-engine";
+
+/* ─── Weak topic tracking ────────────────────────────────────────────── */
+const WEAK_TOPIC_THRESHOLD = 3;
+const WEAK_TOPICS_STORAGE_KEY = "aya_weak_topics_grade5_math";
+
+interface WeakTopicsData {
+  [topicName: string]: number;
+}
+
+const getWeakTopics = (): WeakTopicsData => {
+  try {
+    const data = localStorage.getItem(WEAK_TOPICS_STORAGE_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch {
+    return {};
+  }
+};
+
+const trackMistake = (topicName: string): WeakTopicsData => {
+  const weak = getWeakTopics();
+  weak[topicName] = (weak[topicName] || 0) + 1;
+  localStorage.setItem(WEAK_TOPICS_STORAGE_KEY, JSON.stringify(weak));
+  return weak;
+};
+
+const getWeakTopicsToReview = (): string[] => {
+  const weak = getWeakTopics();
+  return Object.entries(weak)
+    .filter(([_, count]) => count >= WEAK_TOPIC_THRESHOLD)
+    .map(([topic]) => topic);
+};
 
 /* ─── Adaptive profile ──────────────────────────────────────────── */
 
@@ -712,6 +743,7 @@ function InteractiveLessonEngine({
   /* spokenText may include content suffix (explanation/problem/hint) beyond what the bubble shows */
   const [spokenText, setSpokenText] = useState<string>(greetingText);
   const [answerInput, setAnswerInput] = useState("");
+  const [weakTopicsToSuggest, setWeakTopicsToSuggest] = useState<string[]>([]);
   /* voiceEmotion: AYA's delivery style for the current TTS line */
   const [voiceEmotion, setVoiceEmotion] = useState<EmotionMode>("intro");
   /* narrationTriggered: tracks if user pressed button to listen in this phase */
@@ -961,6 +993,10 @@ function InteractiveLessonEngine({
       trackAnswer(false);
       consecutiveCorrectRef.current = 0;
       lessonMistakesRef.current += 1;
+      // Track weak topics for grade 5 math
+      if (grade === 5 && subject.id === "mathematics") {
+        trackMistake(topic.label[lang] ?? topic.label.en);
+      }
       const nextAttempts = attempts + 1;
       /* First wrong in primary grades (1-4): go to hinting phase — speak hint text aloud */
       if (isPrimary && attempts === 0) {
@@ -1614,6 +1650,8 @@ function InteractiveLessonEngine({
               : total.practice > 0
               ? Math.round((practiceCorrect / total.practice) * 100)
               : 100;
+            // Check for weak topics on completion
+            const weakTopics = grade === 5 && subject.id === "mathematics" ? getWeakTopicsToReview() : [];
             return (
               <div className="space-y-4">
                 <motion.div
@@ -1645,6 +1683,39 @@ function InteractiveLessonEngine({
                   </div>
                 </motion.div>
                 <CuriosityCardDisplay card={curiosityCard} lang={lang} />
+                {weakTopics.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-amber-50 border-l-4 border-amber-400 rounded-lg px-4 py-3 space-y-3"
+                  >
+                    <div className="flex gap-2">
+                      <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div className="text-sm">
+                        <p className="font-semibold text-amber-900 mb-1">
+                          {lang === "bg" ? "AYA забеляза" : "AYA noticed"}
+                        </p>
+                        <p className="text-amber-800">
+                          {lang === "bg" 
+                            ? `Темата „${weakTopics[0]}" се нуждае от още малко упражнения.`
+                            : `The topic "${weakTopics[0]}" needs a bit more practice.`
+                          }
+                        </p>
+                      </div>
+                    </div>
+                    <ActionBtn
+                      onClick={() => {
+                        // Mark for review - in a full app, this would navigate to review mode
+                        localStorage.setItem("aya_review_topic", weakTopics[0]);
+                        onBack();
+                      }}
+                      subject={subject}
+                      testId="btn-review-weak-topic"
+                    >
+                      {lang === "bg" ? "Преговори темата" : "Review topic"}
+                    </ActionBtn>
+                  </motion.div>
+                )}
                 <ActionBtn
                   onClick={startInfinitePractice}
                   subject={subject}

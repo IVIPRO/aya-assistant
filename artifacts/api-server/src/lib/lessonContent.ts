@@ -4,6 +4,7 @@ export interface LessonExample {
   problem: string;
   solution: string;
   hint: string;
+  steps?: string[];
 }
 
 export interface QuizQuestion {
@@ -3042,9 +3043,9 @@ function getTopicText(subjectId: string, topicId: string, grade: number, lang: L
           title: "Algebra Basics",
           explanation: "Algebra uses letters (variables) like x and y to represent unknown numbers. We use equations to show relationships. An equation is a statement where two expressions are equal. To solve an equation, we find the value of the variable that makes the equation true.",
           examples: [
-            { problem: "x + 5 = 12. Find x.", solution: "x = 7", hint: "Think: what number plus 5 equals 12? Try: 12 − 5 = 7" },
-            { problem: "3 × x = 18. Find x.", solution: "x = 6", hint: "What number multiplied by 3 equals 18? Try: 18 ÷ 3 = 6" },
-            { problem: "x − 4 = 9. Find x.", solution: "x = 13", hint: "What number minus 4 equals 9? Try: 9 + 4 = 13" },
+            { problem: "x + 5 = 12. Find x.", solution: "x = 7", hint: "Think: what number plus 5 equals 12? Try: 12 − 5 = 7", steps: ["x + 5 = 12", "x = 12 − 5", "x = 7"] },
+            { problem: "3 × x = 18. Find x.", solution: "x = 6", hint: "What number multiplied by 3 equals 18? Try: 18 ÷ 3 = 6", steps: ["3 × x = 18", "x = 18 ÷ 3", "x = 6"] },
+            { problem: "x − 4 = 9. Find x.", solution: "x = 13", hint: "What number minus 4 equals 9? Try: 9 + 4 = 13", steps: ["x − 4 = 9", "x = 9 + 4", "x = 13"] },
           ],
           tip: "🔤 Think of algebra as a puzzle: the variable x is the hidden piece, and we solve to find it!",
         },
@@ -3052,9 +3053,9 @@ function getTopicText(subjectId: string, topicId: string, grade: number, lang: L
           title: "Algebra Basics",
           explanation: "In algebra, we use variables (x, y, z) to represent unknown numbers and create equations to solve problems. The key principle is to keep both sides of an equation balanced — whatever we do to one side, we must do to the other. This is called 'inverse operations': addition ↔ subtraction, multiplication ↔ division.",
           examples: [
-            { problem: "2x + 3 = 11. Solve for x.", solution: "x = 4", hint: "Subtract 3 from both sides: 2x = 8. Divide both sides by 2: x = 4" },
-            { problem: "x ÷ 2 = 5. Solve for x.", solution: "x = 10", hint: "Multiply both sides by 2: x = 10" },
-            { problem: "5(x + 2) = 35. Solve for x.", solution: "x = 5", hint: "Divide both sides by 5: x + 2 = 7. Subtract 2: x = 5" },
+            { problem: "2x + 3 = 11. Solve for x.", solution: "x = 4", hint: "Subtract 3 from both sides: 2x = 8. Divide both sides by 2: x = 4", steps: ["2x + 3 = 11", "2x = 11 − 3", "2x = 8", "x = 8 ÷ 2", "x = 4"] },
+            { problem: "x ÷ 2 = 5. Solve for x.", solution: "x = 10", hint: "Multiply both sides by 2: x = 10", steps: ["x ÷ 2 = 5", "x = 5 × 2", "x = 10"] },
+            { problem: "5(x + 2) = 35. Solve for x.", solution: "x = 5", hint: "Divide both sides by 5: x + 2 = 7. Subtract 2: x = 5", steps: ["5(x + 2) = 35", "x + 2 = 35 ÷ 5", "x + 2 = 7", "x = 7 − 2", "x = 5"] },
           ],
           tip: "⚖️ Equations are like a balance scale — keep both sides equal!",
         },
@@ -3064,9 +3065,9 @@ function getTopicText(subjectId: string, topicId: string, grade: number, lang: L
           title: "Алгебра",
           explanation: "В алгебрата използваме буквите (променливите) като x и y, за да представим неизвестни числа. Уравнението показва равенство между две групи. За да решим уравнение, трябва да намерим стойността на променливата, която прави уравнението вярно.",
           examples: [
-            { problem: "x + 5 = 12. Намери x.", solution: "x = 7", hint: "Кое число плюс 5 е равно на 12? Опитай: 12 − 5 = 7" },
-            { problem: "3 × x = 18. Намери x.", solution: "x = 6", hint: "Кое число по 3 е равно на 18? Опитай: 18 ÷ 3 = 6" },
-            { problem: "x − 4 = 9. Намери x.", solution: "x = 13", hint: "Кое число минус 4 е равно на 9? Опитай: 9 + 4 = 13" },
+            { problem: "x + 5 = 12. Намери x.", solution: "x = 7", hint: "Кое число плюс 5 е равно на 12? Опитай: 12 − 5 = 7", steps: ["x + 5 = 12", "x = 12 − 5", "x = 7"] },
+            { problem: "3 × x = 18. Намери x.", solution: "x = 6", hint: "Кое число по 3 е равно на 18? Опитай: 18 ÷ 3 = 6", steps: ["3 × x = 18", "x = 18 ÷ 3", "x = 6"] },
+            { problem: "x − 4 = 9. Намери x.", solution: "x = 13", hint: "Кое число минус 4 е равно на 9? Опитай: 9 + 4 = 13", steps: ["x − 4 = 9", "x = 9 + 4", "x = 13"] },
           ],
           tip: "🔤 Мисли на алгебрата като пъзел: x е скритото число, което трябва да намериш!",
         },
@@ -3074,9 +3075,9 @@ function getTopicText(subjectId: string, topicId: string, grade: number, lang: L
           title: "Алгебра",
           explanation: "В алгебрата използваме променливи (x, y, z), за да представим неизвестни числа и да решим задачи. Ключният принцип е да держим уравнението в баланс — каквото направим от едната страна, трябва да направим и от другата. Това са обратни операции: събиране ↔ изваждане, умножение ↔ деление.",
           examples: [
-            { problem: "2x + 3 = 11. Реши за x.", solution: "x = 4", hint: "Извади 3 от двете страни: 2x = 8. Раздели двете страни на 2: x = 4" },
-            { problem: "x ÷ 2 = 5. Реши за x.", solution: "x = 10", hint: "Умножи двете страни по 2: x = 10" },
-            { problem: "5(x + 2) = 35. Реши за x.", solution: "x = 5", hint: "Раздели двете страни на 5: x + 2 = 7. Извади 2: x = 5" },
+            { problem: "2x + 3 = 11. Реши за x.", solution: "x = 4", hint: "Извади 3 от двете страни: 2x = 8. Раздели двете страни на 2: x = 4", steps: ["2x + 3 = 11", "2x = 11 − 3", "2x = 8", "x = 8 ÷ 2", "x = 4"] },
+            { problem: "x ÷ 2 = 5. Реши за x.", solution: "x = 10", hint: "Умножи двете страни по 2: x = 10", steps: ["x ÷ 2 = 5", "x = 5 × 2", "x = 10"] },
+            { problem: "5(x + 2) = 35. Реши за x.", solution: "x = 5", hint: "Раздели двете страни на 5: x + 2 = 7. Извади 2: x = 5", steps: ["5(x + 2) = 35", "x + 2 = 35 ÷ 5", "x + 2 = 7", "x = 7 − 2", "x = 5"] },
           ],
           tip: "⚖️ Уравненията са като везна — держи двете страни в баланс!",
         },
@@ -3086,9 +3087,9 @@ function getTopicText(subjectId: string, topicId: string, grade: number, lang: L
           title: "Álgebra Básica",
           explanation: "En álgebra, usamos letras (variables) como x e y para representar números desconocidos. Una ecuación muestra igualdad entre dos expresiones. Para resolver una ecuación, encontramos el valor de la variable que hace verdadera la ecuación.",
           examples: [
-            { problem: "x + 5 = 12. Encuentra x.", solution: "x = 7", hint: "¿Qué número más 5 es igual a 12? Intenta: 12 − 5 = 7" },
-            { problem: "3 × x = 18. Encuentra x.", solution: "x = 6", hint: "¿Qué número por 3 es igual a 18? Intenta: 18 ÷ 3 = 6" },
-            { problem: "x − 4 = 9. Encuentra x.", solution: "x = 13", hint: "¿Qué número menos 4 es igual a 9? Intenta: 9 + 4 = 13" },
+            { problem: "x + 5 = 12. Encuentra x.", solution: "x = 7", hint: "¿Qué número más 5 es igual a 12? Intenta: 12 − 5 = 7", steps: ["x + 5 = 12", "x = 12 − 5", "x = 7"] },
+            { problem: "3 × x = 18. Encuentra x.", solution: "x = 6", hint: "¿Qué número por 3 es igual a 18? Intenta: 18 ÷ 3 = 6", steps: ["3 × x = 18", "x = 18 ÷ 3", "x = 6"] },
+            { problem: "x − 4 = 9. Encuentra x.", solution: "x = 13", hint: "¿Qué número menos 4 es igual a 9? Intenta: 9 + 4 = 13", steps: ["x − 4 = 9", "x = 9 + 4", "x = 13"] },
           ],
           tip: "🔤 ¡Piensa en el álgebra como un rompecabezas: x es la pieza oculta que debes encontrar!",
         },
@@ -3096,9 +3097,9 @@ function getTopicText(subjectId: string, topicId: string, grade: number, lang: L
           title: "Álgebra Básica",
           explanation: "En álgebra, usamos variables (x, y, z) para representar números desconocidos y crear ecuaciones para resolver problemas. El principio clave es mantener el equilibrio de la ecuación: lo que hacemos en un lado, debemos hacerlo en el otro. Estas son operaciones inversas: suma ↔ resta, multiplicación ↔ división.",
           examples: [
-            { problem: "2x + 3 = 11. Resuelve para x.", solution: "x = 4", hint: "Resta 3 de ambos lados: 2x = 8. Divide ambos lados entre 2: x = 4" },
-            { problem: "x ÷ 2 = 5. Resuelve para x.", solution: "x = 10", hint: "Multiplica ambos lados por 2: x = 10" },
-            { problem: "5(x + 2) = 35. Resuelve para x.", solution: "x = 5", hint: "Divide ambos lados entre 5: x + 2 = 7. Resta 2: x = 5" },
+            { problem: "2x + 3 = 11. Resuelve para x.", solution: "x = 4", hint: "Resta 3 de ambos lados: 2x = 8. Divide ambos lados entre 2: x = 4", steps: ["2x + 3 = 11", "2x = 11 − 3", "2x = 8", "x = 8 ÷ 2", "x = 4"] },
+            { problem: "x ÷ 2 = 5. Resuelve para x.", solution: "x = 10", hint: "Multiplica ambos lados por 2: x = 10", steps: ["x ÷ 2 = 5", "x = 5 × 2", "x = 10"] },
+            { problem: "5(x + 2) = 35. Resuelve para x.", solution: "x = 5", hint: "Divide ambos lados entre 5: x + 2 = 7. Resta 2: x = 5", steps: ["5(x + 2) = 35", "x + 2 = 35 ÷ 5", "x + 2 = 7", "x = 7 − 2", "x = 5"] },
           ],
           tip: "⚖️ ¡Las ecuaciones son como una balanza — mantén ambos lados equilibrados!",
         },

@@ -37,7 +37,7 @@ interface LessonContent {
   lesson: {
     title: string;
     explanation: string;
-    examples: Array<{ problem: string; solution: string; hint: string }>;
+    examples: Array<{ problem: string; solution: string; hint: string; steps?: string[] }>;
     tip: string;
   };
   practice: {
@@ -1178,7 +1178,37 @@ function InteractiveLessonEngine({
                         animate={{ opacity: 1, height: "auto" }}
                         className="mt-4 pt-4 border-t border-current/20"
                       >
-                        <p className={cn("font-mono text-lg font-bold text-center", subject.colorClass)}>{ex.solution}</p>
+                        {ex.steps && ex.steps.length > 0 ? (
+                          <div className="space-y-4">
+                            <div>
+                              <p className="text-sm font-bold text-muted-foreground mb-3">
+                                {lang === "bg" ? "Стъпка по стъпка решение" : lang === "es" ? "Solución paso a paso" : "Step-by-step solution"}
+                              </p>
+                              <div className="space-y-2 font-mono text-sm">
+                                {ex.steps.map((step, idx) => (
+                                  <motion.div
+                                    key={idx}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ delay: idx * 0.1 }}
+                                    className="flex items-start gap-3"
+                                  >
+                                    <span className="text-xs font-bold text-muted-foreground flex-shrink-0 pt-0.5">{idx + 1}.</span>
+                                    <p>{step}</p>
+                                  </motion.div>
+                                ))}
+                              </div>
+                            </div>
+                            <div className={cn("rounded-lg p-3 border-2", subject.bgClass, subject.borderClass)}>
+                              <p className="text-xs font-bold text-muted-foreground">
+                                {lang === "bg" ? "Краен отговор" : lang === "es" ? "Respuesta final" : "Final answer"}
+                              </p>
+                              <p className={cn("font-mono text-lg font-bold mt-1", subject.colorClass)}>{ex.solution}</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className={cn("font-mono text-lg font-bold text-center", subject.colorClass)}>{ex.solution}</p>
+                        )}
                         {isPrimary && ex.hint && (
                           <p className="text-sm text-muted-foreground text-center mt-2 italic">{ex.hint}</p>
                         )}

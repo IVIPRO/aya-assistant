@@ -3,6 +3,7 @@ import type { LangCode } from "./i18n";
 export interface Topic {
   id: string;
   label: Record<LangCode, string>;
+  grades?: number[];
 }
 
 export interface Subject {
@@ -26,14 +27,14 @@ export const elementarySubjects: Subject[] = [
     bgClass: "bg-gradient-to-br from-orange-50 to-yellow-50",
     borderClass: "border-orange-200",
     topics: [
-      { id: "addition",       label: { en: "Addition",       bg: "Събиране",          es: "Suma",              de: "Addition",         fr: "Addition" } },
-      { id: "subtraction",    label: { en: "Subtraction",    bg: "Изваждане",         es: "Resta",             de: "Subtraktion",      fr: "Soustraction" } },
-      { id: "multiplication", label: { en: "Multiplication", bg: "Умножение",         es: "Multiplicación",    de: "Multiplikation",   fr: "Multiplication" } },
-      { id: "division",       label: { en: "Division",       bg: "Деление",           es: "División",          de: "Division",         fr: "Division" } },
-      { id: "word-problems",  label: { en: "Word problems",  bg: "Текстови задачи",   es: "Problemas escritos", de: "Textaufgaben",    fr: "Problèmes écrits" } },
-      { id: "fractions",      label: { en: "Fractions",      bg: "Дроби",             es: "Fracciones",         de: "Brüche",           fr: "Fractions" } },
-      { id: "geometry",       label: { en: "Geometry",       bg: "Геометрия",         es: "Geometría",          de: "Geometrie",        fr: "Géométrie" } },
-      { id: "measurement",    label: { en: "Measurement",    bg: "Мерене",            es: "Medición",           de: "Messen",           fr: "Mesure" } },
+      { id: "addition",       label: { en: "Addition",       bg: "Събиране",          es: "Suma",              de: "Addition",         fr: "Addition" }, grades: [1, 2, 3, 4] },
+      { id: "subtraction",    label: { en: "Subtraction",    bg: "Изваждане",         es: "Resta",             de: "Subtraktion",      fr: "Soustraction" }, grades: [1, 2, 3, 4] },
+      { id: "multiplication", label: { en: "Multiplication", bg: "Умножение",         es: "Multiplicación",    de: "Multiplikation",   fr: "Multiplication" }, grades: [3, 4] },
+      { id: "division",       label: { en: "Division",       bg: "Деление",           es: "División",          de: "Division",         fr: "Division" }, grades: [3, 4] },
+      { id: "word-problems",  label: { en: "Word problems",  bg: "Текстови задачи",   es: "Problemas escritos", de: "Textaufgaben",    fr: "Problèmes écrits" }, grades: [2, 3, 4] },
+      { id: "fractions",      label: { en: "Fractions",      bg: "Дроби",             es: "Fracciones",         de: "Brüche",           fr: "Fractions" }, grades: [3, 4] },
+      { id: "geometry",       label: { en: "Geometry",       bg: "Геометрични фигури", es: "Geometría",          de: "Geometrie",        fr: "Géométrie" }, grades: [2, 3, 4] },
+      { id: "measurement",    label: { en: "Measurement",    bg: "Мерене",            es: "Medición",           de: "Messen",           fr: "Mesure" }, grades: [2, 3, 4] },
     ],
   },
   {

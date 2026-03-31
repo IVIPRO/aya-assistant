@@ -164,7 +164,7 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {getSubjectsForGrade(grade).map((subject, idx) => {
-                const subjectTopics = subject.topics;
+                const subjectTopics = subject.topics.filter(t => !t.grades || t.grades.includes(grade));
                 const doneLessons = subjectTopics.filter(t => getTopicDone(subject.id, t.id)?.lessonDone).length;
                 const totalTopics = subjectTopics.length;
                 const allDone = doneLessons === totalTopics && totalTopics > 0;
@@ -223,7 +223,9 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
-                {selected.topics.map((topic, idx) => {
+                {selected.topics
+                  .filter(topic => !topic.grades || topic.grades.includes(grade))
+                  .map((topic, idx) => {
                   const done = getTopicDone(selected.id, topic.id);
                   const isWeak = isTopicWeak(selected.id, topic.id);
                   return (

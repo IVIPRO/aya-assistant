@@ -1,0 +1,180 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- First inspect the current code carefully
+- Do NOT duplicate logic
+- Reuse existing parent analytics
+- Reuse existing per-child learning state
+- Reuse existing weak-topic / wrong-answer / progress / recent-activity data if already available
+- Do NOT invent fake metrics
+- Do NOT rebuild the parent page
+- Do NOT add dependencies
+- Keep TypeScript clean
+- Keep all fallback logic intact
+
+Goal:
+Check whether the "Родител" page already shows actionable learning recommendations for each child, specifically:
+1. Recommended next lesson/topic
+2. Weak topics that need more practice
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current Родител page and report clearly:
+
+1. Does it already show:
+- "Препоръчан следващ урок"
+- "Слаби теми"
+- "Какво да упражнява сега"
+- "Следваща най-подходяща тема"
+
+2. If yes, verify whether these are:
+- real per-child values
+- derived from actual progress/history
+- grade-appropriate
+- subject-aware
+- topic-aware
+- updated when switching child
+
+3. Identify exactly:
+- which files render these recommendation blocks (if they exist)
+- which functions/helpers compute them
+- whether they use real saved data or placeholders/static text
+
+4. Audit whether recommendation logic already uses:
+- incomplete lessons
+- recent weak performance
+- wrong answer frequency
+- low accuracy topics
+- last activity
+- current grade restrictions
+- available subject/topic mapping
+
+5. Verify that recommendations never suggest:
+- grade-inappropriate topics
+- blocked topics for that child
+- topics from another child
+- topics from another school stage
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If the Родител page already has real working recommendation cards:
+- do NOT rewrite anything
+- do NOT add new logic
+- return audit summary only
+
+If these blocks are missing or partially static:
+- implement only the missing bindings/logic
+- reuse existing analytics and curriculum systems
+- do NOT create parallel recommendation storage
+- do NOT duplicate weak-topic detection if it already exists somewhere else
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION ONLY IF NEEDED
+==================================================
+
+Only if missing, add minimal parent-side recommendation blocks for the selected child:
+
+A. "Препоръчан следващ урок"
+Show one best next lesson/topic based on:
+- current grade
+- current school stage
+- lessons not yet completed
+- nearby logical progression
+- recent success/failure pattern
+- curriculum restrictions
+
+B. "Слаби теми за упражнение"
+Show 1–3 real weak topics based on:
+- wrong answers
+- repeated mistakes
+- lower success rate
+- incomplete practice
+- recent struggling topics
+
+C. "Какво да направим днес"
+Short actionable suggestion such as:
+- “Упражнете събиране с преминаване”
+- “Преговорете десетични дроби”
+- “Завършете урока по ...”
+
+Important:
+- If real data is insufficient, show safe fallback like:
+  “Все още няма достатъчно данни за препоръка.”
+- Do NOT fake rankings
+- Do NOT fabricate percentages
+- Do NOT invent weak topics
+- Prefer safe null/fallback state over false precision
+
+==================================================
+STEP 4 — TESTS
+==================================================
+
+Verify with real checks:
+
+A. Parent opens Родител page
+- page loads without errors
+
+B. Child A selected
+- recommendation blocks use Child A data only
+
+C. Switch to Child B
+- recommendations update correctly
+- no leakage from Child A
+
+D. Grade safety
+- Grade 2 child gets only Grade 2-appropriate topics
+- Grade 5 child gets only Grade 5-appropriate topics
+
+E. Weak topic safety
+- weak topics come from real performance data
+- no placeholder/fake items
+- no empty crash state
+
+F. Persistence
+- refresh page
+- logout/login if needed
+- recommendations still reflect saved child state
+
+G. Code quality
+- TypeScript clean
+- no duplicate logic
+- no extra dependency
+- fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+WHAT IS STATIC OR MISSING
+- exact list
+
+FILES / FUNCTIONS
+- exact files and functions involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- minimally connected real recommendation blocks to Родител page
+
+FINAL STATUS
+- TypeScript clean
+- fallback intact
+- no duplicated logic
+- per-child isolation preserved
+- grade restrictions preserved
+- recommendations are real where data exists
+- safe fallback shown where data is insufficient

@@ -1,0 +1,195 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse existing daily plan, progress, per-child persistence, streak, weak topics, recommendation engine, and current lesson state
+- Do NOT add dependencies
+- Do NOT break UI
+- Keep TypeScript clean
+- Keep all fallbacks intact
+
+Goal:
+Check whether AYA already supports “Continue where you left off” for each child, and implement it only if missing.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current codebase and determine whether the app already supports any of the following per-child resume features:
+
+1. Continue last unfinished lesson
+   example:
+   - "Продължи урока"
+   - "Продължи откъдето спря"
+
+2. Continue last unfinished exercise
+   example:
+   - open same topic
+   - same lesson type
+   - same step/example/exercise index if stored
+
+3. Restore last active context after refresh / relogin
+   example:
+   - child returns to same subject/topic/session safely
+
+4. Resume based on persisted state such as:
+   - last subject
+   - last topic
+   - last lesson type
+   - last viewed item
+   - last exercise index
+   - session progress
+   - incomplete daily plan step
+
+5. Verify exact files/functions involved:
+   - dashboard
+   - lesson viewer
+   - state persistence
+   - child progress tracking
+   - per-child storage
+   - routing/navigation
+   - recommendation/daily-plan logic
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If resume flow already exists and is working:
+- do NOT rewrite it
+- do NOT add parallel logic
+- return audit summary only
+
+If partial resume exists:
+- minimally complete it
+- reuse current persisted state only
+
+If missing:
+- implement a lightweight rule-based resume flow
+- no AI / no OpenAI
+- use existing per-child state only
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION (ONLY IF MISSING)
+==================================================
+
+Implement one safe “continue where you left off” action.
+
+Preferred logic:
+
+If child has unfinished session:
+- resume that exact session
+
+Else if child has last active topic:
+- reopen that topic
+
+Else if daily plan exists:
+- continue next pending item from daily plan
+
+Else:
+- safe fallback:
+  "Започни с плана за днес"
+
+Resume data must be per-child only.
+
+Suggested stored fields if missing:
+- childId
+- lastSubject
+- lastTopic
+- lastContentType
+- lastLessonId or task id
+- lastStepIndex
+- updatedAt
+
+==================================================
+STEP 4 — UI DISPLAY
+==================================================
+
+If implementation is needed, add ONLY ONE resume card/button in a safe place.
+
+Preferred locations:
+1. Табло
+or
+2. Junior dashboard
+
+Bulgarian UI examples:
+
+Title:
+"Продължи откъдето спря"
+
+Body examples:
+"Последно учи: Математика → Събиране"
+"Имаш незавършена задача"
+
+CTA examples:
+"Продължи"
+or
+"Върни се към урока"
+
+Do NOT add a new page.
+Do NOT change navigation structure.
+
+==================================================
+STEP 5 — SAFETY RULES
+==================================================
+
+Verify:
+- child A never sees child B resume state
+- grade restrictions remain enforced
+- grade 2 cannot reopen grade 5 content
+- if saved topic becomes invalid, fallback safely
+- if lesson is deleted/missing, fallback safely
+- no crashes on corrupted/missing state
+
+==================================================
+STEP 6 — TESTS
+==================================================
+
+Verify:
+
+Child A opens math topic and leaves mid-session
+Refresh page
+Resume card appears correctly
+
+Child B logs in
+No leakage from child A
+
+Switch between children
+Each child sees only their own resume state
+
+Invalid or missing saved state
+Fallback works safely
+
+No TypeScript errors
+No duplicated logic
+No fake data
+Fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+FILES / FUNCTIONS
+- exact files involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- resume flow added/completed
+
+FINAL STATUS
+- TypeScript clean
+- no duplicated logic
+- per-child isolation preserved
+- fallback intact
+- grade-safe

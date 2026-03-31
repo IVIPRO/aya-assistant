@@ -904,6 +904,88 @@ function InteractiveLessonEngine({
   };
 
   /* ── check practice answer */
+  /* ── Generate explanation for elementary math (grades 1-4) ── */
+  const getElementaryMathExplanation = (problem: string, correct: string, studentAnswer?: string): string | undefined => {
+    // Addition explanations
+    if (problem.includes("+")) {
+      const match = problem.match(/(\d+)\s*\+\s*(\d+)/);
+      if (!match) return undefined;
+      
+      const a = parseInt(match[1]);
+      const b = parseInt(match[2]);
+      const sum = parseInt(correct);
+      
+      // One-digit: keep simple
+      if (a < 10 && b < 10) {
+        return undefined; // Use hint system only
+      }
+      
+      // Two-digit addition breakdown
+      const aOnes = a % 10;
+      const aTens = Math.floor(a / 10);
+      const bOnes = b % 10;
+      const bTens = Math.floor(b / 10);
+      const onesSum = aOnes + bOnes;
+      const hasCarry = onesSum >= 10;
+      
+      let explanation = `Ще събе­рем единиците и десетиците.\n\n`;
+      explanation += `${a} = ${aTens} дес. и ${aOnes} един.\n`;
+      explanation += `${b} = ${bTens} дес. и ${bOnes} един.\n\n`;
+      explanation += `Първо събираме единиците:\n${aOnes} + ${bOnes} = ${onesSum}`;
+      
+      if (hasCarry) {
+        explanation += ` (пишем ${onesSum % 10}, пренасяме 1)\n\n`;
+        explanation += `После събираме десетиците:\n${aTens} дес. + ${bTens} дес. + 1 дес. = ${Math.floor(sum / 10)} дес.\n\n`;
+      } else {
+        explanation += `\n\nПосле събираме десетиците:\n${aTens} дес. + ${bTens} дес. = ${Math.floor(sum / 10)} дес.\n\n`;
+      }
+      
+      explanation += `Отговор: ${sum}`;
+      return explanation;
+    }
+    
+    // Subtraction explanations
+    if (problem.includes("−") || problem.includes("-")) {
+      const match = problem.match(/(\d+)\s*[−-]\s*(\d+)/);
+      if (!match) return undefined;
+      
+      const a = parseInt(match[1]);
+      const b = parseInt(match[2]);
+      const diff = parseInt(correct);
+      
+      // One-digit: keep simple
+      if (a < 10) {
+        return undefined; // Use hint system only
+      }
+      
+      // Two-digit subtraction breakdown
+      const aOnes = a % 10;
+      const aTens = Math.floor(a / 10);
+      const bOnes = b % 10;
+      const bTens = Math.floor(b / 10);
+      const needsBorrow = aOnes < bOnes;
+      
+      let explanation = `Ще извадим единиците и десетиците.\n\n`;
+      explanation += `${a} = ${aTens} дес. и ${aOnes} един.\n`;
+      explanation += `${b} = ${bTens} дес. и ${bOnes} един.\n\n`;
+      
+      if (needsBorrow) {
+        explanation += `Единиците: ${aOnes} е по-малко от ${bOnes}, затова пренасяме.\n`;
+        explanation += `${aTens} дес. и ${aOnes} един. → ${aTens - 1} дес. и ${10 + aOnes} един.\n`;
+        explanation += `${10 + aOnes} − ${bOnes} = ${10 + aOnes - bOnes}\n\n`;
+        explanation += `Десетици: ${aTens - 1} дес. − ${bTens} дес. = ${aTens - 1 - bTens} дес.\n\n`;
+      } else {
+        explanation += `Първо изваждаме единиците:\n${aOnes} − ${bOnes} = ${aOnes - bOnes}\n\n`;
+        explanation += `После изваждаме десетиците:\n${aTens} дес. − ${bTens} дес. = ${aTens - bTens} дес.\n\n`;
+      }
+      
+      explanation += `Отговор: ${diff}`;
+      return explanation;
+    }
+    
+    return undefined;
+  };
+
   /* ── Generate explanation for wrong decimal fractions answers ── */
   const getDecimalFractionsExplanation = (problem: string, correct: string, studentAnswer?: string): string | undefined => {
     // Case 1: Addition with visual alignment
@@ -1004,9 +1086,12 @@ function InteractiveLessonEngine({
         const hintSpoken = hintEx?.hint ?? '';
         go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts }, pick(d.hinting), hintSpoken || undefined);
       } else {
-        const explanation = topic.id === "decimal-fractions" 
-          ? getDecimalFractionsExplanation(problems[idx].question, problems[idx].answer, given)
-          : undefined;
+        let explanation: string | undefined;
+        if (topic.id === "decimal-fractions") {
+          explanation = getDecimalFractionsExplanation(problems[idx].question, problems[idx].answer, given);
+        } else if (isPrimary && (topic.id === "addition" || topic.id === "subtraction")) {
+          explanation = getElementaryMathExplanation(problems[idx].question, problems[idx].answer, given);
+        }
         setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong", explanation });
         const wrongMsg = topicContext === "weak" ? ctxD.practiceSupport : pick(d.practiceWrong2);
         say(wrongMsg, undefined, "retry");

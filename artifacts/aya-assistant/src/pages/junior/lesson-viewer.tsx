@@ -1135,13 +1135,15 @@ function InteractiveLessonEngine({
         trackMistake(topic.label[lang] ?? topic.label.en);
       }
       const nextAttempts = attempts + 1;
-      /* First wrong in primary grades (1-4): go to hinting phase — speak hint text aloud */
-      if (isPrimary && attempts === 0) {
+      /* Check for explanation first (new unified system) */
+      const explanation = getMathExplanation(problems[idx].question, problems[idx].answer, given, grade);
+      
+      /* First wrong in primary grades (1-4): show explanation if available, else hinting phase */
+      if (isPrimary && attempts === 0 && !explanation) {
         const hintEx = examples.find(e => e.hint) ?? examples[0];
         const hintSpoken = hintEx?.hint ?? '';
         go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts }, pick(d.hinting), hintSpoken || undefined);
       } else {
-        const explanation = getMathExplanation(problems[idx].question, problems[idx].answer, given, grade);
         setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong", explanation });
         const wrongMsg = topicContext === "weak" ? ctxD.practiceSupport : pick(d.practiceWrong2);
         say(wrongMsg, undefined, "retry");

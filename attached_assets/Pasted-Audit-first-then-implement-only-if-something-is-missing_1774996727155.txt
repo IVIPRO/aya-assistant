@@ -1,0 +1,160 @@
+Audit first, then implement only if something is missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- First inspect the current code carefully
+- Do NOT duplicate logic
+- Reuse the existing adaptive difficulty system
+- Reuse the existing student/profile/progress storage if it already exists
+- Do NOT add dependencies
+- Do NOT change UI unless absolutely necessary
+- Keep all fallback logic intact
+
+Goal:
+Check whether student learning state is already persisted correctly per child, so that adaptive difficulty, recent performance, and progression do not reset incorrectly.
+
+--------------------------------------------------
+STEP 1 — AUDIT FIRST
+--------------------------------------------------
+
+Inspect and report whether the following are already persisted, and exactly where:
+
+1. Per-child persistence:
+   - active child
+   - child grade
+   - child subject progress
+   - math topic progress
+   - recent correct/wrong answer history
+   - adaptive difficulty profile
+
+2. Persistence scope:
+   - memory only
+   - component state only
+   - page/session only
+   - localStorage
+   - backend/database
+   - tied to logged-in parent account
+   - tied to specific child ID
+
+3. Verify what happens after:
+   - page refresh
+   - route change
+   - logout/login
+   - switching between children
+   - switching between Начален етап and Прогимназия
+   - closing and reopening the browser
+
+4. Check whether Grade 2 child data and Grade 5 child data remain fully isolated from each other.
+
+5. Check whether adaptive difficulty currently:
+   - rebuilds correctly from stored answer history
+   - resets unexpectedly
+   - leaks between children
+   - leaks between topics
+   - leaks between Grade 2 and Grade 5 math
+
+6. Identify exact files/functions currently responsible for:
+   - reading saved child data
+   - writing saved child data
+   - restoring session state
+   - restoring adaptive difficulty state
+
+--------------------------------------------------
+STEP 2 — DECISION
+--------------------------------------------------
+
+If persistence is already implemented correctly:
+- do NOT rewrite anything
+- do NOT add new storage
+- return audit summary only
+
+If persistence is partial or broken:
+- implement only the missing connection points
+- do NOT rebuild the whole system
+- reuse existing child/profile/progress structures
+
+--------------------------------------------------
+STEP 3 — MINIMAL FIXES ONLY IF NEEDED
+--------------------------------------------------
+
+Only if missing, minimally ensure that:
+
+1. Adaptive difficulty is stored per child
+2. Recent answer history is stored per child and per topic
+3. On reload/login, the system restores:
+   - current child
+   - current grade restrictions
+   - recent performance profile
+   - adaptive difficulty baseline
+4. Switching to another child does NOT reuse the first child’s difficulty or progress
+5. Grade 2 remains locked to Grade 2-safe content after restore
+6. Grade 5 restores its own allowed curriculum/topic set correctly
+
+Important:
+- Reuse existing session/auth logic
+- Reuse existing child profile objects
+- Reuse existing progress storage if present
+- Do NOT create parallel storage systems
+- Do NOT duplicate localStorage keys if keys already exist
+- Preserve fallback if stored data is missing/corrupted
+
+--------------------------------------------------
+STEP 4 — TESTS
+--------------------------------------------------
+
+Verify with real flow:
+
+A. Child A (Grade 2)
+- answer several math tasks
+- produce adaptive changes
+- refresh page
+- verify difficulty/profile restores correctly
+- logout/login
+- verify state restores correctly
+
+B. Child B (different child / different grade if available)
+- open math flow
+- verify Child B does NOT inherit Child A adaptive state
+- verify topic restrictions remain correct for Child B
+
+C. Topic isolation
+- change topic inside math
+- verify progress/adaptive state behaves correctly and does not corrupt unrelated topics
+
+D. Safety
+- missing storage data does not crash app
+- corrupted storage falls back safely
+- TypeScript clean
+- no duplicated logic introduced
+
+--------------------------------------------------
+OUTPUT FORMAT
+--------------------------------------------------
+
+Return exactly:
+
+AUDIT RESULT
+- fully persisted / partially persisted / not persisted
+
+WHAT IS ALREADY STORED
+- exact list
+
+WHAT IS MISSING
+- exact list
+
+FILES / FUNCTIONS
+- exact files and functions involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- minimally fixed missing persistence links
+
+FINAL STATUS
+- TypeScript clean
+- fallback intact
+- no duplicated logic
+- per-child isolation preserved
+- Grade 2 restrictions preserved
+- Grade 5 curriculum preserved

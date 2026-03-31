@@ -1,0 +1,197 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse existing parent analytics, weak topics, streak tracking, daily plan, recommendations, per-child persistence, and safe fallback logic
+- Do NOT add dependencies
+- Do NOT break current UI
+- Keep TypeScript clean
+- Keep all per-child isolation intact
+
+Goal:
+Check whether AYA already supports smart parent alerts / actionable parent notifications inside the parent section, and implement them only if missing.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current codebase and determine whether the parent section already supports any of the following real, per-child alerts:
+
+1. Learning inactivity alert
+   example:
+   - "Детето не е учило 2 дни"
+   - "Няма активност днес"
+
+2. Weak topic alert
+   example:
+   - "Нужен е преговор по Събиране"
+   - "Има затруднение в Десетични дроби"
+
+3. Streak risk / streak broken alert
+   example:
+   - "Поредицата е прекъсната"
+   - "Днес е добър ден да запазите серията"
+
+4. Recommended next action alert
+   example:
+   - "Препоръчителен следващ урок"
+   - "Подходяща практика за днес"
+
+5. Positive achievement alert
+   example:
+   - "3 дни подред учене"
+   - "Напредък в слаба тема"
+
+6. Verify exact files/functions involved:
+   - parent page
+   - analytics/progress service
+   - streak logic
+   - weak-topic detection
+   - recommendation engine
+   - daily-plan logic
+   - per-child state persistence
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If smart parent alerts already exist and are real:
+- do NOT rewrite them
+- do NOT add duplicate logic
+- return audit summary only
+
+If pieces exist but are not combined into parent alerts:
+- minimally compose them into one safe alert block
+- reuse existing data only
+
+If missing:
+- implement a lightweight rule-based parent alerts block
+- no AI / no OpenAI
+- no fake data
+- use only real persisted child data
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION (ONLY IF MISSING)
+==================================================
+
+Implement a simple per-child parent alerts system using existing analytics.
+
+Possible alert types:
+
+A. Inactivity
+- if no activity today → soft reminder
+- if no activity for 2+ days → stronger reminder
+
+B. Weak topic
+- if weak topic exists → recommend review
+
+C. Streak
+- if streak > 0 and no activity today → remind to preserve streak
+- if streak milestone reached → positive message
+
+D. Recommendation
+- if recommended next lesson exists → show it
+
+Bulgarian examples:
+
+1. "Днес още няма учебна активност."
+2. "Последно учене: преди 2 дни."
+3. "Добре е да се преговори: {topic}"
+4. "Препоръчителен следващ урок: {lesson}"
+5. "Серия: {n} дни — чудесна последователност!"
+
+Priority rule:
+- show max 1–3 most important alerts per child
+- do not overload the parent page
+
+==================================================
+STEP 4 — UI DISPLAY
+==================================================
+
+If implementation is needed, add the alerts in ONE safe place only:
+
+Preferred place:
+- Родител page
+
+Section title examples:
+- "Важни сигнали"
+or
+- "Какво да следите днес"
+
+Each alert must be:
+- short
+- actionable
+- in Bulgarian
+- based on real data only
+
+Do NOT add a new page.
+Do NOT change navigation.
+
+==================================================
+STEP 5 — PER-CHILD SAFETY
+==================================================
+
+Verify:
+- parent sees alerts only for the selected child
+- no leakage between children
+- grade-safe recommendations remain enforced
+- weak topics belong to correct child only
+- streak belongs to correct child only
+- missing data falls back safely
+- no fake alerts are generated
+
+==================================================
+STEP 6 — TESTS
+==================================================
+
+Verify:
+
+Child A has no activity today
+→ parent sees inactivity alert
+
+Child B has weak topic in math
+→ parent sees weak-topic alert
+
+Child C has active streak
+→ parent sees streak-related alert
+
+Switch child
+→ alerts change correctly per child
+
+Refresh page
+→ alerts remain real and safe
+
+No TypeScript errors
+No duplicated logic
+No fake data
+Fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+FILES / FUNCTIONS
+- exact files involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- smart parent alerts added/completed
+
+FINAL STATUS
+- TypeScript clean
+- no duplicated logic
+- per-child isolation preserved
+- fallback intact
+- grade-safe

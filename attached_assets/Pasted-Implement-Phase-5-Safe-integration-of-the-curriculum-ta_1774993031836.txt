@@ -1,0 +1,114 @@
+Implement Phase 5: Safe integration of the curriculum task generation system into the live UI task flow.
+
+Important:
+- Keep this lightweight (Lite)
+- Do NOT enable Agent mode
+- Do NOT redesign UI
+- Do NOT rewrite existing screens
+- Reuse existing components
+- Use the validation layer that was implemented in Phase 4
+
+Goal:
+Connect the curriculum-aware task generation engine to the current AYA learning screens safely.
+
+Scope:
+Integrate only for:
+
+1. Начален етап → 2 клас → Математика
+2. Прогимназия → 5 клас → Математика
+
+Do NOT activate the system globally yet.
+
+--------------------------------
+
+INTEGRATION FLOW
+
+Replace direct task generation with the validated flow.
+
+Use the pattern:
+
+const validated = validateAndCorrectContext(userContext)
+const correctedContext = validated.correctedContext || validated.context
+const task = generateTask(correctedContext)
+
+This ensures:
+- grade rules respected
+- topics valid
+- safe fallback behavior
+
+--------------------------------
+
+WHERE TO CONNECT
+
+Connect the new generation flow where tasks are requested for:
+
+- Урок
+- Упражнение
+- Тест
+- Пример
+
+Inside math learning flows.
+
+Do NOT change:
+
+- avatar system
+- progress UI
+- voice playback
+- family module
+- psychology module
+
+--------------------------------
+
+SAFETY RULES
+
+1. If the curriculum system fails,
+fallback to the previous task generation logic.
+
+2. Never block the UI.
+
+3. Never return empty tasks.
+
+4. If validation modifies context,
+log it internally but keep UI clean.
+
+--------------------------------
+
+GRADE RULES
+
+Grade 2:
+
+allowed:
+- addition
+- subtraction
+- simple word problems
+
+blocked:
+- decimals
+- fractions
+- algebra
+
+Grade 5:
+
+allowed:
+- all operations
+- decimals
+- fractions
+- complex word problems
+
+--------------------------------
+
+EXPECTED RESULT
+
+When a task is requested:
+
+AYA will:
+
+1. detect grade
+2. validate topic
+3. generate correct template
+4. enforce curriculum rules
+5. return safe task
+
+without breaking the existing UI flow.
+
+Only math for Grade 2 and Grade 5 should use the new system for now.

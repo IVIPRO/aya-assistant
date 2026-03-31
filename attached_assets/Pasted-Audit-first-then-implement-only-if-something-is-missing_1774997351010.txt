@@ -1,0 +1,167 @@
+Audit first, then implement only if something is missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- First inspect the current code carefully
+- Do NOT duplicate logic
+- Reuse the existing per-child learning state system
+- Reuse the existing progress / adaptive / performance data already stored
+- Do NOT add dependencies
+- Do NOT rebuild the parent area from scratch
+- Do NOT change unrelated UI
+- Keep all fallback logic intact
+
+Goal:
+Check whether the "Родител" section already reads and shows real child learning data from the production-ready per-child storage and curriculum/adaptive systems.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current "Родител" tab/page and report:
+
+1. Does it already show real data for each child, or only placeholders/static/demo values?
+
+2. Check whether it already reads:
+- child name
+- grade/class
+- current subject progress
+- topic progress
+- completed lessons
+- completed exercises
+- correct/wrong answer trends
+- adaptive difficulty status
+- recent activity
+- weak topics / strong topics
+
+3. Identify exactly:
+- which files render the Родител page
+- which files/functions fetch parent dashboard data
+- whether the page uses real persisted child state
+- whether it is connected to the current logged-in parent account
+- whether switching active child updates the parent view correctly
+
+4. Verify whether the parent page is:
+- per-child aware
+- per-topic aware
+- grade-safe
+- session-persistent
+- using the same saved learning state we already audited
+
+5. Check if any of the following are still fake/mock/static:
+- progress %
+- badges / achievements
+- lesson counters
+- weak areas
+- recommendations
+- streaks
+- recent results
+- subject cards
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If the Родител page already uses real persisted data correctly:
+- do NOT rewrite it
+- do NOT add new backend structures
+- return audit summary only
+
+If the Родител page is partially connected or still static:
+- implement only the missing data bindings
+- reuse existing child state
+- reuse existing adaptive/performance/progress storage
+- do NOT duplicate progress logic
+- do NOT create a parallel parent-progress system
+
+==================================================
+STEP 3 — MINIMAL FIXES ONLY IF NEEDED
+==================================================
+
+Only if needed, minimally connect the Родител page to real existing data so it can show:
+
+For each selected child:
+1. Child name + class
+2. Current school stage:
+   - Начален етап or Прогимназия
+3. Subjects actually available for that child’s grade
+4. Progress by subject
+5. Completed lessons count
+6. Completed exercises/tasks count
+7. Recent accuracy summary
+8. Weak topics detected from wrong answers / history
+9. Strong topics detected from success history
+10. Last activity / last studied topic
+
+Important:
+- Reuse current persisted per-child learning state
+- Reuse adaptive difficulty data only if it already exists and makes sense for parent view
+- Do NOT invent analytics not supported by existing data
+- If a metric is not truly available, do not fake it
+- Prefer “not yet available” over fabricated numbers
+- No duplicated storage
+- No duplicated calculations if helpers already exist
+
+==================================================
+STEP 4 — TESTS
+==================================================
+
+Verify with real checks:
+
+A. Parent opens Родител page
+- page loads without errors
+
+B. Child A selected
+- shows Child A data only
+
+C. Switch to Child B
+- updates to Child B data only
+- no leakage from Child A
+
+D. Grade isolation
+- Grade 2 child shows only grade-appropriate subjects/topics
+- Grade 5 child shows only grade-appropriate subjects/topics
+
+E. Persistence
+- refresh page
+- logout/login
+- verify parent still sees correct child-linked data
+
+F. Safety
+- missing child data does not crash page
+- missing progress uses safe fallback
+- TypeScript clean
+- fallback intact
+- no duplicated logic introduced
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- fully connected / partially connected / mostly static
+
+WHAT IS ALREADY REAL
+- exact list
+
+WHAT IS STILL STATIC OR MISSING
+- exact list
+
+FILES / FUNCTIONS
+- exact files and functions involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- minimally connected parent view to real child data
+
+FINAL STATUS
+- TypeScript clean
+- fallback intact
+- no duplicated logic
+- per-child isolation preserved
+- grade restrictions preserved
+- parent page uses real persisted learning state where available

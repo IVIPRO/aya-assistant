@@ -1,0 +1,189 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse existing parent analytics, progress tracking, weak topics, recommendations, streak logic, daily plan, per-child persistence, and real backend data
+- Do NOT add dependencies
+- Do NOT break current UI
+- Keep TypeScript clean
+- Keep all fallback logic intact
+- Do NOT fabricate weekly data; use only real persisted child activity
+
+Goal:
+Check whether AYA already supports a real per-child weekly parent report inside the parent section, and implement it only if missing.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current codebase and determine whether the parent section already supports any real weekly summary/report such as:
+
+1. Weekly activity summary
+   example:
+   - days active this week
+   - total solved tasks this week
+   - lessons completed this week
+
+2. Weekly weak topics summary
+   example:
+   - topics with most mistakes this week
+   - topics needing review
+
+3. Weekly strengths / progress summary
+   example:
+   - improved topic
+   - accuracy improvement
+   - streak maintained
+
+4. Weekly next-step recommendation
+   example:
+   - what to revise next week
+   - which lesson should be next
+
+5. Verify exact files/functions involved:
+   - parent page
+   - analytics/progress service
+   - streak logic
+   - weak-topic detection
+   - recommendations
+   - daily-plan logic
+   - per-child storage / persistence
+   - backend metrics
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If a real weekly parent report already exists:
+- do NOT rewrite it
+- do NOT add duplicate logic
+- return audit summary only
+
+If pieces exist but are not combined into one weekly report:
+- minimally compose them
+- reuse existing real data only
+
+If missing:
+- implement a lightweight rule-based weekly parent report
+- no AI / no OpenAI
+- no fake summaries
+- use only real persisted child data
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION (ONLY IF MISSING)
+==================================================
+
+Implement one per-child weekly report block using existing analytics.
+
+Required weekly sections:
+
+A. Активност тази седмица
+- active days this week
+- solved tasks this week
+- completed lessons this week
+
+B. Теми за преговор
+- 1–3 weak topics based on real mistakes
+
+C. Силен напредък
+- topic or area with visible improvement
+- if none, safe fallback message
+
+D. Следваща стъпка
+- recommended next lesson or review topic
+
+Bulgarian examples:
+
+Title:
+"Седмичен отчет"
+
+Fields:
+- "Активни дни: {n}"
+- "Решени задачи: {n}"
+- "Завършени уроци: {n}"
+- "Теми за преговор: {topics}"
+- "Напредък: {message}"
+- "Следваща препоръка: {recommendation}"
+
+Safe fallback if little data:
+"Тази седмица все още няма достатъчно активност за пълен отчет."
+
+==================================================
+STEP 4 — UI DISPLAY
+==================================================
+
+If implementation is needed, add the weekly report in ONE safe place only:
+
+Preferred place:
+- Родител page
+
+Keep UI simple, Bulgarian, compact, and readable.
+
+Do NOT add new pages.
+Do NOT change navigation.
+Do NOT create duplicate analytics cards.
+
+==================================================
+STEP 5 — PER-CHILD SAFETY
+==================================================
+
+Verify:
+- report is generated only for the selected child
+- no leakage between children
+- grade-safe recommendations remain enforced
+- weak topics belong only to that child
+- missing data falls back safely
+- no fabricated weekly stats
+
+==================================================
+STEP 6 — TESTS
+==================================================
+
+Verify:
+
+Child A has activity this week
+→ weekly report shows real numbers
+
+Child B has different history
+→ different weekly report
+
+Switch child
+→ report updates correctly
+
+Refresh page
+→ report remains correct
+
+No TypeScript errors
+No duplicated logic
+No fake data
+Fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+FILES / FUNCTIONS
+- exact files involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- weekly parent report added/completed
+
+FINAL STATUS
+- TypeScript clean
+- no duplicated logic
+- per-child isolation preserved
+- fallback intact
+- grade-safe

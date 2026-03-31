@@ -1,0 +1,140 @@
+Audit first, then implement only if something is missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- First inspect the current code carefully
+- Do NOT duplicate logic
+- Reuse the existing adaptive difficulty system
+- Reuse the existing curriculum engine
+- Do NOT add dependencies
+- Do NOT change UI unless absolutely necessary
+- Keep all fallback logic intact
+
+Goal:
+Check whether adaptive difficulty is now consistently applied across the FULL Grade 2 and Grade 5 math flow, not only in lesson explanations.
+
+--------------------------------------------------
+STEP 1 — AUDIT
+--------------------------------------------------
+
+Inspect and report:
+
+1. Is adaptive difficulty currently used in:
+   - solved examples
+   - lesson explanations
+   - guided practice
+   - independent practice
+   - test tasks
+   - word problems
+
+2. For each flow above, identify:
+   - file
+   - function
+   - whether difficulty is STATIC or ADAPTIVE
+
+3. Check whether the current live flow actually passes adaptive difficulty into:
+   - tryGenerateCurriculumTask(...)
+   - generateTask(...)
+   - any existing lesson/practice/test generator
+
+4. Check whether difficulty is calculated from REAL recent student performance or only from temporary local values.
+
+5. Check whether adaptive difficulty is:
+   - session-only
+   - page-only
+   - persisted per student
+   - reset accidentally on route change
+
+6. Confirm whether Grade 2 restrictions still hold under adaptive mode:
+   - no decimals
+   - no fractions
+   - no algebra
+   - no grade-inappropriate word problems
+
+7. Confirm whether Grade 5 adaptive mode still respects topic restrictions and curriculum mapping.
+
+--------------------------------------------------
+STEP 2 — DECISION
+--------------------------------------------------
+
+If adaptive difficulty is already consistently active across all math flows:
+- do NOT rewrite anything
+- do NOT add new logic
+- return audit summary only
+
+If it is only partially connected:
+- minimally connect the existing adaptive difficulty logic to the missing flows
+- do NOT rebuild the system
+- do NOT create a second difficulty engine
+
+--------------------------------------------------
+STEP 3 — MINIMAL FIXES ONLY IF NEEDED
+--------------------------------------------------
+
+If any flow is still static, connect it to the existing pipeline:
+
+1. Read recent answer history for the current student
+2. Build adaptive profile using existing functions
+3. Calculate adaptive difficulty
+4. Pass the calculated difficulty into the existing task/example generator
+5. Preserve curriculum validation and grade locks
+6. Preserve fallback to safe/default difficulty if anything fails
+
+Important:
+- Reuse existing adaptiveDifficulty.ts
+- Reuse existing curriculumIntegration.ts
+- Reuse existing validation layer
+- Reuse existing task templates
+- Do NOT create duplicate state or new parallel logic
+
+--------------------------------------------------
+STEP 4 — TESTS
+--------------------------------------------------
+
+Verify with real flow:
+
+Grade 2 math:
+- solved example difficulty changes after success/failure
+- guided practice difficulty changes after success/failure
+- independent practice difficulty changes after success/failure
+- test task difficulty changes after success/failure
+- word problem difficulty changes only within Grade 2-safe boundaries
+
+Grade 5 math:
+- same verification across all flows
+- decimals/fractions/algebra only where allowed by topic/curriculum
+
+Also verify:
+- route changes do not break difficulty tracking
+- refresh does not crash the flow
+- fallback still works
+- no TypeScript errors
+- no duplicated logic introduced
+
+--------------------------------------------------
+OUTPUT FORMAT
+--------------------------------------------------
+
+Return exactly:
+
+AUDIT RESULT
+- fully active / partially active / only lesson explanations active
+
+FILES INVOLVED
+- list exact files/functions
+
+MISSING CONNECTIONS
+- only if any exist
+
+ACTION TAKEN
+- no changes needed
+OR
+- minimally connected missing flows
+
+FINAL STATUS
+- TypeScript clean
+- fallback intact
+- no duplicated logic
+- Grade 2 restrictions preserved
+- Grade 5 curriculum preserved

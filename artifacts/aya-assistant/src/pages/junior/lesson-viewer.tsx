@@ -873,8 +873,25 @@ function InteractiveLessonEngine({
 
   /* ── check practice answer */
   /* ── Generate explanation for wrong decimal fractions answers ── */
-  const getDecimalFractionsExplanation = (problem: string, correct: string): string | undefined => {
+  const getDecimalFractionsExplanation = (problem: string, correct: string, studentAnswer?: string): string | undefined => {
+    // Case 1: Addition with potential merged digits or decimal point error
     if (problem.includes("+")) {
+      if (studentAnswer) {
+        const correctNum = parseFloat(correct);
+        const studentNum = parseFloat(studentAnswer);
+        // Detect merged digits (e.g., student wrote 6.41 instead of 6.5)
+        if (studentAnswer.includes(".") && correct.includes(".")) {
+          const correctDec = correct.split(".")[1]?.length || 0;
+          const studentDec = studentAnswer.split(".")[1]?.length || 0;
+          if (studentDec > correctDec) {
+            return "Изглежда, че цифрите са слепени. Когато събираме десетични числа, подравняваме запетаята и събираме по колони.";
+          }
+        }
+        // Detect decimal point ignored (e.g., student wrote 7.5 instead of 6.5)
+        if (studentNum > correctNum * 1.2) {
+          return "Провери десетичната запетая. Първо събираме десетите, после целите числа.";
+        }
+      }
       return "Когато събираме десетични числа, подравняваме десетичната запетая и събираме цифра по цифра.";
     }
     if (problem.includes("−") || problem.includes("-")) {
@@ -887,6 +904,17 @@ function InteractiveLessonEngine({
       const decimalMatch = problem.match(/[\d.]+/);
       if (decimalMatch) {
         const decimal = decimalMatch[0];
+        // Case 3: Detect decimal-to-fraction mistakes (e.g., student wrote 5/1 instead of 1/2 for 0.5)
+        if (studentAnswer && studentAnswer.includes("/")) {
+          const parts = studentAnswer.split("/");
+          const studentNum = parseInt(parts[0]);
+          if (decimal === "0.5" && (studentNum === 5 || studentAnswer === "5/1" || studentAnswer === "5/10")) {
+            return "0.5 означава пет десети, което е дробта 5/10. Можем да я съкратим до 1/2.";
+          }
+          if (decimal === "0.25" && (studentNum === 25 || studentAnswer === "25/1" || studentAnswer === "25/100")) {
+            return "0.25 означава двадесет и пет стотни, което е дробта 25/100. Можем да я съкратим до 1/4.";
+          }
+        }
         if (decimal === "0.5") {
           return "0.5 означава пет десети, което е дробта 5/10. Можем да я съкратим до 1/2.";
         } else if (decimal === "0.25") {
@@ -926,7 +954,7 @@ function InteractiveLessonEngine({
         go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts }, pick(d.hinting), hintSpoken || undefined);
       } else {
         const explanation = topic.id === "decimal-fractions" 
-          ? getDecimalFractionsExplanation(problems[idx].question, problems[idx].answer)
+          ? getDecimalFractionsExplanation(problems[idx].question, problems[idx].answer, given)
           : undefined;
         setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong", explanation });
         const wrongMsg = topicContext === "weak" ? ctxD.practiceSupport : pick(d.practiceWrong2);

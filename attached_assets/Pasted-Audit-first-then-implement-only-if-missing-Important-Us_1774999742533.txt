@@ -1,0 +1,194 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- First inspect the current code carefully
+- Do NOT duplicate logic
+- Reuse existing progress, streak, weak-topics, recommendations, and per-child persistence
+- Do NOT add dependencies
+- Do NOT break current UI
+- Keep TypeScript clean
+- Keep all fallback logic intact
+
+Goal:
+Check whether AYA already has a per-child daily study plan / recommended daily learning flow, and only implement it if missing.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current codebase and report whether the system already supports any of the following:
+
+1. Daily study plan
+   example:
+   - 1 урок
+   - 5 задачи
+   - 1 преговор
+
+2. Per-child recommended learning session
+   example:
+   - continue current weak topic
+   - recommended next lesson
+   - suggested practice count
+
+3. Daily goal / session goal
+   example:
+   - “Днес учиш 15 минути”
+   - “Остава ти 1 задача”
+   - “План за днес”
+
+4. Any logic that combines:
+   - weak topics
+   - recommended next lesson
+   - streak
+   - recent activity
+   - progress history
+   into one actionable daily recommendation
+
+5. Verify exact files/functions involved:
+   - dashboard
+   - parent page
+   - progress analytics
+   - recommendation engine
+   - curriculum integration
+   - per-child persistence
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If a real daily study planner already exists:
+- do NOT rewrite it
+- do NOT add parallel logic
+- return audit summary only
+
+If recommendation pieces exist but are not combined into a daily plan:
+- minimally compose them into one daily-plan block
+- reuse existing data only
+
+If missing entirely:
+- add a lightweight rule-based daily study plan
+- do NOT use OpenAI / external AI
+- use only existing analytics and curriculum data
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION (ONLY IF MISSING)
+==================================================
+
+Create a lightweight per-child daily study plan block.
+
+Plan should generate from existing child state:
+
+Inputs:
+- current grade
+- current subject/topic
+- weak topics
+- recommended next lesson
+- recent activity
+- streak / engagement
+- solved tasks history
+
+Output example in Bulgarian:
+
+Днес за теб:
+1. Урок: {recommendedLesson}
+2. Задачи: {practiceCount}
+3. Преговор: {reviewTopic or weakTopic}
+
+Rules:
+- If child is active and strong → slightly larger plan
+- If child struggles → smaller, easier plan
+- If no data → safe fallback:
+  "Днес започни с 1 урок и 3 задачи."
+
+Default simple rules:
+- beginner → 1 lesson + 3 tasks
+- intermediate → 1 lesson + 5 tasks
+- advanced → 1 lesson + 7 tasks + 1 review
+
+If weak topic exists:
+- review should prioritize weak topic
+
+If recommended next lesson exists:
+- lesson slot should use it
+
+==================================================
+STEP 4 — UI DISPLAY
+==================================================
+
+If implementation is needed, show the daily plan in ONE safe place only.
+
+Preferred order:
+1. Табло
+or
+2. Junior dashboard
+
+Keep the UI simple and localized in Bulgarian.
+
+Example card title:
+"План за днес"
+
+Example content:
+- Урок
+- Задачи
+- Преговор
+
+Do NOT change navigation.
+Do NOT add new pages.
+
+==================================================
+STEP 5 — PER-CHILD SAFETY
+==================================================
+
+Verify:
+- plan is different per child
+- no data leakage between children
+- grade restrictions still apply
+- grade 2 cannot receive grade 5 content
+- weak topics and recommendations remain per-child only
+
+==================================================
+STEP 6 — TESTS
+==================================================
+
+Verify:
+
+Child A has weak math topic → daily plan includes that topic
+Child B has different history → different plan
+
+Refresh page → plan persists or regenerates safely
+Login/logout → no corruption
+Switch child → correct child plan only
+
+No TypeScript errors
+No duplicated logic
+No fake data
+Fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+FILES / FUNCTIONS
+- exact files involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- lightweight daily plan added
+
+FINAL STATUS
+- TypeScript clean
+- no duplicated logic
+- per-child isolation preserved
+- fallback intact
+- grade-safe

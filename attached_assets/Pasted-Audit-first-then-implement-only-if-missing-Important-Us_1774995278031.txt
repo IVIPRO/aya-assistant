@@ -1,0 +1,189 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- First inspect the current codebase
+- Do NOT duplicate logic
+- Do NOT modify UI layout
+- Do NOT add OpenAI or external AI
+- Do NOT add new dependencies
+- Reuse the curriculum system already built
+
+Goal:
+Check whether an adaptive difficulty system already exists for math tasks.
+
+--------------------------------
+STEP 1 — AUDIT
+--------------------------------
+
+Inspect the code and report:
+
+1. Is there any existing system that adjusts task difficulty based on student performance?
+
+Look for logic such as:
+- tracking correct/wrong streak
+- increasing difficulty after correct answers
+- lowering difficulty after repeated mistakes
+- skill progression tracking
+
+2. Which files are involved?
+
+Possible locations:
+- lesson-viewer.tsx
+- taskTemplates.ts
+- curriculumIntegration.ts
+- generationValidator.ts
+- student progress utilities
+
+3. Is difficulty stored anywhere such as:
+- currentDifficulty
+- skillLevel
+- mastery
+- progressScore
+
+4. Does the system already adjust:
+- number size
+- operation complexity
+- word problem difficulty
+
+5. Is there any logic such as:
+correctStreak >= X → harder task  
+wrongStreak >= X → easier task
+
+--------------------------------
+STEP 2 — DECISION
+--------------------------------
+
+If adaptive difficulty already exists:
+- do NOT rewrite it
+- do NOT create a second system
+- only return an audit summary
+
+If it does NOT exist:
+
+implement a lightweight adaptive difficulty layer.
+
+--------------------------------
+STEP 3 — IMPLEMENTATION (ONLY IF MISSING)
+--------------------------------
+
+Create a small helper:
+
+getAdaptiveDifficulty(params)
+
+Inputs:
+- grade
+- topic
+- recentAnswers
+- correctStreak
+- wrongStreak
+
+Output:
+- difficultyLevel
+
+Difficulty levels:
+
+1. EASY
+2. NORMAL
+3. CHALLENGE
+
+Rules example:
+
+correctStreak >= 3 → increase difficulty
+
+wrongStreak >= 2 → decrease difficulty
+
+--------------------------------
+GRADE RULES
+--------------------------------
+
+Grade 2:
+
+EASY
+- numbers up to 20
+
+NORMAL
+- numbers up to 100
+
+CHALLENGE
+- regrouping problems
+- slightly harder word problems
+
+Grade 5:
+
+EASY
+- simple operations
+
+NORMAL
+- decimals
+- fractions
+
+CHALLENGE
+- multi-step word problems
+- algebra expressions
+
+--------------------------------
+INTEGRATION
+--------------------------------
+
+Before generating a task:
+
+1. compute adaptive difficulty
+2. pass difficulty to taskTemplates
+3. generate task using curriculum constraints
+
+Example flow:
+
+difficulty = getAdaptiveDifficulty(studentState)
+
+task = tryGenerateCurriculumTask(
+  grade,
+  topic,
+  templateType,
+  difficulty
+)
+
+--------------------------------
+SAFETY RULES
+--------------------------------
+
+- Never break current task generation
+- Keep fallback intact
+- If adaptive difficulty fails → use NORMAL
+- Do not modify UI
+- Do not modify avatar / explanation / buttons
+
+--------------------------------
+TEST CASES
+--------------------------------
+
+Verify:
+
+Grade 2:
+- 3 correct answers → harder problems
+- 2 wrong answers → easier problems
+
+Grade 5:
+- correct streak → decimals or harder tasks
+- wrong streak → simpler operations
+
+--------------------------------
+OUTPUT
+--------------------------------
+
+Return:
+
+AUDIT RESULT
+- adaptive difficulty already exists: yes/no
+- files involved
+
+ACTION
+- no changes needed
+OR
+- minimal adaptive difficulty layer added
+
+FINAL STATUS
+- TypeScript clean
+- fallback intact
+- UI unchanged

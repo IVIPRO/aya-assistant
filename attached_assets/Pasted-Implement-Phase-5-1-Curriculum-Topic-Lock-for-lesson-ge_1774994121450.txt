@@ -1,0 +1,121 @@
+Implement Phase 5.1: Curriculum Topic Lock for lesson generation.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Do NOT change UI layout
+- Do NOT rebuild lesson screens
+- Only restrict topic selection using the existing curriculum map
+
+Reuse existing files:
+- curriculumMap.ts
+- curriculumUtils.ts
+- curriculumIntegration.ts
+- generationValidator.ts
+
+Goal:
+Prevent the UI from requesting topics that are not allowed for the selected grade according to the curriculum map.
+
+--------------------------------
+
+IMPLEMENT TOPIC LOCK
+
+Before a lesson or task is generated:
+
+1. Detect:
+- stage
+- grade
+- subject
+
+2. Retrieve allowed topics using the existing helper:
+getTopicsForGradeAndSubject()
+
+3. If the UI requests a topic that is NOT in the allowed list:
+replace it with the closest valid topic from the curriculum.
+
+Example:
+
+Grade 2 requests:
+"Decimals"
+
+System response:
+replace with "Addition" or "Subtraction"
+
+--------------------------------
+
+GRADE RULES
+
+Grade 2 math allowed topics:
+- addition
+- subtraction
+- basic geometry
+- simple word problems
+
+Grade 2 blocked:
+- decimals
+- fractions
+- algebra
+- advanced multiplication
+
+Grade 5 allowed topics:
+- multiplication
+- division
+- decimals
+- fractions
+- introductory algebra
+- complex word problems
+
+--------------------------------
+
+IMPLEMENTATION
+
+Add a lightweight topic guard function:
+
+ensureValidTopicForGrade(grade, subject, topic)
+
+This function should:
+- check topic validity
+- auto-correct if needed
+- return corrected topic
+
+Integrate this guard before calling:
+
+tryGenerateCurriculumTask()
+
+--------------------------------
+
+SAFETY
+
+Do NOT:
+- remove validator
+- remove fallback
+- change existing UI logic
+
+The topic lock should work as an additional safety layer.
+
+--------------------------------
+
+TEST CASES
+
+Verify:
+
+Grade 2 / topic "Decimals"
+→ replaced automatically
+
+Grade 2 / topic "Addition"
+→ accepted
+
+Grade 5 / topic "Fractions"
+→ accepted
+
+Grade 5 / topic "Algebra"
+→ accepted
+
+--------------------------------
+
+OUTPUT
+
+Report:
+- where topic lock was inserted
+- which components now call ensureValidTopicForGrade()
+- confirmation TypeScript is clean

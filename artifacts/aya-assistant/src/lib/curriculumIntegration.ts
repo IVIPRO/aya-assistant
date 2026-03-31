@@ -16,6 +16,7 @@ import type { Grade } from "./curriculumMap";
 import type { TaskGenerationContext, Task } from "./taskTemplates";
 import { validateAndCorrectContext } from "./generationValidator";
 import { generateTask } from "./taskTemplates";
+import { getTopicsForGradeAndSubject } from "./curriculumUtils";
 
 /* ── Context Detection ── */
 
@@ -254,6 +255,59 @@ export const applyCurriculumContextIfNeeded = (
     grade: shouldApply ? grade : null,
     topic: shouldApply ? topic : null,
   };
+};
+
+/* ── Topic Lock (Phase 5.1) ── */
+
+/**
+ * Ensure topic is valid for the given grade/subject
+ * Auto-corrects to a valid topic if the requested topic is not allowed
+ */
+export const ensureValidTopicForGrade = (
+  grade: Grade,
+  subject: string,
+  topic: string
+): string => {
+  // Get allowed topics for this grade/subject
+  const allowedTopics = getTopicsForGradeAndSubject(grade, subject);
+
+  // Check if requested topic is in the allowed list
+  const isAllowed = allowedTopics.some(t => t.topicId === topic);
+
+  if (isAllowed) {
+    return topic; // Topic is valid, return as-is
+  }
+
+  // Topic is not allowed for this grade
+  // Auto-correct to the first valid topic
+  if (allowedTopics.length > 0) {
+    const correctedTopic = allowedTopics[0].topicId;
+    console.debug(
+      `[Curriculum Topic Lock] Grade ${grade} requested invalid topic "${topic}". ` +
+      `Auto-correcting to "${correctedTopic}".`
+    );
+    return correctedTopic;
+  }
+
+  // Fallback: return original topic if no allowed topics found (shouldn't happen)
+  console.warn(
+    `[Curriculum Topic Lock] No allowed topics found for grade ${grade} subject "${subject}". ` +
+    `Returning requested topic "${topic}" as fallback.`
+  );
+  return topic;
+};
+
+/**
+ * Pre-flight check: is a topic allowed for a grade?
+ * Returns true if valid, false if invalid
+ */
+export const isTopicAllowedForGrade = (
+  grade: Grade,
+  subject: string,
+  topic: string
+): boolean => {
+  const allowedTopics = getTopicsForGradeAndSubject(grade, subject);
+  return allowedTopics.some(t => t.topicId === topic);
 };
 
 /* ── Logging & Monitoring ── */

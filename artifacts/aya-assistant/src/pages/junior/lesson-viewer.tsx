@@ -15,7 +15,7 @@ import { XpToast, type XpReward } from "@/components/xp-toast";
 import { AyaAvatarImage as AyaAvatar, type AyaEmotion } from "@/components/AyaAvatarImage";
 import { getCuriosityCard, getCuriosityFact, CURIOSITY_BRIDGES, type CuriosityCard as CuriosityCardData } from "@/lib/curiosityEngine";
 import { StoryLessonEngine } from "./story-engine";
-import { tryGenerateCurriculumTask, shouldUseCurriculumSystem, detectCurrentGrade } from "@/lib/curriculumIntegration";
+import { tryGenerateCurriculumTask, shouldUseCurriculumSystem, detectCurrentGrade, ensureValidTopicForGrade } from "@/lib/curriculumIntegration";
 
 /* ─── Weak topic tracking ────────────────────────────────────────────── */
 const WEAK_TOPIC_THRESHOLD = 3;
@@ -1016,9 +1016,12 @@ function InteractiveLessonEngine({
     if (curriculumGrade && (curriculumGrade === 2 || curriculumGrade === 5) && subject.id === "mathematics") {
       // Attempt to generate explanation via curriculum system
       try {
+        // Phase 5.1: Apply topic lock before generation
+        const validTopic = ensureValidTopicForGrade(curriculumGrade, subject.id, topic.id);
+        
         const curriculumTask = tryGenerateCurriculumTask(
           curriculumGrade,
-          topic.id,
+          validTopic,
           "solved-example"
         );
         

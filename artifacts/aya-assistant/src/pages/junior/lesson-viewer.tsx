@@ -17,6 +17,7 @@ import { getCuriosityCard, getCuriosityFact, CURIOSITY_BRIDGES, type CuriosityCa
 import { StoryLessonEngine } from "./story-engine";
 import { tryGenerateCurriculumTask, shouldUseCurriculumSystem, detectCurrentGrade, ensureValidTopicForGrade } from "@/lib/curriculumIntegration";
 import { diagnoseWrongAnswer, formatDiagnosisForDisplay } from "@/lib/wrongAnswerDiagnosis";
+import { buildAdaptiveProfile, getAdaptiveDifficulty } from "@/lib/adaptiveDifficulty";
 
 /* ─── Weak topic tracking ────────────────────────────────────────────── */
 const WEAK_TOPIC_THRESHOLD = 3;
@@ -1020,10 +1021,40 @@ function InteractiveLessonEngine({
         // Phase 5.1: Apply topic lock before generation
         const validTopic = ensureValidTopicForGrade(curriculumGrade, subject.id, topic.id);
         
+        // Phase 5.3: Calculate adaptive difficulty from performance streaks
+        let adaptiveDifficulty: "beginner" | "intermediate" | "advanced" | undefined = undefined;
+        try {
+          // Build profile from existing performance tracking refs
+          const recentAnswers = sessionPerfRef.current.correctStreak > 0 
+            ? Array(Math.min(sessionPerfRef.current.correctStreak, 5)).fill(true)
+            : Array(Math.min(sessionPerfRef.current.wrongStreak, 5)).fill(false);
+          
+          const profile = buildAdaptiveProfile(
+            recentAnswers,
+            practiceCorrectRef.current,
+            practiceCorrectRef.current + lessonMistakesRef.current
+          );
+          
+          // Get adaptive difficulty adjustment
+          const adjustment = getAdaptiveDifficulty({
+            grade: curriculumGrade,
+            topic: validTopic,
+            baseDifficulty: "beginner", // Default base for explanations
+            profile
+          });
+          
+          adaptiveDifficulty = adjustment.difficulty;
+          console.debug("[Adaptive] Explanation difficulty:", adjustment.reason, "→", adaptiveDifficulty);
+        } catch (err) {
+          // Silent failure - use no difficulty adjustment
+          console.debug("[Adaptive] Failed to compute difficulty:", err);
+        }
+        
         const curriculumTask = tryGenerateCurriculumTask(
           curriculumGrade,
           validTopic,
-          "solved-example"
+          "solved-example",
+          adaptiveDifficulty
         );
         
         if (curriculumTask && "explanation" in curriculumTask) {

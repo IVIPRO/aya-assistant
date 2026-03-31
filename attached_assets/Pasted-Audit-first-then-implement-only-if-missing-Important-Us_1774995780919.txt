@@ -1,0 +1,146 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- First inspect the current codebase carefully
+- Do NOT duplicate logic
+- Do NOT create a second adaptive difficulty system
+- Reuse the existing adaptiveDifficulty.ts
+- Do NOT add dependencies
+- Do NOT change UI unless absolutely required
+- Keep fallback logic intact
+
+Goal:
+Check whether the adaptive difficulty system that was already built is actually connected to the live lesson/task flow in AYA.
+
+--------------------------------------------------
+STEP 1 — AUDIT
+--------------------------------------------------
+
+Inspect and report:
+
+1. Is adaptiveDifficulty.ts currently imported anywhere in the live flow?
+2. Is getAdaptiveDifficulty() actually called before generating the next task/example/practice item?
+3. Is buildAdaptiveProfile() used with real student answer history?
+4. Is shouldNotifyDifficultyChange() used anywhere in UI or flow?
+5. Which files are currently involved in the live generation flow?
+   Check especially:
+   - lesson-viewer.tsx
+   - curriculumIntegration.ts
+   - taskTemplates.ts
+   - wrongAnswerDiagnosis.ts
+   - any progress/history state files
+
+6. Determine whether adaptive difficulty is:
+   - BUILT ONLY
+   - PARTIALLY CONNECTED
+   - FULLY LIVE
+
+7. Check if the current task generation still uses static difficulty only.
+
+--------------------------------------------------
+STEP 2 — DECISION
+--------------------------------------------------
+
+If adaptive difficulty is already fully live:
+- do NOT rewrite anything
+- do NOT add new code
+- return only an audit summary
+
+If it is NOT fully connected:
+- minimally connect the existing adaptive difficulty system to the live task generation flow
+- do NOT rebuild the system
+- only wire the already existing functions into the current generation pipeline
+
+--------------------------------------------------
+STEP 3 — MINIMAL INTEGRATION (ONLY IF MISSING)
+--------------------------------------------------
+
+Required behavior:
+
+Before generating the next math task:
+1. Read recent student answers from the current session/state
+2. Build adaptive profile
+3. Calculate adaptive difficulty
+4. Pass that difficulty into the existing task generation flow
+5. If anything fails, default to NORMAL difficulty
+
+Expected integration idea:
+
+- use existing adaptiveDifficulty.ts
+- keep curriculum validation
+- keep grade/topic restrictions
+- keep fallback logic
+
+Pseudo flow:
+
+adaptiveProfile = buildAdaptiveProfile(recentAnswers)
+difficulty = getAdaptiveDifficulty({
+  grade,
+  topic,
+  profile: adaptiveProfile
+})
+
+task = tryGenerateCurriculumTask(
+  grade,
+  topic,
+  templateType,
+  difficulty
+)
+
+If adaptive difficulty fails:
+- fallback to NORMAL
+- do not break current flow
+
+--------------------------------------------------
+STEP 4 — SAFETY RULES
+--------------------------------------------------
+
+- Do NOT modify completed diagnosis system
+- Do NOT touch wrongAnswerDiagnosis unless needed for reading answer history only
+- Do NOT break Grade 2 restrictions
+- Do NOT allow decimals/fractions/algebra in Grade 2
+- Do NOT create duplicate state for streaks if equivalent state already exists
+- Reuse existing answer history / correct-wrong tracking if available
+
+--------------------------------------------------
+STEP 5 — TESTS
+--------------------------------------------------
+
+Verify with real flow:
+
+Grade 2:
+- after 3 correct answers, next task becomes harder
+- after 2 wrong answers, next task becomes easier
+
+Grade 5:
+- after strong success streak, next task increases difficulty
+- after repeated mistakes, difficulty drops
+
+Also verify:
+- UI still works
+- no TypeScript errors
+- fallback still works
+- no duplicated logic introduced
+
+--------------------------------------------------
+OUTPUT FORMAT
+--------------------------------------------------
+
+Return:
+
+AUDIT RESULT
+- built only / partially connected / fully live
+- files involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- existing adaptive difficulty system connected to live task flow
+
+FINAL STATUS
+- TypeScript clean
+- fallback intact
+- no duplicated logic
+- curriculum restrictions preserved

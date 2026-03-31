@@ -1,0 +1,150 @@
+Implement Phase 3: Task Templates based on the curriculum structure that was just created.
+
+Important:
+- Keep implementation lightweight (Lite)
+- Do NOT introduce Agent-only architecture
+- Reuse curriculumMap.ts and curriculumUtils.ts
+- Do NOT modify UI components
+- Do NOT break existing logic
+- No new dependencies
+
+Goal:
+Create reusable task templates that allow AYA to generate structured learning tasks by topic.
+
+Scope:
+Start only with:
+
+Начален етап → 2 клас → Математика  
+Прогимназия → 5 клас → Математика
+
+These two will serve as the reference implementations.
+
+--------------------------------
+TASK TEMPLATE TYPES
+--------------------------------
+
+Create reusable templates for math topics.
+
+1️⃣ Solved Example
+
+Structure:
+
+problem
+step-by-step explanation
+final answer
+short reasoning
+
+Example:
+
+35 + 6
+
+Разделяме 35 на десетици и единици.
+
+35 = 3 дес. и 5 ед.
+
+Събираме единиците:
+5 + 6 = 11
+
+Пишем 1 и пренасяме 1 десетица.
+
+Сега десетиците:
+3 + 1 = 4
+
+Отговор:
+41
+
+--------------------------------
+
+2️⃣ Guided Practice
+
+Structure:
+
+problem
+hint
+step guidance
+retry option
+
+--------------------------------
+
+3️⃣ Independent Practice
+
+Structure:
+
+problem
+student answer input
+answer validation
+error feedback
+retry
+
+--------------------------------
+
+4️⃣ Short Test Task
+
+Structure:
+
+problem
+multiple choice answers
+correct answer
+short explanation
+
+--------------------------------
+
+WORD PROBLEMS
+
+Add support for:
+
+story problem
+operation detection
+reasoning explanation
+result
+
+Example:
+
+34 стикера се разделят поравно между 26 деца.
+
+34 ÷ 26
+
+Всяко дете получава 1 стикер.
+
+Остават 8.
+
+--------------------------------
+
+RULES
+
+1️⃣ Templates must reuse the curriculum structure.
+
+Use:
+
+getTopicsForGradeAndSubject()
+
+2️⃣ Difficulty must match grade.
+
+Example:
+
+Grade 2:
+- numbers up to 100
+- no decimals
+- simple word problems
+
+Grade 5:
+- decimals
+- larger numbers
+- more complex word problems
+
+3️⃣ Do not generate thousands of tasks.
+
+Only create the template engine.
+
+--------------------------------
+
+EXPECTED RESULT
+
+AYA now has reusable task templates connected to the curriculum structure.
+
+Active implementation for:
+
+2 клас математика  
+5 клас математика
+
+These become the base for expanding the entire curriculum later.

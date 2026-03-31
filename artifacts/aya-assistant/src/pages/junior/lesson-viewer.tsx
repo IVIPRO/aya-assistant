@@ -921,7 +921,7 @@ function InteractiveLessonEngine({
     // Check for decimals (contains ".")
     const hasDecimals = /\d+\.\d+/.test(problem);
     
-    // Detect operator
+    // Detect explicit operators first
     if (problem.includes("+")) {
       return { type: "addition", hasDecimals, hasFractions: false };
     } else if (problem.includes("−") || (problem.includes("-") && !problem.startsWith("-"))) {
@@ -935,8 +935,87 @@ function InteractiveLessonEngine({
     return { type: "other", hasDecimals, hasFractions: false };
   };
 
+  /* ── Bulgarian word problem operation detector ── */
+  const detectWordProblemOperation = (problem: string): "addition" | "subtraction" | "multiplication" | "division" | null => {
+    const lower = problem.toLowerCase();
+    
+    // DIVISION keywords: поравно, разделят, разделяме, всяко получава, между
+    if (/(поравно|разделят|разделяме|между)/.test(lower) || 
+        /(всяко|което|всеки).*получав/.test(lower)) {
+      return "division";
+    }
+    
+    // MULTIPLICATION keywords: всяка група има, по, еднакви групи
+    if (/(всяка група|еднакви групи|по.*\d+|всеки.*по)/.test(lower)) {
+      return "multiplication";
+    }
+    
+    // SUBTRACTION keywords: останаха, разлика, по-малко
+    if (/(останаха|разлика|по-малко|отишла|отпадна)/.test(lower)) {
+      return "subtraction";
+    }
+    
+    // ADDITION keywords: общо, заедно, още
+    if (/(общо|заедно|още|и всички|плюс)/.test(lower)) {
+      return "addition";
+    }
+    
+    return null;
+  };
+
+  /* ── Word problem explanation generator ── */
+  const getWordProblemExplanation = (problem: string, correct: string, operation: "addition" | "subtraction" | "multiplication" | "division"): string | undefined => {
+    // Extract numbers from problem
+    const numbers = problem.match(/\d+/g);
+    if (!numbers || numbers.length < 2) return undefined;
+    
+    const a = parseInt(numbers[0]);
+    const b = parseInt(numbers[1]);
+    const result = parseInt(correct);
+    
+    if (operation === "division") {
+      return `Имаме ${a} предмета.\n\n` +
+             `Те трябва да се разделят поравно между ${b}.\n\n` +
+             `Правим деление:\n${a} ÷ ${b}\n\n` +
+             `${b} влиза в ${a} → ${Math.floor(a / b)} път.\n\n` +
+             `${b} × ${Math.floor(a / b)} = ${b * Math.floor(a / b)}\n\n` +
+             `Остават: ${a} − ${b * Math.floor(a / b)} = ${a % b}\n\n` +
+             `Всеки получава: ${Math.floor(a / b)}\n` +
+             `${a % b !== 0 ? `Остават: ${a % b}` : ""}`;
+    }
+    
+    if (operation === "multiplication") {
+      return `Имаме ${b} групи.\n` +
+             `Всяка група има ${a} предмета.\n\n` +
+             `Правим умножение:\n${a} × ${b} = ${result}\n\n` +
+             `Значи общо имаме ${result} предмета.`;
+    }
+    
+    if (operation === "subtraction") {
+      return `Имахме ${a} предмета.\n\n` +
+             `Отишли са ${b}.\n\n` +
+             `Правим изваждане:\n${a} − ${b} = ${result}\n\n` +
+             `Остават ${result} предмета.`;
+    }
+    
+    if (operation === "addition") {
+      return `Имаме ${a} предмета.\n\n` +
+             `Добавяме още ${b}.\n\n` +
+             `Правим събиране:\n${a} + ${b} = ${result}\n\n` +
+             `Общо имаме ${result} предмета.`;
+    }
+    
+    return undefined;
+  };
+
   /* ── Unified math explanation router ── */
   const getMathExplanation = (problem: string, correct: string, studentAnswer?: string, grade?: number): string | undefined => {
+    // Check for word problems first (Bulgarian text)
+    const wordProblemOp = detectWordProblemOperation(problem);
+    if (wordProblemOp) {
+      return getWordProblemExplanation(problem, correct, wordProblemOp);
+    }
+    
     const problemType = detectMathProblemType(problem);
     
     // Route to appropriate explanation generator
@@ -954,7 +1033,7 @@ function InteractiveLessonEngine({
     }
     
     // For higher grades, add more explanation types as needed
-    // (Currently we only have decimal-fractions and elementary-math)
+    // (Currently we only have decimal-fractions, elementary-math, and word-problems)
     
     return undefined;
   };

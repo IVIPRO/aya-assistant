@@ -1,0 +1,158 @@
+Build a curriculum-aligned task generation structure for AYA based on Bulgarian school levels (МОН-style structure), but do it incrementally and without heavy architecture changes.
+
+Important:
+- Keep this lightweight (Lite)
+- Do NOT switch to Agent mode
+- Do NOT rebuild the entire platform
+- Do NOT introduce external AI or OpenAI for this
+- Reuse existing topic / lesson / exercise / test structures
+- Avoid code duplication
+- Extend the current architecture carefully
+
+Goal:
+AYA should generate and organize tasks according to Bulgarian school grade structure, starting from the existing sections:
+- Начален етап
+- Прогимназия
+
+Do this in phases.
+
+-----------------------------------
+PHASE 1 — CURRICULUM MAP STRUCTURE
+-----------------------------------
+
+Create a clean internal curriculum map structure for grades 1–7.
+
+Requirements:
+
+1. Organize by:
+- school stage
+- grade
+- subject
+- topic
+
+Example shape:
+
+{
+  "Начален етап": {
+    "1 клас": {...},
+    "2 клас": {...},
+    "3 клас": {...},
+    "4 клас": {...}
+  },
+  "Прогимназия": {
+    "5 клас": {...},
+    "6 клас": {...},
+    "7 клас": {...}
+  }
+}
+
+2. Subjects should be realistic and school-like.
+
+For Начален етап include at least:
+- Математика
+- Български език и литература
+- Околен свят / Човекът и природата / Човекът и обществото where appropriate by grade
+- Английски език (optional/additional if already present in UI)
+
+For Прогимназия include at least:
+- Математика
+- Български език и литература
+- История и цивилизации
+- География и икономика
+- Биология и здравно образование
+- Физика и астрономия
+- Химия и опазване на околната среда
+- Английски език
+
+3. Do NOT try to fully fill all content at once.
+Only create the curriculum/topic map structure first.
+
+-----------------------------------
+PHASE 2 — CONNECT EXISTING TOPICS
+-----------------------------------
+
+Reuse the topics that already exist in AYA and map them into this structure.
+
+Examples:
+- "Събиране"
+- "Изваждане"
+- "Десетични дроби"
+- "Алгебра"
+- "Текстови задачи"
+
+Do not recreate them if they already exist.
+
+-----------------------------------
+PHASE 3 — TASK TEMPLATES
+-----------------------------------
+
+Create reusable task templates by topic type.
+
+Examples:
+
+For arithmetic topics:
+- solved example
+- guided practice
+- самостоятельна задача / самостоятелна задача
+- short test question
+
+For word problems:
+- detect operation
+- explain reasoning
+- practice task
+- answer check
+
+For language topics:
+- reading comprehension
+- grammar choice
+- fill in missing word
+- short written answer
+
+Important:
+Do NOT generate all tasks for all grades immediately.
+Only prepare reusable templates.
+
+-----------------------------------
+PHASE 4 — SAFE GENERATION RULES
+-----------------------------------
+
+Create simple rules so each generated task matches:
+- the correct grade
+- the correct subject
+- the correct topic difficulty
+
+Examples:
+- 2 клас math should not receive fractions/progymnasium content
+- 5 клас math may receive decimals / algebra entry topics
+- 7 клас can receive more advanced material
+
+-----------------------------------
+PHASE 5 — START SMALL
+-----------------------------------
+
+After building the structure, apply it ONLY to these first areas:
+
+1. Начален етап → 2 клас → Математика
+2. Прогимназия → 5 клас → Математика
+
+These two areas should become the reference implementation.
+
+-----------------------------------
+UI / PRODUCT RULES
+-----------------------------------
+
+- Keep all visible UI text in Bulgarian
+- Keep the current AYA style
+- Do not redesign the app
+- Do not break login, progress, avatar, or voice systems
+- Do not modify Family / Psychology / unrelated sections
+
+-----------------------------------
+EXPECTED RESULT
+-----------------------------------
+
+AYA gets a structured internal curriculum framework for grades 1–7, but implementation starts only with:
+- 2 клас математика
+- 5 клас математика
+
+This should prepare the platform for future expansion without causing code duplication or unstable behavior.

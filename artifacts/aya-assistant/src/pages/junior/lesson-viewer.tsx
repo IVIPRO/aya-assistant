@@ -714,9 +714,16 @@ function InteractiveLessonEngine({
   const [answerInput, setAnswerInput] = useState("");
   /* voiceEmotion: AYA's delivery style for the current TTS line */
   const [voiceEmotion, setVoiceEmotion] = useState<EmotionMode>("intro");
+  /* narrationTriggered: tracks if user pressed button to listen in this phase */
+  const [narrationTriggered, setNarrationTriggered] = useState(false);
 
   /* ── infinite practice state */
   const [infLoading, setInfLoading] = useState(false);
+
+  /* Reset narration trigger when dialogue changes (phase transition) */
+  useEffect(() => {
+    setNarrationTriggered(false);
+  }, [dialogue]);
 
   /* ── score tracking */
   const practiceCorrectRef = useRef(0);
@@ -773,10 +780,6 @@ function InteractiveLessonEngine({
     return `${pick(bridges)} ${fact.content}`;
   };
 
-  /* ── voice: speak whenever spokenText changes, with current emotion mode ── */
-  useEffect(() => {
-    speak(spokenText, voiceEmotion);
-  }, [spokenText]);
 
   /* ── phase-specific cached pick refs */
   const explanationLeadRef = useRef(pick(d.explanationLead));
@@ -811,6 +814,7 @@ function InteractiveLessonEngine({
 
   /* go() — phase transition: sets phase, dialogue (bubble), spokenText (TTS) + voice emotion from next phase */
   const go = useCallback((next: Phase, text: string, spokenSuffix?: string) => {
+    /* Note: stopVoice and setNarrationTriggered are called in a useEffect that depends on phase change */
     setPhase(next);
     setDialogue(text);
     setVoiceEmotion(phaseToVoiceEmotion(next));
@@ -1097,19 +1101,40 @@ function InteractiveLessonEngine({
           transition={{ duration: 0.25 }}
           className="space-y-6"
         >
-          {/* AYA speech + replay */}
+          {/* AYA speech + listen button */}
           <div>
             <AyaSpeech emotion={phaseEmotion(phase)} text={dialogue} speaking={isVoicePlaying} />
+            {/* Initial "listen" button or replay button */}
             {voiceEnabled && !isVoicePlaying && (
               <div className="flex justify-center -mt-1 mb-1">
                 <button
-                  onClick={() => speak(spokenText, voiceEmotion)}
+                  onClick={() => {
+                    setNarrationTriggered(true);
+                    speak(spokenText, voiceEmotion);
+                  }}
                   className="text-xs text-muted-foreground/60 hover:text-muted-foreground flex items-center gap-1 px-2 py-0.5 rounded-full hover:bg-muted/40 transition-colors"
-                  title={lang === "bg" ? "Изслушай пак" : lang === "de" ? "Nochmal hören" : lang === "fr" ? "Réécouter" : lang === "es" ? "Escuchar de nuevo" : "Replay"}
+                  title={narrationTriggered ? (lang === "bg" ? "Изслушай пак" : lang === "de" ? "Nochmal hören" : lang === "fr" ? "Réécouter" : lang === "es" ? "Escuchar de nuevo" : "Replay") : (lang === "bg" ? "Изслушай" : "Listen")}
                 >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>{lang === "bg" ? "Изслушай" : lang === "de" ? "Wiederholen" : lang === "fr" ? "Réécouter" : lang === "es" ? "Repetir" : "Replay"}</span>
+                  {!narrationTriggered ? (
+                    <>
+                      <span>▶</span>
+                      <span>{lang === "bg" ? "Изслушай" : lang === "de" ? "Anhören" : lang === "fr" ? "Écouter" : lang === "es" ? "Escuchar" : "Listen"}</span>
+                    </>
+                  ) : (
+                    <>
+                      <RotateCcw className="w-3 h-3" />
+                      <span>{lang === "bg" ? "Изслушай" : lang === "de" ? "Wiederholen" : lang === "fr" ? "Réécouter" : lang === "es" ? "Repetir" : "Replay"}</span>
+                    </>
+                  )}
                 </button>
+              </div>
+            )}
+            {/* Disabled message when voice is OFF */}
+            {!voiceEnabled && spokenText.trim() && (
+              <div className="flex justify-center -mt-1 mb-1">
+                <span className="text-xs text-muted-foreground/40 italic">
+                  {lang === "bg" ? "Включи звука за да слушаш" : lang === "de" ? "Aktiviere Ton zum Hören" : lang === "fr" ? "Activez le son pour écouter" : lang === "es" ? "Activa el sonido para escuchar" : "Enable voice to listen"}
+                </span>
               </div>
             )}
           </div>
@@ -1716,6 +1741,7 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
     voiceEnabled,
     toggleVoice,
   } = useAyaLessonVoice(lang, childId);
+
   const completeFiredRef = useRef(false);
   const lessonFiredRef = useRef(false);
 

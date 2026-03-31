@@ -118,6 +118,11 @@ export function useAyaLessonVoice(
       const processed = preprocessForSpeech(text, lang);
       if (!processed.trim()) return;
 
+      // Force cancel any currently playing speech (defensive safeguard)
+      if (typeof window !== "undefined" && window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+
       openAiTts.stop();
       browserTts.stop();
 

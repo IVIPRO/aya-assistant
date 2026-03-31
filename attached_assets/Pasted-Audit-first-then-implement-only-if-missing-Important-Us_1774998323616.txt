@@ -1,0 +1,158 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- First inspect the current code carefully
+- Do NOT duplicate logic
+- Reuse existing parent analytics
+- Reuse existing per-child learning state
+- Reuse existing recommendation / weak-topic / progress / recent-activity data if already available
+- Do NOT invent fake metrics
+- Do NOT rebuild the parent page
+- Do NOT add dependencies
+- Keep TypeScript clean
+- Keep all fallback logic intact
+
+Goal:
+Check whether the "Родител" page already shows a real compact progress summary for the selected child.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current Родител page and report clearly whether it already has real blocks for:
+
+1. "Последна активност"
+2. "Последни 7 дни"
+3. "Най-силен предмет"
+4. "Нуждае се от внимание"
+5. "Последно завършен урок" or equivalent
+6. "Колко е учено тази седмица" or equivalent
+
+For each item, verify:
+- is it real or static
+- is it per-child
+- does it update when switching child
+- does it respect grade/stage restrictions
+- does it come from persisted analytics/state
+- is it safe when little/no data exists
+
+Also identify:
+- exact files rendering the parent summary
+- exact functions/selectors/helpers providing this data
+- whether some of these metrics already exist under different labels
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If these parent progress summary blocks already exist and use real data:
+- do NOT rewrite anything
+- do NOT add parallel logic
+- return audit summary only
+
+If some blocks are missing or partially static:
+- implement only the missing minimum
+- reuse existing data sources
+- do NOT create duplicate analytics pipelines
+- do NOT invent new storage if current storage is enough
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION ONLY IF NEEDED
+==================================================
+
+Only if missing, add a compact real progress summary on Родител for the selected child:
+
+A. "Последна активност"
+Show one real recent item such as:
+- последен урок
+- последна практика
+- последна тема
+- last active timestamp if available
+
+B. "Последни 7 дни"
+Show lightweight real summary using existing data only, for example:
+- брой решени задачи
+- брой активни дни
+- брой завършени уроци
+Use only metrics that already exist or can be derived safely from persisted events/state
+
+C. "Най-силен предмет"
+Show real best-performing subject if enough data exists
+
+D. "Нуждае се от внимание"
+Show real subject/topic with weaker recent performance if enough data exists
+
+Important:
+- If there is not enough data, show safe fallback like:
+  "Все още няма достатъчно данни."
+- Do NOT fabricate percentages
+- Do NOT invent rankings
+- Do NOT show misleading precision
+- Prefer honest fallback over guessed insight
+
+==================================================
+STEP 4 — TESTS
+==================================================
+
+Verify with real checks:
+
+A. Parent opens Родител
+- page loads without errors
+
+B. Child A selected
+- all progress summary values use Child A data only
+
+C. Switch to Child B
+- all values update correctly
+- no leakage from Child A
+
+D. Data scarcity
+- if child has little/no activity, safe fallback is shown
+- no empty crash state
+
+E. Grade safety
+- no metrics reference unavailable topics for that child’s grade/stage
+
+F. Refresh persistence
+- reload page
+- summary still reflects saved child state
+
+G. Code quality
+- TypeScript clean
+- no duplicate logic
+- no added dependencies
+- fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+WHAT IS STATIC OR MISSING
+- exact list
+
+FILES / FUNCTIONS
+- exact files and functions involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- minimally connected real parent progress summary blocks
+
+FINAL STATUS
+- TypeScript clean
+- fallback intact
+- no duplicated logic
+- per-child isolation preserved
+- grade restrictions preserved
+- real data only
+- safe fallback shown where data is insufficient

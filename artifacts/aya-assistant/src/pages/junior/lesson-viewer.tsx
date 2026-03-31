@@ -69,7 +69,7 @@ type Phase =
   | { kind: "greeting" }
   | { kind: "explanation" }
   | { kind: "example"; idx: number; revealed: boolean }
-  | { kind: "practice"; idx: number; attempts: number; feedback: "none" | "correct" | "wrong" }
+  | { kind: "practice"; idx: number; attempts: number; feedback: "none" | "correct" | "wrong"; explanation?: string }
   | { kind: "hinting"; practiceIdx: number; attempts: number }
   | { kind: "celebrate"; nextPracticeIdx: number }
   | { kind: "quiz-intro" }
@@ -872,6 +872,23 @@ function InteractiveLessonEngine({
   };
 
   /* ── check practice answer */
+  /* ── Generate explanation for wrong decimal fractions answers ── */
+  const getDecimalFractionsExplanation = (problem: string, correct: string): string | undefined => {
+    if (problem.includes("+")) {
+      return "Когато събираме десетични числа, подравняваме десетичната запетая и събираме цифра по цифра.";
+    }
+    if (problem.includes("−") || problem.includes("-")) {
+      return "Когато изваждаме десетични числа, подравняваме десетичната запетая и изваждаме цифра по цифра.";
+    }
+    if (problem.includes("по-голямо") || problem.includes("по-малко")) {
+      return "Сравнявайки десетични числа, гледаме цяла част, после десети, стотни и т.н. Десетите са по-големи от стотните.";
+    }
+    if (problem.includes("Преобразувай") && problem.includes("дроб")) {
+      return "Броят на цифрите след запетаята показва знаменателя: един знак = десета (1/10), два знака = стотна (1/100).";
+    }
+    return undefined;
+  };
+
   const checkPractice = (idx: number, attempts: number) => {
     const correct = problems[idx].answer.trim().toLowerCase();
     const given = answerInput.trim().toLowerCase();
@@ -893,7 +910,10 @@ function InteractiveLessonEngine({
         const hintSpoken = hintEx?.hint ?? '';
         go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts }, pick(d.hinting), hintSpoken || undefined);
       } else {
-        setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong" });
+        const explanation = topic.id === "decimal-fractions" 
+          ? getDecimalFractionsExplanation(problems[idx].question, problems[idx].answer)
+          : undefined;
+        setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong", explanation });
         const wrongMsg = topicContext === "weak" ? ctxD.practiceSupport : pick(d.practiceWrong2);
         say(wrongMsg, undefined, "retry");
       }
@@ -1320,6 +1340,13 @@ function InteractiveLessonEngine({
                       <XCircle className="w-4 h-4" />
                       <span>{lang === "bg" ? "Не съвсем — опитай пак!" : "Not quite — try again!"}</span>
                     </div>
+                    {/* Explanation for decimal fractions wrong answers */}
+                    {phase.kind === "practice" && phase.explanation && (
+                      <div className="bg-blue-50 border-l-4 border-blue-300 rounded px-4 py-3 text-sm text-blue-800">
+                        <p className="font-semibold text-blue-900 mb-1">{lang === "bg" ? "Обяснение:" : "Explanation:"}</p>
+                        <p>{phase.explanation}</p>
+                      </div>
+                    )}
                     {/* Weak topics: reveal correct answer after 1st wrong; others after 2nd */}
                     {((topicContext === "weak" && attempts >= 1) || attempts >= 2) && (
                       <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-2 text-sm text-amber-800">

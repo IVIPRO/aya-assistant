@@ -1,0 +1,170 @@
+Implement Phase 5.2: Wrong Answer Diagnosis for Math Tasks.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Do NOT change UI layout
+- Do NOT add external AI or OpenAI calls
+- Do NOT create heavy new architecture
+- Reuse the existing curriculum/task/validation system already built
+- Do NOT duplicate existing explanation logic
+
+Goal:
+When a student gives a wrong answer in math, AYA should identify the likely mistake type and show a short, helpful Bulgarian explanation before showing the correct answer.
+
+Scope for this phase:
+Activate only for:
+1. Начален етап → 2 клас → Математика
+2. Прогимназия → 5 клас → Математика
+
+Do NOT activate for all subjects yet.
+
+--------------------------------
+WHAT TO BUILD
+--------------------------------
+
+Create a lightweight rule-based wrong-answer diagnosis layer.
+
+Add a helper such as:
+
+diagnoseWrongAnswer(params)
+
+Input should include:
+- grade
+- topic
+- task type
+- question text
+- correct answer
+- user answer
+
+Output should include:
+- errorType
+- shortBulgarianExplanation
+- optionalHint
+
+--------------------------------
+ERROR TYPES TO DETECT
+--------------------------------
+
+For Grade 2 Math:
+- wrong counting
+- forgot carrying / regrouping
+- digit reversal
+- chose subtraction instead of addition
+- chose addition instead of subtraction
+- misunderstood word problem
+- off by 1
+- off by 10
+
+For Grade 5 Math:
+- decimal place misalignment
+- ignored decimal comma/point logic
+- wrong operation chosen
+- algebra sign error
+- forgot to move term across equal sign correctly
+- fraction numerator/denominator confusion
+- incorrect comparison of decimal numbers
+- word problem operation misunderstanding
+- arithmetic slip
+
+--------------------------------
+EXAMPLES OF EXPECTED DIAGNOSIS
+--------------------------------
+
+Example A:
+Question: 46 + 27
+Correct: 73
+User: 613
+Diagnosis:
+- forgot place value regrouping
+- Bulgarian explanation:
+"Изглежда си събрал цифрите, но не си подредил единици и десетици правилно."
+
+Example B:
+Question: 3.4 + 3.1
+Correct: 6.5
+User: 34.1
+Diagnosis:
+- decimal place misalignment
+- Bulgarian explanation:
+"При десетичните числа събираме цели части с цели части и десети с десети."
+
+Example C:
+Question: x + 5 = 12
+Correct: 7
+User: 17
+Diagnosis:
+- algebra operation misunderstanding
+- Bulgarian explanation:
+"За да намерим x, трябва да махнем 5 от 12, а не да го прибавяме."
+
+--------------------------------
+UI BEHAVIOR
+--------------------------------
+
+Keep current UI structure unchanged.
+
+On wrong answer:
+1. show existing wrong-answer feedback
+2. show the diagnosis explanation in Bulgarian
+3. then show hint / correct-answer flow as already used
+
+Do NOT redesign cards, buttons, avatar area, or progress flow.
+
+Only enrich the existing wrong-answer feedback with diagnosis.
+
+--------------------------------
+INTEGRATION RULES
+--------------------------------
+
+- Reuse current wrong-answer pipeline
+- Insert diagnosis before final answer reveal
+- If diagnosis cannot confidently classify the mistake:
+  return a safe generic Bulgarian explanation like:
+  "Нека опитаме стъпка по стъпка и да проверим коя операция е нужна."
+
+- Keep fallback intact
+- Never block the exercise flow
+- Never leave diagnosis empty
+
+--------------------------------
+SAFETY RULES
+--------------------------------
+
+- Rule-based only
+- No external services
+- No OpenAI
+- No new dependencies
+- No duplicated explanation renderer
+- TypeScript clean
+- Preserve all current working mechanics in:
+  - Grade 2 math
+  - Grade 5 math
+
+--------------------------------
+TEST CASES
+--------------------------------
+
+Verify all of these:
+
+Grade 2:
+- addition with carrying wrong answer
+- subtraction wrong operation
+- simple word problem misunderstanding
+
+Grade 5:
+- decimal addition wrong alignment
+- decimal comparison mistake
+- algebra sign mistake
+- fraction confusion if fraction topic is active
+
+--------------------------------
+OUTPUT
+--------------------------------
+
+When finished, report only:
+1. Which files were updated
+2. What mistake categories were implemented
+3. Where diagnosis was inserted into the current wrong-answer flow
+4. Whether fallback remained intact
+5. Whether TypeScript is clean

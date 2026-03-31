@@ -16,6 +16,7 @@ import { AyaAvatarImage as AyaAvatar, type AyaEmotion } from "@/components/AyaAv
 import { getCuriosityCard, getCuriosityFact, CURIOSITY_BRIDGES, type CuriosityCard as CuriosityCardData } from "@/lib/curiosityEngine";
 import { StoryLessonEngine } from "./story-engine";
 import { tryGenerateCurriculumTask, shouldUseCurriculumSystem, detectCurrentGrade, ensureValidTopicForGrade } from "@/lib/curriculumIntegration";
+import { diagnoseWrongAnswer, formatDiagnosisForDisplay } from "@/lib/wrongAnswerDiagnosis";
 
 /* ─── Weak topic tracking ────────────────────────────────────────────── */
 const WEAK_TOPIC_THRESHOLD = 3;
@@ -1253,16 +1254,40 @@ function InteractiveLessonEngine({
         trackMistake(topic.label[lang] ?? topic.label.en);
       }
       const nextAttempts = attempts + 1;
+      
+      /* Phase 5.2: Diagnose wrong answer for grades 2 & 5 math */
+      let diagnosisExplanation: string | undefined;
+      if ((grade === 2 || grade === 5) && subject.id === "mathematics") {
+        try {
+          const diagnosis = diagnoseWrongAnswer({
+            grade,
+            topic: topic.id,
+            question: problems[idx].question,
+            correctAnswer: problems[idx].answer,
+            userAnswer: given,
+          });
+          diagnosisExplanation = formatDiagnosisForDisplay(diagnosis);
+        } catch (e) {
+          console.debug("[Diagnosis] Error:", e);
+          // Fallback: no diagnosis shown
+        }
+      }
+      
       /* Check for explanation first (new unified system) */
       const explanation = getMathExplanation(problems[idx].question, problems[idx].answer, given, grade);
       
+      /* Combine diagnosis + explanation */
+      const fullExplanation = diagnosisExplanation 
+        ? (explanation ? `${diagnosisExplanation}\n\n${explanation}` : diagnosisExplanation)
+        : explanation;
+      
       /* First wrong in primary grades (1-4): show explanation if available, else hinting phase */
-      if (isPrimary && attempts === 0 && !explanation) {
+      if (isPrimary && attempts === 0 && !fullExplanation) {
         const hintEx = examples.find(e => e.hint) ?? examples[0];
         const hintSpoken = hintEx?.hint ?? '';
         go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts }, pick(d.hinting), hintSpoken || undefined);
       } else {
-        setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong", explanation });
+        setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong", explanation: fullExplanation });
         const wrongMsg = topicContext === "weak" ? ctxD.practiceSupport : pick(d.practiceWrong2);
         say(wrongMsg, undefined, "retry");
       }

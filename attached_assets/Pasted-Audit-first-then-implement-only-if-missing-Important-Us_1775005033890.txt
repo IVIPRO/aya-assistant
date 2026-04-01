@@ -1,0 +1,207 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse existing daily study plan, streak tracking, weak-topic engine, parent analytics, achievement system, per-child persistence, and any existing notification/banner/toast utilities
+- Do NOT add dependencies
+- Do NOT break current UI
+- Keep TypeScript clean
+- Use only real persisted child data
+- No fake notifications
+- No fabricated reminder timestamps
+
+Goal:
+Check whether AYA already supports a real notifications / reminder system for learning activity per child, and implement it only if missing.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current codebase and determine whether the app already supports real learning reminders / notifications.
+
+Check for existing support for:
+
+1. Daily study reminders
+   example:
+   - reminder to continue today’s plan
+   - reminder when there is no activity today
+
+2. Streak-risk reminders
+   example:
+   - child may lose streak today
+   - inactivity warning based on real timestamps
+
+3. Weak-topic reminders
+   example:
+   - suggest revision for weak topics
+   - reminder based on real analytics
+
+4. Parent-facing alerts / recommendations
+   example:
+   - suggested action for parent
+   - child has been inactive
+   - child struggles in topic X
+
+5. In-app notifications already present
+   example:
+   - banners
+   - toasts
+   - inline alerts
+   - cards on dashboard
+
+6. Any stored reminder state
+   example:
+   - last reminder shown
+   - dismissed reminders
+   - per-child notification memory
+
+7. Verify exact files/functions involved:
+   - daily plan
+   - streak tracking
+   - weak-topic engine
+   - parent page
+   - junior dashboard
+   - notification/toast/banner utilities
+   - per-child persistence / DB storage
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If a real reminder / notification system already exists:
+- do NOT rewrite it
+- do NOT duplicate logic
+- return audit summary only
+
+If partial logic exists:
+- minimally connect the missing parts using existing real data only
+
+If missing:
+- implement a lightweight in-app reminder system
+- no AI / no OpenAI
+- no fabricated reminders
+- use only real child activity and persisted timestamps
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION (ONLY IF MISSING)
+==================================================
+
+Implement safe per-child reminder logic.
+
+Possible reminder types:
+- daily_plan_reminder
+- streak_risk_reminder
+- weak_topic_reminder
+- inactivity_reminder
+- parent_action_reminder
+
+Possible fields:
+- childId
+- reminderType
+- reminderLabel
+- reminderTimestamp
+- relatedTopic (optional)
+- dismissedAt (optional)
+- shownToday flag or equivalent safe logic
+
+Safe rules:
+- no spam
+- no duplicate reminder loops on refresh
+- reminders shown only when supported by real data
+- per-child isolation only
+- safe fallback when analytics are missing
+
+Suggested Bulgarian labels:
+- "Време е за учене"
+- "Днес може да загубиш поредицата"
+- "Добре е да преговориш тази тема"
+- "Имаш план за днес"
+- "Нужна е още малко практика"
+
+==================================================
+STEP 4 — OPTIONAL UI
+==================================================
+
+If implementation is needed, display only in safe existing places.
+
+Preferred order:
+1. Junior dashboard
+2. Родител page
+3. existing notification/banner area if already present
+
+Do NOT create a new page.
+Do NOT change navigation.
+Do NOT add push notifications.
+Do NOT add browser permission prompts.
+Only safe in-app reminders.
+
+==================================================
+STEP 5 — PER-CHILD SAFETY
+==================================================
+
+Verify:
+- reminders belong only to selected child
+- no leakage between children
+- switching child updates reminders correctly
+- refresh does not re-trigger duplicates
+- dismissed reminders behave safely
+- no fabricated reminder data
+
+==================================================
+STEP 6 — TESTS
+==================================================
+
+Verify:
+
+Child A inactive today
+→ real reminder appears if appropriate
+
+Child B active today
+→ no false reminder
+
+Weak topic exists
+→ revision reminder appears correctly
+
+Streak at risk
+→ warning appears once safely
+
+Switch child
+→ reminders update correctly
+
+Refresh page
+→ no duplicate reminder spam
+
+No TypeScript errors
+No duplicated logic
+No fake data
+Fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+FILES / FUNCTIONS
+- exact files involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- reminder / notification system added/completed
+
+FINAL STATUS
+- TypeScript clean
+- no duplicated logic
+- per-child isolation preserved
+- fallback intact
+- real reminder data only

@@ -1,0 +1,180 @@
+Audit first, then implement only if something critical is missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse existing auth, parent/child flows, curriculum restrictions, analytics, notifications, localization, gamification, and safety guards
+- Do NOT add dependencies unless absolutely required
+- Do NOT change UI unless a critical store-readiness issue is found
+- Keep TypeScript clean
+- No fabricated problems
+- No speculative fixes
+- If already ready, return audit summary only
+
+Goal:
+Run a complete App Store / Google Play readiness audit for the current AYA MVP and implement only small critical fixes if truly missing.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current codebase and verify whether the app is ready for packaging / store submission from a product and technical MVP perspective.
+
+Check the following areas:
+
+1. Authentication / session readiness
+- login works safely
+- parent/child separation works
+- logout works
+- no obvious broken route after refresh
+
+2. Navigation readiness
+- all major screens open correctly
+- no dead-end pages
+- no broken back navigation
+- no placeholder-only critical screens
+
+3. Production safety
+- no debug-only behavior required for app use
+- no hardcoded fake production data in critical user-facing flows
+- no obviously broken fallback paths
+- no crash-prone required flows
+
+4. Parent-child core product flow
+- parent can view child progress
+- junior can study
+- progress persists
+- recommendations / reports / progress views work
+- weak topic / streak / analytics paths are functional
+
+5. Grade / curriculum safety
+- child sees grade-appropriate content
+- no forbidden topics leaking between grades
+- curriculum restrictions are enforced in runtime
+
+6. Localization readiness
+- no obvious English fallback in key Bulgarian UX paths
+- no broken mixed-language core screens
+- no placeholder localization strings in critical areas
+
+7. Audio / voice readiness
+- speech toggle behaves safely
+- no autoplay chaos
+- no overlapping narration loops
+- app still usable with voice off
+
+8. Persistence / refresh readiness
+- state survives refresh where appropriate
+- no duplicate writes
+- no progress corruption
+- per-child isolation preserved
+
+9. Gamification / analytics readiness
+- XP / badges / streak / mastery do not corrupt state
+- parent data reflects real persisted data
+- no fabricated numbers in core dashboards
+
+10. Store-facing product completeness
+Check if the app already has the minimum viable completeness to be submitted as:
+- functional MVP
+- no obviously unfinished blocker
+- safe enough for external users
+
+==================================================
+STEP 2 — STORE READINESS CHECKLIST
+==================================================
+
+Create an audit for these likely store blockers:
+
+A. Critical blockers
+- app cannot start
+- auth broken
+- major screen broken
+- crashes in core flows
+- unusable navigation
+- broken child safety
+- severe data leakage
+- severe language issues in core flow
+
+B. Non-blocking polish issues
+- optional UI polish
+- optional resume logic
+- optional better alerts
+- optional richer parent charts
+- optional advanced reminders
+- optional timeline/history improvements
+
+Mark each found issue as:
+- CRITICAL
+- IMPORTANT BUT NON-BLOCKING
+- OPTIONAL POST-LAUNCH
+
+==================================================
+STEP 3 — IMPLEMENT ONLY IF CRITICAL
+==================================================
+
+If no critical blockers exist:
+- do NOT change code
+- return audit summary only
+
+If a small critical blocker exists:
+- fix only that minimal blocker
+- no refactor
+- no architecture changes
+- no duplicated logic
+- no UI redesign
+
+==================================================
+STEP 4 — VERIFY CORE FLOWS
+==================================================
+
+Test these flows conceptually in the existing code:
+
+1. Parent login / access
+2. Child learning flow
+3. Junior dashboard
+4. Прогимназия flow
+5. Начален етап flow
+6. Parent dashboard / reports / recommendations
+7. XP / badges / streak / mastery visibility
+8. Voice on/off usage
+9. Refresh during active usage
+10. Switch child and verify isolation
+
+==================================================
+STEP 5 — OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+APP STORE AUDIT RESULT
+- ready / mostly ready / not ready
+
+CRITICAL BLOCKERS
+- exact list
+- or "none"
+
+IMPORTANT BUT NON-BLOCKING
+- exact list
+- or "none"
+
+OPTIONAL POST-LAUNCH
+- exact list
+- or "none"
+
+FILES / FLOWS CHECKED
+- exact list
+
+ACTION TAKEN
+- no changes needed
+OR
+- minimal blocker fix applied
+
+FINAL VERDICT
+- safe for MVP submission / not yet safe
+- TypeScript clean
+- no duplicated logic
+- per-child isolation preserved
+- core educational flow functional

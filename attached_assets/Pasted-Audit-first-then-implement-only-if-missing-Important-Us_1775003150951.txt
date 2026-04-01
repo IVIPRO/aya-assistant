@@ -1,0 +1,196 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse existing weak-topic detection, mastery tracking, parent recommendations, daily study plan, curriculum engine, adaptive difficulty, and per-child persistence
+- Do NOT add dependencies
+- Do NOT break current UI
+- Keep TypeScript clean
+- Use only real persisted child data
+- No fake revision recommendations
+
+Goal:
+Check whether AYA already supports a real smart revision engine that selects what the child should review next, and implement it only if missing.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current codebase and determine whether a revision-selection engine already exists.
+
+Check whether the system already combines:
+
+1. Weak topics
+   example:
+   - topics with repeated mistakes
+   - low mastery topics
+
+2. Time since last practice
+   example:
+   - topic not practiced recently
+   - forgotten topic candidate
+
+3. Mastery level
+   example:
+   - weak / developing / stable / mastered
+
+4. Recent mistakes
+   example:
+   - wrong answers in recent sessions
+
+5. Daily study plan recommendations
+
+6. Parent recommendations / next-step suggestions
+
+7. Adaptive difficulty signals
+
+8. Verify exact files/functions involved:
+   - weak-topic detection
+   - mastery tracking
+   - recommendations
+   - daily plan
+   - curriculum integration
+   - adaptive difficulty
+   - per-child progress state
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If a real smart revision engine already exists:
+- do NOT rewrite it
+- do NOT duplicate logic
+- return audit summary only
+
+If partial logic exists:
+- minimally compose it into one revision engine using existing data only
+
+If missing:
+- implement a lightweight rule-based revision engine
+- no AI / no OpenAI
+- no fabricated priorities
+- use only real persisted child data
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION (ONLY IF MISSING)
+==================================================
+
+Implement one revision-priority score per topic.
+
+Example idea:
+
+revisionPriority can consider:
+- weak topic status
+- low mastery
+- recent mistakes
+- many failed attempts
+- not reviewed recently
+
+Priority examples:
+- high: weak + not practiced recently
+- medium: developing + recent mistakes
+- low: stable/mastered
+
+The engine should output:
+- top 1–3 revision topics for the child
+- optional reason for each topic
+
+Bulgarian examples:
+- "Преговори: Събиране"
+- "Нужен е преговор по: Изваждане"
+- "Добре е да се върнеш към: Десетични дроби"
+
+Possible reasons:
+- "има повече грешки"
+- "не е упражнявано скоро"
+- "нивото още се развива"
+
+==================================================
+STEP 4 — UI DISPLAY
+==================================================
+
+If implementation is needed, display it in ONE safe place only.
+
+Preferred order:
+1. Daily plan
+2. Parent page
+3. Recommendation section already present
+
+Do NOT add a new page.
+Do NOT change navigation.
+Do NOT create duplicate recommendation blocks.
+
+Keep UI compact and in Bulgarian.
+
+Suggested title:
+- "Най-важен преговор днес"
+or
+- "Какво да преговорим"
+
+==================================================
+STEP 5 — PER-CHILD SAFETY
+==================================================
+
+Verify:
+- revision topics belong only to selected child
+- no leakage between children
+- grade-safe recommendations remain enforced
+- topic suggestions respect curriculum limits
+- missing data falls back safely
+- no fake priorities are generated
+
+==================================================
+STEP 6 — TESTS
+==================================================
+
+Verify:
+
+Child A has weak topics
+→ revision engine recommends real weak topics
+
+Child B has different history
+→ different revision suggestions
+
+Switch child
+→ revision suggestions update correctly
+
+Refresh page
+→ data remains correct
+
+If no weak topics
+→ safe fallback message
+
+No TypeScript errors
+No duplicated logic
+No fake data
+Fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+FILES / FUNCTIONS
+- exact files involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- smart revision engine added/completed
+
+FINAL STATUS
+- TypeScript clean
+- no duplicated logic
+- per-child isolation preserved
+- fallback intact
+- grade-safe

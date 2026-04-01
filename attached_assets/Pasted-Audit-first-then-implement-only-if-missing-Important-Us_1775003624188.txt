@@ -1,0 +1,183 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse existing per-child persistence, activity tracking, progress analytics, streak system, daily study plan, and lesson/practice completion flow
+- Do NOT add dependencies
+- Do NOT break current UI
+- Keep TypeScript clean
+- Use only real persisted session/activity data
+- No fake study-time values
+
+Goal:
+Check whether AYA already supports real learning session tracking and study-time measurement per child, and implement it only if missing.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current codebase and determine whether the app already tracks learning sessions or study time.
+
+Check for existing support for:
+
+1. Session start / session end
+   example:
+   - when a child opens a lesson or exercise
+   - when a child leaves or becomes inactive
+
+2. Study duration per child
+   example:
+   - minutes studied today
+   - minutes studied this week
+
+3. Session-based activity tracking
+   example:
+   - lesson session
+   - exercise session
+   - total active learning time
+
+4. Parent analytics already showing time-based learning metrics
+
+5. Daily plan already using session/activity duration
+
+6. Verify exact files/functions involved:
+   - activity tracking
+   - analytics service
+   - progress persistence
+   - streak system
+   - daily plan
+   - parent page
+   - per-child storage
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If real learning session tracking already exists:
+- do NOT rewrite it
+- do NOT duplicate logic
+- return audit summary only
+
+If partial tracking exists:
+- minimally extend it using existing data only
+
+If missing:
+- implement a lightweight rule-based learning session timer
+- no AI / no OpenAI
+- no fake durations
+- use only real timestamps and persisted activity
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION (ONLY IF MISSING)
+==================================================
+
+Implement safe per-child session tracking.
+
+Suggested logic:
+- session starts when child enters lesson/exercise/practice/test
+- session ends when child exits, switches section, or becomes inactive for a safe timeout
+- store:
+  - sessionStart
+  - sessionEnd
+  - durationMinutes
+  - contentType
+  - childId
+
+Suggested aggregate metrics:
+- todayStudyMinutes
+- weekStudyMinutes
+- totalStudyMinutes
+
+Safe rules:
+- ignore absurd durations
+- avoid double-counting overlapping sessions
+- preserve per-child isolation
+- fallback safely if session closes unexpectedly
+
+==================================================
+STEP 4 — OPTIONAL UI
+==================================================
+
+If implementation is needed, display only in safe existing places:
+
+Preferred order:
+1. Родител page
+2. Junior dashboard if already suitable
+3. analytics summary only if already present
+
+Bulgarian examples:
+- "Време в учене днес: 24 мин"
+- "Време тази седмица: 2 ч 15 мин"
+- "Последна учебна сесия: 18 мин"
+
+Do NOT create a new page.
+Do NOT add timers running visibly unless already supported.
+Do NOT change navigation.
+
+==================================================
+STEP 5 — PER-CHILD SAFETY
+==================================================
+
+Verify:
+- study time belongs only to selected child
+- no leakage between children
+- switching child changes metrics correctly
+- page refresh does not lose valid session history
+- missing session end handled safely
+- no fabricated time values
+
+==================================================
+STEP 6 — TESTS
+==================================================
+
+Verify:
+
+Child A studies for some time
+→ session is recorded
+
+Child B has different usage
+→ different metrics
+
+Switch child
+→ metrics update correctly
+
+Refresh page
+→ metrics remain correct
+
+Unexpected close / navigation away
+→ safe fallback handling
+
+No TypeScript errors
+No duplicated logic
+No fake data
+Fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+FILES / FUNCTIONS
+- exact files involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- learning session tracking added/completed
+
+FINAL STATUS
+- TypeScript clean
+- no duplicated logic
+- per-child isolation preserved
+- fallback intact
+- real time data only

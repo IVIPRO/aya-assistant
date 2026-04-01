@@ -1,0 +1,131 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse existing analytics, weak-topic detection, lesson completion tracking, and per-child progress data
+- Do NOT add dependencies
+- Do NOT break UI
+- Keep TypeScript clean
+- Use only real persisted child data
+- No fake mastery scores
+
+Goal:
+Check whether AYA already supports a per-topic mastery tracking system for each child.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the codebase and determine whether the system already tracks mastery levels for each topic.
+
+Check for existing metrics such as:
+
+1. Accuracy per topic
+   example:
+   correct answers / total attempts
+
+2. Attempts per topic
+   example:
+   number of solved tasks
+
+3. Lesson completion per topic
+
+4. Weak topic classification
+
+5. Improvement tracking
+   example:
+   topic improving over time
+
+6. Verify files involved:
+   - analytics service
+   - progress tracking
+   - topic structure
+   - curriculum
+   - parent analytics
+   - weak-topic detection
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If topic mastery tracking already exists:
+- do NOT rewrite it
+- do NOT duplicate calculations
+- return audit summary only
+
+If partial tracking exists:
+- minimally extend it using existing data
+
+If missing:
+- create lightweight topic mastery tracking
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION (ONLY IF MISSING)
+==================================================
+
+Track mastery per topic using existing data.
+
+Example metrics:
+
+topicMasteryScore =
+correctAnswers / totalAttempts
+
+topicStatus:
+
+0–40% → слаб  
+40–70% → развива се  
+70–90% → стабилен  
+90–100% → овладян
+
+Store mastery per child per topic.
+
+==================================================
+STEP 4 — OPTIONAL UI
+==================================================
+
+If needed, display mastery in Parent page:
+
+Example:
+
+Теми:
+
+Събиране → 82%  
+Изваждане → 61%  
+Десетични дроби → 34%
+
+Weak topics appear first.
+
+==================================================
+STEP 5 — TESTS
+==================================================
+
+Verify:
+
+Child A and B have different mastery maps
+
+Accuracy updates mastery
+
+Weak topics appear correctly
+
+Refresh page keeps data
+
+No TypeScript errors
+No duplicated logic
+No fake mastery data
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT EXISTS
+FILES
+ACTION
+FINAL STATUS

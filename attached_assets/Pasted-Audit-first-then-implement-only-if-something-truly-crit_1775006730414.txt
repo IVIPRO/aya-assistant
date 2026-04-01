@@ -1,0 +1,182 @@
+Audit first, then implement only if something truly critical is missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse all existing systems already built:
+  - curriculum restrictions
+  - grade safety
+  - per-child isolation
+  - progress persistence
+  - parent analytics
+  - weak-topic detection
+  - smart revision
+  - adaptive difficulty
+  - streaks
+  - XP / badges / gamification
+  - anti-loop protections
+  - app-store readiness safeguards
+- Do NOT add dependencies unless absolutely necessary
+- Do NOT redesign UI
+- Do NOT fabricate missing issues
+- Do NOT make speculative fixes
+- If the app is already hardened enough for MVP production, return audit summary only
+- Keep TypeScript clean
+
+Goal:
+Run the final production hardening audit for the AYA MVP and apply only tiny critical fixes if really needed.
+
+==================================================
+STEP 1 — FULL FINAL AUDIT
+==================================================
+
+Inspect the current codebase and verify the app is hardened for MVP production use.
+
+Audit all of these areas:
+
+1. Runtime stability
+- no crash-prone critical flows
+- no unsafe null/undefined access in main user paths
+- safe guards around optional data
+- safe loading / empty / fallback states
+
+2. Data safety
+- no duplicate writes in critical learning flows
+- progress writes are idempotent enough
+- XP / badges / streak / mastery do not corrupt state
+- parent analytics reads only real persisted data
+- no child-to-child leakage
+
+3. Auth / access safety
+- protected routes behave safely
+- parent vs child boundaries remain enforced
+- logout / refresh do not expose wrong data
+- child switching remains isolated
+
+4. Curriculum safety
+- grade restrictions remain enforced
+- forbidden topics do not leak
+- junior and прогимназия stay separated correctly
+- generated tasks remain grade-appropriate
+
+5. Navigation safety
+- no dead ends in core flow
+- no broken back navigation in major screens
+- no redirect loops
+- no lesson/practice/session loops
+
+6. Voice / media safety
+- voice toggle safe
+- no autoplay chaos
+- no overlapping playback
+- safe behavior if speech unavailable or disabled
+
+7. Persistence safety
+- refresh-safe where intended
+- no broken state restore
+- no invalid cached UI
+- no duplicate milestone triggering after reload
+
+8. Parent dashboard safety
+- real metrics only
+- safe fallbacks if partial data missing
+- recommendations do not break page
+- weekly/daily/report data safe
+
+9. Junior / child UX safety
+- lessons remain usable
+- wrong-answer explanations safe
+- adaptive difficulty safe
+- streak / celebration / gamification does not spam or break flow
+
+10. Production readiness hygiene
+- no obvious debug remnants in critical user flows
+- no placeholder blocker text in main screens
+- no fake data in production-critical screens
+- TypeScript stays clean
+- existing architecture remains stable
+
+==================================================
+STEP 2 — CLASSIFY FINDINGS
+==================================================
+
+Classify every finding as one of:
+
+- CRITICAL PRODUCTION BLOCKER
+- IMPORTANT BUT NON-BLOCKING
+- OPTIONAL POST-LAUNCH IMPROVEMENT
+
+If there are no critical blockers, do NOT change code.
+
+==================================================
+STEP 3 — IMPLEMENT ONLY IF CRITICAL
+==================================================
+
+If something truly critical is missing:
+- fix only the minimum needed
+- do not refactor large areas
+- do not add new systems
+- do not redesign UI
+- do not duplicate existing protections
+- preserve all existing logic and safeguards
+
+If nothing critical is missing:
+- no code changes
+- audit summary only
+
+==================================================
+STEP 4 — VERIFY FINAL CORE FLOWS
+==================================================
+
+Verify conceptually against the current implementation:
+
+1. Parent login → parent dashboard
+2. Child learning flow in Начален етап
+3. Child learning flow in Прогимназия
+4. Lesson → example → practice → wrong answer → next task
+5. Streak / XP / badge / progress updates
+6. Parent reports / recommendations / weak topics
+7. Child switching
+8. Refresh during active usage
+9. Voice on/off flows
+10. Safety fallbacks when data is partial/missing
+
+==================================================
+STEP 5 — OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+FINAL HARDENING AUDIT RESULT
+- production-ready / mostly production-ready / not production-ready
+
+CRITICAL PRODUCTION BLOCKERS
+- exact list
+- or "none"
+
+IMPORTANT BUT NON-BLOCKING
+- exact list
+- or "none"
+
+OPTIONAL POST-LAUNCH IMPROVEMENTS
+- exact list
+- or "none"
+
+FILES / FLOWS CHECKED
+- exact list
+
+ACTION TAKEN
+- no changes needed
+OR
+- minimal critical fix applied
+
+FINAL VERDICT
+- safe for MVP production
+- TypeScript clean
+- no duplicated logic
+- per-child isolation preserved
+- curriculum safety preserved
+- parent/child core flows functional
+- ready for release

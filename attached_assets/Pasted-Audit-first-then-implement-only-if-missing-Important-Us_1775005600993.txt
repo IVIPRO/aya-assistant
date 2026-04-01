@@ -1,0 +1,163 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse existing guards, fallbacks, per-child isolation, curriculum restrictions, adaptive difficulty logic, notifications, parent analytics, progress tracking, and lesson flow logic
+- Do NOT add dependencies
+- Do NOT break current UI
+- Keep TypeScript clean
+- No fabricated issues
+- No speculative fixes
+- If already implemented, return audit summary only
+
+Goal:
+Run a full safety & anti-loop audit for AYA learning flows and implement only if something critical is missing.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current codebase and verify whether AYA already protects against the following:
+
+1. Infinite render loops
+   - repeated state updates
+   - effects depending on changing objects/functions
+   - lesson regeneration loops
+   - repeated retry loops
+
+2. Duplicate generation loops
+   - same task generated repeatedly
+   - same toast/celebration firing multiple times
+   - repeated badge/XP awards
+   - repeated progress writes on refresh/re-render
+
+3. Navigation loops
+   - child switching causing repeated reloads
+   - lesson open/close loops
+   - parent page refresh loops
+   - dashboard auto-redirect loops
+
+4. Speech / narration loops
+   - repeated autoplay
+   - overlapping playback
+   - repeated “listen” triggers
+   - speech state not resetting safely
+
+5. Persistence loops / duplicate writes
+   - progress saved twice
+   - streak updated more than once
+   - XP duplicated
+   - badge history duplicated
+   - achievement/timeline duplicated
+
+6. API / fetch retry safety
+   - uncontrolled retries
+   - duplicate request storms
+   - re-fetch on every render
+   - missing guards for loading states
+
+7. Per-child safety
+   - switching child does not duplicate state
+   - no state leakage
+   - no shared cache mistakes
+
+8. Fallback safety
+   - app still works if analytics missing
+   - app still works if lesson data partially missing
+   - app still works if curriculum generator fails
+
+Check exact files/functions involved.
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If the safety / anti-loop protections are already sufficient:
+- do NOT rewrite anything
+- do NOT refactor unnecessarily
+- return audit summary only
+
+If something small is missing:
+- add the smallest safe fix only
+
+If something critical is missing:
+- implement lightweight guards only
+- no architecture rewrite
+- no new dependencies
+
+==================================================
+STEP 3 — IMPLEMENT ONLY IF NEEDED
+==================================================
+
+If fixes are needed, prefer only small protections like:
+
+- useRef guard flags
+- once-per-session guards
+- once-per-child guards
+- once-per-task guards
+- dedupe keys for XP / badges / progress writes
+- safe loading flags
+- safe mounted/unmounted guards
+- effect dependency stabilization
+- idempotent save/update logic
+
+Do NOT redesign the app.
+Do NOT create new pages.
+Do NOT change UI unless absolutely necessary.
+
+==================================================
+STEP 4 — VERIFY
+==================================================
+
+Verify all of these with real current flows:
+
+1. Open Junior dashboard repeatedly
+2. Switch between children repeatedly
+3. Open lesson → practice → wrong answer → next task
+4. Open Parent page repeatedly
+5. Trigger XP / badge / streak / mastery events
+6. Refresh during active lesson
+7. Use speech on/off
+8. Navigate quickly between lesson screens
+
+Make sure:
+- no duplicate writes
+- no duplicate awards
+- no repeated toasts
+- no render loops
+- no speech loops
+- no broken fallbacks
+- no child data leakage
+
+==================================================
+STEP 5 — OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- safe / partially safe / critical issue found
+
+WHAT ALREADY EXISTS
+- exact list
+
+FILES / FUNCTIONS
+- exact files involved
+
+ISSUES FOUND
+- exact list or "none"
+
+ACTION TAKEN
+- no changes needed
+OR
+- minimal fixes added
+
+FINAL STATUS
+- TypeScript clean
+- no duplicated logic
+- no UI breakage
+- per-child isolation preserved
+- anti-loop protections confirmed

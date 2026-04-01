@@ -1,0 +1,187 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse existing streak system, mastery tracking, celebration milestones, progress analytics, daily plan, weak-topic engine, and per-child persistence
+- Do NOT add dependencies
+- Do NOT break current UI
+- Keep TypeScript clean
+- Use only real persisted child data
+- No fake XP, no fabricated rewards
+
+Goal:
+Check whether AYA already supports a real XP / points / gamification system per child, and implement it only if missing.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current codebase and determine whether an XP / points / gamification system already exists.
+
+Check for existing support for:
+
+1. XP / points per child
+   example:
+   - points for solved tasks
+   - points for lesson completion
+   - points for daily streaks
+
+2. Celebration / reward milestones
+   example:
+   - badges
+   - level-up messages
+   - milestone celebrations
+
+3. Level system already connected to learning progress
+
+4. Reward logic already tied to:
+   - correct answers
+   - completed sessions
+   - mastery improvements
+   - streaks
+
+5. Parent page visibility of progress / achievements
+
+6. Verify exact files/functions involved:
+   - streak system
+   - celebration milestone logic
+   - mastery/progress storage
+   - analytics
+   - dashboard / junior page
+   - parent page
+   - per-child persistence
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If a real XP / gamification system already exists:
+- do NOT rewrite it
+- do NOT duplicate logic
+- return audit summary only
+
+If partial logic exists:
+- minimally connect the missing parts using existing data only
+
+If missing:
+- implement a lightweight rule-based XP system
+- no AI / no OpenAI
+- no fake values
+- use only real child actions and persisted data
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION (ONLY IF MISSING)
+==================================================
+
+Implement a safe per-child XP system.
+
+Possible real actions that may give XP:
+- completed lesson
+- completed exercise
+- correct answer
+- streak milestone
+- topic mastered
+
+Possible simple fields:
+- totalXp
+- currentLevel
+- xpToday
+- lastRewardAt
+
+Safe rules:
+- no double-counting
+- no XP inflation on refresh
+- no duplicate reward triggers
+- per-child isolation only
+- safe fallback if some activity data is missing
+
+Possible Bulgarian labels:
+- "Точки"
+- "Ниво"
+- "Днес спечели"
+- "Поздравления! Ново ниво"
+- "Бонус за постоянство"
+
+==================================================
+STEP 4 — OPTIONAL UI
+==================================================
+
+If implementation is needed, display only in safe existing places:
+
+Preferred order:
+1. Junior dashboard
+2. Parent page
+3. celebration banner if already supported
+
+Do NOT create a new page.
+Do NOT change navigation.
+Do NOT add heavy visual effects.
+Keep it compact and child-friendly.
+
+==================================================
+STEP 5 — PER-CHILD SAFETY
+==================================================
+
+Verify:
+- XP belongs only to selected child
+- no leakage between children
+- switching child changes values correctly
+- refresh does not duplicate rewards
+- grade-safe content remains enforced
+- no fabricated XP values
+
+==================================================
+STEP 6 — TESTS
+==================================================
+
+Verify:
+
+Child A completes tasks
+→ XP increases correctly
+
+Child B has separate values
+→ no shared points
+
+Switch child
+→ XP/level updates correctly
+
+Refresh page
+→ no duplicate XP gain
+
+Streak / lesson completion
+→ reward triggers once only
+
+No TypeScript errors
+No duplicated logic
+No fake data
+Fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+FILES / FUNCTIONS
+- exact files involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- XP / gamification added/completed
+
+FINAL STATUS
+- TypeScript clean
+- no duplicated logic
+- per-child isolation preserved
+- fallback intact
+- real reward data only

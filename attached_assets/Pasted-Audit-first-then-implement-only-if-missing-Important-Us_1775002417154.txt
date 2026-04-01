@@ -1,0 +1,191 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse existing mastery tracking, parent analytics, weekly report, streak data, weak-topic detection, and per-child progress state
+- Do NOT add dependencies
+- Do NOT break UI
+- Keep TypeScript clean
+- Use only real persisted data
+- No fake charts, no fabricated progress values
+
+Goal:
+Check whether AYA already supports clear progress visualization for each child, and implement it only if missing.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current codebase and determine whether the app already visualizes progress using existing real data.
+
+Check for existing UI or backend support for:
+
+1. Subject progress visualization
+   example:
+   - Математика 72%
+   - Български език 54%
+
+2. Topic progress visualization
+   example:
+   - Събиране → овладяно
+   - Изваждане → развива се
+   - Десетични дроби → слабo
+
+3. Weekly trend / recent improvement visualization
+   example:
+   - better than last week
+   - more solved tasks than previous week
+
+4. Mastery display already connected to UI
+
+5. Parent page visual summary already present
+
+6. Verify exact files/functions involved:
+   - parent page
+   - dashboard
+   - mastery tracking
+   - weekly report
+   - analytics/progress services
+   - per-child persistence
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If progress visualization already exists and is real:
+- do NOT rewrite it
+- do NOT duplicate calculations
+- return audit summary only
+
+If partial visualization exists:
+- minimally improve composition using existing data only
+
+If missing:
+- implement a lightweight progress visualization block
+- no AI / no OpenAI
+- no fake values
+- no new libraries
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION (ONLY IF MISSING)
+==================================================
+
+Implement a simple per-child progress visualization using existing analytics.
+
+Preferred visualization style:
+- cards / rows / bars using plain existing UI
+- no chart library
+- use simple percentages / labels / status colors already available in project if any
+
+Suggested sections:
+
+A. Напредък по предмети
+- Математика
+- Български език
+- Четене и литература
+- Английски език
+- etc. only if real data exists
+
+B. Напредък по теми
+- show top weak topics
+- show top strong topics
+- show mastery status from existing backend
+
+C. Последна седмица
+- solved tasks
+- active days
+- streak
+- recent improvement if calculable from real data
+
+Bulgarian examples:
+
+Section title:
+"Напредък"
+
+Labels:
+- "Овладяно"
+- "Развива се"
+- "Нужно е упражнение"
+- "Силен напредък"
+- "Най-много трудности"
+
+==================================================
+STEP 4 — UI DISPLAY
+==================================================
+
+If implementation is needed, add the progress visualization in ONE safe place only.
+
+Preferred order:
+1. Родител page
+2. optionally Junior dashboard only if already supported by existing layout
+
+Do NOT create a new page.
+Do NOT change navigation.
+Do NOT add heavy charts.
+
+Keep it compact, readable, and real-data based.
+
+==================================================
+STEP 5 — PER-CHILD SAFETY
+==================================================
+
+Verify:
+- selected child sees only their own progress
+- parent page shows only current child data
+- no leakage between children
+- grade-safe topics only
+- missing data falls back safely
+- no fabricated percentages
+
+==================================================
+STEP 6 — TESTS
+==================================================
+
+Verify:
+
+Child A has progress in math
+→ progress visualization shows real values
+
+Child B has different data
+→ different visualization appears
+
+Switch child
+→ progress updates correctly
+
+Refresh page
+→ progress stays correct
+
+No TypeScript errors
+No duplicated logic
+No fake data
+Fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+FILES / FUNCTIONS
+- exact files involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- progress visualization added/completed
+
+FINAL STATUS
+- TypeScript clean
+- no duplicated logic
+- per-child isolation preserved
+- fallback intact
+- grade-safe

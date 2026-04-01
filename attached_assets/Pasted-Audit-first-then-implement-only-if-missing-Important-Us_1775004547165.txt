@@ -1,0 +1,197 @@
+Audit first, then implement only if missing.
+
+Important:
+- Use Lite mode only
+- Do NOT use Agent
+- Audit first before any change
+- Do NOT duplicate logic
+- Reuse existing XP system, badge system, streak milestones, celebrations, parent analytics, junior dashboard, and per-child persistence
+- Do NOT add dependencies
+- Do NOT break current UI
+- Keep TypeScript clean
+- Use only real persisted child data
+- No fake achievements
+- No fake dates/timestamps
+
+Goal:
+Check whether AYA already supports a real achievement history / timeline per child, and implement it only if missing.
+
+==================================================
+STEP 1 — AUDIT FIRST
+==================================================
+
+Inspect the current codebase and determine whether the app already stores and/or displays a real achievement history.
+
+Check for existing support for:
+
+1. Badge history
+   example:
+   - when a badge was earned
+   - which badge was earned first / last
+
+2. XP milestone history
+   example:
+   - level-up events
+   - XP reward milestones
+
+3. Streak milestone history
+   example:
+   - 3-day streak
+   - 5-day streak
+   - 7-day streak
+   - 10+ day streak
+
+4. Celebration event history
+   example:
+   - toast trigger records
+   - milestone logs
+   - progress event records
+
+5. Parent visibility of achievement timeline
+
+6. Junior visibility of earned achievements over time
+
+7. Verify exact files/functions involved:
+   - XP system
+   - badge system
+   - streak system
+   - celebration logic
+   - analytics / parent page
+   - junior dashboard
+   - per-child persistence / DB storage
+
+==================================================
+STEP 2 — DECISION
+==================================================
+
+If a real achievement history already exists:
+- do NOT rewrite it
+- do NOT duplicate logic
+- return audit summary only
+
+If partial history exists:
+- minimally connect the missing parts using existing real data only
+
+If missing:
+- implement a lightweight rule-based achievement history
+- no AI / no OpenAI
+- no fabricated milestone records
+- use only real persisted timestamps/events
+
+==================================================
+STEP 3 — MINIMAL IMPLEMENTATION (ONLY IF MISSING)
+==================================================
+
+Implement safe per-child achievement history.
+
+Possible event types:
+- badge_earned
+- level_up
+- streak_milestone
+- xp_milestone
+- lesson_milestone
+- mastery_milestone
+
+Possible fields:
+- childId
+- eventType
+- eventLabel
+- eventTimestamp
+- relatedTopic (optional)
+- relatedBadge (optional)
+- relatedLevel (optional)
+
+Safe rules:
+- no duplicate event inserts
+- no duplicate history on refresh
+- no fake backfilled dates
+- preserve per-child isolation
+- safe fallback if some old achievements have no timestamp
+
+==================================================
+STEP 4 — OPTIONAL UI
+==================================================
+
+If implementation is needed, display it only in safe existing places.
+
+Preferred order:
+1. Родител page
+2. Junior dashboard
+3. existing achievements/rewards section if already present
+
+Do NOT create a new page.
+Do NOT change navigation.
+Do NOT add heavy UI.
+
+Suggested Bulgarian labels:
+- "История на постиженията"
+- "Последни постижения"
+- "Ново ниво"
+- "Спечелен badge"
+- "Поредица"
+- "Постижение отключено"
+
+==================================================
+STEP 5 — PER-CHILD SAFETY
+==================================================
+
+Verify:
+- history belongs only to selected child
+- no leakage between children
+- switching child changes history correctly
+- refresh does not duplicate history entries
+- missing old timestamps handled safely
+- no fabricated events
+
+==================================================
+STEP 6 — TESTS
+==================================================
+
+Verify:
+
+Child A earns badge / XP / level up
+→ history updates correctly
+
+Child B has separate history
+→ no shared events
+
+Switch child
+→ achievement history updates correctly
+
+Refresh page
+→ no duplicate entries
+
+Old children with little/no history
+→ safe fallback message
+
+No TypeScript errors
+No duplicated logic
+No fake data
+Fallback intact
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return exactly:
+
+AUDIT RESULT
+- already implemented / partially implemented / missing
+
+WHAT ALREADY EXISTS
+- exact list
+
+FILES / FUNCTIONS
+- exact files involved
+
+ACTION TAKEN
+- no changes needed
+OR
+- achievement history added/completed
+
+FINAL STATUS
+- TypeScript clean
+- no duplicated logic
+- per-child isolation preserved
+- fallback intact
+- real achievement data only

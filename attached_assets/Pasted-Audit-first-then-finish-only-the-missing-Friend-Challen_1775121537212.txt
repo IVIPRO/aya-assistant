@@ -1,0 +1,170 @@
+Audit first, then finish only the missing Friend Challenge UI flow.
+
+Important rules:
+
+- Use Lite mode only
+- DO NOT use Agent
+- Audit first before changing anything
+- DO NOT rewrite backend if already working
+- DO NOT duplicate logic
+- Reuse the existing:
+  friendChallengesTable
+  /api/challenges routes
+  XP reward logic
+  child isolation / familyId validation
+  localization system
+  toast / celebration utilities if already present
+- Keep TypeScript clean
+- Keep current stable behavior intact
+- Minimal safe implementation only
+
+Goal:
+
+Friend Challenge System already has backend + schema + button entry point.
+Now finish only the missing end-to-end user flow in the UI.
+
+--------------------------------------------------
+STEP 1 — AUDIT FIRST
+
+Inspect the existing code and confirm exactly what already exists for Friend Challenge System.
+
+Check these parts:
+
+1. Database
+- friendChallengesTable
+- fields
+- status flow
+- winner logic
+
+2. Backend
+- GET /challenges
+- POST /challenges
+- POST /challenges/:id/accept
+- POST /challenges/:id/task-complete
+
+3. Frontend
+- current button on Junior welcome screen
+- any existing challenge pages/components/dialogs
+- any current toast-only placeholder flow
+- localization keys already added
+
+Return exact files involved.
+
+--------------------------------------------------
+STEP 2 — DETERMINE WHAT IS STILL MISSING
+
+Audit whether the following are already fully implemented:
+
+- challenge creation form
+- opponent selection UI
+- pending challenge list
+- accept challenge action
+- active challenge progress screen
+- challenge completed / winner screen
+- empty states
+- loading states
+- safe error states
+
+If any of these already exist, reuse them.
+Do NOT build duplicates.
+
+--------------------------------------------------
+STEP 3 — IMPLEMENT ONLY THE MISSING UI FLOW
+
+If missing, implement the minimal safe UI flow:
+
+A. Challenge creation
+- Open from “Challenge a Friend”
+- Select opponent from available children in same family only
+- Select topic
+- Select tasks total
+- Submit challenge
+
+B. Pending challenge list
+- Show pending incoming and outgoing challenges
+- Allow accept for pending incoming challenge
+
+C. Active challenge screen
+- Show:
+  topic
+  tasks total
+  creator progress
+  opponent progress
+  status
+- Refresh-safe from backend data only
+- No fake progress
+- No simulated opponent updates
+
+D. Completed challenge screen
+- Show winner
+- Show XP reward
+- Show final progress
+- Show localized completion message
+
+--------------------------------------------------
+STEP 4 — SAFETY REQUIREMENTS
+
+Must preserve:
+
+- per-child isolation
+- family validation
+- no duplicate XP
+- idempotent task completion
+- no infinite render loops
+- no polling loop unless already safely implemented
+- no fake real-time simulation
+- no hardcoded dummy opponents
+- no fake challenge history
+
+If opponent progress is not updated yet by real actions,
+show only real backend values.
+
+--------------------------------------------------
+STEP 5 — UI DESIGN RULES
+
+- Keep current AYA visual style
+- Use existing Junior card/button patterns
+- Reuse existing modal/page components if available
+- Localize all new UI in existing supported languages
+- Do not redesign dashboard
+- Add only the minimum screens/components needed
+
+--------------------------------------------------
+STEP 6 — TEST THE FULL FLOW
+
+Verify with real code paths:
+
+1. Child A creates challenge
+2. Child B sees pending challenge
+3. Child B accepts challenge
+4. Both can open challenge details
+5. Progress values load from backend
+6. Completion state appears correctly
+7. Winner is shown correctly
+8. XP reward is not duplicated
+9. Refresh does not break state
+10. TypeScript clean, no console/server errors
+
+--------------------------------------------------
+STEP 7 — OUTPUT FORMAT
+
+Return exactly this structure:
+
+AUDIT RESULT
+(what already existed)
+
+FILES FOUND
+(list of exact files)
+
+MISSING PARTS
+(list only missing UI pieces)
+
+ACTION TAKEN
+(only what was added/updated)
+
+FINAL STATUS
+- backend preserved
+- no duplicated logic
+- TypeScript clean
+- stable
+- Friend Challenge UI flow completed

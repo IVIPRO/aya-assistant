@@ -514,7 +514,7 @@ function getGradeLabel(grade: number, country: string): string {
   return `Grade ${grade}`;
 }
 
-type JuniorView = "welcome" | "map" | "stages" | "subjects" | "chat" | "lesson";
+type JuniorView = "welcome" | "map" | "stages" | "subjects" | "chat" | "lesson" | "challenges";
 
 /**
  * AYA Junior Avatar — lesson state → avatar emotion mapping.
@@ -882,6 +882,155 @@ function VoiceReadySection({
   );
 }
 
+function ChallengesView({
+  activeChild,
+  siblings,
+  challenges,
+  loading,
+  lang,
+  onCreateChallenge,
+  onAcceptChallenge,
+  onBack,
+}: {
+  activeChild: Child;
+  siblings: Child[];
+  challenges: any[];
+  loading: boolean;
+  lang: string;
+  onCreateChallenge: (opponentId: number, topic: string) => void;
+  onAcceptChallenge: (challengeId: number) => void;
+  onBack: () => void;
+}) {
+  const lbl = JUNIOR_LABELS[lang as keyof typeof JUNIOR_LABELS] ?? JUNIOR_LABELS.en;
+  const [opponentId, setOpponentId] = useState<number | null>(null);
+  const [topic, setTopic] = useState("");
+
+  const pending = challenges.filter((c: any) => c.status === "pending");
+  const active = challenges.filter((c: any) => c.status === "accepted");
+  const completed = challenges.filter((c: any) => c.status === "completed");
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-2xl mx-auto space-y-4">
+      <button
+        onClick={onBack}
+        className="flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-junior mb-4">
+        <ArrowLeft className="w-4 h-4" />
+        {lbl.back}
+      </button>
+
+      <div className="bg-white rounded-2xl p-6 border border-border/30 shadow-sm space-y-4">
+        <h2 className="text-xl font-bold">{lbl.challengeTitle}</h2>
+        {siblings.length > 1 ? (
+          <>
+            <div>
+              <label className="text-sm font-bold text-muted-foreground">Opponent</label>
+              <select
+                value={opponentId ?? ""}
+                onChange={(e) => setOpponentId(parseInt(e.target.value, 10))}
+                className="w-full mt-2 p-2 border rounded-lg">
+                <option value="">Select a friend...</option>
+                {siblings.map((s) => s.id !== activeChild.id && <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-bold text-muted-foreground">Topic</label>
+              <input
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                placeholder="e.g., Fractions, Decimals"
+                className="w-full mt-2 p-2 border rounded-lg" />
+            </div>
+            <button
+              onClick={() => {
+                if (opponentId && topic) {
+                  onCreateChallenge(opponentId, topic);
+                  setOpponentId(null);
+                  setTopic("");
+                }
+              }}
+              disabled={!opponentId || !topic}
+              className="w-full py-2 bg-junior text-white rounded-lg font-bold disabled:opacity-50">
+              Send Challenge
+            </button>
+          </>
+        ) : (
+          <p className="text-sm text-muted-foreground">Need another child in family to challenge</p>
+        )}
+      </div>
+
+      {loading && <div className="text-center py-8">Loading...</div>}
+
+      {pending.length > 0 && (
+        <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
+          <h3 className="font-bold mb-3">Pending Challenges</h3>
+          <div className="space-y-2">
+            {pending.map((c: any) => (
+              <div key={c.id} className="bg-white p-3 rounded-lg flex items-center justify-between">
+                <div className="text-sm">
+                  <div className="font-bold">{c.topic}</div>
+                  <div className="text-xs text-muted-foreground">From another player</div>
+                </div>
+                {c.opponentStudentId !== activeChild.id && (
+                  <button
+                    onClick={() => onAcceptChallenge(c.id)}
+                    className="px-3 py-1 bg-green-500 text-white text-xs rounded-lg font-bold">
+                    Accept
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {active.length > 0 && (
+        <div className="bg-purple-50 rounded-2xl p-4 border border-purple-200">
+          <h3 className="font-bold mb-3">Active Challenges</h3>
+          <div className="space-y-3">
+            {active.map((c: any) => (
+              <div key={c.id} className="bg-white p-4 rounded-lg">
+                <div className="font-bold mb-2">{c.topic}</div>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs">
+                    <span>You: {c.tasksCompletedCreator ?? 0}/{c.tasksTotal}</span>
+                    <span>Opponent: {c.tasksCompletedOpponent ?? 0}/{c.tasksTotal}</span>
+                  </div>
+                  <div className="h-2 bg-gray-200 rounded-full overflow-hidden flex gap-0.5">
+                    <div
+                      className="bg-junior rounded-full transition-all"
+                      style={{ width: `${((c.tasksCompletedCreator ?? 0) / c.tasksTotal) * 45}%` }}
+                    />
+                    <div
+                      className="bg-blue-500 rounded-full transition-all"
+                      style={{ width: `${((c.tasksCompletedOpponent ?? 0) / c.tasksTotal) * 45}%` }}
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {completed.length > 0 && (
+        <div className="bg-green-50 rounded-2xl p-4 border border-green-200">
+          <h3 className="font-bold mb-3">✅ Completed</h3>
+          <div className="space-y-2 text-sm">
+            {completed.map((c: any) => (
+              <div key={c.id} className="bg-white p-3 rounded-lg">
+                <div className="font-bold">{c.topic}</div>
+                <div className="text-xs text-muted-foreground">
+                  {c.winner === activeChild.id ? "You won! 🎉" : "Challenge finished"}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 export function Junior() {
   const { activeChildId, setActiveChildId } = useAuth();
   const { toast } = useToast();
@@ -901,6 +1050,12 @@ export function Junior() {
     subject: Subject; topic: Topic; mode: LessonMode;
     dailyPlanId: number; dailyPlanTaskId: string;
   } | null>(null);
+
+  /* ── Friend Challenges ──────────────────────────────────────── */
+  const [challenges, setChallenges] = useState<any[]>([]);
+  const [selectedOpponent, setSelectedOpponent] = useState<number | null>(null);
+  const [selectedTopic2, setSelectedTopic2] = useState("");
+  const [challengesLoading, setChallengesLoading] = useState(false);
 
   /* ── Free Conversation Mode ──────────────────────────────────── */
   const [conversationMode, setConversationMode] = useState<"default" | "free">("default");
@@ -1051,6 +1206,55 @@ export function Junior() {
   const { data: children = [], isLoading: childrenLoading, refetch } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
   const updateChild = useUpdateChild();
 
+  const handleCreateChallenge = useCallback((opponentId: number, topic: string) => {
+    if (!activeChild) return;
+    fetch("/api/challenges", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("aya_token") ?? ""}`,
+      },
+      body: JSON.stringify({
+        creatorStudentId: activeChild.id,
+        opponentStudentId: opponentId,
+        topic,
+        tasksTotal: 10,
+      }),
+    })
+      .then(r => r.json())
+      .then(() => {
+        toast({ title: "Challenge sent! ⚔️", description: "Friend will see your challenge", variant: "default" });
+        setChallengesLoading(true);
+        fetch(`/api/challenges?childId=${activeChild.id}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("aya_token") ?? ""}` },
+        })
+          .then(r => r.ok ? r.json() : [])
+          .then(data => { setChallenges(data); setChallengesLoading(false); })
+          .catch(() => setChallengesLoading(false));
+      })
+      .catch(() => toast({ title: "Error", description: "Could not send challenge", variant: "destructive" }));
+  }, [activeChild, toast]);
+
+  const handleAcceptChallenge = useCallback((challengeId: number) => {
+    fetch(`/api/challenges/${challengeId}/accept`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${localStorage.getItem("aya_token") ?? ""}` },
+    })
+      .then(() => {
+        toast({ title: "Challenge accepted!", description: "Good luck!", variant: "default" });
+        if (activeChild) {
+          setChallengesLoading(true);
+          fetch(`/api/challenges?childId=${activeChild.id}`, {
+            headers: { Authorization: `Bearer ${localStorage.getItem("aya_token") ?? ""}` },
+          })
+            .then(r => r.ok ? r.json() : [])
+            .then(data => { setChallenges(data); setChallengesLoading(false); })
+            .catch(() => setChallengesLoading(false));
+        }
+      })
+      .catch(() => toast({ title: "Error", description: "Could not accept challenge", variant: "destructive" }));
+  }, [activeChild, toast]);
+
   /* ── Sync view changes to teacher state ─────────────────────────── */
   useEffect(() => {
     if (view === "welcome")  handleTeacherStateChange("idle");
@@ -1059,6 +1263,7 @@ export function Junior() {
     if (view === "map")      handleTeacherStateChange("encouraging");
     if (view === "chat")     handleTeacherStateChange("talking");
     if (view === "lesson")   handleTeacherStateChange("talking");
+    if (view === "challenges") handleTeacherStateChange("encouraging");
   }, [view, handleTeacherStateChange]);
 
   /* ── Turn off Free Conversation Mode when leaving chat view ─────── */
@@ -1207,9 +1412,14 @@ export function Junior() {
               onLessons={() => { setSelectedGrade(activeChild.grade); setView("stages"); }}
               onChangeCompanion={() => setShowCharPicker(true)}
               onChallengeClick={() => {
-                const lang = resolveLang(activeChild.language);
-                const lbl = JUNIOR_LABELS[lang];
-                toast({ title: lbl.challengeTitle, description: lbl.challengeInvite, variant: "default" });
+                setChallengesLoading(true);
+                fetch(`/api/challenges?childId=${activeChild.id}`, {
+                  headers: { Authorization: `Bearer ${localStorage.getItem("aya_token") ?? ""}` },
+                })
+                  .then(r => r.ok ? r.json() : [])
+                  .then(data => { setChallenges(data); setChallengesLoading(false); })
+                  .catch(() => { setChallengesLoading(false); });
+                setView("challenges");
               }}
             />
             <div className="max-w-2xl mx-auto">
@@ -1367,6 +1577,17 @@ export function Junior() {
               </Link>
             </div>
           </motion.div>
+        ) : view === "challenges" && activeChild ? (
+          <ChallengesView
+            activeChild={activeChild}
+            siblings={children}
+            challenges={challenges}
+            loading={challengesLoading}
+            lang={juniorLang}
+            onCreateChallenge={handleCreateChallenge}
+            onAcceptChallenge={handleAcceptChallenge}
+            onBack={() => setView("welcome")}
+          />
         ) : (
           <motion.div key="chat" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             {/* ── Chat view header ─────────────────────────────── */}

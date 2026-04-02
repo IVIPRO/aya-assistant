@@ -1,0 +1,105 @@
+Audit first, then verify Friend Challenge System in Preview with real end-to-end checks.
+
+Important rules:
+
+- Use Lite mode only
+- DO NOT use Agent
+- DO NOT implement new features unless a real bug is found
+- First audit what was already built
+- Reuse existing Friend Challenge code
+- Do not rewrite stable logic
+- Keep TypeScript clean
+- Use Preview testing logic only
+- Focus on real verification, not assumptions
+
+Goal:
+
+Verify whether Friend Challenge System is truly complete and production-safe in real usage.
+
+--------------------------------------------------
+STEP 1 — AUDIT CURRENT IMPLEMENTATION
+
+Inspect the current Friend Challenge implementation and confirm:
+
+- schema exists
+- API routes exist
+- create / accept / task-complete flow exists
+- challenges UI exists
+- pending / active / completed states exist
+- XP reward logic exists
+- isolation / safety rules exist
+
+Return exact files involved.
+
+--------------------------------------------------
+STEP 2 — PREVIEW VERIFICATION CHECKLIST
+
+Verify these scenarios carefully:
+
+1. Child A opens “Challenge a Friend”
+2. Child A selects opponent
+3. Child A enters topic
+4. Child A sends challenge successfully
+5. Child B can see pending challenge
+6. Child B can accept challenge
+7. Challenge moves to active state
+8. Both children can see progress
+9. Task completion updates progress correctly
+10. Challenge completion sets winner correctly
+11. XP reward is granted once only
+12. Refresh keeps correct challenge state
+13. No duplicate challenge actions
+14. No console errors
+15. No server errors
+
+--------------------------------------------------
+STEP 3 — EDGE CASES
+
+Check these cases too:
+
+- same child cannot challenge self
+- child outside family cannot appear as opponent
+- accepting already accepted challenge is blocked safely
+- task-complete cannot overcount progress
+- completed challenge cannot be re-completed
+- missing data shows safe empty state
+- failed API call shows safe toast/error state
+
+--------------------------------------------------
+STEP 4 — ONLY FIX REAL BUGS IF FOUND
+
+If everything works:
+DO NOT change code.
+
+If a real bug is found:
+- fix only that bug
+- minimal change only
+- no refactors
+- no duplicate logic
+- preserve existing stable architecture
+
+--------------------------------------------------
+STEP 5 — OUTPUT FORMAT
+
+Return exactly:
+
+AUDIT RESULT
+(current implementation summary)
+
+FILES VERIFIED
+(list of exact files)
+
+PREVIEW TEST RESULT
+(pass / fail for each scenario)
+
+BUGS FOUND
+(list or NONE)
+
+ACTION TAKEN
+(no changes / minimal fixes)
+
+FINAL VERDICT
+Friend Challenge is:
+- MVP complete
+- production safe / not yet production safe
+- ready for release / needs minor fixes

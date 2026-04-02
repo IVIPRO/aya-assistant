@@ -1,0 +1,192 @@
+Audit first, then fill missing curriculum lessons by MОН structure only where missing.
+
+Important rules:
+
+- Use Lite mode only
+- DO NOT use Agent
+- Audit first before changing anything
+- DO NOT duplicate existing lessons
+- DO NOT overwrite existing valid lessons
+- DO NOT invent random topics
+- Follow Bulgarian MОН-style curriculum structure as closely as possible
+- Keep current schema and architecture unchanged
+- Reuse the existing curriculum system
+- Keep TypeScript clean
+- No UI redesign
+- No backend refactor
+- Minimal safe content expansion only
+
+Main goal:
+
+Find exactly where lessons are missing in:
+- Начален етап
+- Прогимназия
+
+and add only the missing lessons in the existing curriculum structure, so the UI no longer shows placeholder/missing-topic states like "?".
+
+--------------------------------------------------
+STEP 1 — FULL AUDIT FIRST
+
+Inspect the existing curriculum sources and determine:
+
+1. Which files define lessons/topics/curriculum
+2. Which grades already exist
+3. Which subjects already exist
+4. Which lesson arrays/topics are incomplete
+5. Where placeholder / empty / missing topic states are caused
+
+Search for:
+- curriculum
+- topicTitleBg
+- topicTitleEn
+- topics
+- lessons
+- grade
+- subject
+- placeholder
+- "?"
+- fallback topic rendering
+
+Return exact files involved.
+
+--------------------------------------------------
+STEP 2 — BUILD A GAP MAP
+
+Create an audit summary for all grades and subjects currently present.
+
+For each grade, list:
+- subject
+- existing lesson count
+- obviously missing lesson areas
+- whether the current set looks partial/incomplete
+
+Focus first on:
+
+Начален етап:
+- 1 клас
+- 2 клас
+- 3 клас
+- 4 клас
+
+Прогимназия:
+- 5 клас
+- 6 клас
+- 7 клас
+
+Return a structured gap map.
+
+--------------------------------------------------
+STEP 3 — DO NOT FILL EVERYTHING AT ONCE BLINDLY
+
+Before adding content, determine whether the current architecture expects:
+- topic-based lessons
+- lessonType variants
+- skills arrays
+- difficulty levels
+- localized titles
+
+Reuse the existing exact structure.
+Do not introduce a new schema.
+
+--------------------------------------------------
+STEP 4 — IMPLEMENT ONLY MISSING CURRICULUM CONTENT
+
+Add missing lessons only where gaps are confirmed.
+
+Use MОН-aligned topic groups.
+
+Priority order:
+
+PHASE A — Начален етап
+1. Математика
+2. Български език / Четене и литература
+3. Околен свят
+4. Логика и мислене
+5. Английски език if already supported in schema
+
+PHASE B — Прогимназия
+1. Математика
+2. Български език и литература
+3. History/Science subjects only if the current schema already supports them
+
+If a subject is not structurally supported yet, report it instead of forcing it.
+
+--------------------------------------------------
+STEP 5 — CONTENT RULES
+
+When adding lessons:
+
+- keep titles short and school-appropriate
+- use Bulgarian titles first
+- add English titles only if the schema already requires them
+- keep difficulty progression logical
+- avoid duplicate or near-duplicate topics
+- no advanced topics in lower grades
+- preserve grade safety
+- preserve current lesson ordering style if one exists
+
+Examples of acceptable direction:
+- numbers
+- addition/subtraction
+- multiplication/division
+- text problems
+- geometry
+- time
+- measurements
+- reading
+- spelling
+- sentence building
+- grammar basics
+
+But use only where grade-appropriate and only where missing.
+
+--------------------------------------------------
+STEP 6 — PREVENT BREAKAGE
+
+Must preserve:
+
+- current curriculum engine
+- current generators
+- current adaptive systems
+- current challenge / XP / progress systems
+- current Family / Parent reporting logic
+- current localization structure
+
+No new engines.
+No refactors.
+No UI rewrites.
+
+--------------------------------------------------
+STEP 7 — VALIDATE AFTER CHANGES
+
+After filling the missing lessons, verify:
+
+- TypeScript clean
+- no duplicate topic ids
+- no missing required fields
+- no broken imports
+- no broken grade/subject routing
+- no placeholder "?" caused by missing lesson data in the filled areas
+
+--------------------------------------------------
+STEP 8 — OUTPUT FORMAT
+
+Return exactly:
+
+AUDIT RESULT
+(summary)
+
+FILES FOUND
+(list of exact files)
+
+GAP MAP
+(by grade and subject)
+
+ACTION TAKEN
+(what missing lessons were added)
+
+FINAL STATUS
+- schema preserved
+- no duplicated logic
+- TypeScript clean
+- MОН-aligned expansion added safely

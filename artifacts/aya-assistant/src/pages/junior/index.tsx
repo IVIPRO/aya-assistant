@@ -1289,6 +1289,7 @@ export function Junior() {
   }, [children, activeChildId, setActiveChildId]);
 
   const activeChildIdResolved = activeChildId ?? children[0]?.id ?? null;
+  const activeChild = children.find(c => c.id === activeChildIdResolved) ?? null;
 
   const { data: missions = [] } = useListMissions(
     { childId: activeChildIdResolved ?? 0 },
@@ -1304,7 +1305,6 @@ export function Junior() {
     progress.map(p => new Date(p.createdAt))
   );
 
-  const activeChild = children.find(c => c.id === activeChildIdResolved) ?? null;
   const character = activeChild?.aiCharacter ?? null;
   const currentChar = CHARACTERS.find(c => c.id === character);
   const level = getLevel(activeChild?.xp ?? 0);

@@ -223,6 +223,150 @@ export const BG_CURRICULUM: GradeSubjectEntry[] = [
     ],
   },
 
+  // ── Reading & Literature Grade 1 ───────────────────────────────────────────
+  {
+    grade: 1,
+    subjectId: "reading-literature",
+    topics: [
+      {
+        topicId: "simple_stories",
+        topicTitleBg: "Прости разкази",
+        topicTitleEn: "Simple stories",
+        difficultyLevel: "intro",
+        lessonType: "reading",
+        skills: ["story_comprehension", "identify_characters", "sequence_events"],
+      },
+      {
+        topicId: "reading_comprehension_intro",
+        topicTitleBg: "Начално разбиране на текст",
+        topicTitleEn: "Reading comprehension basics",
+        difficultyLevel: "basic",
+        lessonType: "reading",
+        skills: ["answer_questions", "find_details", "understand_purpose"],
+      },
+      {
+        topicId: "simple_poetry",
+        topicTitleBg: "Проста поезия",
+        topicTitleEn: "Simple poetry",
+        difficultyLevel: "intro",
+        lessonType: "reading",
+        skills: ["rhyme_recognition", "rhythm", "emotional_response"],
+      },
+      {
+        topicId: "story_characters",
+        topicTitleBg: "Герои и техните дела",
+        topicTitleEn: "Characters and their actions",
+        difficultyLevel: "basic",
+        lessonType: "lesson",
+        skills: ["character_traits", "character_motivation", "story_role"],
+      },
+      {
+        topicId: "story_retelling",
+        topicTitleBg: "Преразказ на истории",
+        topicTitleEn: "Story retelling",
+        difficultyLevel: "basic",
+        lessonType: "writing",
+        skills: ["sequence_recall", "describe_events", "summarize"],
+      },
+    ],
+  },
+
+  // ── Logic & Thinking Grade 1 ────────────────────────────────────────────────
+  {
+    grade: 1,
+    subjectId: "logic-thinking",
+    topics: [
+      {
+        topicId: "color_patterns",
+        topicTitleBg: "Цветни закономерности",
+        topicTitleEn: "Color patterns",
+        difficultyLevel: "intro",
+        lessonType: "game",
+        skills: ["pattern_recognition", "predict_next", "color_sequence"],
+      },
+      {
+        topicId: "number_patterns",
+        topicTitleBg: "Числови закономерности",
+        topicTitleEn: "Number patterns",
+        difficultyLevel: "intro",
+        lessonType: "practice",
+        skills: ["sequence", "counting_pattern", "predict_continuation"],
+      },
+      {
+        topicId: "visual_puzzles",
+        topicTitleBg: "Визуални пъзели",
+        topicTitleEn: "Visual puzzles",
+        difficultyLevel: "basic",
+        lessonType: "game",
+        skills: ["spatial_reasoning", "problem_solving", "logic"],
+      },
+      {
+        topicId: "size_comparison",
+        topicTitleBg: "Сравняване по размер",
+        topicTitleEn: "Comparing sizes",
+        difficultyLevel: "intro",
+        lessonType: "practice",
+        skills: ["bigger_smaller", "tallest_shortest", "comparison"],
+      },
+      {
+        topicId: "ordering_sequence",
+        topicTitleBg: "Наредба в поредица",
+        topicTitleEn: "Ordering in sequence",
+        difficultyLevel: "basic",
+        lessonType: "practice",
+        skills: ["sequence_order", "before_after", "logical_order"],
+      },
+    ],
+  },
+
+  // ── Nature & Science Grade 1 ────────────────────────────────────────────────
+  {
+    grade: 1,
+    subjectId: "nature-science",
+    topics: [
+      {
+        topicId: "plants_basics",
+        topicTitleBg: "Растения - основи",
+        topicTitleEn: "Plants - basics",
+        difficultyLevel: "intro",
+        lessonType: "lesson",
+        skills: ["plant_parts", "growth", "needs_of_plants"],
+      },
+      {
+        topicId: "animals_habitats",
+        topicTitleBg: "Животни и техните домове",
+        topicTitleEn: "Animals and their habitats",
+        difficultyLevel: "intro",
+        lessonType: "lesson",
+        skills: ["animal_types", "habitat_match", "animal_needs"],
+      },
+      {
+        topicId: "earth_basics",
+        topicTitleBg: "Земята - основи",
+        topicTitleEn: "Earth basics",
+        difficultyLevel: "intro",
+        lessonType: "lesson",
+        skills: ["day_night", "sun_moon", "earth_movement"],
+      },
+      {
+        topicId: "seasons_changes",
+        topicTitleBg: "Сезонни промени",
+        topicTitleEn: "Seasonal changes",
+        difficultyLevel: "basic",
+        lessonType: "lesson",
+        skills: ["season_characteristics", "weather_changes", "plant_animal_changes"],
+      },
+      {
+        topicId: "weather_observation",
+        topicTitleBg: "Наблюдение на времето",
+        topicTitleEn: "Weather observation",
+        difficultyLevel: "intro",
+        lessonType: "practice",
+        skills: ["weather_types", "weather_effects", "clothing_weather"],
+      },
+    ],
+  },
+
   // ── Bulgarian Language Grade 2 ─────────────────────────────────────────────
   {
     grade: 2,

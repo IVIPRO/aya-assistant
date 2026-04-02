@@ -1206,6 +1206,10 @@ export function Junior() {
   const { data: children = [], isLoading: childrenLoading, refetch } = useListChildren({ query: { queryKey: getListChildrenQueryKey() } });
   const updateChild = useUpdateChild();
 
+  /* Declare activeChild early so callbacks can use it */
+  const activeChildIdResolved = activeChildId ?? children[0]?.id ?? null;
+  const activeChild = children.find(c => c.id === activeChildIdResolved) ?? null;
+
   const handleCreateChallenge = useCallback((opponentId: number, topic: string) => {
     if (!activeChild) return;
     fetch("/api/challenges", {
@@ -1287,9 +1291,6 @@ export function Junior() {
       setActiveChildId(children[0].id);
     }
   }, [children, activeChildId, setActiveChildId]);
-
-  const activeChildIdResolved = activeChildId ?? children[0]?.id ?? null;
-  const activeChild = children.find(c => c.id === activeChildIdResolved) ?? null;
 
   const { data: missions = [] } = useListMissions(
     { childId: activeChildIdResolved ?? 0 },

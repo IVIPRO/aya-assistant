@@ -140,6 +140,9 @@ const JUNIOR_LABELS: Record<JuniorLang, {
   voiceModeActive: string;
   voiceModeStop: string;
   styleLabel: string;
+  challengeFriend: string;
+  challengeTitle: string;
+  challengeInvite: string;
 }> = {
   en: {
     welcomeBack: "Welcome back,",
@@ -196,6 +199,9 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     voiceModeActive: "🎙️ Listening…",
     voiceModeStop: "Stop",
     styleLabel: "Style",
+    challengeFriend: "Challenge a Friend",
+    challengeTitle: "Friend Challenge",
+    challengeInvite: "Challenge sent! ⚔️",
   },
   bg: {
     welcomeBack: "Добре дошла,",
@@ -252,6 +258,9 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     voiceModeActive: "🎙️ Слушам…",
     voiceModeStop: "Спри",
     styleLabel: "Стил",
+    challengeFriend: "Предизвикай приятел",
+    challengeTitle: "Предизвикателство с приятел",
+    challengeInvite: "Предизвикателство изпратено! ⚔️",
   },
   es: {
     welcomeBack: "Bienvenida,",
@@ -308,6 +317,9 @@ const JUNIOR_LABELS: Record<JuniorLang, {
     voiceModeActive: "🎙️ Escuchando…",
     voiceModeStop: "Parar",
     styleLabel: "Estilo",
+    challengeFriend: "Desafiar a un Amigo",
+    challengeTitle: "Desafío de Amigos",
+    challengeInvite: "¡Desafío enviado! ⚔️",
   },
 };
 
@@ -557,7 +569,7 @@ function CharacterPicker({ child, onSelect, onClose }: { child: Child; onSelect:
   );
 }
 
-function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLessons, onChangeCompanion }: {
+function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLessons, onChangeCompanion, onChallengeClick }: {
   child: Child;
   character: typeof CHARACTERS[0] | undefined;
   streak: number;
@@ -565,6 +577,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
   onChat: () => void;
   onLessons: () => void;
   onChangeCompanion: () => void;
+  onChallengeClick?: () => void;
 }) {
   const lang = getLang(child.language);
   const lbl = JUNIOR_LABELS[lang];
@@ -718,7 +731,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
               <ChevronRight className="w-5 h-5" />
             </motion.button>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <motion.button
                 whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                 onClick={onChat}
@@ -741,6 +754,14 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
                 className="py-3 bg-white border-2 border-purple-200 text-purple-700 rounded-2xl font-bold text-sm shadow-md hover:bg-purple-50 transition-all flex items-center justify-center gap-2">
                 <Sparkles className="w-5 h-5" />
                 {lbl.changeCompanion}
+              </motion.button>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                onClick={onChallengeClick}
+                className="py-3 bg-white border-2 border-red-200 text-red-700 rounded-2xl font-bold text-sm shadow-md hover:bg-red-50 transition-all flex items-center justify-center gap-2">
+                <Trophy className="w-5 h-5" />
+                {lbl.challengeFriend}
               </motion.button>
             </div>
           </div>
@@ -1185,6 +1206,11 @@ export function Junior() {
               onChat={() => { setSelectedSubject(null); setSelectedTopic(null); setView("chat"); }}
               onLessons={() => { setSelectedGrade(activeChild.grade); setView("stages"); }}
               onChangeCompanion={() => setShowCharPicker(true)}
+              onChallengeClick={() => {
+                const lang = resolveLang(activeChild.language);
+                const lbl = JUNIOR_LABELS[lang];
+                toast({ title: lbl.challengeTitle, description: lbl.challengeInvite, variant: "default" });
+              }}
             />
             <div className="max-w-2xl mx-auto">
               <DailyPlanCard

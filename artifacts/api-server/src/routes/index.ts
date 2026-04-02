@@ -15,6 +15,7 @@ import visionRouter from "./vision";
 import voiceRouter from "./voice";
 import dailyPlanRouter from "./dailyPlan";
 import ttsRouter from "./tts";
+import challengesRouter from "./challenges";
 
 const router: IRouter = Router();
 
@@ -33,6 +34,7 @@ router.use(learningRouter);
 router.use(visionRouter);
 router.use(voiceRouter);
 router.use(dailyPlanRouter);
+router.use(challengesRouter);
 router.use("/tts", ttsRouter);
 
 export default router;

@@ -1,0 +1,197 @@
+Audit first, then implement only if missing.
+
+Important rules:
+
+- Use Lite mode only
+- DO NOT use Agent
+- Audit first before making any change
+- DO NOT duplicate existing logic
+- Reuse existing systems:
+  dailyPlan
+  missions
+  streak
+  XP
+  progress tracking
+  child profiles
+- DO NOT change existing learning flows
+- DO NOT break UI
+- Keep TypeScript clean
+- Use minimal new code
+- If similar functionality already exists under a different name, reuse it instead of creating new systems
+
+Goal:
+
+Check whether AYA already contains any type of peer challenge / friend competition system and implement a lightweight Friend Challenge System only if missing.
+
+--------------------------------------------------
+
+STEP 1 — FULL AUDIT
+
+Search the codebase for existing systems that might already implement friend challenges.
+
+Look for logic or files related to:
+
+friendChallenge
+challenge
+peerChallenge
+duel
+competition
+leaderboard
+studentCompetition
+classCompetition
+missionChallenge
+peerXP
+
+Also inspect existing systems that could already support it:
+
+missions
+weeklyInsights
+XP
+streak
+leaderboards
+missionTasks
+adaptiveProfile
+
+Verify whether missions already support:
+
+- multi-student missions
+- shared XP goals
+- challenge invitations
+- peer comparison
+
+Return exact files if found.
+
+--------------------------------------------------
+
+STEP 2 — DECISION
+
+If a friend challenge system already exists:
+
+DO NOT implement a new one.
+
+Instead return:
+
+AUDIT RESULT
+Existing challenge system found
+
+FILES
+(list of files)
+
+RECOMMENDATION
+Reuse existing system.
+
+--------------------------------------------------
+
+STEP 3 — IMPLEMENT ONLY IF MISSING
+
+If no peer challenge system exists, implement a minimal safe system.
+
+Create a simple model:
+
+friendChallenges
+
+Fields:
+
+challengeId
+creatorStudentId
+opponentStudentId
+topic
+tasksTotal
+tasksCompletedCreator
+tasksCompletedOpponent
+winner
+status
+createdAt
+
+--------------------------------------------------
+
+STEP 4 — CHALLENGE FLOW
+
+Student can start a challenge.
+
+Example challenge:
+
+Solve 10 fraction tasks.
+
+Flow:
+
+Student A creates challenge  
+Student B accepts challenge  
+Both solve tasks  
+AYA tracks progress  
+Winner gets XP bonus.
+
+Example message:
+
+"You challenged Ivan to a fractions battle."
+
+--------------------------------------------------
+
+STEP 5 — UI INTEGRATION
+
+Add challenge entry point only in Junior dashboard.
+
+Example:
+
+"Challenge a friend"
+
+When challenge completes:
+
+"Challenge completed — you won!"
+
+Reuse existing:
+
+XP system  
+celebration system  
+leaderboard logic
+
+Do not create new celebration engines.
+
+--------------------------------------------------
+
+STEP 6 — SAFETY RULES
+
+Ensure:
+
+- per-child isolation
+- no duplicate XP rewards
+- no challenge loops
+- safe fallback if opponent inactive
+- refresh safe
+- no infinite state updates
+
+--------------------------------------------------
+
+STEP 7 — TEST
+
+Verify:
+
+Student A creates challenge  
+Student B accepts  
+Both complete tasks  
+Winner receives XP  
+Challenge closes correctly
+
+No crashes  
+No duplicated progress  
+TypeScript clean
+
+--------------------------------------------------
+
+OUTPUT FORMAT
+
+Return exactly:
+
+AUDIT RESULT
+existing system / missing system
+
+FILES FOUND
+(list)
+
+ACTION TAKEN
+no change / minimal implementation
+
+FINAL STATUS
+safe
+TypeScript clean
+no duplicated logic

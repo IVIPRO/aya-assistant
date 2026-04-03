@@ -1,0 +1,131 @@
+Audit whether AYA already has an infinite lesson regeneration / variant generation engine.
+
+IMPORTANT RULES
+- Lite mode only
+- Do NOT use Agent
+- Do NOT implement anything yet
+- Audit existing systems only
+- Avoid duplicate code
+- Do NOT refactor
+- Do NOT change files
+
+GOAL
+Check whether the current AI lesson system already supports generating unlimited lesson variants for the same curriculum topic.
+
+STEP 1 — FIND EXISTING LESSON GENERATION SYSTEMS
+
+Search for all files related to lesson generation, exercise generation, quiz generation, and adaptive learning.
+
+Look for names like:
+
+aiLessonGenerator
+lessonGenerator
+generateLesson
+generateExercises
+quizGenerator
+practiceGenerator
+adaptiveDifficulty
+lessonContent
+learningRecommendation
+dailyPlan
+
+Return all relevant file paths.
+
+--------------------------------------------------
+
+STEP 2 — CHECK SAME-TOPIC VARIANT CAPABILITY
+
+Determine whether the system can generate multiple different lessons for the SAME topicId.
+
+Check for:
+- randomization
+- seed variation
+- shuffled examples
+- dynamic exercise generation
+- regenerated prompts
+- practice mode variants
+- fresh outputs per call
+
+Answer clearly:
+
+Can the same topicId generate different lesson versions on repeated calls?
+YES / NO / PARTIAL
+
+--------------------------------------------------
+
+STEP 3 — CHECK IF "INFINITE MODE" ALREADY EXISTS UNDER ANOTHER NAME
+
+Search for systems or parameters like:
+
+mode
+variant
+practiceMode
+retryLesson
+regen
+remix
+freshLesson
+exerciseSet
+difficultyMode
+sessionMode
+repeatPractice
+newExamples
+
+Check whether any existing endpoint already supports multiple versions for same topic.
+
+--------------------------------------------------
+
+STEP 4 — CHECK CURRENT API ENDPOINTS
+
+Inspect endpoints such as:
+
+/api/lessons/generate
+/api/daily-plan
+/api/learning/recommendation
+
+Check whether they already accept parameters that can create fresh versions, such as:
+
+topicId
+childId
+mode
+difficulty
+lang
+variant
+sessionId
+attempt
+
+--------------------------------------------------
+
+STEP 5 — CHECK DUPLICATE RISK
+
+Determine whether implementing a new Infinite Learning Engine would duplicate existing capabilities.
+
+Return one of these conclusions:
+
+1. Already fully exists
+2. Partially exists, only UI missing
+3. Partially exists, only API parameter missing
+4. Does not exist
+
+--------------------------------------------------
+
+STEP 6 — OUTPUT FORMAT
+
+INFINITE LESSON ENGINE AUDIT
+
+Existing generation files:
+(list)
+
+Same-topic multiple variants:
+YES / NO / PARTIAL
+
+Existing infinite capability under another name:
+YES / NO
+
+Existing endpoint support:
+(list)
+
+Duplicate risk:
+LOW / MEDIUM / HIGH
+
+FINAL VERDICT:
+Already exists / Partially exists / Safe to implement new layer

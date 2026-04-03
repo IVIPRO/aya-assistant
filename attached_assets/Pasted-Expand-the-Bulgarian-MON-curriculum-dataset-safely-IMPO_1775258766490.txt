@@ -1,0 +1,141 @@
+Expand the Bulgarian MON curriculum dataset safely.
+
+IMPORTANT RULES
+
+- Lite mode only
+- Do NOT enable Agent
+- Do NOT modify existing system logic
+- Do NOT refactor files
+- Do NOT change database schemas
+- Only expand missing curriculum data
+
+This task is DATA EXPANSION ONLY.
+
+--------------------------------------------------
+
+STEP 1 — LOAD CURRENT CURRICULUM
+
+Locate existing curriculum file:
+
+/artifacts/api-server/src/lib/bgCurriculum.ts
+
+Analyze structure of entries.
+
+Each entry likely follows a structure similar to:
+
+{
+  grade: number
+  subject: string
+  topicId: number
+  title: string
+  description: string
+}
+
+DO NOT modify structure.
+
+--------------------------------------------------
+
+STEP 2 — DETECT EXISTING TOPICS
+
+Verify current coverage:
+
+Grade 1 — complete  
+Grades 2–4 — missing topics  
+Grades 5–7 — math + Bulgarian only
+
+Do NOT duplicate existing topics.
+
+--------------------------------------------------
+
+STEP 3 — EXPAND GRADES 2–4
+
+Add missing topics for:
+
+Grade 2  
+Grade 3  
+Grade 4  
+
+Subjects:
+
+Mathematics  
+Bulgarian Language  
+Reading & Literature  
+Logic & Thinking  
+Nature & Science  
+
+Follow Bulgarian MON curriculum progression.
+
+Use sequential topicId values continuing from existing dataset.
+
+--------------------------------------------------
+
+STEP 4 — ADD MISSING SUBJECTS FOR GRADES 5–7
+
+Add topics for:
+
+History  
+Geography  
+Biology  
+Physics  
+Chemistry  
+
+Grades:
+
+5  
+6  
+7  
+
+Each subject should include approximately:
+
+10–20 topics per grade.
+
+Use educational progression aligned with Bulgarian school programs.
+
+--------------------------------------------------
+
+STEP 5 — FORMAT RULES
+
+Maintain exact format used in existing dataset.
+
+Each topic must contain:
+
+grade  
+subject  
+topicId  
+title  
+description
+
+Descriptions should be short learning goals.
+
+Example:
+
+{
+  grade: 5,
+  subject: "History",
+  topicId: 301,
+  title: "Ancient Civilizations",
+  description: "Introduction to early human civilizations and their cultural development."
+}
+
+--------------------------------------------------
+
+STEP 6 — VALIDATION
+
+Before output:
+
+- ensure topicIds are unique
+- ensure no duplicate titles
+- ensure correct grade–subject pairing
+- ensure existing entries remain untouched
+
+--------------------------------------------------
+
+STEP 7 — OUTPUT
+
+Return only the additional curriculum entries to append.
+
+Do NOT rewrite the whole file.
+
+Format output as TypeScript array entries ready to paste into:
+
+bgCurriculum.ts

@@ -1,0 +1,138 @@
+Audit parent analytics and parent dashboard features.
+
+IMPORTANT RULES
+- Lite mode only
+- Do NOT use Agent
+- Do NOT implement anything yet
+- Audit existing code only
+- Do NOT duplicate systems
+
+STEP 1 — SEARCH PARENT FEATURES
+
+Search project for parent related systems.
+
+Look for files or components containing:
+
+parentDashboard
+parentAnalytics
+parentReport
+childProgressView
+learningReport
+parentInsights
+
+Possible locations:
+
+/client
+/server
+/routes
+/components
+/lib
+
+Return files if found.
+
+--------------------------------------------------
+
+STEP 2 — CHECK DATABASE STRUCTURE
+
+Check if parent analytics data already exists.
+
+Look for tables:
+
+childTopicProgressTable
+progressTable
+dailyPlansTable
+learningPathTable
+
+Verify if they store enough data for parent reports.
+
+Check fields:
+
+childId
+topicId
+score
+accuracy
+timeSpent
+completedLessons
+
+--------------------------------------------------
+
+STEP 3 — CHECK EXISTING API ROUTES
+
+Search for endpoints like:
+
+/parent
+/analytics
+/progress
+/reports
+/child-progress
+
+Return route files.
+
+Example:
+
+routes/parent.ts
+routes/analytics.ts
+routes/progress.ts
+
+--------------------------------------------------
+
+STEP 4 — CHECK UI COMPONENTS
+
+Look for UI components for parent view.
+
+Possible components:
+
+ParentDashboard.tsx
+ParentView.tsx
+ChildProgressCard.tsx
+ProgressChart.tsx
+
+Check if parent role exists in UI navigation.
+
+--------------------------------------------------
+
+STEP 5 — CHECK AUTH ROLES
+
+Verify if system supports roles:
+
+student
+parent
+admin
+
+Check auth system.
+
+--------------------------------------------------
+
+STEP 6 — ANALYZE POSSIBILITY
+
+Determine if parent dashboard can be created using existing data.
+
+Evaluate if system already collects:
+
+topic mastery
+weak topics
+daily activity
+lesson completion
+
+--------------------------------------------------
+
+OUTPUT FORMAT
+
+Return:
+
+PARENT DASHBOARD STATUS
+
+Existing parent dashboard: YES / NO
+
+Existing analytics API: YES / NO
+
+Existing UI components: YES / NO
+
+Database ready for reports: YES / NO
+
+FILES FOUND
+(list them)
+
+RECOMMENDATION
+
+Can parent dashboard be built with current system?

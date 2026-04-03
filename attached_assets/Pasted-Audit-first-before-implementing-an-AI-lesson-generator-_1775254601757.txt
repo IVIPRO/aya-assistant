@@ -1,0 +1,106 @@
+Audit first before implementing an AI lesson generator.
+
+IMPORTANT RULES
+
+- Lite mode only
+- Do NOT use Agent
+- Do NOT create duplicate systems
+- Do NOT write new generator code if one already exists
+- First audit the project
+- Only extend existing functionality
+
+--------------------------------------------------
+
+STEP 1 — AUDIT EXISTING GENERATOR
+
+Search the codebase for any existing lesson generation systems.
+
+Look for files such as:
+
+aiLessonGenerator.ts
+aiMissionGenerator.ts
+lessonContent.ts
+lessonEngine.ts
+contentGenerator.ts
+
+Report:
+
+- which generators already exist
+- where they are used
+- whether they generate lessons dynamically
+- whether they are connected to curriculum topics
+
+--------------------------------------------------
+
+STEP 2 — CHECK CURRICULUM CONNECTION
+
+Verify if lessons are currently generated from:
+
+bgCurriculum.ts
+curriculum.ts
+topicId mappings
+
+Check if the generator already supports:
+
+dynamic exercises
+dynamic explanations
+topic-based generation
+
+--------------------------------------------------
+
+STEP 3 — DETECT DUPLICATES
+
+Check for:
+
+duplicate generators
+duplicate lesson systems
+duplicate topic engines
+
+If duplicates exist:
+identify which system is the real one used by the UI.
+
+--------------------------------------------------
+
+STEP 4 — DECIDE STRATEGY
+
+If a generator already exists:
+
+extend it.
+
+Do NOT create a second generator.
+
+If none exists:
+
+then implement a generator using existing lessonContent.ts architecture.
+
+--------------------------------------------------
+
+STEP 5 — IMPLEMENT ONLY IF NEEDED
+
+Goal:
+
+Generate unlimited lessons from curriculum topics.
+
+Lesson structure:
+
+explanation
+5 exercises
+1 interactive activity
+1 mini test
+
+Ensure:
+
+numbers/tasks randomize
+topics follow Bulgarian MON curriculum
+grades 1–4 and 5–7 supported
+
+--------------------------------------------------
+
+STEP 6 — VALIDATION
+
+Confirm:
+
+no duplicate generators
+existing code reused
+AI generator connected to curriculum
+lessons generated dynamically

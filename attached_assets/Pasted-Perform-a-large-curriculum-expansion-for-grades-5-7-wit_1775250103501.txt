@@ -1,0 +1,136 @@
+Perform a large curriculum expansion for grades 5–7 with grade-specific lessons.
+
+IMPORTANT RULES
+
+- Lite mode only
+- DO NOT use Agent
+- DO NOT change the curriculum architecture
+- DO NOT modify the lessonContent engine
+- DO NOT touch grades 1–4 logic
+- DO NOT duplicate topics between grades
+- DO NOT copy grade 5 topics into grade 6 or 7
+- Follow Bulgarian school progression (МОН style)
+
+GOAL
+
+Expand the curriculum so that each subject in grades 5–7 contains a large number of topics (around 30–50 per subject) with clear progression and different content per grade.
+
+Subjects to expand if already supported:
+
+- mathematics
+- bulgarian language
+- literature
+- history
+- geography
+- biology
+- physics
+- chemistry
+- english language
+
+--------------------------------------------------
+
+STEP 1 — AUDIT CURRENT STATE
+
+Check the existing topics for grades 5, 6 and 7.
+
+Report:
+- current topic count per subject
+- subjects with very small topic sets
+- subjects with duplicated topics
+
+--------------------------------------------------
+
+STEP 2 — CREATE LARGE GRADE-SPECIFIC CURRICULUM
+
+Create different topic sets for each grade.
+
+GRADE 5
+Introductory concepts.
+
+Examples:
+- natural numbers
+- divisibility
+- fractions
+- decimals
+- basic geometry
+- ancient history
+- earth geography
+- plant biology
+
+GRADE 6
+Intermediate concepts.
+
+Examples:
+- ratios and proportions
+- percentages
+- integers
+- algebraic expressions
+- medieval history
+- continents and oceans
+- human biology
+
+GRADE 7
+Advanced concepts.
+
+Examples:
+- linear equations
+- inequalities
+- functions
+- probability
+- renaissance history
+- advanced geography
+- genetics basics
+- physics laws
+- chemistry reactions
+
+--------------------------------------------------
+
+STEP 3 — ENSURE LARGE TOPIC SETS
+
+Each subject should contain approximately:
+
+30–50 topics.
+
+Topics must be:
+
+- short
+- unique
+- grade-appropriate
+- progressively harder
+
+--------------------------------------------------
+
+STEP 4 — IMPLEMENT SAFELY
+
+Add topics only to the curriculum data.
+
+Do NOT change:
+
+- schema
+- routing
+- lessonContent engine
+- UI components
+
+--------------------------------------------------
+
+STEP 5 — VALIDATION
+
+Verify:
+
+- TypeScript clean
+- no duplicate topic IDs
+- grades 1–4 unchanged
+- grades 5–7 load correctly
+- subjects contain large topic sets
+- no identical topic lists between grades
+
+--------------------------------------------------
+
+STEP 6 — OUTPUT
+
+Return:
+
+AUDIT RESULT
+FILES MODIFIED
+NEW TOPIC COUNTS PER SUBJECT
+VALIDATION RESULT

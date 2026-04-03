@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, Eye, CheckCircle2, XCircle,
-  ChevronRight, RotateCcw, Loader2, Trophy, Star, Sparkles,
+  ChevronRight, RotateCcw, RotateCw, Loader2, Trophy, Star, Sparkles,
   Volume2, VolumeX, AlertCircle,
 } from "lucide-react";
 import { useAyaLessonVoice, type EmotionMode } from "@/hooks/use-aya-lesson-voice";
@@ -722,12 +722,14 @@ interface EngineProps {
   onRecordLesson: () => void;
   onBack: () => void;
   onAskAya: () => void;
+  onRegenerateLesson: () => Promise<void>;
+  isRegeneratingLesson: boolean;
 }
 
 function InteractiveLessonEngine({
   data, topic, subject, lang, grade, childId, topicContext,
   speak, isVoicePlaying, voiceEnabled,
-  onComplete, onRecordLesson, onBack, onAskAya,
+  onComplete, onRecordLesson, onBack, onAskAya, onRegenerateLesson, isRegeneratingLesson,
 }: EngineProps) {
   const l = L[lang];
   const d = D[lang];
@@ -754,6 +756,9 @@ function InteractiveLessonEngine({
 
   /* ── infinite practice state */
   const [infLoading, setInfLoading] = useState(false);
+
+  /* ── lesson regeneration state */
+  const [regeneratingLesson, setRegeneratingLesson] = useState(false);
 
   /* Reset narration trigger when dialogue changes (phase transition) */
   useEffect(() => {
@@ -1600,6 +1605,29 @@ function InteractiveLessonEngine({
               <ActionBtn onClick={fromExplanation} subject={subject} testId="btn-understood">
                 {l.understood} <ChevronRight className="w-5 h-5" />
               </ActionBtn>
+              <button
+                onClick={onRegenerateLesson}
+                disabled={isRegeneratingLesson}
+                className={cn(
+                  "w-full py-3 px-5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2",
+                  isRegeneratingLesson
+                    ? "bg-muted text-muted-foreground cursor-not-allowed"
+                    : "bg-slate-100 text-slate-700 hover:bg-slate-200 active:scale-95"
+                )}
+                title={lang === "bg" ? "Получи друга версия на този урок" : "Get another version of this lesson"}
+              >
+                {isRegeneratingLesson ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    {lang === "bg" ? "Зареждам..." : "Loading..."}
+                  </>
+                ) : (
+                  <>
+                    <RotateCw className="w-4 h-4" />
+                    {lang === "bg" ? "Опитай друга версия" : "Try Another Version"}
+                  </>
+                )}
+              </button>
               {topicContext === "strong" && ctxD.skipExplanationBtn && (
                 <ActionBtn onClick={fromExplanation} subject={subject} variant="ghost">
                   <Sparkles className="w-4 h-4" /> {ctxD.skipExplanationBtn}
@@ -2296,6 +2324,15 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
     }
   }, [record]);
 
+  const handleRegenerateLesson = useCallback(async () => {
+    setRegeneratingLesson(true);
+    try {
+      await queryClient.refetchQueries({ queryKey: ["lesson", subject.id, topic.id, grade, lang] });
+    } finally {
+      setRegeneratingLesson(false);
+    }
+  }, [queryClient, subject.id, topic.id, grade, lang]);
+
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
       <XpToast reward={reward} lang={lang} onDismiss={() => setReward(null)} />
@@ -2370,6 +2407,8 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
           onRecordLesson={handleRecordLesson}
           onBack={() => { stopVoice(); onBack(); }}
           onAskAya={() => { stopVoice(); onAskAya(); }}
+          onRegenerateLesson={handleRegenerateLesson}
+          isRegeneratingLesson={regeneratingLesson}
         />
       )}
     </motion.div>

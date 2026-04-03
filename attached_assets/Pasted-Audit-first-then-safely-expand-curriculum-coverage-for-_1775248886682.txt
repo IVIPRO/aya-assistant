@@ -1,0 +1,145 @@
+Audit first, then safely expand curriculum coverage for grades 5-7 only, using the existing architecture.
+
+Important rules:
+
+- Use Lite mode only
+- DO NOT use Agent
+- Audit first before changing anything
+- DO NOT overwrite working elementary grade logic
+- DO NOT change schema
+- DO NOT refactor architecture
+- DO NOT duplicate existing topics
+- Reuse the current curriculum engine, band/range logic, and bgCurriculum structure
+- Keep TypeScript clean
+- No UI redesign
+- Minimal safe curriculum expansion only
+
+Main goal:
+
+Safely complete curriculum coverage for Прогимназия (grades 5, 6, 7) where topics are missing or incomplete, following Bulgarian MОН-style progression, without breaking the working system for grades 1-4.
+
+--------------------------------------------------
+STEP 1 — AUDIT FIRST
+
+Inspect the existing curriculum system and confirm:
+
+1. Which files currently define grades 5-7 topics
+2. Which subjects for grades 5-7 already exist
+3. Which grades 5-7 subjects are incomplete
+4. Whether grades 5-7 already use:
+- band/range mapping
+- direct topic lists
+- fallback placeholders
+- partial curriculum entries
+
+Search for:
+- grade 5
+- grade 6
+- grade 7
+- progymnasium / прогимназия
+- topicTitleBg
+- subject
+- curriculum mapping
+- band
+- range
+
+Return exact files involved.
+
+--------------------------------------------------
+STEP 2 — BUILD A GAP MAP FOR GRADES 5-7
+
+For each grade (5, 6, 7), list:
+
+- subjects present
+- topic count per subject
+- clearly missing/incomplete subject areas
+- whether placeholders / empty states may appear
+
+Focus on existing supported subjects only.
+Do NOT force unsupported subjects into the schema.
+
+--------------------------------------------------
+STEP 3 — DETERMINE SAFE SCOPE
+
+If the existing structure fully supports these subjects, prioritize:
+
+1. mathematics
+2. bulgarian-language / bulgarian-literature
+3. reading/literature equivalent if split exists
+4. science/history only if already structurally supported
+
+If a subject is not structurally supported in the current schema, report it instead of forcing it.
+
+--------------------------------------------------
+STEP 4 — IMPLEMENT ONLY MISSING CONTENT
+
+Add only missing topics for grades 5-7.
+
+Rules for added content:
+
+- Follow Bulgarian MОН-style progression
+- Keep topic titles short and school-appropriate
+- Use Bulgarian titles first
+- Add English titles only if required by current schema
+- Preserve current difficulty progression
+- Avoid duplicates and near-duplicates
+- Preserve current ordering style
+- Keep grade safety correct:
+  - no grade 7-only topics inside grade 5
+  - no overly advanced algebra/geometry inside lower scope unless already expected by schema
+
+--------------------------------------------------
+STEP 5 — PROTECT WORKING SYSTEM
+
+Must preserve:
+
+- all working grades 1-4 logic
+- activeChild handling
+- curriculum engine
+- band/range mapping
+- adaptive systems
+- progress systems
+- challenge / XP / parent reporting
+- existing localization patterns
+
+No new engine.
+No broad refactor.
+No schema changes.
+
+--------------------------------------------------
+STEP 6 — VALIDATE AFTER CHANGES
+
+Verify:
+
+- TypeScript clean
+- no duplicate topic ids
+- no broken imports
+- no broken routing by grade/subject
+- no placeholder/missing-topic states in filled grades 5-7 areas
+- grades 1-4 still work unchanged
+
+--------------------------------------------------
+STEP 7 — OUTPUT FORMAT
+
+Return exactly:
+
+AUDIT RESULT
+(summary)
+
+FILES FOUND
+(exact files)
+
+GAP MAP
+(by grade 5 / 6 / 7 and subject)
+
+ACTION TAKEN
+(what topics were added)
+
+VALIDATION RESULT
+(confirm grades 1-4 preserved and grades 5-7 improved)
+
+FINAL STATUS
+- schema preserved
+- no duplicated logic
+- TypeScript clean
+- grades 5-7 safely expanded

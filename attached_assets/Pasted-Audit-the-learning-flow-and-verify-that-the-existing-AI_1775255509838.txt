@@ -1,0 +1,167 @@
+Audit the learning flow and verify that the existing AI systems are connected correctly.
+
+IMPORTANT RULES
+- Lite mode only
+- DO NOT use Agent
+- DO NOT create new systems
+- DO NOT duplicate code
+- First audit everything
+- Only patch wiring if something is not connected
+
+SYSTEMS THAT ALREADY EXIST
+
+aiLessonGenerator
+adaptiveDifficulty
+studentAdaptiveProfile
+progressTracking
+topicProgression
+
+These must work together in one learning pipeline.
+
+--------------------------------------------------
+
+STEP 1 — TRACE LESSON FLOW
+
+Trace the full flow when a student opens a lesson.
+
+Expected flow:
+
+topicId
+↓
+aiLessonGenerator
+↓
+adaptiveDifficulty
+↓
+studentAdaptiveProfile
+↓
+progressTracking
+
+Find where this flow currently starts.
+
+Check:
+
+routes/lessons.ts
+lessonContent.ts
+lesson loader functions
+UI lesson components
+
+Return the exact files and functions used.
+
+--------------------------------------------------
+
+STEP 2 — VERIFY GENERATOR USAGE
+
+Check if aiLessonGenerator is always used.
+
+Verify:
+
+lessonContent.ts
+staticLessons
+fallback lesson systems
+
+Confirm whether:
+
+topicId → aiLessonGenerator → lesson
+
+is the real flow.
+
+If static lessons still exist:
+list where they are used.
+
+--------------------------------------------------
+
+STEP 3 — VERIFY ADAPTIVE LEARNING
+
+Check if:
+
+adaptiveDifficulty.ts
+studentAdaptiveProfile.ts
+
+are actually used during lesson generation.
+
+Confirm whether:
+
+student performance
+↓
+difficulty adjustment
+↓
+new task generation
+
+is active.
+
+--------------------------------------------------
+
+STEP 4 — VERIFY PROGRESS TRACKING
+
+Check:
+
+routes/progress.ts
+schema/progress.ts
+topicProgression.ts
+
+Confirm that when a student finishes a lesson:
+
+progress is saved
+topic mastery updates
+student profile updates
+
+--------------------------------------------------
+
+STEP 5 — DETECT DUPLICATE SYSTEMS
+
+Search for:
+
+duplicate lesson generators
+duplicate difficulty systems
+duplicate progress trackers
+
+If duplicates exist:
+identify the correct system used by UI.
+
+--------------------------------------------------
+
+STEP 6 — PATCH ONLY IF NEEDED
+
+If the systems exist but are not connected:
+
+connect them.
+
+Do NOT rewrite systems.
+
+Only fix the wiring.
+
+--------------------------------------------------
+
+STEP 7 — VALIDATION
+
+Confirm:
+
+aiLessonGenerator used
+adaptiveDifficulty active
+student profile updated
+progress tracking saved
+no duplicate systems created
+
+--------------------------------------------------
+
+OUTPUT FORMAT
+
+Return:
+
+LESSON FLOW MAP
+(files and functions)
+
+GENERATOR STATUS
+(used or bypassed)
+
+ADAPTIVE LEARNING STATUS
+(active or inactive)
+
+PROGRESS TRACKING STATUS
+(active or inactive)
+
+DUPLICATE SYSTEMS
+(if any)
+
+FILES MODIFIED
+(if wiring patch applied)

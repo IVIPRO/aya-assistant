@@ -1,0 +1,116 @@
+Audit and fix the real data source for the Student/Прогимназия subjects screen.
+
+IMPORTANT
+- Lite mode only
+- DO NOT use Agent
+- DO NOT switch modes
+- DO NOT add more topics yet
+- DO NOT claim success unless the UI numbers actually change
+- First find the exact source of truth used by the visible Student/Прогимназия subject cards
+
+GOAL
+
+The UI still shows very small topic counts:
+- Bulgarian language: 6
+- Literature: 5
+- History: 4
+- Geography: 4
+- Biology: 5
+- Physics/Chemistry/English: 1/4 lessons
+
+So the previously added topics are NOT being read by this screen.
+
+Find the exact file/path/data structure that drives:
+1. subject card topic counts
+2. lesson counts
+3. the actual topics shown after opening a subject
+
+--------------------------------------------------
+STEP 1 — TRACE THE REAL UI DATA FLOW
+
+Trace the Student/Прогимназия screen from UI to data.
+
+Find:
+- the page/component rendering these subject cards
+- the selector/function computing "X теми" or "X/Y урока"
+- the exact curriculum source used by this screen
+- whether it reads from:
+  - curriculum.ts
+  - bgCurriculum.ts
+  - lessonContent.ts
+  - hardcoded arrays
+  - fallback/mock/default data
+  - derived band/range mapping
+
+Return exact file paths and function names.
+
+--------------------------------------------------
+STEP 2 — VERIFY WHY THE NEW TOPICS DO NOT APPEAR
+
+Audit why the claimed 188 new topics are not visible.
+
+Possible causes to check:
+- wrong file modified
+- UI reads another curriculum source
+- fallback/default arrays override real data
+- grade mapping mismatch
+- subject key mismatch
+- topic IDs not connected to displayed subject
+- lesson count computed from another source
+
+Return the exact root cause.
+
+--------------------------------------------------
+STEP 3 — FIX ONLY THE CONNECTION
+
+Do NOT add new curriculum topics yet.
+
+Only fix the wiring so the Student/Прогимназия screen reads the real curriculum data that already exists.
+
+Requirements:
+- keep schema unchanged
+- keep architecture unchanged
+- keep grades 1–4 untouched
+- no duplicated logic
+- no hardcoded patch unless absolutely necessary
+- remove/replace fallback source only if it is incorrectly overriding real curriculum
+
+--------------------------------------------------
+STEP 4 — VALIDATE WITH REAL UI RESULT
+
+After the fix, validate that the visible subject card counts change in the actual UI.
+
+Specifically confirm whether these subjects now show higher counts:
+- mathematics
+- bulgarian language
+- literature
+- history
+- geography
+- biology
+- physics
+- chemistry
+- english
+
+Do not say "complete" unless the subject cards really reflect the updated curriculum.
+
+--------------------------------------------------
+STEP 5 — OUTPUT FORMAT
+
+Return exactly:
+
+REAL UI SOURCE
+(list exact files/functions)
+
+ROOT CAUSE
+(why the UI still shows tiny counts)
+
+FILES MODIFIED
+(exact files)
+
+UI VALIDATION
+(show before vs after counts for each subject card)
+
+FINAL STATUS
+- grades 1–4 preserved
+- no Agent used
+- Student/Прогимназия now reads real curriculum data

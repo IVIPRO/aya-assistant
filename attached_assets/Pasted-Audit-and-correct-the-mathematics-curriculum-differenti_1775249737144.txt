@@ -1,0 +1,97 @@
+Audit and correct the mathematics curriculum differentiation for grades 5, 6, and 7.
+
+Important rules:
+
+- Use Lite mode only
+- DO NOT use Agent
+- DO NOT change the curriculum architecture
+- DO NOT modify the lessonContent engine
+- DO NOT break grades 1–4
+- Only adjust the topic lists for grades 5–7 mathematics
+
+Goal:
+
+Currently grades 5, 6, and 7 share identical math topics.
+Replace them with grade-appropriate progression according to Bulgarian school curriculum.
+
+--------------------------------------------------
+
+STEP 1 — AUDIT CURRENT STATE
+
+Inspect mathematics topics for:
+
+- grade 5
+- grade 6
+- grade 7
+
+Confirm if they are identical or duplicated.
+
+Return:
+- file location
+- topic lists per grade
+
+--------------------------------------------------
+
+STEP 2 — CREATE GRADE-SPECIFIC TOPIC SETS
+
+Implement proper progression.
+
+GRADE 5 mathematics:
+- natural numbers operations
+- divisibility
+- fractions
+- decimal numbers
+- measurement units
+- perimeter and area
+- basic geometry
+
+GRADE 6 mathematics:
+- ratios and proportions
+- percentages
+- integers and rational numbers
+- coordinate plane
+- algebraic expressions
+- geometry (angles, polygons)
+
+GRADE 7 mathematics:
+- linear equations
+- inequalities
+- functions
+- probability basics
+- advanced geometry
+- exam preparation topics
+
+--------------------------------------------------
+
+STEP 3 — IMPLEMENT SAFELY
+
+Replace duplicated topic sets with grade-appropriate sets.
+
+Rules:
+- keep topicTitleBg structure
+- keep topicTitleEn if required
+- preserve topic ids format
+- avoid duplicates
+- maintain difficulty scaling
+
+--------------------------------------------------
+
+STEP 4 — VALIDATE
+
+Verify:
+
+- TypeScript clean
+- curriculum engine works
+- grades 1–4 untouched
+- grades 5–7 now load different math topics
+
+--------------------------------------------------
+
+STEP 5 — OUTPUT
+
+Return:
+
+AUDIT RESULT  
+FILES MODIFIED  
+NEW TOPIC COUNTS  
+VALIDATION RESULT

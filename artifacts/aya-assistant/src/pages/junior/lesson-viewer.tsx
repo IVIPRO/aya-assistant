@@ -2216,16 +2216,6 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
   const completeFiredRef = useRef(false);
   const lessonFiredRef = useRef(false);
 
-  const { data, isLoading, isError } = useQuery<LessonContent>({
-    queryKey: ["lesson", subject.id, topic.id, grade, lang],
-    queryFn: async () => {
-      const res = await fetch(`/api/lessons/content?subjectId=${subject.id}&topicId=${topic.id}&grade=${grade}&lang=${lang}`);
-      if (!res.ok) throw new Error("Failed to load lesson");
-      return res.json();
-    },
-    staleTime: 5 * 60 * 1000,
-  });
-
   const { data: adaptiveProfile } = useQuery<AdaptiveProfile>({
     queryKey: ["adaptive-profile", childId, subject.id, topic.id],
     queryFn: async () => {
@@ -2237,6 +2227,18 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
     },
     staleTime: 2 * 60 * 1000,
     enabled: childId > 0,
+  });
+
+  const { data, isLoading, isError } = useQuery<LessonContent>({
+    queryKey: ["lesson", subject.id, topic.id, grade, lang],
+    queryFn: async () => {
+      const topicCtx: TopicContext = adaptiveProfile?.currentTopicStats?.context ?? "normal";
+      const res = await fetch(`/api/lessons/generate?subjectId=${subject.id}&topicId=${topic.id}&grade=${grade}&lang=${lang}&mode=${topicCtx}`);
+      if (!res.ok) throw new Error("Failed to load lesson");
+      return res.json();
+    },
+    staleTime: 5 * 60 * 1000,
+    enabled: Boolean(adaptiveProfile),
   });
 
   const topicContext: TopicContext = adaptiveProfile?.currentTopicStats?.context ?? "normal";

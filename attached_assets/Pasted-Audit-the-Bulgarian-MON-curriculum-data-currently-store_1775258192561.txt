@@ -1,0 +1,130 @@
+Audit the Bulgarian MON curriculum data currently stored in the system.
+
+IMPORTANT RULES
+- Lite mode only
+- Do NOT use Agent
+- Do NOT modify code
+- Do NOT generate new lessons
+- Only analyze existing curriculum data
+- Avoid duplicate systems
+
+STEP 1 — LOCATE CURRICULUM DATA
+
+Search the project for curriculum datasets.
+
+Possible locations:
+
+/server/data
+/server/curriculum
+/server/lib
+/server/constants
+/database
+/seed files
+
+Look for files containing:
+
+curriculum  
+topics  
+monCurriculum  
+lessonTopics  
+gradeTopics  
+
+Return file paths.
+
+--------------------------------------------------
+
+STEP 2 — COUNT TOPICS BY GRADE
+
+Check how many topics exist for each grade.
+
+Grades to analyze:
+
+Grade 1  
+Grade 2  
+Grade 3  
+Grade 4  
+Grade 5  
+Grade 6  
+Grade 7  
+
+Return topic counts.
+
+Example output:
+
+Grade 1 — 38 topics  
+Grade 2 — 42 topics  
+Grade 3 — 45 topics  
+Grade 4 — 48 topics  
+Grade 5 — 32 topics  
+Grade 6 — 29 topics  
+Grade 7 — 28 topics  
+
+--------------------------------------------------
+
+STEP 3 — CHECK SUBJECT COVERAGE
+
+Verify which subjects exist.
+
+Look for:
+
+Mathematics  
+Bulgarian language  
+Literature  
+History  
+Geography  
+Biology  
+Physics  
+Chemistry  
+
+Return subject coverage per grade.
+
+--------------------------------------------------
+
+STEP 4 — CHECK DATABASE TABLE
+
+Inspect tables such as:
+
+topicsTable  
+lessonTopics  
+curriculumTopics  
+learningPathTable  
+
+Check fields like:
+
+topicId  
+grade  
+subject  
+title  
+description  
+
+--------------------------------------------------
+
+STEP 5 — CHECK MISSING CURRICULUM
+
+Determine if any grade has missing topics.
+
+Identify gaps in:
+
+Grade 1–4 (Начален етап)  
+Grade 5–7 (Прогимназия)
+
+--------------------------------------------------
+
+OUTPUT FORMAT
+
+CURRICULUM STATUS
+
+Total topics in system  
+Topics per grade  
+Subjects per grade  
+
+FILES FOUND
+(list them)
+
+DATABASE TABLES USED
+(list them)
+
+MISSING CURRICULUM
+(list gaps if any)
+
+FINAL STATUS

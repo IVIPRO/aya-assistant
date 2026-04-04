@@ -82,6 +82,67 @@ router.get("/lessons/generate", requireAuth, async (req, res): Promise<void> => 
     res.set("Cache-Control", "no-store, no-cache, must-revalidate");
     res.set("Pragma", "no-cache");
     res.json(content);
+
+    // ─── Background pre-generation of next variants (fire-and-forget) ───────────
+    // Only for variant 0: generate variants 1 and 2 asynchronously to warm the cache
+    if (variantNum === 0) {
+      const preGenerateNextVariants = async () => {
+        try {
+          for (const nextVariant of [1, 2]) {
+            // Check if already cached
+            const alreadyCached = await getCachedLesson({
+              subjectId,
+              topicId,
+              grade: gradeNum,
+              lang: langCode,
+              mode: lessonMode,
+              variant: nextVariant,
+            });
+
+            if (alreadyCached) {
+              console.log(
+                `[LESSON_PREGENERATE] Variant ${nextVariant} already cached for ${subjectId}/${topicId}`
+              );
+              continue;
+            }
+
+            // Generate in background without blocking response
+            const variantContent = await generateAILesson(
+              subjectId,
+              topicId,
+              gradeNum,
+              langCode,
+              lessonMode
+            );
+
+            // Save to cache (unique constraint prevents duplicates if races occur)
+            await saveCachedLesson(
+              {
+                subjectId,
+                topicId,
+                grade: gradeNum,
+                lang: langCode,
+                mode: lessonMode,
+                variant: nextVariant,
+              },
+              variantContent
+            );
+
+            console.log(
+              `[LESSON_PREGENERATE] Variant ${nextVariant} cached for ${subjectId}/${topicId}/${gradeNum}/${langCode}`
+            );
+          }
+        } catch (err) {
+          // Silently fail - user already got variant 0, this is just optimization
+          console.warn("[LESSON_PREGENERATE] Background generation failed:", String(err));
+        }
+      };
+
+      // Start background generation without awaiting
+      preGenerateNextVariants().catch(() => {
+        // Catch unhandled promise rejections
+      });
+    }
   } catch (err) {
     console.error("[LESSONS_GENERATE] Unexpected error:", err);
     res.status(500).json({ error: "Failed to generate lesson" });

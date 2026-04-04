@@ -1310,6 +1310,33 @@ export function ParentDashboard() {
     return subjectLabels[subjectId]?.[lang] ?? subjectId;
   };
 
+  /* ── Comprehensive UI translation helper for all Bulgarian labels ── */
+  const badgeTranslations: Record<string, Record<LangCode, string>> = {
+    "Math Explorer": { en: "Math Explorer", bg: "Математически изследовател", es: "Explorador Matemático", de: "Mathe-Forscher", fr: "Explorateur Mathématique" },
+    "Reading Star": { en: "Reading Star", bg: "Звезда на четенето", es: "Estrella de Lectura", de: "Lese-Stern", fr: "Étoile de Lecture" },
+    "Logic Master": { en: "Logic Master", bg: "Майстор на логиката", es: "Maestro de Lógica", de: "Logik-Meister", fr: "Maître de la Logique" },
+    "7 Day Streak": { en: "7 Day Streak", bg: "7-дневна серия", es: "Racha de 7 días", de: "7-Tage-Serie", fr: "Série de 7 jours" },
+    "First Steps": { en: "First Steps", bg: "Първи стъпки", es: "Primeros Pasos", de: "Erste Schritte", fr: "Premiers pas" },
+    "Lesson Master": { en: "Lesson Master", bg: "Майстор на уроци", es: "Maestro de Lecciones", de: "Unterrichts-Meister", fr: "Maître des Leçons" },
+  };
+
+  const topicTranslations: Record<string, Record<LangCode, string>> = {
+    "addition": { en: "Addition", bg: "Събиране", es: "Suma", de: "Addition", fr: "Addition" },
+    "subtraction": { en: "Subtraction", bg: "Изваждане", es: "Resta", de: "Subtraktion", fr: "Soustraction" },
+    "multiplication": { en: "Multiplication", bg: "Умножение", es: "Multiplicación", de: "Multiplikation", fr: "Multiplication" },
+    "division": { en: "Division", bg: "Деление", es: "División", de: "Division", fr: "Division" },
+    "reading_comprehension_basic": { en: "Reading Comprehension", bg: "Разбиране на текст", es: "Comprensión", de: "Leseverständnis", fr: "Compréhension" },
+    "word_problems": { en: "Word Problems", bg: "Текстови задачи", es: "Problemas", de: "Textaufgaben", fr: "Problèmes écrits" },
+  };
+
+  const translateBadgeTitle = (badgeTitle: string): string => {
+    return badgeTranslations[badgeTitle]?.[lang] ?? badgeTitle;
+  };
+
+  const translateTopicLabel = (topicId: string): string => {
+    return topicTranslations[topicId]?.[lang] ?? topicId;
+  };
+
   const unlockedZones = ZONE_ORDER.filter(zoneName => {
     const zone = { "Math Island": 0, "Reading Forest": 30, "Logic Mountain": 80, "English City": 150, "Science Planet": 250 };
     return (progressChild?.xp ?? 0) >= zone[zoneName as keyof typeof zone];
@@ -1823,7 +1850,7 @@ export function ParentDashboard() {
                 {badges.map(badge => (
                   <div key={badge.id} className="flex flex-col items-center gap-1 p-3 bg-yellow-50 rounded-xl border border-yellow-200 min-w-[72px] text-center">
                     <span className="text-2xl">{badge.icon}</span>
-                    <span className="text-xs font-bold">{badge.title}</span>
+                    <span className="text-xs font-bold">{translateBadgeTitle(badge.title)}</span>
                     <span className="text-[10px] text-muted-foreground">{new Date(badge.earnedAt).toLocaleDateString()}</span>
                   </div>
                 ))}

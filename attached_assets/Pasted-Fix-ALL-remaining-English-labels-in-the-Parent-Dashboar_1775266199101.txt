@@ -1,0 +1,148 @@
+Fix ALL remaining English labels in the Parent Dashboard UI.
+
+IMPORTANT
+- Lite mode only
+- DO NOT use Agent
+- Audit first
+- Do NOT change database
+- Do NOT change analytics logic
+- Do NOT change API responses
+- Only change UI display mapping
+- Test in Replit Preview only
+
+GOAL
+Ensure that the Parent Dashboard shows ONLY Bulgarian labels.
+
+STEP 1 — AUDIT
+
+Scan Parent dashboard components:
+
+- Weekly progress
+- Needs practice
+- Improvement zones
+- Achievements / badges
+- Progress charts
+- Mission activity
+- Subject cards
+
+Find all places where raw IDs or English labels appear.
+
+STEP 2 — CREATE CENTRAL UI TRANSLATION MAP
+
+Create a shared UI helper for Bulgarian display names.
+
+Example:
+
+subjectTranslation = {
+
+mathematics: "Математика",
+geography: "География",
+physics: "Физика",
+chemistry: "Химия",
+reading-literature: "Четене и литература",
+nature-science: "Околен свят",
+bulgarian_language: "Български език",
+english: "Английски език",
+
+tts: "AI четене",
+voice_session: "Гласова сесия"
+
+}
+
+topicTranslation = {
+
+division: "Деление",
+addition: "Събиране",
+reading_comprehension_basic: "Разбиране на текст",
+perimeter-area: "Периметър и лице",
+algebra-basics: "Основи на алгебра",
+fractions-adv: "Дроби",
+decimal-fractions: "Десетични дроби",
+natural-numbers: "Естествени числа",
+nat-num-review: "Преговор на числа",
+addition-subtraction: "Събиране и изваждане",
+grammar-eng: "Английска граматика",
+phonetics-review: "Фонетика",
+punctuation: "Пунктуация",
+physical-geography: "Физическа география",
+thermodynamics: "Термодинамика",
+mixtures: "Смеси"
+
+}
+
+achievementTranslation = {
+
+"First Steps": "Първи стъпки",
+"On Fire!": "В серия!"
+}
+
+STEP 3 — APPLY TRANSLATIONS
+
+Use the translation helper in:
+
+ParentDashboard
+WeeklyProgressCard
+ImprovementZones
+AchievementsGrid
+Charts
+MissionActivity
+
+If label exists in translation map → show Bulgarian text.
+
+If not → fallback:
+
+replace "-" with space
+capitalize first letter.
+
+STEP 4 — FIX WEEKLY SUMMARY TEXT
+
+Replace raw IDs in generated text.
+
+Example:
+
+Current:
+"Успехи в division и reading_comprehension_basic."
+
+Correct:
+
+"Успехи в Деление и Разбиране на текст."
+
+STEP 5 — TEST
+
+Verify in Preview:
+
+No English words remain.
+
+Check:
+
+Parent Dashboard
+Weekly progress
+Improvement zones
+Badges
+Charts
+Mission activity
+
+STEP 6 — OUTPUT
+
+PARENT DASHBOARD FULL LOCALIZATION
+
+Files audited:
+(list)
+
+Files modified:
+(list)
+
+Translation helper created:
+YES / NO
+
+English labels remaining:
+YES / NO
+
+TypeScript errors:
+YES / NO
+
+Runtime errors:
+YES / NO
+
+STATUS:
+Fully localized

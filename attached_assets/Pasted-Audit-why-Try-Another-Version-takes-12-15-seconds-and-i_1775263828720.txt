@@ -1,0 +1,89 @@
+Audit why "Опитай друга версия" / "Try Another Version" takes 12-15 seconds and identify the safest speed optimization path.
+
+IMPORTANT RULES
+- Lite mode only
+- Do NOT use Agent
+- Audit only first
+- Do NOT implement anything yet
+- Do NOT refactor
+- Do NOT change backend/frontend logic yet
+- Measure and identify bottleneck only
+- Avoid duplicate optimization if caching/prefetch already exists
+
+GOAL
+Find where the latency comes from in the lesson regeneration flow.
+
+FLOW TO AUDIT
+Lesson Viewer -> "Try Another Version" button -> /api/lessons/generate -> new lesson returned -> UI replaces lesson
+
+STEP 1 — TRACE THE FLOW
+Inspect the exact frontend handler and backend route used for regeneration.
+
+Identify:
+- frontend file and handler
+- API route used
+- backend generator function used
+- whether the call goes directly to OpenAI or through an internal generator layer
+
+STEP 2 — FIND LATENCY SOURCE
+Determine which part is slowest:
+1. frontend waiting / unnecessary re-render
+2. network request time
+3. backend route processing
+4. OpenAI generation time
+5. post-processing / parsing / formatting
+6. duplicate requests
+
+STEP 3 — CHECK FOR EXISTING SPEED FEATURES
+Audit whether any of these already exist:
+- caching
+- request deduplication
+- prefetching next variant
+- background generation
+- streaming
+- skeleton UI
+- optimistic UI
+- local variant rotation
+- reusable framing variants without full regeneration
+
+STEP 4 — CHECK DUPLICATE RISK
+If we optimize speed, determine whether the optimization would duplicate existing mechanisms.
+
+Return:
+- already exists
+- partially exists
+- does not exist
+
+STEP 5 — RECOMMEND THE SAFEST NEXT FIX
+Choose only ONE safest next optimization for Lite mode.
+
+Possible examples:
+- add lightweight timing logs
+- prefetch next variant after lesson load
+- reduce prompt size
+- reduce post-processing
+- cache one extra variant per topic
+- show progressive loading stages
+
+STEP 6 — OUTPUT FORMAT
+
+REGENERATION SPEED AUDIT
+
+Frontend handler:
+Backend route:
+Generator used:
+
+Latency source:
+- frontend / network / backend / OpenAI / parsing / mixed
+
+Existing speed features:
+(list)
+
+Duplicate risk:
+LOW / MEDIUM / HIGH
+
+Best next safe optimization:
+(one specific action only)
+
+Need Agent:
+YES / NO

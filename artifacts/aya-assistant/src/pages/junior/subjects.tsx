@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, BookOpen, Pencil, Brain, MessageCircle, CheckCircle2, Circle, AlertTriangle, BookMarked } from "lucide-react";
 import { EDUCATION_STAGES, SUBJECT_ACTIONS_LABELS, type Subject, type Topic } from "@/lib/curriculum";
@@ -60,6 +60,7 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
   const [selected, setSelected] = useState<Subject | null>(null);
   const [lessonCtx, setLessonCtx] = useState<LessonContext | null>(null);
   const labels = SUBJECT_ACTIONS_LABELS[lang];
+  const queryClient = useQueryClient();
 
   function openLesson(ctx: LessonContext) {
     setLessonCtx(ctx);
@@ -73,6 +74,41 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
 
   /* Reset lesson-active flag on unmount so corner avatar re-appears */
   useEffect(() => () => { onLessonActiveChange?.(false); }, []);
+
+  /* ── Silent prewarm of first topic when subject selected ── */
+  useEffect(() => {
+    if (!selected) return;
+
+    const prewarmFirstTopic = async () => {
+      try {
+        // Get first topic filtered by grade
+        const firstTopic = selected.topics.find(t => !t.grades || t.grades.includes(grade));
+        if (!firstTopic) return;
+
+        // Check if already cached in React Query memory
+        const cachedKey = ["lesson", selected.id, firstTopic.id, grade, lang, 0];
+        const existing = queryClient.getQueryData(cachedKey);
+        if (existing) return; // Already warmed
+
+        // Fetch from API (will use persistent cache if available)
+        const res = await fetch(
+          `/api/lessons/generate?subjectId=${selected.id}&topicId=${firstTopic.id}&grade=${grade}&lang=${lang}&mode=normal&variant=0`
+        );
+        
+        if (res.ok) {
+          const lessonContent = await res.json();
+          // Store in React Query cache for instant access
+          queryClient.setQueryData(cachedKey, lessonContent);
+        }
+      } catch {
+        // Silently fail - normal lesson generation still works if prewarm fails
+      }
+    };
+
+    // Start prewarm with a small delay to avoid blocking subject selection UI
+    const timeoutId = setTimeout(prewarmFirstTopic, 500);
+    return () => clearTimeout(timeoutId);
+  }, [selected, grade, lang, queryClient]);
 
   /* Fetch topic progress for this child */
   const { data: progressData } = useQuery<{ topics: TopicProgressItem[] }>({

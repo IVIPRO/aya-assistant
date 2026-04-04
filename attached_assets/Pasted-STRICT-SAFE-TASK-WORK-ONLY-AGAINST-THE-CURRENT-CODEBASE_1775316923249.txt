@@ -1,0 +1,103 @@
+STRICT SAFE TASK. WORK ONLY AGAINST THE CURRENT CODEBASE / ZIP ALREADY IN THIS CHAT. DO NOT RE-ARCHITECT. DO NOT DUPLICATE EXISTING CACHE/PREGENERATE LOGIC. FIRST AUDIT WHAT ALREADY EXISTS, THEN APPLY ONLY MINIMAL SAFE CHANGES.
+
+GOAL:
+Speed up FIRST lesson opening in both:
+1) Начален етап
+2) Прогимназия
+
+Right now "Опитай друга версия" is fast because cached/pre-generated variants exist after the first load.
+I want the FIRST lesson open itself to become much faster for common topics, without breaking progress, lesson history, exercises, or current lesson generation.
+
+REQUIRED APPROACH:
+Implement a SAFE "starter lesson warm cache" / "popular topic prefill" mechanism using the EXISTING lesson pipeline as much as possible.
+
+RULES:
+- Reuse existing lesson generation route and cache system
+- Reuse existing lesson schema and validation
+- Reuse current React Query/frontend fetch flow where possible
+- No breaking API changes
+- No duplicate logic
+- No separate second lesson engine
+- No fake data
+- No hardcoded lesson text in frontend
+- No removal of current AI generation
+- Keep "Опитай друга версия" behavior intact
+- Keep Junior + Прогимназия compatibility
+- Keep multilingual support intact
+
+TASK ORDER (MANDATORY):
+1. AUDIT current implementation for:
+   - lesson cache
+   - lesson pre-generation
+   - lesson fetch flow
+   - topic selection flow in Junior and Прогимназия
+   - whether there is already any "popular/default topic prewarm" logic
+2. REPORT findings clearly:
+   - what already exists
+   - what can be reused
+   - exact bottleneck for first lesson opening
+3. IMPLEMENT the MINIMAL SAFE FIX only
+
+TARGET BEHAVIOR:
+- When user opens subject page (example: Математика), the system should quietly prewarm the FIRST most likely lesson(s) in background
+- When user clicks a common lesson shortly after, it should open much faster from cache if already warmed
+- If no warmed cache exists, fallback must remain current normal generation
+- No user-visible errors
+- No wrong-grade or wrong-topic lesson reuse
+- No stale cross-student leakage
+
+SAFE IMPLEMENTATION OPTIONS (choose the smallest safe one after audit):
+Option A:
+Prewarm the first 1-2 visible topics for the currently opened subject page
+Option B:
+Prewarm only the most common/default topic for that subject/grade
+Option C:
+Use an existing background pre-generation hook if already present and extend it minimally
+
+IMPORTANT SAFETY CONSTRAINTS:
+- Cache keys must remain student-safe, grade-safe, subject-safe, topic-safe, language-safe
+- Never mix lesson cache between children
+- Never mix grade 1-4 with grade 5-7
+- Do not break progress writes
+- Do not duplicate lesson history entries
+- Do not pre-create progress records just by warming cache
+- Do not trigger exercise completion or analytics events during prewarm
+- Avoid extra heavy OpenAI usage; prewarm must be conservative, not massive
+- Prefer 1-2 topics only, not entire subject bulk generation
+
+EXPECTED DELIVERABLE:
+A) SHORT AUDIT
+- existing lesson loading path
+- existing cache/pre-generation path
+- exact first-load bottleneck
+- chosen minimal fix and why
+
+B) CODE CHANGES
+List exact files modified
+
+C) VALIDATION
+Must verify all of the following:
+1. project builds successfully
+2. no TypeScript errors
+3. first normal lesson generation still works
+4. "Опитай друга версия" still works
+5. Junior still works
+6. Прогимназия still works
+7. no duplicate history/progress writes from prewarm
+8. cache isolation is preserved
+
+D) TEST STEPS
+Give exact Preview test steps for me:
+- Начален етап → Математика
+- Прогимназия → Математика
+- how to verify prewarm happened
+- how to compare first click speed before/after
+
+E) FINAL VERDICT
+At the end say only one of:
+- SAFE AND COMPLETE
+- AUDIT COMPLETE, IMPLEMENTATION NOT SAFE IN LITE
+- BLOCKED WITH SPECIFIC REASON
+
+If there is already similar functionality in the current codebase, DO NOT rebuild it.
+Instead extend or connect the existing mechanism only.

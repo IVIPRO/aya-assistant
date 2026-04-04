@@ -271,6 +271,53 @@ export interface EvaluationContext {
  * For now, context-aware but not truly question-specific.
  * Future work: wire to a Q&A database with per-question validation.
  */
+/**
+ * Topic-specific fallback hints to ensure explanation always matches the topic.
+ * Used when generated explanation drifts off-topic.
+ */
+const TOPIC_FALLBACK_HINTS: Record<string, string> = {
+  // Reading/Language
+  reading_comprehension_basic: "Прочети внимателното текста отново — ищи ключовите думи в историята.",
+  nouns_basic: "Съществителното назовава предмет, място или живо същество. Кое е съществително в текста?",
+  verbs_basic: "Глаголът показва действие. Какво действие прави персонажът?",
+  sentence_building: "Изречението има подлог (кой?) и сказуемо (какво?). Попълни двете части.",
+  simple_words: "Мислей за простите думи — краткосчетени, познати думи.",
+  letters_and_sounds: "Фокусирай се на звуковете и буквите — един звук, една буква.",
+  syllables: "Брой сричките: раз-де-ли в части и преброй.",
+  spelling_rules_basic: "Проверь правилото за правопис — как се пишат правилно тези букви?",
+};
+
+/**
+ * Validate that an explanation text stays within the topic's semantic field.
+ * Returns true if explanation is topic-appropriate, false if it drifts.
+ */
+function isExplanationOnTopic(explanation: string, topicId: string): boolean {
+  if (!explanation || explanation.length < 3) return true; // Empty explanations are okay
+  
+  const ex = explanation.toLowerCase();
+  
+  // Simple heuristics: check for obvious cross-topic drift
+  const reading_topics = ["reading", "story", "text", "historia", "четене", "история", "текст"];
+  const grammar_topics = ["noun", "verb", "adjective", "глагол", "съществител", "прилагател"];
+  const sound_topics = ["sound", "letter", "буква", "звук"];
+  
+  const isReadingTopic = topicId?.includes("reading") || topicId?.includes("story") || topicId?.includes("comprehension");
+  const isGrammarTopic = topicId?.includes("noun") || topicId?.includes("verb") || topicId?.includes("adjective");
+  const isSoundTopic = topicId?.includes("letter") || topicId?.includes("sound");
+  
+  // If topic is reading, explanation should not be mainly about grammar or sounds
+  if (isReadingTopic && grammar_topics.some(g => ex.includes(g))) return false;
+  if (isReadingTopic && sound_topics.some(s => ex.includes(s))) return false;
+  
+  // If topic is grammar, explanation should not be about reading comprehension
+  if (isGrammarTopic && reading_topics.some(r => ex.includes(r))) return false;
+  
+  // If topic is sounds/letters, explanation should not be about comprehension
+  if (isSoundTopic && reading_topics.some(r => ex.includes(r))) return false;
+  
+  return true; // Assume on-topic if no red flags
+}
+
 export function evaluateBulgarianLessonAnswer(
   context: EvaluationContext,
   studentAnswer: string,
@@ -362,5 +409,15 @@ export function evaluateBulgarianLessonAnswer(
   }
 
   // Fallback: generic keyword evaluation
-  return evaluateKeywordMatch(studentAnswer, ["разбирам", "научи", "урок"]);
+  let result = evaluateKeywordMatch(studentAnswer, ["разбирам", "научи", "урок"]);
+  
+  // ── COHERENCE CHECK: Validate explanation stays on-topic ──────────────────
+  // If explanation drifts to a different topic, use topic-specific fallback instead.
+  if (!isExplanationOnTopic(result.explanation, topicId)) {
+    const fallback = TOPIC_FALLBACK_HINTS[topicId] ?? "Помисли отново — можеш ли да намериш на-добрия отговор?";
+    result.explanation = fallback;
+    console.warn(`[BG_EVALUATOR] Explanation drifted for topic="${topicId}" — using fallback hint`);
+  }
+  
+  return result;
 }

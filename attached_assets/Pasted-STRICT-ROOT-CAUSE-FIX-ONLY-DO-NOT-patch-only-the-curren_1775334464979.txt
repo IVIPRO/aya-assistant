@@ -1,0 +1,149 @@
+STRICT ROOT-CAUSE FIX ONLY. DO NOT patch only the currently visible example.
+Audit the existing lesson/exercise generation pipeline for Junior and Прогимназия and fix the GLOBAL cause of cross-component inconsistency across ALL lessons.
+
+PROBLEM TO SOLVE
+In many generated lessons, the task/question is on one topic, but the hint and/or example are about a different concept.
+Examples of bad output:
+- Question: "Коя част ни помага да дишаме?"
+  Hint/example talks about eyes or seeing.
+- Question: "Какво дишаме?"
+  Hint/example talks about water evaporation.
+- Question: "Какво прави вятърът?"
+  Hint/example uses unnatural or mismatched objects/actions.
+This means the system still allows semantic drift between:
+1) topic
+2) question
+3) hint
+4) example
+5) expected answer
+
+GOAL
+Create ONE robust global fix so every generated lesson stays internally consistent across all subjects and all grades.
+The fix must apply to:
+- Начален етап
+- Прогимназия
+- lessons
+- exercises
+- retry / “Опитвам пак”
+- “Опитай друга версия”
+- cache/prewarm/prefetch flows too
+
+REQUIRED ROOT-CAUSE SOLUTION
+Implement a strict “content coherence contract” for every generated exercise item.
+
+For EACH generated exercise, enforce these rules:
+1. QUESTION_TOPIC_MATCH
+   The question must match the current lesson topic/category/topicId.
+2. HINT_QUESTION_MATCH
+   The hint must help solve THIS exact question, not a related or unrelated concept.
+3. EXAMPLE_QUESTION_MATCH
+   The example must demonstrate the same skill/concept as the question.
+4. ANSWER_MATCH
+   The expected/correct answer must logically answer the exact question.
+5. AGE_APPROPRIATE
+   Vocabulary and examples must be concrete, child-safe, natural Bulgarian, grade-appropriate.
+6. NO_SEMANTIC_DRIFT
+   Reject generated content if hint/example introduce a different semantic field than the question.
+7. NO_BIZARRE_COMBINATIONS
+   Reject unnatural examples such as random body-part/object or unrelated science/action pairings.
+8. NO_GENERIC_FILLER_HINTS
+   Hint must not be vague motivational filler; it must actually help solve the problem.
+9. SAME-INTENT-RETRY
+   On retry/regenerate, keep the same lesson topic and same skill intent, only vary the instance.
+
+MANDATORY IMPLEMENTATION APPROACH
+Do NOT only tweak prompt wording.
+Add central validation in code after AI generation and before returning data to UI.
+
+Implement a reusable global validator, something like:
+- validateExerciseCoherence(...)
+or equivalent
+that checks:
+- topic semantic intent
+- question keywords
+- hint semantic alignment
+- example semantic alignment
+- answer alignment
+- banned mismatch patterns
+- safe Bulgarian naturalness heuristics
+
+If validation fails:
+1. regenerate once with stronger constraints
+2. if still invalid, replace with deterministic safe fallback template for that exact topic/skill
+3. never return incoherent content to the UI
+
+IMPORTANT
+The fallback must be TOPIC-SPECIFIC, not generic.
+For example:
+- breathing/body -> lungs, nose, air, breathing
+- wind/air -> wind blows, air moves leaves, flags, kites
+- body parts -> eyes see, ears hear, nose smells, mouth eats/speaks, lungs help breathing
+- water -> drink, liquid, rain, river, washing, not breathing
+Do NOT mix these semantic families.
+
+AUDIT FIRST
+Before changing code:
+1. inspect the existing generator pipeline
+2. inspect all validators already added
+3. inspect retry flow
+4. inspect fallback templates
+5. inspect semantic intent maps / topic maps
+6. identify why drift still passes validation
+7. then apply the minimal but complete root-cause fix
+
+PRESERVE EXISTING FEATURES
+Do NOT break:
+- caching
+- prefetch
+- prewarm
+- progress tracking
+- resume learning
+- Junior / Прогимназия routing
+- variant generation
+- difficulty adjustment
+- translations/localization
+- existing API contracts if avoidable
+
+PREFER MINIMAL SAFE CHANGES
+Use the smallest number of files possible, but fix the issue globally.
+Do not duplicate logic in many places.
+Put coherence validation in a central reusable layer.
+
+AFTER IMPLEMENTATION
+Run validation and report:
+1. root cause found
+2. files changed
+3. exact validation rules added
+4. how failed generations are handled
+5. why this now fixes ALL lessons globally
+6. build status
+7. confirmation that existing speed/caching systems still work
+
+TEST WITH THESE EXAMPLES
+Explicitly test and confirm all of these become coherent:
+- "Коя част ни помага да дишаме?"
+- "Какво дишаме?"
+- "Какво прави вятърът?"
+- body-parts lesson
+- air/wind lesson
+- water lesson
+- one math lesson
+- one reading lesson
+
+SUCCESS CRITERIA
+The system must never return:
+- body question + eye hint mismatch
+- air question + water hint mismatch
+- wind question + absurd example
+- correct answer not supported by hint/example
+- off-topic retry variant
+
+OUTPUT FORMAT
+Return a strict implementation report:
+A) root cause
+B) changed files
+C) validators added
+D) fallback behavior
+E) test cases passed
+F) build result
+G) confirmation no existing performance systems were broken

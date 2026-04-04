@@ -9,6 +9,7 @@ import {
   getSafeTemplates,
   getSemanticIntent,
   validateExerciseSemanticAlignment,
+  normalizeTopicId,
   type SemanticIntent,
 } from "./taskConsistencyGuard";
 import { isHintExampleNatural, getSafeHintExample } from "./hintExampleValidator";
@@ -464,34 +465,57 @@ function hintAndQuestionMatchTopic(
 ): boolean {
   if (!hint || hint.length < 5) return true; // Empty hint passes (not ideal, but ok)
 
+  // Normalise slug-format IDs so science topics get proper keyword lookup
+  const normTopicId = normalizeTopicId(topicId);
+
   const q = question.toLowerCase();
   const h = hint.toLowerCase();
 
   // Extract key concepts from topic ID
   const topicKeywords: Record<string, string[]> = {
+    // Math
     addition_to_10: ["събира", "плюс", "добав", "прибав", "sum", "add"],
+    addition_to_20: ["събира", "плюс", "добав", "прибав", "sum", "add"],
     subtraction_to_10: ["изважда", "минус", "отнема", "minus", "subtract"],
+    subtraction_to_20: ["изважда", "минус", "отнема", "minus", "subtract"],
     multiplication_intro: ["умножа", "групи", "пъти", "multiply"],
     division_intro: ["дели", "групира", "раздели", "divide", "groups"],
-    nouns_basic: ["съществител", "назова", "име", "предмет", "noun"],
-    verbs_basic: ["глагол", "действие", "прави", "verb"],
-    adjectives: ["прилагател", "описва", "качество", "adjective"],
-    color_patterns: ["цвет", "редица", "повтаря", "закономер", "pattern", "sequence"],
-    visual_puzzles: ["пъзел", "логик", "мислене", "дедукц", "puzzle", "logic"],
-    reading_comprehension_basic: ["четене", "текст", "разбира", "история", "passage"],
     addition: ["събира", "плюс", "добав", "sum", "add"],
     subtraction: ["изважда", "минус", "отнема", "minus", "subtract"],
+    multiplication: ["умножа", "пъти", "multiply"],
+    division: ["дели", "divide"],
+    // Language
+    nouns_basic: ["съществител", "назова", "предмет", "noun"],
+    verbs_basic: ["глагол", "действие", "verb"],
+    adjectives: ["прилагател", "описва", "adjective"],
+    color_patterns: ["цвет", "редица", "повтаря", "закономер", "pattern"],
+    visual_puzzles: ["пъзел", "логик", "мислене", "puzzle", "logic"],
+    reading_comprehension_basic: ["четене", "текст", "разбира", "история", "passage"],
+    // Nature & Science — critical additions to catch cross-topic drift
+    human_body_g2: ["тяло", "орган", "дише", "сърце", "очи", "уши", "нос", "зъби", "body", "lung", "heart", "eye"],
+    "human-body": ["тяло", "орган", "дише", "сърце", "очи", "уши", "нос", "зъби", "body", "lung", "heart", "eye"],
+    breathing_g2: ["дишане", "дише", "белите дробове", "кислород", "вдишва", "нос", "уста", "breathing", "lung", "oxygen"],
+    air_wind_g2: ["вятър", "въздух", "духа", "движи", "листа", "знаме", "хвърчило", "wind", "air", "blow", "move"],
+    water_cycle_g3: ["вода", "изпарение", "облак", "дъжд", "кондензация", "water", "evapor", "cloud", "rain"],
+    water_basics_g2: ["вода", "пие", "река", "дъжд", "чист", "water", "drink", "river", "rain"],
+    animals_g2: ["животно", "живее", "среда", "хранене", "animal", "habitat", "live", "eat"],
+    "animals-plants": ["животно", "растение", "живее", "расте", "animal", "plant", "grow", "live"],
+    plants_basics: ["растение", "корен", "стъбло", "лист", "plant", "root", "stem", "leaf"],
+    plants_g2: ["растение", "дърво", "цвете", "plant", "tree", "flower"],
+    seasons_g2: ["сезон", "пролет", "лято", "есен", "зима", "season", "spring", "summer", "autumn", "winter"],
+    "seasons-weather": ["сезон", "времето", "дъжд", "сняг", "слънце", "season", "weather", "rain", "snow"],
   };
 
-  const keywords = topicKeywords[topicId] ?? [];
+  // Try normalized ID first, then raw ID
+  const keywords = topicKeywords[normTopicId] ?? topicKeywords[topicId] ?? [];
 
-  // If we have keywords for this topic, check if both question and hint contain at least one
+  // If we have keywords for this topic, check both question and hint overlap
   if (keywords.length > 0) {
     const qHasKeyword = keywords.some((kw) => q.includes(kw));
     const hHasKeyword = keywords.some((kw) => h.includes(kw));
 
-    // Both should have at least one keyword to be consistent
-    // If question has keyword, hint should too
+    // If question clearly matches the topic, hint must also match.
+    // Also reject if hint has NO keyword overlap with question at all for science topics.
     if (qHasKeyword && !hHasKeyword) {
       return false; // Topic mismatch detected
     }
@@ -583,32 +607,72 @@ export async function generateExerciseBatch(
 
   console.log(`[EXERCISE_BATCH] Generating ${count}: subject=${subjectId} topic=${topicId} grade=${grade} lang=${lang} mode=${mode}`);
 
-  const semanticIntent = getSemanticIntent(topicId);
+  // Normalise to canonical ID for all intent/keyword lookups
+  const canonicalTopicId = normalizeTopicId(topicId);
+  const semanticIntent = getSemanticIntent(canonicalTopicId) ?? getSemanticIntent(topicId);
 
-  try {
+  /** Run one generation attempt and return validated exercises */
+  async function attempt(temperature: number, retryNote: string): Promise<ExerciseItem[]> {
+    const prompt = buildExerciseBatchPrompt(subjectId, topicId, grade, lang, mode, count)
+      + (retryNote ? `\n\n${retryNote}` : "");
     const response = await openaiClient.chat.completions.create({
       model: "gpt-4o-mini",
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: buildLessonSystemPrompt(lang) },
-        { role: "user", content: buildExerciseBatchPrompt(subjectId, topicId, grade, lang, mode, count) },
+        { role: "user", content: prompt },
       ],
       max_tokens: 4096,
-      temperature: 0.75, // Slightly reduced from 0.9 to reduce creative drift while keeping variety
+      temperature,
     });
-
     const raw = response.choices[0]?.message?.content;
     if (!raw) throw new Error("Empty AI response");
-
     const parsed: unknown = JSON.parse(raw);
-    const exercises = validateExerciseBatch(parsed, count, topicId, semanticIntent);
+    return validateExerciseBatch(parsed, count, topicId, semanticIntent);
+  }
 
-    // If AI exercises are insufficient, supplement with safe templates
+  try {
+    // ── First attempt ──────────────────────────────────────────────────────────
+    let exercises: ExerciseItem[] = [];
+    try {
+      exercises = await attempt(0.75, "");
+    } catch (firstErr) {
+      console.warn(`[EXERCISE_BATCH] First attempt failed (${String(firstErr)}), retrying with stronger constraints…`);
+    }
+
+    // ── Retry with stricter prompt if too few valid exercises ─────────────────
+    const SUFFICIENT = Math.min(count * 0.5, 8);
+    if (exercises.length < SUFFICIENT) {
+      const semanticNote = semanticIntent
+        ? `STRICT RETRY — COHERENCE CONTRACT:
+The topic is "${semanticIntent.concept}".
+REQUIRED keywords in every question AND hint: ${semanticIntent.includes.slice(0, 6).join(", ")}.
+FORBIDDEN in any field: ${semanticIntent.excludes.join(", ")}.
+Every hint MUST use these exact topic concepts — do NOT drift to any other subject.`
+        : `STRICT RETRY — COHERENCE CONTRACT:
+Every question, hint, and explanation MUST stay on the exact topic.
+Do NOT mix different science, language, or math concepts.`;
+      try {
+        console.log(`[EXERCISE_BATCH] Retry with stricter constraints (got ${exercises.length} valid on first attempt)`);
+        const retryExercises = await attempt(0.6, semanticNote);
+        // Merge: keep valid exercises from first attempt, fill with retry results
+        const seen = new Set(exercises.map((e) => e.question));
+        for (const ex of retryExercises) {
+          if (!seen.has(ex.question)) {
+            exercises.push(ex);
+            seen.add(ex.question);
+          }
+        }
+      } catch (retryErr) {
+        console.warn(`[EXERCISE_BATCH] Retry also failed: ${String(retryErr)}`);
+      }
+    }
+
+    // ── Supplement with safe templates if still insufficient ──────────────────
     if (exercises.length < Math.min(count * 0.5, 8) && lang === "bg") {
-      const templates = getSafeTemplates(topicId, grade);
+      const templates = getSafeTemplates(canonicalTopicId, grade).concat(getSafeTemplates(topicId, grade));
       if (templates.length > 0) {
         console.log(`[EXERCISE_BATCH] Supplementing with ${templates.length} safe templates for topic=${topicId}`);
-        // Add topicId to templates if not present
         const templatesWithTopicId = templates.map((t) => ({ ...t, topicId }));
         exercises.unshift(...templatesWithTopicId.slice(0, Math.min(templatesWithTopicId.length, count - exercises.length)));
       }

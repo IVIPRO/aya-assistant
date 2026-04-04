@@ -867,10 +867,146 @@ const SEMANTIC_INTENT_MAP: Record<string, SemanticIntent> = {
     includes: ["season", "spring", "summer", "autumn", "winter", "weather", "сезон", "пролет", "лято", "есен", "зима"],
     excludes: ["temperature scale", "thermometer"],
   },
+
+  // ── SLUG-FORMAT ALIASES (same intents, accessed via URL slugs) ─────────────
+
+  // "human-body" slug → same as human_body_g2
+  "human-body": {
+    concept: "Human body parts and basic functions",
+    includes: ["body", "head", "arms", "legs", "eyes", "ears", "heart", "lungs", "teeth", "breathe", "sense",
+      "дише", "белите дробове", "сърце", "тяло", "очи", "уши", "нос", "уста", "зъби"],
+    excludes: ["water cycle", "evaporation", "condensation", "вода", "изпарение", "кондензация"],
+  },
+
+  // "animals-plants" slug
+  "animals-plants": {
+    concept: "Animals and plants — types, features, basic needs",
+    includes: ["animal", "plant", "creature", "flower", "tree", "root", "leaf", "grow", "live", "eat",
+      "животно", "растение", "цвете", "дърво", "корен", "расте", "живее", "яде"],
+    excludes: ["water cycle", "evaporation", "human body", "arithmetic"],
+  },
+
+  // "seasons-weather" slug
+  "seasons-weather": {
+    concept: "Seasons and weather — spring, summer, autumn, winter, rain, sun",
+    includes: ["season", "spring", "summer", "autumn", "winter", "rain", "snow", "sun", "wind", "weather",
+      "сезон", "пролет", "лято", "есен", "зима", "дъжд", "сняг", "слънце", "вятър", "времето"],
+    excludes: ["water cycle evaporation", "human body", "arithmetic", "изпарение"],
+  },
+
+  // ── Air / Wind topics ──────────────────────────────────────────────────────
+  air_wind_g2: {
+    concept: "Air and wind — wind moves objects, air is around us, we need air to breathe",
+    includes: ["wind", "air", "blow", "move", "leaf", "flag", "kite", "breathe",
+      "вятър", "въздух", "духа", "движи", "листа", "знаме", "хвърчило", "дишаме"],
+    excludes: ["water evaporation", "condensation", "изпарение", "кондензация", "кръвообращение", "сърце", "очи"],
+  },
+  air_properties_g3: {
+    concept: "Properties of air — air has weight, takes up space, can be compressed",
+    includes: ["air", "weight", "space", "pressure", "volume", "въздух", "тегло", "налягане", "обем"],
+    excludes: ["water cycle", "breathing organs", "изпарение"],
+  },
+
+  // ── Breathing / Respiration (separate from wind/air, separate from water) ──
+  breathing_g2: {
+    concept: "Breathing — lungs, inhale/exhale air, nose and mouth, oxygen",
+    includes: ["breathing", "lung", "inhale", "exhale", "oxygen", "air", "nose", "mouth",
+      "дишане", "белите дробове", "вдишва", "издишва", "кислород", "въздух", "нос", "уста"],
+    excludes: ["water evaporation", "water cycle", "wind", "изпарение", "кондензация", "вятър", "очи", "сърце"],
+  },
+
+  // ── Water (drinking/liquid water, NOT evaporation cycle) ──────────────────
+  water_basics_g2: {
+    concept: "Water — drinking, liquid, rivers, rain, washing — basic properties",
+    includes: ["water", "drink", "liquid", "river", "rain", "wash", "clean", "wet",
+      "вода", "пие", "течност", "река", "дъжд", "мие", "чист", "влажен"],
+    excludes: ["breathing", "lungs", "human body organs", "дишане", "белите дробове"],
+  },
+
+  // ── Community Helpers / Social Studies ────────────────────────────────────
+  "community-helpers": {
+    concept: "Community helpers — doctors, firefighters, teachers, police, roles in society",
+    includes: ["doctor", "teacher", "firefighter", "police", "help", "community", "work", "role",
+      "лекар", "учител", "пожарникар", "полиция", "помага", "общество", "работа"],
+    excludes: ["arithmetic", "plants", "water cycle"],
+  },
+
+  // ── Maps / Directions ────────────────────────────────────────────────────
+  "maps-directions": {
+    concept: "Maps and directions — left, right, north, south, reading simple maps",
+    includes: ["map", "direction", "left", "right", "north", "south", "east", "west", "navigate",
+      "карта", "посока", "ляво", "дясно", "север", "юг", "изток", "запад"],
+    excludes: ["arithmetic", "seasons", "weather"],
+  },
+
+  // ── History Stories ─────────────────────────────────────────────────────
+  "history-stories": {
+    concept: "Bulgarian history — important people, events, national heroes, traditions",
+    includes: ["history", "hero", "Bulgaria", "story", "event", "tradition", "ancient", "past",
+      "история", "герой", "България", "традиция", "събитие", "миналото"],
+    excludes: ["arithmetic", "water cycle", "animals"],
+  },
+
+  // ── Family & Home ───────────────────────────────────────────────────────
+  "family-home": {
+    concept: "Family members and home — parents, siblings, grandparents, rooms, chores",
+    includes: ["family", "parent", "mother", "father", "brother", "sister", "grandparent", "home", "house", "room",
+      "семейство", "родители", "майка", "баща", "брат", "сестра", "баба", "дядо", "дом", "стая"],
+    excludes: ["arithmetic", "water cycle", "animals", "plants"],
+  },
+
+  // ── Math: multiplication ──────────────────────────────────────────────
+  multiplication_intro: {
+    concept: "Multiplication — equal groups, repeated addition, times tables",
+    includes: ["multiply", "times", "groups", "product", "умножа", "пъти", "групи", "произведение"],
+    excludes: ["subtract", "minus", "divide", "fraction", "изважда", "дели"],
+  },
+
+  // ── Math: division ────────────────────────────────────────────────────
+  division_intro: {
+    concept: "Division — sharing equally, how many groups",
+    includes: ["divide", "share", "groups", "equal", "quotient", "дели", "разпредели", "групи", "равно"],
+    excludes: ["multiply", "add", "subtract", "умножа", "събира", "изважда"],
+  },
 };
 
+/**
+ * Normalise a topic slug (e.g. "human-body") to a canonical ID (e.g. "human_body_g2").
+ * This is necessary because route params use URL-friendly slugs but the intent
+ * map uses underscore-separated IDs.  Without this mapping, getSemanticIntent()
+ * always returns null for slug-format topics, silently disabling all semantic
+ * validation for every science/social/nature topic.
+ */
+const SLUG_TO_CANONICAL: Record<string, string> = {
+  // Nature & Science
+  "human-body": "human_body_g2",
+  "animals-plants": "animals_g2",
+  "seasons-weather": "seasons_g2",
+  "weather": "seasons_g2",
+  // Math
+  "addition": "addition_to_10",
+  "subtraction": "subtraction_to_10",
+  "multiplication": "multiplication_intro",
+  "division": "division_intro",
+  // Logic
+  "patterns-sequences": "color_patterns",
+  "sorting-grouping": "sorting_g2",
+  "comparisons": "comparison_g2",
+  "colors-shapes": "color_patterns",
+  // Language
+  "grammar-basics": "nouns_basic",
+  "story-comprehension": "reading_comprehension_basic",
+  "reading-sentences": "reading_comprehension_basic",
+  "letters-sounds": "nouns_basic",
+};
+
+export function normalizeTopicId(topicId: string): string {
+  return SLUG_TO_CANONICAL[topicId] ?? topicId;
+}
+
 export function getSemanticIntent(topicId: string): SemanticIntent | null {
-  return SEMANTIC_INTENT_MAP[topicId] ?? null;
+  const canonical = normalizeTopicId(topicId);
+  return SEMANTIC_INTENT_MAP[canonical] ?? SEMANTIC_INTENT_MAP[topicId] ?? null;
 }
 
 /**
@@ -905,15 +1041,23 @@ export function validateExerciseSemanticAlignment(
   explanation: string | null,
   intent: SemanticIntent,
 ): boolean {
-  // Question MUST align with intent
+  // Question MUST align with intent (must include at least one include keyword)
   if (!validateSemanticIntent(question, intent, true)) return false;
 
-  // Hint should align if present and substantial
-  if (hint && hint.length > 5) {
+  // Hint: must NOT contain exclude keywords AND, if it's long, must contain
+  // at least one include keyword (prevents hints about unrelated topics drifting in).
+  if (hint && hint.length > 10) {
+    // Always check excludes
     if (!validateSemanticIntent(hint, intent, false)) return false;
+    // If the hint is substantial (>40 chars), require positive include alignment too.
+    // This catches cases like: breathing question + water evaporation hint (includes don't overlap)
+    if (hint.length > 40 && !validateSemanticIntent(hint, intent, true)) {
+      console.warn(`[COHERENCE] Hint drifts from intent "${intent.concept}": "${hint.slice(0, 50)}"`);
+      return false;
+    }
   }
 
-  // Explanation should align if present and substantial
+  // Explanation: must NOT contain exclude keywords
   if (explanation && explanation.length > 5) {
     if (!validateSemanticIntent(explanation, intent, false)) return false;
   }

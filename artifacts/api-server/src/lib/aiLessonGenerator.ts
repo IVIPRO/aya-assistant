@@ -11,6 +11,7 @@ import {
   validateExerciseSemanticAlignment,
   type SemanticIntent,
 } from "./taskConsistencyGuard";
+import { isHintExampleNatural, getSafeHintExample } from "./hintExampleValidator";
 
 type LangCode = "en" | "bg" | "es" | "de" | "fr";
 export type LessonMode = "weak" | "normal" | "strong";
@@ -233,6 +234,14 @@ function buildLessonUserPrompt(
 
 ${topicGuidance}
 
+NATURAL BULGARIAN EXAMPLES FOR HINTS:
+When creating hint examples, use ONLY natural, everyday Bulgarian situations and objects suitable for ${gradeLabel}:
+- Use simple objects: молив, книга, ябълка, топка, дърво, вода, вятър, слънце
+- Use simple actions: тица, ходи, скача, яде, пие, пее, плува
+- Use simple people: момче, момиче, мама, татко, куче, котка
+- NEVER create bizarre combinations like "сърцето на куклата" or "мозък на стол" — these are absurd and unnatural
+- Keep examples concrete and imaginable for a child
+
 CONSISTENCY REQUIREMENT:
 - Every example's "hint" must help understand that specific example's "problem" — not a generic hint.
 - Every example's "solution" must be a valid answer to that specific "problem".
@@ -284,7 +293,7 @@ Rules:
 
 // ─── Lesson Validator ─────────────────────────────────────────────────────────
 
-function validateLessonContent(raw: unknown): LessonContent {
+function validateLessonContent(raw: unknown, topicId?: string): LessonContent {
   if (typeof raw !== "object" || raw === null) throw new Error("Not an object");
   const obj = raw as Record<string, unknown>;
 
@@ -293,6 +302,30 @@ function validateLessonContent(raw: unknown): LessonContent {
     throw new Error("Invalid lesson shape");
   }
   if (lesson.examples.length < 3) throw new Error("Not enough examples");
+
+  // Validate examples — hints must be natural Bulgarian
+  for (let i = 0; i < (lesson.examples as unknown[]).length; i++) {
+    const ex = (lesson.examples as Record<string, unknown>[])[i];
+    if (!ex.problem || !ex.solution || !ex.hint) {
+      throw new Error(`Example ${i} missing required fields`);
+    }
+
+    const hint = String(ex.hint);
+    // Check if hint example is natural Bulgarian
+    if (!isHintExampleNatural(hint, topicId)) {
+      // Try to replace with safe fallback
+      if (topicId) {
+        const safeExample = getSafeHintExample(topicId);
+        if (safeExample) {
+          ex.hint = safeExample;
+          console.log(`[LESSON] Replaced unnatural hint with safe example for topic=${topicId}`);
+          continue;
+        }
+      }
+      // If no safe fallback, still allow it but log warning
+      console.warn(`[LESSON] Unnatural hint detected in example ${i} for topic=${topicId}: "${hint.slice(0, 50)}..."`);
+    }
+  }
 
   const practice = obj["practice"] as Record<string, unknown>;
   if (!practice?.instructions || !Array.isArray(practice?.problems)) {
@@ -632,7 +665,7 @@ export async function generateAILesson(
     if (!raw) throw new Error("Empty AI response");
 
     const parsed: unknown = JSON.parse(raw);
-    const validated = validateLessonContent(parsed);
+    const validated = validateLessonContent(parsed, topicId);
 
     console.log(`[AI_LESSON] Success: subject=${subjectId} topic=${topicId} title="${validated.lesson.title}"`);
     return validated;

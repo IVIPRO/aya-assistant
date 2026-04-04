@@ -1,0 +1,71 @@
+Strictly audit and fix the hint-example generator for Junior lessons so example sentences are always natural, age-appropriate, and semantically valid in Bulgarian.
+
+GOAL
+Fix the remaining micro-quality issue where the topic is correct, but the example inside the hint uses unnatural or absurd nouns/phrasing, such as:
+- "Какво движи сърцето на куклата, когато духа вятър?"
+This must never happen.
+
+SCOPE
+Audit only the lesson/exercise hint example generation layer for Junior and shared lesson generation paths.
+Do NOT touch caching, prefetch, progress tracking, routing, resume, difficulty logic, or published deployment config.
+Use Lite-safe minimal edits only.
+
+WHAT TO FIX
+1. Hint examples must use natural everyday objects and situations for the child’s age.
+2. Example sentence must stay inside the same topic and same logic as the question.
+3. Example sentence must avoid bizarre body-part/object combinations.
+4. Example sentence must be grammatically natural Bulgarian.
+5. If a safe natural example cannot be generated, fallback must produce a short neutral example without weird nouns.
+
+HARD VALIDATION RULES
+Add validation so hint examples are rejected if they contain:
+- unnatural body-part + object combinations
+- semantically absurd phrases
+- placeholder-like noun pairing
+- grammatically broken Bulgarian examples
+- examples unrelated to the exact question intent
+
+REQUIRED SAFE BEHAVIOR
+For topic "Въздух и вятър":
+Question: "Какво прави вятърът?"
+Allowed hint examples should look like:
+- "Какво мести листата, когато духа?"
+- "Какво развява знамето?"
+- "Какво движи хвърчилото?"
+Not allowed:
+- "Какво движи сърцето на куклата?"
+- anything strange, creepy, or illogical
+
+IMPLEMENTATION REQUIREMENTS
+- Add a small semantic-naturalness validator specifically for hint examples
+- Add a safe noun whitelist / safe scenario patterns for early-grade Bulgarian hint examples
+- Prefer deterministic fallback templates for Junior topics when the generated example fails validation
+- Keep the current semantic topic validation intact
+- Do not introduce new API endpoints
+- Do not use Agent-only architecture changes
+
+BULGARIAN QUALITY RULES
+All fallback/example text must be:
+- simple
+- natural
+- child-friendly
+- specific to the topic
+- short
+- valid Bulgarian
+
+TEST CASES TO VERIFY
+Test and report results for at least these:
+1. "Какво прави вятърът?" → hint example must be natural
+2. "Какво дишаме?" → no water/evaporation example
+3. "Кога мием зъбите си?" → no handwashing example
+4. one math topic
+5. one logic topic
+
+OUTPUT FORMAT
+Return a short audit summary with:
+- root cause found
+- exact files changed
+- exact validation added
+- 5 before/after examples
+- confirmation that build passes
+- confirmation no existing speed optimizations were broken

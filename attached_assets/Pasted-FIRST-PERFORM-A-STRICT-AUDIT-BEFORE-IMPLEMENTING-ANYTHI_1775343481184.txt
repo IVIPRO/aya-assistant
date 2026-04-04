@@ -1,0 +1,186 @@
+FIRST PERFORM A STRICT AUDIT BEFORE IMPLEMENTING ANYTHING.
+
+Goal:
+Add a lightweight "Next Best Learning Action" decision layer that combines existing adaptive signals into one child-facing recommendation, without duplicating or replacing any existing systems.
+
+CRITICAL:
+Do NOT recreate logic that already exists in:
+- exerciseDifficultyTracker
+- weakTopicMemoryTracker
+- topicProgression
+- sessionPerformanceTracker
+- topicConfidenceTracker
+- topicConfidenceGuidance
+- quiz readiness / adaptive-profile logic
+- resume learning feature
+
+If any equivalent decision layer already exists, STOP and report instead of implementing.
+
+========================================
+AUDIT FIRST
+========================================
+
+Find and report:
+
+1. Where weakTopicMemoryTracker is read
+2. Where topicConfidenceGuidance is read
+3. Where quiz readiness is read
+4. Where resume learning card/button is built
+5. Where current topic / current lesson adaptive-profile data is returned
+6. Whether a “next recommended action” system already exists anywhere
+
+Only after audit, implement the feature if it does NOT already exist.
+
+========================================
+TARGET FEATURE
+========================================
+
+Add a new lightweight decision helper:
+
+src/lib/nextBestLearningAction.ts
+
+Function:
+
+getNextBestLearningAction({
+  hasResumeLesson,
+  weakTopicCount,
+  topicConfidence,
+  quizReadiness,
+  sessionTrend
+})
+
+Returns one of:
+
+- "resume_lesson"
+- "practice_weak_topic"
+- "continue_current_topic"
+- "attempt_quiz"
+- "advance_topic"
+
+========================================
+DECISION RULES
+========================================
+
+Use ONLY existing signals.
+No new database tables.
+No new backend architecture.
+
+Priority order:
+
+1. If hasResumeLesson = true
+   → return "resume_lesson"
+
+2. Else if weakTopicCount > 0 AND topicConfidence < 50
+   → return "practice_weak_topic"
+
+3. Else if quizReadiness >= 75 AND topicConfidence >= 70
+   → return "attempt_quiz"
+
+4. Else if topicConfidence >= 85 AND sessionTrend is positive
+   → return "advance_topic"
+
+5. Else
+   → return "continue_current_topic"
+
+IMPORTANT:
+This must be ADVISORY only.
+It must NOT force navigation.
+It must NOT override progression.
+It must NOT auto-launch quizzes.
+It must NOT mutate existing state.
+
+========================================
+SAFE UI INTEGRATION
+========================================
+
+If safe, add a very small recommendation card/bubble in the learning UI or dashboard.
+
+Bulgarian examples:
+
+- "Продължи от последния урок"
+- "Нека упражним слабата тема"
+- "Продължи с текущата тема"
+- "Готов си за тест"
+- "Можем да минем към следващата тема"
+
+If UI integration is risky, skip UI and only expose the helper + logs.
+
+========================================
+OPTIONAL SAFE API EXPOSURE
+========================================
+
+Only if already consistent with existing adaptive-profile response:
+
+Add:
+nextBestAction: string
+
+to the existing adaptive-profile/current-topic response.
+
+Do NOT create new routes unless absolutely necessary.
+Prefer reusing existing response objects.
+
+========================================
+SAFETY RULES
+========================================
+
+- No DB changes
+- No schema changes
+- No new tables
+- No route rewrites
+- No breaking changes
+- No replacement of existing systems
+- No duplicated logic
+- No automatic progression triggers
+
+========================================
+VALIDATION
+========================================
+
+Confirm all of the following:
+
+- TypeScript passes
+- Junior still loads correctly
+- Прогимназия still loads correctly
+- resume learning still works
+- topic confidence still works
+- weak topic tracking still works
+- quiz readiness still works
+- guidance layer still works
+- no duplicate decision logic was introduced
+
+========================================
+TEST STEPS (PREVIEW)
+========================================
+
+Test case 1:
+Resume exists
+→ expected nextBestAction = resume_lesson
+
+Test case 2:
+No resume, weak topic exists, low confidence
+→ expected = practice_weak_topic
+
+Test case 3:
+High quiz readiness + high confidence
+→ expected = attempt_quiz
+
+Test case 4:
+Very high confidence + positive trend
+→ expected = advance_topic
+
+Test case 5:
+Normal session
+→ expected = continue_current_topic
+
+========================================
+FINAL REPORT
+========================================
+
+Return:
+
+1. Audit findings
+2. Whether similar logic already existed
+3. What file(s) were added/modified
+4. Why this is non-duplicative
+5. Which existing adaptive systems were reused
+6. Estimated implementation cost: LOW / MEDIUM / HIGH

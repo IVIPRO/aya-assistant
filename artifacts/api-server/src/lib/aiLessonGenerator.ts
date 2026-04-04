@@ -328,6 +328,7 @@ export interface ExerciseItem {
   explanation: string | null;
   exerciseType: "multiple-choice" | "open-ended";
   difficulty: "easy" | "medium" | "hard";
+  topicId: string; // Track which topic this exercise belongs to for hint/explanation consistency
 }
 
 // ─── Exercise Batch Prompt ────────────────────────────────────────────────────
@@ -381,10 +382,11 @@ Return a JSON object with this exact structure:
       "question": "string — clear, age-appropriate question",
       "correctAnswer": "string — the correct answer",
       "options": ["string", "string", "string", "string"] or null,
-      "hint": "string — short helpful hint that helps solve THIS specific question",
+      "hint": "string — short helpful hint that helps solve THIS specific question and stays on same topic",
       "explanation": "string — brief explanation of why THIS answer is correct for THIS question",
       "exerciseType": "multiple-choice" or "open-ended",
-      "difficulty": "easy" or "medium" or "hard"
+      "difficulty": "easy" or "medium" or "hard",
+      "topicId": "string — the exact topic being tested (e.g., 'addition_to_10', 'nouns_basic', 'color_patterns')"
     }
   ]
 }
@@ -396,12 +398,64 @@ Additional rules:
 - No placeholder options like "A", "B", "C", "D" — all options must be real, meaningful answers.
 - Never duplicate questions.
 - Ensure ALL exercises are different from each other.
-- All exercises must stay on topic: "${topicLabel}". Do NOT drift to other subjects.`;
+- All exercises must stay on topic: "${topicLabel}". Do NOT drift to other subjects.
+- CRITICAL: "topicId" must be set to a specific sub-topic or variant within "${topicLabel}". The hint and explanation must be written to match this topicId, not a different topic.`;
+}
+
+// ─── Topic Consistency Validator ──────────────────────────────────────────────
+
+/**
+ * Check if hint and question appear to come from the same topic.
+ * This is a lightweight heuristic check — we look for obvious keyword overlaps.
+ * For example, if the question is about "addition" but the hint talks about "verbs",
+ * that's a red flag.
+ */
+function hintAndQuestionMatchTopic(
+  question: string,
+  hint: string | null,
+  topicId: string,
+): boolean {
+  if (!hint || hint.length < 5) return true; // Empty hint passes (not ideal, but ok)
+
+  const q = question.toLowerCase();
+  const h = hint.toLowerCase();
+
+  // Extract key concepts from topic ID
+  const topicKeywords: Record<string, string[]> = {
+    addition_to_10: ["събира", "плюс", "добав", "прибав", "sum", "add"],
+    subtraction_to_10: ["изважда", "минус", "отнема", "minus", "subtract"],
+    multiplication_intro: ["умножа", "групи", "пъти", "multiply"],
+    division_intro: ["дели", "групира", "раздели", "divide", "groups"],
+    nouns_basic: ["съществител", "назова", "име", "предмет", "noun"],
+    verbs_basic: ["глагол", "действие", "прави", "verb"],
+    adjectives: ["прилагател", "описва", "качество", "adjective"],
+    color_patterns: ["цвет", "редица", "повтаря", "закономер", "pattern", "sequence"],
+    visual_puzzles: ["пъзел", "логик", "мислене", "дедукц", "puzzle", "logic"],
+    reading_comprehension_basic: ["четене", "текст", "разбира", "история", "passage"],
+    addition: ["събира", "плюс", "добав", "sum", "add"],
+    subtraction: ["изважда", "минус", "отнема", "minus", "subtract"],
+  };
+
+  const keywords = topicKeywords[topicId] ?? [];
+
+  // If we have keywords for this topic, check if both question and hint contain at least one
+  if (keywords.length > 0) {
+    const qHasKeyword = keywords.some((kw) => q.includes(kw));
+    const hHasKeyword = keywords.some((kw) => h.includes(kw));
+
+    // Both should have at least one keyword to be consistent
+    // If question has keyword, hint should too
+    if (qHasKeyword && !hHasKeyword) {
+      return false; // Topic mismatch detected
+    }
+  }
+
+  return true; // Assume consistent if no red flags
 }
 
 // ─── Exercise Batch Validator ─────────────────────────────────────────────────
 
-function validateExerciseBatch(raw: unknown, expectedCount: number): ExerciseItem[] {
+function validateExerciseBatch(raw: unknown, expectedCount: number, requiredTopicId: string): ExerciseItem[] {
   if (typeof raw !== "object" || raw === null) throw new Error("Not an object");
   const obj = raw as Record<string, unknown>;
   const exercises = obj["exercises"];
@@ -413,6 +467,9 @@ function validateExerciseBatch(raw: unknown, expectedCount: number): ExerciseIte
     if (!ex.question || !ex.correctAnswer || !ex.exerciseType || !ex.difficulty) continue;
     if (ex.exerciseType === "multiple-choice" && (!Array.isArray(ex.options) || ex.options.length < 2)) continue;
 
+    // Extract topicId from exercise or use the required one
+    const exerciseTopicId = ex.topicId ? String(ex.topicId) : requiredTopicId;
+
     const item: ExerciseItem = {
       question: String(ex.question),
       correctAnswer: String(ex.correctAnswer),
@@ -421,11 +478,20 @@ function validateExerciseBatch(raw: unknown, expectedCount: number): ExerciseIte
       explanation: ex.explanation ? String(ex.explanation) : null,
       exerciseType: ex.exerciseType === "open-ended" ? "open-ended" : "multiple-choice",
       difficulty: ex.difficulty === "hard" ? "hard" : ex.difficulty === "easy" ? "easy" : "medium",
+      topicId: exerciseTopicId,
     };
 
     // Apply consistency filter — discard exercises that fail basic consistency checks
     if (!isExerciseConsistent(item)) {
       console.warn(`[EXERCISE_BATCH] Consistency filter removed: "${item.question.slice(0, 60)}..."`);
+      continue;
+    }
+
+    // Check topic consistency: hint and question should match the topic
+    if (!hintAndQuestionMatchTopic(item.question, item.hint, item.topicId)) {
+      console.warn(
+        `[EXERCISE_BATCH] Topic mismatch: question on "${item.topicId}" but hint appears to be on different topic`,
+      );
       continue;
     }
 
@@ -471,14 +537,16 @@ export async function generateExerciseBatch(
     if (!raw) throw new Error("Empty AI response");
 
     const parsed: unknown = JSON.parse(raw);
-    const exercises = validateExerciseBatch(parsed, count);
+    const exercises = validateExerciseBatch(parsed, count, topicId);
 
     // If AI exercises are insufficient, supplement with safe templates
     if (exercises.length < Math.min(count * 0.5, 8) && lang === "bg") {
       const templates = getSafeTemplates(topicId, grade);
       if (templates.length > 0) {
         console.log(`[EXERCISE_BATCH] Supplementing with ${templates.length} safe templates for topic=${topicId}`);
-        exercises.unshift(...templates.slice(0, Math.min(templates.length, count - exercises.length)));
+        // Add topicId to templates if not present
+        const templatesWithTopicId = templates.map((t) => ({ ...t, topicId }));
+        exercises.unshift(...templatesWithTopicId.slice(0, Math.min(templatesWithTopicId.length, count - exercises.length)));
       }
     }
 

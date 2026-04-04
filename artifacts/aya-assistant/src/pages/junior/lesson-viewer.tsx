@@ -2325,6 +2325,89 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
     return () => clearTimeout(timeoutId);
   }, [data, isLoading, adaptiveProfile, lessonVariantSeed, subject.id, topic.id, grade, lang, topicContext, queryClient]);
 
+  /* ── Silent next-topic prefetch after lesson loads ── */
+  useEffect(() => {
+    if (!data || isLoading || !adaptiveProfile) return;
+
+    const prefetchNextTopic = async () => {
+      try {
+        // Find current topic index in subject.topics array
+        const currentIdx = subject.topics.findIndex(t => t.id === topic.id);
+        if (currentIdx === -1 || currentIdx >= subject.topics.length - 1) return; // Not found or already last
+
+        // Get next topic
+        const nextTopic = subject.topics[currentIdx + 1];
+        if (!nextTopic) return;
+
+        // Check if next topic is available for this grade
+        if (nextTopic.grades && !nextTopic.grades.includes(grade)) return;
+
+        // Check if already cached in React Query
+        const cachedKey = ["lesson", subject.id, nextTopic.id, grade, lang, 0];
+        const existing = queryClient.getQueryData(cachedKey);
+        if (existing) return; // Already cached
+
+        // Fetch from API
+        const res = await fetch(
+          `/api/lessons/generate?subjectId=${subject.id}&topicId=${nextTopic.id}&grade=${grade}&lang=${lang}&mode=normal&variant=0`
+        );
+
+        if (res.ok) {
+          const lessonContent = await res.json();
+          // Store in React Query cache
+          queryClient.setQueryData(cachedKey, lessonContent);
+        }
+      } catch {
+        // Silently fail - normal lesson flow unaffected
+      }
+    };
+
+    // Start after variant prefetch (delay 3 seconds)
+    const timeoutId = setTimeout(prefetchNextTopic, 3000);
+    return () => clearTimeout(timeoutId);
+  }, [data, isLoading, adaptiveProfile, subject.id, subject.topics, topic.id, grade, lang, queryClient]);
+
+  /* ── Silent first-exercise prefetch when lesson loads ── */
+  useEffect(() => {
+    if (!data || isLoading || !adaptiveProfile) return;
+
+    const prefetchExercises = async () => {
+      try {
+        // Build exercise params (same as when user clicks Practice)
+        const params = new URLSearchParams({
+          childId: String(childId),
+          subjectId: subject.id,
+          topicId: topic.id,
+          grade: String(grade),
+          lang,
+          count: "10",
+        });
+
+        // Check if already cached in React Query (use a simple key)
+        const cacheKey = ["exercises", subject.id, topic.id, grade, lang];
+        const existing = queryClient.getQueryData(cacheKey);
+        if (existing) return; // Already cached
+
+        // Fetch exercises from API
+        const res = await fetch(`/api/lessons/exercises?${params.toString()}`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem("aya_token") ?? ""}` },
+        });
+
+        if (res.ok) {
+          const body = await res.json() as { exercises: PoolExercise[] };
+          // Store in React Query cache for instant access when user clicks Practice
+          queryClient.setQueryData(cacheKey, body);
+        }
+      } catch {
+        // Silently fail - normal exercise flow unaffected
+      }
+    };
+
+    // Start after next-topic prefetch (delay 4 seconds)
+    const timeoutId = setTimeout(prefetchExercises, 4000);
+    return () => clearTimeout(timeoutId);
+  }, [data, isLoading, adaptiveProfile, subject.id, topic.id, grade, lang, childId, queryClient]);
+
   const completeMutation = useMutation({
     mutationFn: async ({
       action, correctCount, totalCount,

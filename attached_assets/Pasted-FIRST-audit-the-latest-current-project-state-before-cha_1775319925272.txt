@@ -1,0 +1,104 @@
+FIRST: audit the latest current project state before changing anything. Check the existing codebase/ZIP and all current implementations related to:
+- lesson caching
+- first-topic prewarm
+- "Try Another Version" fast loading
+- Junior and Прогимназия lesson-viewer flow
+- topic cards / subject pages / exercise loading
+Do NOT duplicate any existing logic. Reuse current patterns only.
+
+TASK GOAL:
+Implement the next Lite-safe performance upgrade for AYA:
+
+"Smart Next-Step Prefetch"
+
+What it should do:
+1. When a student opens a lesson and the lesson is fully loaded,
+   silently prefetch in background:
+   - the MOST LIKELY next topic in the same subject
+   - the FIRST exercise for the CURRENT lesson/topic
+2. This must work for both:
+   - Начален етап
+   - Прогимназия
+3. Use current cache architecture and patterns if they already exist.
+4. Do NOT break:
+   - progress tracking
+   - lesson completion
+   - exercise scoring
+   - history
+   - "Try Another Version"
+   - current prewarm for first lesson
+5. Do NOT create duplicate requests if the same data is already cached or already being prefetched.
+6. Do NOT mark anything as completed just because it was prefetched.
+7. Keep this Lite-safe:
+   - prefer frontend orchestration + existing backend endpoints
+   - avoid major architecture refactor
+   - avoid new complex schema unless absolutely necessary
+   - avoid Agent-scale rewrite
+
+DEFINITION OF "MOST LIKELY NEXT TOPIC":
+Use the safest simple rule first:
+- if current topic is inside an ordered list for the subject, prefetch the next topic in that order
+- if there is no next topic, do nothing
+Do not invent complex prediction logic yet.
+
+DEFINITION OF "FIRST EXERCISE":
+- prefetch only the first/default exercise payload for the current topic if such flow already exists
+- if exercise flow is generated dynamically, warm the cache using the safest existing path
+- if no safe existing path exists, audit and report instead of forcing a risky implementation
+
+STRICT SAFETY RULES:
+- no hallucinated features
+- no duplicate cache layers
+- no duplicate query keys
+- no duplicate database writes
+- no new progress records from prefetch
+- no changes to UX unless needed for hidden prefetch
+- no breaking changes
+
+IMPLEMENTATION REQUIREMENTS:
+A) Audit first
+- identify exact files already handling:
+  - lesson loading
+  - prewarm
+  - cache keys
+  - topic navigation
+  - exercise loading
+- list what already exists and what is missing
+
+B) Implement only the missing minimal code
+- reuse current React Query / cache / route patterns
+- add guard rails against repeated background fetches
+- isolate by:
+  - student
+  - grade
+  - subject
+  - topic
+  - language
+  - variant if relevant
+
+C) Validation
+After implementation, verify and report:
+- TypeScript build passes
+- no duplicate requests loop
+- no progress write on prefetch
+- current first-topic prewarm still works
+- "Try Another Version" still works
+- Junior still works
+- Прогимназия still works
+
+D) Manual test steps
+Give exact test steps for Preview only, not published version.
+
+E) Final report format
+Return:
+1. AUDIT SUMMARY
+2. FILES CHANGED
+3. WHAT WAS IMPLEMENTED
+4. WHAT WAS REUSED
+5. SAFETY CHECK RESULTS
+6. TEST STEPS
+7. FINAL VERDICT
+
+IMPORTANT:
+If audit shows part of this is already implemented, do NOT re-implement it. Only extend the current system minimally.
+If the "first exercise prefetch" path is risky, skip that part and clearly report why.

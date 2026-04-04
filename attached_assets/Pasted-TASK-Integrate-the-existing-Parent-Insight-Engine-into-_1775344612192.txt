@@ -1,0 +1,77 @@
+TASK: Integrate the existing Parent Insight Engine into the Parent dashboard UI without rebuilding logic.
+
+IMPORTANT:
+- First AUDIT the current codebase and confirm whether a parent-facing recommendation/insight engine already exists.
+- Reuse existing logic if present.
+- DO NOT create a duplicate engine.
+- DO NOT add new database tables.
+- DO NOT change schema.
+- DO NOT break Junior / Прогимназия / caching / adaptive systems.
+- Keep this Lite-safe and minimal.
+
+PRIMARY GOAL:
+Use the already existing parent insight / recommendation logic (for example nextBestLearningAction.ts or equivalent existing files) and surface it inside the Parent area as a compact “AI Parent Insight” card.
+
+WHAT TO DO:
+1. Audit the codebase for existing reusable logic:
+   - nextBestLearningAction.ts
+   - session performance / readiness / weak topic / confidence utilities
+   - anything already built for learning recommendations
+2. If such logic exists:
+   - integrate it into the Parent dashboard UI
+   - do NOT recreate recommendation rules from scratch
+3. Add a compact Parent Insight card that shows:
+   - strongest subject
+   - weakest subject / weak topic
+   - recommended next action
+   - short child-friendly parent summary in Bulgarian
+4. The card must be read-only UI composition over existing data/signals.
+5. Use existing adaptive/profile/performance signals wherever already available.
+6. If some signal is missing, fail gracefully and hide only that subsection, not the whole card.
+
+UI REQUIREMENTS:
+- Location: Parent dashboard, visible without opening lesson pages
+- Title in Bulgarian: “AI Анализ за родителя”
+- Sections:
+  - “Силна страна”
+  - “Нуждае се от внимание”
+  - “Препоръчана следваща стъпка”
+- Keep it compact and clean, matching current AYA style
+- No heavy redesign
+
+DATA RULES:
+- Prefer existing computed signals over new calculations
+- No new endpoints unless absolutely necessary
+- If one tiny endpoint is required, keep it read-only and minimal
+- No writes from this feature
+- No duplicate tracking
+
+VALIDATION / SAFETY:
+Before finishing, verify:
+- TypeScript passes
+- Parent page renders
+- No schema/db changes
+- Existing Junior/Прогимназия flows remain untouched
+- No duplicate recommendation engine was created
+- Existing reusable module was actually used if found
+
+OUTPUT FORMAT:
+Return:
+A) AUDIT RESULT
+- Which existing files/modules were found
+- Which one was reused
+- Which one was skipped to avoid duplication
+
+B) CHANGES MADE
+- exact files modified
+- short explanation
+
+C) VALIDATION
+- build result
+- runtime result
+- duplication check result
+
+D) TEST STEPS
+Give exact Preview test steps for Parent dashboard.
+
+If no reusable parent insight logic exists, say so explicitly first, then implement the smallest possible Lite-safe version using already available signals only.

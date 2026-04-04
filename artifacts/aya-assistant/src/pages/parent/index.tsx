@@ -1107,6 +1107,124 @@ function getMissionZone(mission: { zone?: string | null; subject: string }): str
   return "Science Planet";
 }
 
+/* ───────────────────────────────────────────────────────────────
+   Parent AI Insight Card — Synthesizes strongest/weakest subjects
+   and recommends next learning action (Phase 2B)
+─────────────────────────────────────────────────────────────── */
+
+function ParentAIInsightCard({
+  strengths,
+  weaknesses,
+  weakTopics,
+  lang,
+}: {
+  strengths: Array<{ subject: string; score: number }>;
+  weaknesses: Array<{ subject: string; score: number }>;
+  weakTopics: WeakTopic[];
+  lang: LangCode;
+}) {
+  const subjectLabels: Record<string, Record<LangCode, string>> = {
+    "mathematics": { en: "Mathematics", bg: "Математика", es: "Matemáticas", de: "Mathematik", fr: "Mathématiques" },
+    "mathematics-advanced": { en: "Mathematics", bg: "Математика", es: "Matemáticas", de: "Mathematik", fr: "Mathématiques" },
+    "bulgarian-language": { en: "Bulgarian Language", bg: "Български език", es: "Lengua", de: "Bulgarische Sprache", fr: "Langue bulgare" },
+    "reading-literature": { en: "Reading", bg: "Четене", es: "Lectura", de: "Lesen", fr: "Lecture" },
+    "logic-thinking": { en: "Logic", bg: "Логика", es: "Lógica", de: "Logik", fr: "Logique" },
+    "english-language": { en: "English", bg: "Английски език", es: "Inglés", de: "Englisch", fr: "Anglais" },
+  };
+
+  const topicLabels: Record<string, Record<LangCode, string>> = {
+    "addition": { en: "Addition", bg: "Събиране", es: "Suma", de: "Addition", fr: "Addition" },
+    "subtraction": { en: "Subtraction", bg: "Изваждане", es: "Resta", de: "Subtraktion", fr: "Soustraction" },
+    "multiplication": { en: "Multiplication", bg: "Умножение", es: "Multiplicación", de: "Multiplikation", fr: "Multiplication" },
+    "division": { en: "Division", bg: "Деление", es: "División", de: "Division", fr: "Division" },
+    "word-problems": { en: "Word problems", bg: "Текстови задачи", es: "Problemas", de: "Textaufgaben", fr: "Problèmes écrits" },
+    "reading_comprehension_basic": { en: "Reading Comprehension", bg: "Разбиране на текст", es: "Comprensión", de: "Leseverständnis", fr: "Compréhension" },
+  };
+
+  const translateSubject = (id: string): string => subjectLabels[id]?.[lang] ?? id;
+  const translateTopic = (id: string): string => topicLabels[id]?.[lang] ?? id;
+
+  const labels: Record<LangCode, { title: string; strength: string; needs: string; recommend: string; practice: string }> = {
+    en: { title: "AI Analysis for Parent", strength: "Strongest Subject", needs: "Needs Attention", recommend: "Recommended Action", practice: "Continue practicing" },
+    bg: { title: "AI Анализ за родителя", strength: "Силна страна", needs: "Нуждае се от внимание", recommend: "Препоръчана следваща стъпка", practice: "Продължаване на практиката" },
+    es: { title: "Análisis IA para padres", strength: "Tema fuerte", needs: "Necesita atención", recommend: "Acción recomendada", practice: "Continuar practicando" },
+    de: { title: "KI-Analyse für Eltern", strength: "Stärke", needs: "Braucht Aufmerksamkeit", recommend: "Empfohlene Maßnahme", practice: "Weiter üben" },
+    fr: { title: "Analyse IA pour les parents", strength: "Point fort", needs: "Besoin d'attention", recommend: "Action recommandée", practice: "Continuer la pratique" },
+  };
+
+  const lbl = labels[lang];
+  const strongestSubject = strengths[0];
+  const weakestSubject = weaknesses[0];
+  const weakestTopic = weakTopics[0];
+
+  if (!strongestSubject && !weakestSubject && weakTopics.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-5 rounded-2xl border border-purple-200 shadow-sm">
+      <h3 className="font-bold mb-4 flex items-center gap-2 text-purple-800">
+        <Sparkles className="w-5 h-5 text-purple-600" />
+        {lbl.title}
+      </h3>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {strongestSubject && (
+          <div className="bg-white/70 p-3 rounded-xl border border-green-200">
+            <p className="text-xs font-semibold text-green-700 mb-1">{lbl.strength}</p>
+            <p className="text-sm font-bold text-green-800">{translateSubject(strongestSubject.subject)}</p>
+            <p className="text-xs text-green-600 mt-1">📈 {strongestSubject.score}%</p>
+          </div>
+        )}
+
+        {(weakestSubject || weakestTopic) && (
+          <div className="bg-white/70 p-3 rounded-xl border border-orange-200">
+            <p className="text-xs font-semibold text-orange-700 mb-1">{lbl.needs}</p>
+            {weakestTopic ? (
+              <>
+                <p className="text-sm font-bold text-orange-800">
+                  {translateSubject(weakestTopic.subjectId)} → {translateTopic(weakestTopic.topicId)}
+                </p>
+                <p className="text-xs text-orange-600 mt-1">📉 {weakestTopic.successRate}%</p>
+              </>
+            ) : weakestSubject ? (
+              <>
+                <p className="text-sm font-bold text-orange-800">{translateSubject(weakestSubject.subject)}</p>
+                <p className="text-xs text-orange-600 mt-1">📉 {weakestSubject.score}%</p>
+              </>
+            ) : null}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-4 p-3 bg-white/80 rounded-xl border border-purple-200">
+        <p className="text-xs font-semibold text-purple-700 mb-2">{lbl.recommend}</p>
+        <p className="text-sm text-purple-800 leading-relaxed">
+          {weakestTopic || weakestSubject
+            ? lang === "bg"
+              ? `Предложаваме вашето дете да практикува ${weakestTopic ? translateTopic(weakestTopic.topicId) : translateSubject(weakestSubject!.subject)} до достигане на 70% точност. Всеки ден упражнения помага! 💪`
+              : lang === "es"
+              ? `Recomendamos que su hijo practique ${weakestTopic ? translateTopic(weakestTopic.topicId) : translateSubject(weakestSubject!.subject)} hasta alcanzar el 70% de precisión. ¡Cada día de práctica ayuda! 💪`
+              : lang === "de"
+              ? `Wir empfehlen, dass Ihr Kind ${weakestTopic ? translateTopic(weakestTopic.topicId) : translateSubject(weakestSubject!.subject)} übt, bis 70% Genauigkeit erreicht ist. Jeden Tag üben hilft! 💪`
+              : lang === "fr"
+              ? `Nous recommandons que votre enfant pratique ${weakestTopic ? translateTopic(weakestTopic.topicId) : translateSubject(weakestSubject!.subject)} jusqu'à atteindre 70% de précision. Chaque jour de pratique aide! 💪`
+              : `We recommend your child practice ${weakestTopic ? translateTopic(weakestTopic.topicId) : translateSubject(weakestSubject!.subject)} until reaching 70% accuracy. Daily practice helps! 💪`
+            : lang === "bg"
+            ? "Одличен прогрес! Продължаваме със следващите теми. 🎉"
+            : lang === "es"
+            ? "¡Excelente progreso! Continuemos con los siguientes temas. 🎉"
+            : lang === "de"
+            ? "Ausgezeichneter Fortschritt! Fahren wir mit den nächsten Themen fort. 🎉"
+            : lang === "fr"
+            ? "Excellent progrès! Continuons avec les sujets suivants. 🎉"
+            : "Excellent progress! Let's continue with the next topics. 🎉"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function ParentDashboard() {
   const [tab, setTab] = useState("children");
   const [editingChild, setEditingChild] = useState<Child | null>(null);
@@ -1872,6 +1990,16 @@ export function ParentDashboard() {
               childId={progressChild.id}
               lang={lang}
               plbl={plbl}
+            />
+          )}
+
+          {/* ── Parent AI Insight Card (Phase 2B) ────────────────────── */}
+          {progressChild && (strengths.length > 0 || weaknesses.length > 0 || weakTopics.length > 0) && (
+            <ParentAIInsightCard
+              strengths={strengths}
+              weaknesses={weaknesses}
+              weakTopics={weakTopics}
+              lang={lang}
             />
           )}
 

@@ -1,0 +1,125 @@
+FIRST DO A STRICT AUDIT OF THE CURRENT CODEBASE BEFORE CHANGING ANYTHING.
+
+Goal:
+Add a lightweight Topic Confidence Tracker for AYA that works on top of the existing systems without duplicating:
+- sessionPerformanceTracker
+- exerciseDifficultyTracker
+- weakTopicMemoryTracker
+- topicProgression
+- quiz readiness logic
+- resume learning logic
+
+IMPORTANT RULES:
+1. Reuse existing data and signals wherever possible.
+2. Do NOT rebuild or duplicate any adaptive AI teacher logic that already exists.
+3. Do NOT add DB schema changes unless absolutely required. Prefer in-memory/session/local derived state first.
+4. Do NOT break Junior or Прогимназия.
+5. Keep it Lite-safe and minimal.
+6. Before implementation, explicitly report:
+   - what already exists
+   - what overlaps
+   - what will be reused
+   - what new thing will be added
+7. If the same feature or near-equivalent already exists, STOP and report instead of re-implementing it.
+
+TARGET FEATURE:
+Introduce a per-topic confidence score that estimates how well the child actually knows a topic.
+
+Desired behavior:
+- Each topic gets a confidence value from 0 to 100
+- Confidence is derived from existing signals, such as:
+  - recent correct/wrong answers
+  - repeated mistakes
+  - hint usage / retry loops
+  - session performance on that topic
+  - exercise completion quality if already available
+- Confidence should move gradually, not jump wildly
+- Confidence should support these conceptual bands:
+  - 0–29 = weak
+  - 30–59 = learning
+  - 60–79 = stable
+  - 80–100 = mastered
+
+DO NOT add big UI yet.
+Only add a SMALL safe UI exposure if minimal and already easy:
+- optional tiny label/chip in lesson or topic view, such as:
+  - “Увереност: ниска”
+  - “Увереност: средна”
+  - “Увереност: добра”
+  - “Увереност: отлична”
+If UI is risky, skip UI and implement only logic + logs.
+
+IMPLEMENTATION PREFERENCE:
+Preferred approach:
+1. Audit current architecture
+2. Create a lightweight topicConfidenceTracker utility/module
+3. Feed it from existing trackers/signals
+4. Keep it derived and minimal
+5. Expose helper methods like:
+   - getTopicConfidence(...)
+   - updateTopicConfidenceFromAnswer(...)
+   - getTopicConfidenceBand(...)
+6. Integrate only where safe
+
+REQUIRED SAFETY:
+- No breaking changes
+- No routing changes unless necessary
+- No DB migrations unless absolutely required
+- No duplicate tracking of the same metric at the same level
+- No replacement of existing adaptive systems
+- No aggressive UI refactor
+
+CHECK FOR DUPLICATION AGAINST CURRENT CODE:
+Specifically inspect whether there is already any equivalent logic under names similar to:
+- confidence
+- mastery
+- proficiency
+- readiness per topic
+- learned state
+- skill level
+- topic state
+- topic mastery
+- progress score
+If found, reuse/extend that instead of creating a new parallel system.
+
+OUTPUT FORMAT:
+A) AUDIT
+- What already exists
+- What overlaps
+- What is missing
+- Why this is not duplicate
+
+B) PLAN
+- Exact minimal files to touch
+- Why this is Lite-safe
+- Estimated cost/complexity: LOW / MEDIUM / HIGH
+
+C) IMPLEMENTATION
+- Make the minimal safe changes
+
+D) VALIDATION
+Confirm all of the following:
+- TypeScript build passes
+- Existing caching still works
+- Existing quiz readiness still works
+- Existing difficulty adjustment still works
+- Existing weak-topic detection still works
+- Junior works
+- Прогимназия works
+- No duplicate system created
+
+E) TEST STEPS
+Give exact Preview test steps:
+1. Open one topic
+2. Answer several correctly
+3. Answer several incorrectly
+4. Verify confidence changes logically
+5. Verify no existing feature broke
+
+F) FINAL VERDICT
+State clearly whether:
+- implemented successfully
+- safe to keep
+- or should be reverted
+
+If overlap with an already-existing feature is discovered, do NOT continue blindly — report it first.

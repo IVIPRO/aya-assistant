@@ -1,0 +1,99 @@
+Audit the new "Try Another Version" lesson regeneration flow end-to-end.
+
+IMPORTANT RULES
+- Lite mode only
+- Do NOT use Agent
+- Do NOT implement new features
+- Do NOT refactor
+- Audit and verify only
+- Test in Preview only, not published version
+
+GOAL
+Verify that the existing lesson regeneration feature works safely and correctly after the runtime fix.
+
+FEATURE TO AUDIT
+The lesson viewer now has a button:
+- BG: "Опитай друга версия"
+- EN: "Try Another Version"
+
+--------------------------------------------------
+STEP 1 — UI VISIBILITY CHECK
+
+Verify in Preview that:
+- the button is visible inside lesson viewer
+- it appears only where appropriate
+- label is localized correctly
+- no layout/UI breakage exists on desktop view
+
+--------------------------------------------------
+STEP 2 — CLICK FLOW CHECK
+
+Click the button and verify:
+- no runtime error appears
+- loading state appears
+- button becomes disabled during request
+- request completes successfully
+- lesson viewer stays on same topic
+- page does NOT reload
+
+--------------------------------------------------
+STEP 3 — CONTENT VARIANT CHECK
+
+Verify whether the returned lesson is actually a NEW version:
+- same topicId preserved
+- same subject/grade preserved
+- lesson explanation wording changes
+- examples and/or exercises change
+- quiz/practice block changes if supported
+
+Answer clearly:
+Same topic preserved: YES / NO
+New lesson variant generated: YES / NO / PARTIAL
+
+--------------------------------------------------
+STEP 4 — STATE SAFETY CHECK
+
+Verify:
+- regeneratingLesson state is correctly scoped in LessonViewer
+- no duplicate or conflicting state remains
+- no console/runtime errors after multiple clicks
+- loading state resets correctly after success and after failure
+
+--------------------------------------------------
+STEP 5 — PROGRESS / DATA SAFETY CHECK
+
+Verify that clicking "Try Another Version":
+- does NOT duplicate progress writes
+- does NOT create duplicate lesson completion records
+- does NOT change current child/subject/topic unexpectedly
+- does NOT affect unrelated components
+
+--------------------------------------------------
+STEP 6 — FILE / LOG CHECK
+
+Inspect the relevant component and confirm:
+- lesson-viewer.tsx compiles
+- no TypeScript errors
+- no console errors in Preview
+- backend remains unchanged
+
+--------------------------------------------------
+STEP 7 — OUTPUT FORMAT
+
+REGENERATION FEATURE AUDIT
+
+Button visible: YES / NO
+Runtime errors: YES / NO
+Loading state works: YES / NO
+Button disables during request: YES / NO
+Same topic preserved: YES / NO
+New lesson variant generated: YES / NO / PARTIAL
+Duplicate progress writes: YES / NO
+Console errors: YES / NO
+TypeScript errors: YES / NO
+
+FILES CHECKED
+- src/pages/junior/lesson-viewer.tsx
+
+FINAL VERDICT
+Safe and working / Working with minor issues / Needs fix

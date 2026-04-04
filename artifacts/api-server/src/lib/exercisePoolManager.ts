@@ -11,6 +11,7 @@ import { db, exercisePoolTable } from "@workspace/db";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { generateExerciseBatch, type LessonMode } from "./aiLessonGenerator";
 import { recordAnswer, getDifficultyMode } from "./exerciseDifficultyTracker";
+import { recordTopicAnswer } from "./weakTopicMemoryTracker";
 import type { ExercisePoolItem } from "@workspace/db";
 
 export type { ExercisePoolItem };
@@ -211,10 +212,15 @@ export async function recordExerciseResult(
     })
     .where(eq(exercisePoolTable.id, exerciseId));
 
-  // ─── Smart Difficulty Adjustment ─────────────────────────────────────────
+  // ─── Smart Difficulty Adjustment + Weak Topic Detection ────────────────
   // Record answer in difficulty tracker to enable real-time difficulty adjustment
+  // Also record topic answer for weak topic detection
   if (exercise) {
     recordAnswer(exercise.childId, exercise.subjectId, correct);
+    
+    // Record answer for this topic (for weak topic detection)
+    const topicId = exercise.topicId || "unknown";
+    recordTopicAnswer(exercise.childId, exercise.subjectId, topicId, correct);
   }
 
   console.log(`[POOL_MANAGER] Recorded result exerciseId=${exerciseId} correct=${correct}`);

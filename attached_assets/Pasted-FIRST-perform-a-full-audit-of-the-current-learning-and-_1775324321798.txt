@@ -1,0 +1,126 @@
+FIRST: perform a full audit of the current learning and progress tracking system.
+
+Analyze the codebase for:
+
+• lesson completion tracking  
+• exercise answer validation  
+• difficulty adjustment system  
+• topic identifiers  
+• subject / grade structure  
+• progress tables  
+• analytics or tracking logic  
+
+Do NOT duplicate existing tracking systems.
+
+Reuse all existing progress and validation structures.
+
+GOAL
+
+Implement a feature called:
+
+"Weak Topic Detection"
+
+The system should identify topics where a student struggles.
+
+A topic is considered WEAK if:
+
+• more than 40% of answers in that topic are incorrect  
+OR  
+• difficulty repeatedly decreases in that topic
+
+The system should maintain a lightweight tracker per student:
+
+weakTopicTracker
+
+Tracked by:
+
+• subject  
+• grade  
+• topic  
+
+RULES
+
+When a topic becomes weak:
+
+flag it as:
+
+weak = true
+
+When a student improves (correct answers > 70%):
+
+remove the weak flag.
+
+DO NOT:
+
+• create new heavy database tables  
+• add extra API calls  
+• break the difficulty system  
+• break caching or prefetch systems  
+
+IMPLEMENTATION
+
+A) AUDIT
+
+Identify where:
+
+• answers are validated  
+• topic identifiers exist  
+• progress is recorded  
+
+Explain what parts can be reused.
+
+B) WEAK TOPIC TRACKER
+
+Create a lightweight in-memory tracker that:
+
+• tracks correct vs wrong answers per topic  
+• evaluates weakness conditions  
+• stores status temporarily
+
+C) UI INTEGRATION
+
+When a weak topic is detected:
+
+show a suggestion card:
+
+"Преговори тази тема"
+
+Clicking it opens the weak topic lesson again.
+
+D) PERFORMANCE SAFETY
+
+The tracker must:
+
+• NOT trigger extra AI generation  
+• NOT add heavy database writes  
+• remain compatible with prefetch and difficulty systems  
+
+E) VALIDATION
+
+Verify:
+
+• TypeScript build passes  
+• difficulty system still works  
+• progress tracking intact  
+• Junior works  
+• Прогимназия works  
+
+F) TEST STEPS
+
+Provide preview test steps for:
+
+1. answer several questions wrong in a topic  
+2. verify topic becomes flagged as weak  
+3. continue answering correctly  
+4. verify weak flag disappears
+
+G) FINAL REPORT
+
+Return:
+
+1. Audit summary  
+2. Files changed  
+3. Weak detection logic  
+4. Safety verification  
+5. Test steps  
+6. Final verdict

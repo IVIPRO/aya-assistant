@@ -11,6 +11,7 @@
  */
 
 import type { LessonMode } from "./aiLessonGenerator";
+import { recordDifficultyChange, recordTopicAnswer } from "./weakTopicMemoryTracker";
 
 interface AnswerRecord {
   correct: boolean;
@@ -103,16 +104,21 @@ function getConsecutiveWrong(answers: AnswerRecord[]): number {
 
 /**
  * Update difficulty level based on answer history
+ * Also signals weak topic tracker when difficulty changes
  */
 function updateDifficultyLevel(state: StudentDifficultyState): void {
   const correctCount = getConsecutiveCorrect(state.lastAnswers);
   const wrongCount = getConsecutiveWrong(state.lastAnswers);
+  const oldLevel = state.difficultyLevel;
   
   // 3 correct in a row → increase difficulty
   if (correctCount >= 3) {
     if (state.difficultyLevel < 3) {
       state.difficultyLevel = Math.min(3, (state.difficultyLevel + 1) as 1 | 2 | 3);
       console.log(`[DIFFICULTY] childId=${state.childId} subject=${state.subject}: INCREASE to level ${state.difficultyLevel} (${correctCount} correct)`);
+      
+      // ─── Signal Weak Topic Tracker ─────────────────────────────────────
+      recordDifficultyChange(state.childId, state.subject, "practice", oldLevel, state.difficultyLevel);
     }
   }
   // 2 wrong in a row → decrease difficulty
@@ -120,6 +126,9 @@ function updateDifficultyLevel(state: StudentDifficultyState): void {
     if (state.difficultyLevel > 1) {
       state.difficultyLevel = Math.max(1, (state.difficultyLevel - 1) as 1 | 2 | 3);
       console.log(`[DIFFICULTY] childId=${state.childId} subject=${state.subject}: DECREASE to level ${state.difficultyLevel} (${wrongCount} wrong)`);
+      
+      // ─── Signal Weak Topic Tracker ─────────────────────────────────────
+      recordDifficultyChange(state.childId, state.subject, "practice", oldLevel, state.difficultyLevel);
     }
   }
   // Mixed results: maintain current level (no change)

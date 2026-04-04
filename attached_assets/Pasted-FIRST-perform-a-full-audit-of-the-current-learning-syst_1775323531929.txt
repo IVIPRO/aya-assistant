@@ -1,0 +1,127 @@
+FIRST: perform a full audit of the current learning system before making changes.
+
+Analyze the project for:
+
+• lesson generation
+• exercise generation
+• progress tracking
+• answer validation
+• exercise difficulty levels
+• AI prompt logic
+• database tables for exercises
+• React Query cache
+• Junior + Прогимназия flows
+
+DO NOT duplicate existing systems.
+
+Reuse all existing structures whenever possible.
+
+GOAL
+
+Implement a lightweight system called:
+
+"Smart Difficulty Adjustment"
+
+The system should automatically adapt exercise difficulty based on student performance.
+
+RULES
+
+If a student answers:
+
+3 correct in a row → increase difficulty slightly
+
+2 wrong in a row → decrease difficulty slightly
+
+mixed results → keep same difficulty
+
+This should adjust:
+
+• number difficulty
+• problem complexity
+• step count
+• vocabulary complexity (for language subjects)
+
+DO NOT:
+
+• modify existing database schema unless absolutely necessary
+• break exercise generation prompts
+• break caching
+• trigger heavy AI calls unnecessarily
+
+IMPLEMENTATION APPROACH
+
+A) AUDIT
+
+Identify where:
+
+• exercises are generated
+• answers are validated
+• progress is stored
+
+Explain which parts can be reused.
+
+B) DIFFICULTY MEMORY
+
+Create a lightweight in-memory difficulty tracker per student:
+
+studentDifficultyState
+
+tracked by:
+
+• subject
+• grade
+• topic
+
+The system updates difficulty based on recent answers.
+
+C) ADAPTIVE EXERCISE REQUEST
+
+When requesting a new exercise:
+
+inject difficulty modifier:
+
+difficultyLevel:
+1 = easy
+2 = normal
+3 = harder
+
+Adjust exercise generation prompt accordingly.
+
+D) PERFORMANCE SAFETY
+
+Difficulty adjustments must:
+
+• NOT trigger extra AI calls
+• reuse existing caches
+• remain compatible with prefetch systems
+• work with variant prefetch
+
+E) VALIDATION
+
+Verify:
+
+• TypeScript build passes
+• lesson flow unchanged
+• progress tracking intact
+• Junior works
+• Прогимназия works
+
+F) TEST STEPS
+
+Provide preview test steps for:
+
+1. answer several questions correctly
+2. verify difficulty increases
+3. answer wrong repeatedly
+4. verify difficulty decreases
+
+G) FINAL REPORT
+
+Return:
+
+1. Audit summary
+2. Files changed
+3. Logic implemented
+4. Safety verification
+5. Test steps
+6. Final verdict

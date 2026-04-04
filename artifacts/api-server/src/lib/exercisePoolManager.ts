@@ -10,6 +10,7 @@ import { randomUUID } from "crypto";
 import { db, exercisePoolTable } from "@workspace/db";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { generateExerciseBatch, type LessonMode } from "./aiLessonGenerator";
+import { recordAnswer, getDifficultyMode } from "./exerciseDifficultyTracker";
 import type { ExercisePoolItem } from "@workspace/db";
 
 export type { ExercisePoolItem };
@@ -127,11 +128,18 @@ export async function ensureExercisePool(
   const stats = await getPoolStats(childId, subjectId, topicId);
   const poolKey = `${childId}:${subjectId}:${topicId}`;
 
+  // ─── Smart Difficulty Adjustment ─────────────────────────────────────────
+  // Get difficulty mode from tracker (based on recent answer patterns)
+  // This overrides the batch-level mode from pool stats
+  const trackerMode = getDifficultyMode(childId, subjectId);
+  // Fall back to stats-based mode if tracker returns normal (default)
+  const statsMode = inferMode(stats);
+  const mode: LessonMode = trackerMode !== "normal" ? trackerMode : statsMode;
+
   if (stats.total === 0) {
     /* Very first call — generate a small batch synchronously so the user
        gets exercises immediately, then kick off a full refill in background. */
-    const mode = inferMode(stats);
-    console.log(`[POOL_MANAGER] Pool empty — generating initial ${INITIAL_BATCH_SIZE} (sync) mode=${mode}`);
+    console.log(`[POOL_MANAGER] Pool empty — generating initial ${INITIAL_BATCH_SIZE} (sync) mode=${mode} [tracker=${trackerMode}, stats=${statsMode}]`);
     await generateAndInsertBatch(childId, subjectId, topicId, grade, lang, mode, INITIAL_BATCH_SIZE);
     /* Fire-and-forget the large refill */
     if (!refillInProgress.has(poolKey)) {
@@ -145,8 +153,7 @@ export async function ensureExercisePool(
 
   if (stats.unused < LOW_POOL_THRESHOLD && !refillInProgress.has(poolKey)) {
     /* Pool running low — refill in background, don't block response */
-    const mode = inferMode(stats);
-    console.log(`[POOL_MANAGER] Pool low (${stats.unused} unused) — background refill mode=${mode}`);
+    console.log(`[POOL_MANAGER] Pool low (${stats.unused} unused) — background refill mode=${mode} [tracker=${trackerMode}, stats=${statsMode}]`);
     refillInProgress.add(poolKey);
     generateAndInsertBatch(childId, subjectId, topicId, grade, lang, mode, REFILL_BATCH_SIZE)
       .catch((e) => console.warn("[POOL_MANAGER] Background refill failed:", e))
@@ -188,6 +195,12 @@ export async function recordExerciseResult(
   correct: boolean,
   userAnswer: string,
 ): Promise<void> {
+  // Get exercise to know which subject it belongs to
+  const [exercise] = await db
+    .select()
+    .from(exercisePoolTable)
+    .where(eq(exercisePoolTable.id, exerciseId));
+
   await db
     .update(exercisePoolTable)
     .set({
@@ -197,6 +210,12 @@ export async function recordExerciseResult(
       usedAt: new Date(),
     })
     .where(eq(exercisePoolTable.id, exerciseId));
+
+  // ─── Smart Difficulty Adjustment ─────────────────────────────────────────
+  // Record answer in difficulty tracker to enable real-time difficulty adjustment
+  if (exercise) {
+    recordAnswer(exercise.childId, exercise.subjectId, correct);
+  }
 
   console.log(`[POOL_MANAGER] Recorded result exerciseId=${exerciseId} correct=${correct}`);
 }

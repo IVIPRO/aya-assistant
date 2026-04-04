@@ -1,0 +1,111 @@
+FIRST: audit the latest current project state before changing anything. Check the current codebase/ZIP and all existing implementations related to:
+- lesson caching
+- first-topic prewarm
+- next-topic prefetch
+- exercise prefetch
+- "Try Another Version" variant prefetch
+- Junior and Прогимназия subject selection screens
+- grade landing pages and subject cards
+Do NOT duplicate any existing logic. Reuse current patterns only.
+
+TASK GOAL:
+Implement the next Lite-safe speed upgrade:
+
+"Subject Card Warmup"
+
+What it should do:
+1. When the student opens a grade landing page with subject cards
+   (Начален етап or Прогимназия),
+   silently prewarm the FIRST DEFAULT lesson for each VISIBLE subject card.
+2. Only prewarm visible subject cards currently rendered on screen.
+3. Keep requests limited and safe:
+   - max 2 concurrent warmups at a time
+   - queue the rest
+   - skip subjects already cached
+   - skip subjects already being prefetched
+4. Do NOT block navigation or UI.
+5. Do NOT create duplicate progress/history/completion records.
+6. Do NOT break:
+   - current first-topic instant load
+   - next-topic prefetch
+   - exercise prefetch
+   - "Try Another Version"
+   - Junior flow
+   - Прогимназия flow
+
+SAFE DEFINITION OF "FIRST DEFAULT LESSON":
+- use the existing safest rule already used by the current first-topic warmup logic
+- do NOT invent a new ordering system
+- if no valid first lesson exists for a subject, skip safely
+
+STRICT SAFETY RULES:
+- no hallucinated features
+- no duplicate cache layers
+- no duplicate prefetch loops
+- no new DB writes from warmup
+- no progress/completion writes
+- no risky schema changes
+- no architecture rewrite
+- Lite-safe only
+
+IMPLEMENTATION REQUIREMENTS:
+
+A) AUDIT FIRST
+Identify exact files/functions already handling:
+- subject cards / grade landing pages
+- warmup / prefetch orchestration
+- lesson cache keys
+- concurrency guards
+- Junior inheritance
+- Прогимназия inheritance
+
+Report what already exists and what is missing.
+
+B) IMPLEMENT ONLY MINIMAL MISSING CODE
+Goal:
+- when grade page opens, subject cards begin silent warmup
+- when user clicks a subject card, first lesson should already be hot if warmup completed
+- if warmup did not finish, fallback must remain the existing normal loading path
+
+C) CONCURRENCY + SAFETY
+Implement a minimal safe queue:
+- maximum 2 parallel warmups
+- no repeat warmup for same cache key
+- isolate by:
+  - child/student
+  - grade
+  - subject
+  - language
+  - topic
+  - variant=0 only
+- no variant prewarm at this stage beyond what already exists after opening a lesson
+
+D) VALIDATION
+After implementation, verify and report:
+- TypeScript build passes
+- no duplicate network storm
+- no duplicate progress/history writes
+- subject click still works if warmup is incomplete
+- current lesson page optimizations still work
+- Junior still works
+- Прогимназия still works
+
+E) MANUAL TEST STEPS
+Give exact Preview-only test steps, not published version.
+
+F) FINAL REPORT FORMAT
+Return:
+1. AUDIT SUMMARY
+2. FILES CHANGED
+3. WHAT WAS IMPLEMENTED
+4. WHAT WAS REUSED
+5. SAFETY CHECK RESULTS
+6. TEST STEPS
+7. FINAL VERDICT
+8. EXPECTED SPEED IMPROVEMENT
+
+IMPORTANT:
+- If audit shows this is already partially implemented, do NOT re-implement it.
+- Extend the current system minimally.
+- If safe queueing already exists, reuse it.
+- If subject-card warmup would cause too many background requests on some pages, automatically limit to the first 3 visible subjects and clearly report that decision.

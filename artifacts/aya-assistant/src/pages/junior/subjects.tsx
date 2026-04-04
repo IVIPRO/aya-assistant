@@ -110,6 +110,71 @@ export function SubjectPanel({ lang, grade, childId, childName, characterEmoji, 
     return () => clearTimeout(timeoutId);
   }, [selected, grade, lang, queryClient]);
 
+  /* ── Silent bulk warmup of all subject cards when grid visible ── */
+  useEffect(() => {
+    if (selected !== null) return; // Only warmup when subject grid is visible
+
+    const warmSubjectCards = async () => {
+      try {
+        const subjects = getSubjectsForGrade(grade);
+        if (subjects.length === 0) return;
+
+        // Track in-progress warmups (max 2 concurrent)
+        const inProgressSet = new Set<string>();
+        let queueIdx = 0;
+
+        const startWarmup = async (subjectId: string, topicId: string) => {
+          inProgressSet.add(subjectId);
+          try {
+            const cachedKey = ["lesson", subjectId, topicId, grade, lang, 0];
+            // Skip if already cached
+            if (queryClient.getQueryData(cachedKey)) {
+              inProgressSet.delete(subjectId);
+              return;
+            }
+
+            // Fetch and cache
+            const res = await fetch(
+              `/api/lessons/generate?subjectId=${subjectId}&topicId=${topicId}&grade=${grade}&lang=${lang}&mode=normal&variant=0`
+            );
+            if (res.ok) {
+              const lessonContent = await res.json();
+              queryClient.setQueryData(cachedKey, lessonContent);
+            }
+          } catch {
+            // Silently fail
+          } finally {
+            inProgressSet.delete(subjectId);
+            // Dequeue and start next warmup if available
+            if (queueIdx < subjects.length) {
+              const nextSubject = subjects[queueIdx++];
+              const nextFirstTopic = nextSubject.topics.find(t => !t.grades || t.grades.includes(grade));
+              if (nextFirstTopic) {
+                startWarmup(nextSubject.id, nextFirstTopic.id);
+              }
+            }
+          }
+        };
+
+        // Start with first 2 subjects
+        for (let i = 0; i < Math.min(2, subjects.length); i++) {
+          const subject = subjects[i];
+          const firstTopic = subject.topics.find(t => !t.grades || t.grades.includes(grade));
+          if (firstTopic) {
+            queueIdx = i + 1;
+            startWarmup(subject.id, firstTopic.id);
+          }
+        }
+      } catch {
+        // Silently fail entire warmup
+      }
+    };
+
+    // Delay to avoid competing with subject selection UI
+    const timeoutId = setTimeout(warmSubjectCards, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [selected, grade, lang, queryClient]);
+
   /* Fetch topic progress for this child */
   const { data: progressData } = useQuery<{ topics: TopicProgressItem[] }>({
     queryKey: ["learning-progress", childId],

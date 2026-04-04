@@ -724,12 +724,15 @@ interface EngineProps {
   onAskAya: () => void;
   onRegenerateLesson: () => Promise<void>;
   isRegeneratingLesson: boolean;
+  regenerateMessages: string[];
+  regenerateMessageIdx: number;
 }
 
 function InteractiveLessonEngine({
   data, topic, subject, lang, grade, childId, topicContext,
   speak, isVoicePlaying, voiceEnabled,
   onComplete, onRecordLesson, onBack, onAskAya, onRegenerateLesson, isRegeneratingLesson,
+  regenerateMessages, regenerateMessageIdx,
 }: EngineProps) {
   const l = L[lang];
   const d = D[lang];
@@ -1606,7 +1609,7 @@ function InteractiveLessonEngine({
                 onClick={onRegenerateLesson}
                 disabled={isRegeneratingLesson}
                 className={cn(
-                  "w-full py-3 px-5 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-2",
+                  "w-full py-3 px-5 rounded-2xl font-bold text-sm transition-all flex flex-col items-center justify-center gap-2",
                   isRegeneratingLesson
                     ? "bg-muted text-muted-foreground cursor-not-allowed"
                     : "bg-slate-100 text-slate-700 hover:bg-slate-200 active:scale-95"
@@ -1616,7 +1619,7 @@ function InteractiveLessonEngine({
                 {isRegeneratingLesson ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    {lang === "bg" ? "Зареждам..." : "Loading..."}
+                    <span className="text-xs font-semibold">{regenerateMessages[regenerateMessageIdx]}</span>
                   </>
                 ) : (
                   <>
@@ -2227,8 +2230,14 @@ export interface LessonViewerProps {
 export function LessonViewer({ subject, topic, initialMode, grade, lang, childId, onBack, onAskAya, dailyPlanId, dailyPlanTaskId }: LessonViewerProps) {
   const [reward, setReward] = useState<XpReward | null>(null);
   const [regeneratingLesson, setRegeneratingLesson] = useState(false);
+  const [regenerateMessageIdx, setRegenerateMessageIdx] = useState(0);
   const l = L[lang];
   const queryClient = useQueryClient();
+
+  /* ── Progressive loading messages for lesson regeneration ── */
+  const regenerateMessages = lang === "bg"
+    ? ["AYA мисли...", "Създавам нов пример...", "Подготвям обяснение...", "Почти готово..."]
+    : ["AYA is thinking...", "Creating new example...", "Preparing explanation...", "Almost ready..."];
 
   /* ── Voice ─────────────────────────────────────────────────────── */
   const {
@@ -2241,6 +2250,18 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
 
   const completeFiredRef = useRef(false);
   const lessonFiredRef = useRef(false);
+
+  /* ── Rotate progressive loading messages every 2 seconds ── */
+  useEffect(() => {
+    if (!regeneratingLesson) {
+      setRegenerateMessageIdx(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setRegenerateMessageIdx((prev) => (prev + 1) % regenerateMessages.length);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [regeneratingLesson, regenerateMessages.length]);
 
   const { data: adaptiveProfile } = useQuery<AdaptiveProfile>({
     queryKey: ["adaptive-profile", childId, subject.id, topic.id],
@@ -2407,6 +2428,8 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
           onAskAya={() => { stopVoice(); onAskAya(); }}
           onRegenerateLesson={handleRegenerateLesson}
           isRegeneratingLesson={regeneratingLesson}
+          regenerateMessages={regenerateMessages}
+          regenerateMessageIdx={regenerateMessageIdx}
         />
       )}
     </motion.div>

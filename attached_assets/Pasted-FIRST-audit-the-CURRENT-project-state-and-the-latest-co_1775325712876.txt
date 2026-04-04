@@ -1,0 +1,158 @@
+FIRST: audit the CURRENT project state and the latest code/files before making changes. Reuse what already exists. Do NOT duplicate systems, prompts, schemas, or generators.
+
+GOAL
+
+Fix the task generation quality across AYA so that ALL generated tasks, hints, examples, and expected answers are logically consistent, age-appropriate, and aligned with the actual lesson/topic.
+
+Current visible bug example:
+Lesson shows a task like:
+“Какво е червено и кръгло?”
+but the hint/example talks about:
+“Какво има на масата? (хляб, мляко)”
+This is logically mismatched.
+
+We need a SYSTEMIC fix, not a one-off patch.
+
+SCOPE
+
+Audit and repair task/lesson generation for:
+• Начален етап
+• Прогимназия
+
+Especially inspect:
+• AI lesson generation prompts
+• task templates
+• hint generation
+• example generation
+• expected answer generation
+• lesson type / topic mapping
+• “memory games”, “logic”, “math”, “Bulgarian”, “reading”, etc.
+• any fallback or mock task generators
+• any hardcoded examples reused across unrelated topics
+
+STRICT REQUIREMENTS
+
+Every generated task must satisfy ALL of these rules:
+
+1. TASK-TO-HINT CONSISTENCY
+The hint must help solve the exact task shown.
+No generic or unrelated hint is allowed.
+
+2. TASK-TO-EXAMPLE CONSISTENCY
+The example must be from the same reasoning pattern as the task.
+Example must teach HOW to solve the task, not switch to a different task type.
+
+3. TOPIC CONSISTENCY
+The task must match the topic title and subject.
+Examples:
+• geometry → shapes, sides, angles, forms
+• division → grouping/sharing/division logic
+• reading → text comprehension, sentence meaning
+• memory games → memory/observation/pattern recall
+Do NOT mix unrelated concepts.
+
+4. AGE APPROPRIATENESS
+Junior tasks must be simple, concrete, and child-friendly.
+No abstract, confusing, or multi-layered wording for small children.
+
+5. ANSWERABILITY
+Each task must have a clear solvable answer.
+No ambiguous or under-specified question.
+
+6. NO TEMPLATE BLEED
+Do NOT reuse examples/hints from another subject or another lesson type.
+
+IMPLEMENTATION PLAN
+
+A) FULL AUDIT
+Audit where the actual lesson/task content is produced.
+Find:
+• lesson prompt builder
+• task prompt builder
+• hint/example prompt sections
+• fallback generators
+• any content post-processing
+
+Return exact files and functions responsible.
+
+B) ADD CONTENT VALIDATION LAYER
+Before returning a generated task to UI, add a lightweight validation step that checks:
+
+• does hint reference same task type?
+• does example match same reasoning type?
+• does task match topic/subject?
+• is question answerable?
+• is wording age-appropriate?
+
+If validation fails:
+regenerate ONLY the broken part
+or fall back to a safe local template for that topic.
+
+C) SAFE TOPIC TEMPLATES
+For the most common Junior lesson types, create safe structured templates so output stays logical even when AI drifts.
+
+At minimum add safe templates for:
+• shapes / geometry
+• counting
+• addition
+• subtraction
+• multiplication
+• division
+• observation / memory games
+• Bulgarian language basics
+• reading comprehension basics
+• logic & thinking basics
+
+Each template must guarantee:
+• one clear question
+• one relevant hint
+• one relevant example
+• one valid answer pattern
+
+D) MEMORY GAME REPAIR
+Specifically inspect the lesson type:
+“Игри на паметта”
+Ensure these tasks are actually memory/observation based and not random food/object/category mismatches.
+
+E) DO NOT BREAK
+Do NOT break:
+• lesson caching
+• “Опитай друга версия”
+• prefetch systems
+• difficulty adjustment
+• progress tracking
+• resume feature
+• Junior / Прогимназия routing
+
+F) VALIDATION / TESTING
+After fix, test at least these cases in Preview:
+
+1. Начален етап → Игри на паметта
+2. Начален етап → Математика
+3. Начален етап → Логика и мислене
+4. Прогимназия → Математика
+5. Прогимназия → Български език
+
+For each test verify:
+• task is logical
+• hint matches task
+• example matches task
+• expected answer makes sense
+• wording matches child age / grade
+• “Опитай друга версия” still returns a different but still logical task
+
+G) OUTPUT REPORT
+Return:
+
+1. Root cause summary
+2. Exact files changed
+3. Validation rules added
+4. Which safe templates were added
+5. Test results from Preview
+6. Final verdict: SAFE / NOT SAFE
+
+IMPORTANT
+This is a quality-critical educational fix.
+Prefer correctness and logical consistency over cleverness.
+Do not leave partially fixed generation.
+Make the whole task pipeline reliable.

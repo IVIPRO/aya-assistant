@@ -1,0 +1,57 @@
+Първо направи СТРИКТЕН AUDIT на текущия код в workspace и НЕ имплементирай нищо, преди да провериш дали бързото зареждане вече не е направено частично и за Прогимназия.
+
+Цел:
+Да работи същото бързо зареждане на AI уроците и бутона „Опитай друга версия“ и в ПРОГИМНАЗИЯ, както вече е направено за НАЧАЛЕН ЕТАП.
+
+ЗАДЪЛЖИТЕЛНО:
+1. Провери кои файлове вече бяха променени за Начален етап:
+   - lesson-viewer / student lesson page
+   - React Query key / variant seed
+   - cache logic
+   - backend route за lessons/generate
+   - pre-generate variants 1 и 2
+2. Намери точния екран/компонент/route за Прогимназия.
+3. Провери дали Прогимназия ползва:
+   - отделен lesson viewer
+   - отделен query key
+   - отделен route
+   - отделен wrapper/component
+   - или същата lesson engine логика.
+4. Ако Прогимназия вече ползва същия pipeline, НЕ дублирай код. Само свържи липсващото.
+5. Ако има отделен component за Прогимназия, приложи СЪЩАТА логика като при Начален етап:
+   - persistent cache
+   - variant seed в query key
+   - background pre-generation на следващите варианти
+   - „Опитай друга версия“ да взима готов variant от cache
+   - без да чупиш progress tracking, tests, exercises, history, ask AYA
+6. Не пипай schema, ако не е абсолютно нужно.
+7. Не въвеждай нова архитектура. Използвай вече работещия pattern от Начален етап.
+8. След промените направи build/typecheck и дай ясен отчет.
+
+Искам накрая точен отчет в този формат:
+
+A) AUDIT
+- кои файлове за Начален етап вече съдържат fast-loading логика
+- кои файлове използва Прогимназия
+- shared ли е pipeline или е отделен
+
+B) FIX
+- какво точно беше липсвало за Прогимназия
+- кои файлове промени
+- дали е reuse-нат съществуващ код без duplication
+
+C) VALIDATION
+- build passed / failed
+- TypeScript errors: yes/no
+- cache active in Прогимназия: yes/no
+- pre-generated variants active: yes/no
+- бутон „Опитай друга версия“ в Прогимназия зарежда ли по-бързо след първото отваряне: yes/no
+
+D) TEST STEPS
+Дай ми 5 точни стъпки как да го тествам в Preview в Replit за Прогимназия.
+
+Важно:
+- Не прави audit-only.
+- След audit, ако липсва wiring, направо го поправи.
+- Не дублирай Junior логика.
+- Искам minimal safe fix с максимален reuse.

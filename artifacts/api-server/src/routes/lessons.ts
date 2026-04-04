@@ -22,7 +22,7 @@ router.get("/lessons/content", requireAuth, (req, res): void => {
     return;
   }
 
-  const gradeNum = Math.max(1, Math.min(4, parseInt(grade ?? "2", 10) || 2));
+  const gradeNum = Math.max(1, Math.min(7, parseInt(grade ?? "2", 10) || 2));
   const langCode = (lang === "bg" || lang === "es") ? lang : "en";
 
   const content = getLessonContent(subjectId, topicId, gradeNum, langCode);
@@ -39,7 +39,7 @@ router.get("/lessons/generate", requireAuth, async (req, res): Promise<void> => 
     return;
   }
 
-  const gradeNum = Math.max(1, Math.min(4, parseInt(grade ?? "2", 10) || 2));
+  const gradeNum = Math.max(1, Math.min(7, parseInt(grade ?? "2", 10) || 2));
   const validLangs = ["en", "bg", "es", "de", "fr"] as const;
   type ValidLang = typeof validLangs[number];
   const langCode: ValidLang = (validLangs as readonly string[]).includes(lang) ? (lang as ValidLang) : "en";
@@ -170,7 +170,7 @@ router.get("/lessons/exercises", requireAuth, async (req, res): Promise<void> =>
     return;
   }
 
-  const gradeNum = Math.max(1, Math.min(4, parseInt(grade ?? "2", 10) || 2));
+  const gradeNum = Math.max(1, Math.min(7, parseInt(grade ?? "2", 10) || 2));
   const langCode = (["en", "bg", "es", "de", "fr"] as string[]).includes(lang) ? lang : "en";
   const exerciseCount = Math.max(1, Math.min(20, parseInt(count ?? "10", 10) || 10));
 

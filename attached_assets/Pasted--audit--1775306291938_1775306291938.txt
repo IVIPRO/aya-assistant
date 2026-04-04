@@ -1,0 +1,105 @@
+Първо направи audit по САМО на текущия код в проекта и НЕ измисляй. Не дублирай вече съществуващ код. Работи само ако след проверка липсва или е счупено.
+
+ЗАДАЧА:
+Поправи бутона „Опитай друга версия“ в Начален етап / junior lesson viewer, така че:
+1. винаги да зарежда НОВ вариант на същия урок
+2. да не връща стария cached React Query резултат
+3. да не чупи progress tracking
+4. да не дублира записите за завършен урок
+5. да остане съвместимо с текущия backend
+
+ПРЕДИ ПРОМЯНА ПРОВЕРИ:
+- artifacts/aya-assistant/src/pages/junior/lesson-viewer.tsx
+- къде е handleRegenerateLesson
+- как е дефиниран lesson query key
+- artifacts/api-server/src/routes/lessons.ts
+- има ли вече lesson cache implementation
+- има ли variant, nonce, refreshKey, revision или подобен параметър
+- има ли DB таблица за кеш на уроци
+- има ли helper-и за cache / invalidate / regenerate
+
+АКО ГО НЯМА ИЛИ Е НЕПЪЛНО, НАПРАВИ ТОВА:
+
+A) FRONTEND
+
+В lesson-viewer.tsx добави отделен state:
+lessonVariantSeed или lessonRefreshNonce
+
+При натискане на „Опитай друга версия“:
+увеличавай този seed.
+
+Добави seed към lesson query key например:
+
+["lesson", subject.id, topic.id, grade, lang, topicContext, lessonVariantSeed]
+
+Подай и query param към API:
+
+variantSeed=<value>
+
+или
+
+refreshNonce=<timestamp>
+
+НЕ използвай само refetchQueries със стария key.
+
+Бутонът трябва да е disabled докато зарежда.
+
+Запази текущите loading messages.
+
+Не променяй record("lesson"), record("practice"), record("quiz") логиката освен ако audit не покаже реален bug.
+
+B) BACKEND
+
+В /api/lessons/generate добави optional параметър:
+
+variantSeed
+
+Подай го към generator-а само за разнообразяване.
+
+Добави response headers:
+
+Cache-Control: no-store, no-cache, must-revalidate  
+Pragma: no-cache
+
+C) GENERATOR
+
+Ако вече има random framing system използвай variantSeed за да генерираш нов framing / examples.
+
+Ако няма — добави минимална deterministic variety логика.
+
+НЕ променяй JSON schema на урока.
+
+D) SAFE GUARDS
+
+Progress tracking да не се записва повторно при regenerate.
+
+„Опитай друга версия“ да сменя само lesson content.
+
+Да не се променят:
+subject  
+topic  
+grade
+
+Exercise / Test / History бутоните да продължат да работят.
+
+E) VALIDATION
+
+След промяната направи проверка и докладвай:
+
+1. стария lesson query key
+2. новия lesson query key
+3. кои файлове са променени
+4. дали /api/lessons/generate връща no-store headers
+5. дали 3 натискания на „Опитай друга версия“ дават 3 различни урока
+6. дали има TypeScript errors
+7. дали има runtime errors
+8. дали има duplicate progress записи
+
+ВАЖНО:
+
+НЕ казвай “system is complete” без реална проверка.  
+НЕ прави голям refactor.  
+НЕ включвай Agent mode.  
+Направи минимална работеща поправка.
+
+Накрая дай кратък отчет и инструкции как да го тествам в Preview.

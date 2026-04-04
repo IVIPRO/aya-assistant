@@ -2231,6 +2231,7 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
   const [reward, setReward] = useState<XpReward | null>(null);
   const [regeneratingLesson, setRegeneratingLesson] = useState(false);
   const [regenerateMessageIdx, setRegenerateMessageIdx] = useState(0);
+  const [lessonVariantSeed, setLessonVariantSeed] = useState(0);
   const l = L[lang];
   const queryClient = useQueryClient();
 
@@ -2277,10 +2278,10 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
   });
 
   const { data, isLoading, isError } = useQuery<LessonContent>({
-    queryKey: ["lesson", subject.id, topic.id, grade, lang],
+    queryKey: ["lesson", subject.id, topic.id, grade, lang, lessonVariantSeed],
     queryFn: async () => {
       const topicCtx: TopicContext = adaptiveProfile?.currentTopicStats?.context ?? "normal";
-      const res = await fetch(`/api/lessons/generate?subjectId=${subject.id}&topicId=${topic.id}&grade=${grade}&lang=${lang}&mode=${topicCtx}`);
+      const res = await fetch(`/api/lessons/generate?subjectId=${subject.id}&topicId=${topic.id}&grade=${grade}&lang=${lang}&mode=${topicCtx}&variant=${lessonVariantSeed}`);
       if (!res.ok) throw new Error("Failed to load lesson");
       return res.json();
     },
@@ -2346,11 +2347,12 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
   const handleRegenerateLesson = useCallback(async () => {
     setRegeneratingLesson(true);
     try {
-      await queryClient.refetchQueries({ queryKey: ["lesson", subject.id, topic.id, grade, lang] });
+      // Increment variant seed to force new query key and fetch new lesson content
+      setLessonVariantSeed((prev) => prev + 1);
     } finally {
       setRegeneratingLesson(false);
     }
-  }, [queryClient, subject.id, topic.id, grade, lang]);
+  }, []);
 
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>

@@ -78,6 +78,9 @@ router.get("/lessons/generate", requireAuth, async (req, res): Promise<void> => 
       content,
     );
 
+    // Prevent browser caching so variant requests always get correct content
+    res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+    res.set("Pragma", "no-cache");
     res.json(content);
   } catch (err) {
     console.error("[LESSONS_GENERATE] Unexpected error:", err);

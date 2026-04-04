@@ -1,5 +1,13 @@
 import OpenAI from "openai";
 import { getLessonContent, type LessonContent } from "./lessonContent";
+import {
+  getTopicCategory,
+  getTopicPromptGuidance,
+  getTopicAlignedFraming,
+  getCoreConsistencyRules,
+  isExerciseConsistent,
+  getSafeTemplates,
+} from "./taskConsistencyGuard";
 
 type LangCode = "en" | "bg" | "es" | "de" | "fr";
 export type LessonMode = "weak" | "normal" | "strong";
@@ -134,16 +142,6 @@ const TOPIC_LABELS: Record<string, Record<string, string>> = {
   },
 };
 
-// ─── Variety framing contexts (rotated per call to reduce repetition) ─────────
-
-const FRAMING_VARIANTS = [
-  "Use a real-world scenario with everyday objects the child knows.",
-  "Frame the problems in a story format with a small adventure.",
-  "Use nature and animals as the theme for all examples.",
-  "Use food, cooking, and kitchen objects as the theme.",
-  "Use sports, games, and outdoor play as the theme.",
-];
-
 function getLangName(lang: LangCode): string {
   const names: Record<LangCode, string> = {
     en: "English",
@@ -178,7 +176,7 @@ function getGradeLabel(grade: number, lang: LangCode): string {
   return `Grade ${grade}`;
 }
 
-// ─── Prompt builder ───────────────────────────────────────────────────────────
+// ─── Lesson System Prompt ─────────────────────────────────────────────────────
 
 function buildLessonSystemPrompt(lang?: LangCode): string {
   const bgLock =
@@ -189,6 +187,8 @@ function buildLessonSystemPrompt(lang?: LangCode): string {
 Your lessons are clear, kind, age-appropriate, and educationally sound.
 Return only valid JSON — no markdown, no commentary, just the JSON object.${bgLock}`;
 }
+
+// ─── Lesson User Prompt ───────────────────────────────────────────────────────
 
 function buildLessonUserPrompt(
   subjectId: string,
@@ -202,8 +202,9 @@ function buildLessonUserPrompt(
   const gradeLabel = getGradeLabel(grade, lang);
   const langName = getLangName(lang);
 
-  const framingIdx = Math.floor(Math.random() * FRAMING_VARIANTS.length);
-  const framing = FRAMING_VARIANTS[framingIdx];
+  // Use topic-aligned framing only — no random cross-subject themes
+  const category = getTopicCategory(topicId);
+  const framing = getTopicAlignedFraming(category);
 
   const modeHint =
     mode === "weak"
@@ -217,12 +218,22 @@ function buildLessonUserPrompt(
       ? `\nThis is a Bulgarian child following the МОН (Ministry of Education) curriculum for ${gradeLabel}. Write ONLY in Bulgarian (Български). Do NOT write in Russian. Bulgarian and Russian share the Cyrillic alphabet but are different languages — use Bulgarian words, Bulgarian grammar, and Bulgarian curriculum examples. Never mix in Russian words or phrases.`
       : "";
 
+  // Get topic-specific guidance
+  const topicGuidance = getTopicPromptGuidance(category, topicLabel, topicId, grade);
+
   return `Generate a complete lesson in ${langName} for:
 - Subject: ${subjectLabel}
 - Topic: ${topicLabel}
 - Grade: ${gradeLabel}
 - Difficulty context: ${modeHint}
-- Variety framing: ${framing}${bulgarianNote}
+- Thematic framing: ${framing}${bulgarianNote}
+
+${topicGuidance}
+
+CONSISTENCY REQUIREMENT:
+- Every example's "hint" must help understand that specific example's "problem" — not a generic hint.
+- Every example's "solution" must be a valid answer to that specific "problem".
+- All examples and practice problems must stay within the topic "${topicLabel}".
 
 Return a JSON object matching EXACTLY this schema:
 {
@@ -268,7 +279,7 @@ Rules:
 - lesson.examples must have EXACTLY 3 items.`;
 }
 
-// ─── Validator ────────────────────────────────────────────────────────────────
+// ─── Lesson Validator ─────────────────────────────────────────────────────────
 
 function validateLessonContent(raw: unknown): LessonContent {
   if (typeof raw !== "object" || raw === null) throw new Error("Not an object");
@@ -346,13 +357,22 @@ function buildExerciseBatchPrompt(
       ? `\nThis is a Bulgarian child following the МОН curriculum for ${gradeLabel}. Write ONLY in Bulgarian (Български). Do NOT write in Russian. Bulgarian and Russian share the Cyrillic alphabet but are completely different languages. Use Bulgarian words, Bulgarian grammar, and age-appropriate Bulgarian examples. Never use Russian words or phrases.`
       : "";
 
-  const isMath = subjectId === "mathematics";
+  // Get topic category and specific guidance
+  const category = getTopicCategory(topicId);
+  const topicGuidance = getTopicPromptGuidance(category, topicLabel, topicId, grade);
+  const consistencyRules = getCoreConsistencyRules();
+  const framing = getTopicAlignedFraming(category);
 
   return `Generate exactly ${count} practice exercises in ${langName} for:
 - Subject: ${subjectLabel}
 - Topic: ${topicLabel}
 - Grade: ${gradeLabel}
-- ${difficultyInstruction}${bulgarianNote}
+- ${difficultyInstruction}
+- Thematic context: ${framing}${bulgarianNote}
+
+${topicGuidance}
+
+${consistencyRules}
 
 Return a JSON object with this exact structure:
 {
@@ -361,27 +381,25 @@ Return a JSON object with this exact structure:
       "question": "string — clear, age-appropriate question",
       "correctAnswer": "string — the correct answer",
       "options": ["string", "string", "string", "string"] or null,
-      "hint": "string — short helpful hint, or null",
-      "explanation": "string — brief explanation of why the answer is correct, or null",
+      "hint": "string — short helpful hint that helps solve THIS specific question",
+      "explanation": "string — brief explanation of why THIS answer is correct for THIS question",
       "exerciseType": "multiple-choice" or "open-ended",
       "difficulty": "easy" or "medium" or "hard"
     }
   ]
 }
 
-Rules:
+Additional rules:
 - Generate EXACTLY ${count} items in the "exercises" array.
 - All text content must be in ${langName}.
-${isMath ? `- For mathematics: use actual numbers appropriate for ${gradeLabel}. Make every exercise a solvable math expression.
-- Use multiple-choice for about half, open-ended for the other half.
-- For multiple-choice math: options must be 4 different plausible numeric strings. One must be the correct answer.
-- Vary the topics slightly (${topicLabel} variations) across the batch.` : `- For language/literacy topics: use age-appropriate vocabulary, sentences, and comprehension.
-- Use multiple-choice exercises where possible (they are easier for young children to answer).
-- options must contain exactly 4 different string choices when exerciseType is "multiple-choice".`}
-- No placeholder options like "A", "B", "C", "D" — all options must be real answers.
+- For multiple-choice: "correctAnswer" must match one of the "options" exactly (same spelling, same capitalisation).
+- No placeholder options like "A", "B", "C", "D" — all options must be real, meaningful answers.
 - Never duplicate questions.
-- Ensure ALL exercises are different from each other.`;
+- Ensure ALL exercises are different from each other.
+- All exercises must stay on topic: "${topicLabel}". Do NOT drift to other subjects.`;
 }
+
+// ─── Exercise Batch Validator ─────────────────────────────────────────────────
 
 function validateExerciseBatch(raw: unknown, expectedCount: number): ExerciseItem[] {
   if (typeof raw !== "object" || raw === null) throw new Error("Not an object");
@@ -394,7 +412,8 @@ function validateExerciseBatch(raw: unknown, expectedCount: number): ExerciseIte
     const ex = e as Record<string, unknown>;
     if (!ex.question || !ex.correctAnswer || !ex.exerciseType || !ex.difficulty) continue;
     if (ex.exerciseType === "multiple-choice" && (!Array.isArray(ex.options) || ex.options.length < 2)) continue;
-    result.push({
+
+    const item: ExerciseItem = {
       question: String(ex.question),
       correctAnswer: String(ex.correctAnswer),
       options: Array.isArray(ex.options) ? (ex.options as string[]) : null,
@@ -402,13 +421,24 @@ function validateExerciseBatch(raw: unknown, expectedCount: number): ExerciseIte
       explanation: ex.explanation ? String(ex.explanation) : null,
       exerciseType: ex.exerciseType === "open-ended" ? "open-ended" : "multiple-choice",
       difficulty: ex.difficulty === "hard" ? "hard" : ex.difficulty === "easy" ? "easy" : "medium",
-    });
+    };
+
+    // Apply consistency filter — discard exercises that fail basic consistency checks
+    if (!isExerciseConsistent(item)) {
+      console.warn(`[EXERCISE_BATCH] Consistency filter removed: "${item.question.slice(0, 60)}..."`);
+      continue;
+    }
+
+    result.push(item);
   }
+
   if (result.length < Math.min(expectedCount * 0.5, 5)) {
     throw new Error(`Only ${result.length} valid exercises parsed from ${exercises.length} raw`);
   }
   return result;
 }
+
+// ─── Public API: Generate Exercise Batch ──────────────────────────────────────
 
 export async function generateExerciseBatch(
   subjectId: string,
@@ -434,7 +464,7 @@ export async function generateExerciseBatch(
         { role: "user", content: buildExerciseBatchPrompt(subjectId, topicId, grade, lang, mode, count) },
       ],
       max_tokens: 4096,
-      temperature: 0.9,
+      temperature: 0.75, // Slightly reduced from 0.9 to reduce creative drift while keeping variety
     });
 
     const raw = response.choices[0]?.message?.content;
@@ -443,15 +473,34 @@ export async function generateExerciseBatch(
     const parsed: unknown = JSON.parse(raw);
     const exercises = validateExerciseBatch(parsed, count);
 
-    console.log(`[EXERCISE_BATCH] Success: ${exercises.length} exercises generated`);
+    // If AI exercises are insufficient, supplement with safe templates
+    if (exercises.length < Math.min(count * 0.5, 8) && lang === "bg") {
+      const templates = getSafeTemplates(topicId, grade);
+      if (templates.length > 0) {
+        console.log(`[EXERCISE_BATCH] Supplementing with ${templates.length} safe templates for topic=${topicId}`);
+        exercises.unshift(...templates.slice(0, Math.min(templates.length, count - exercises.length)));
+      }
+    }
+
+    console.log(`[EXERCISE_BATCH] Success: ${exercises.length} exercises generated (topic=${topicId})`);
     return exercises;
   } catch (err) {
     console.error("[EXERCISE_BATCH] Failed:", String(err));
+
+    // Fallback: return safe templates if available for BG locale
+    if (lang === "bg") {
+      const templates = getSafeTemplates(topicId, grade);
+      if (templates.length > 0) {
+        console.log(`[EXERCISE_BATCH] Using ${templates.length} safe templates as fallback for topic=${topicId}`);
+        return templates;
+      }
+    }
+
     return [];
   }
 }
 
-// ─── Public API ───────────────────────────────────────────────────────────────
+// ─── Public API: Generate Full Lesson ────────────────────────────────────────
 
 export async function generateAILesson(
   subjectId: string,
@@ -477,7 +526,7 @@ export async function generateAILesson(
         { role: "user", content: buildLessonUserPrompt(subjectId, topicId, grade, lang, mode) },
       ],
       max_tokens: 2048,
-      temperature: 0.8,
+      temperature: 0.75, // Reduced from 0.8 to improve consistency
     });
 
     const raw = response.choices[0]?.message?.content;

@@ -1,0 +1,153 @@
+FIRST PERFORM A FULL AUDIT BEFORE IMPLEMENTING ANYTHING.
+
+Goal:
+Use the newly implemented topicConfidenceTracker to guide learning flow decisions without breaking or duplicating any existing adaptive systems.
+
+IMPORTANT:
+Do NOT recreate logic that already exists in:
+- topicProgression
+- weakTopicMemoryTracker
+- exerciseDifficultyTracker
+- quiz readiness system
+- sessionPerformanceTracker
+
+If similar behavior already exists anywhere in the codebase, STOP and report instead of duplicating.
+
+AUDIT FIRST:
+1. Locate where topicProgression decides the next learning step.
+2. Locate where quiz readiness is calculated.
+3. Locate where weak topic remediation happens.
+4. Locate where lesson continuation / resume learning logic exists.
+
+Report:
+- which components control learning flow
+- where topicConfidence could safely influence decisions
+
+DO NOT IMPLEMENT UNTIL AUDIT IS COMPLETE.
+
+------------------------------------------------
+
+TARGET FEATURE
+
+Introduce "Confidence-Aware Learning Guidance".
+
+This should NOT override systems.
+It should only gently guide them.
+
+Behavior:
+
+IF topicConfidence < 40
+→ Encourage more practice before advancing
+
+IF topicConfidence 40-70
+→ Continue normal learning flow
+
+IF topicConfidence > 70
+→ Allow quiz readiness to increase faster
+
+IF topicConfidence > 85
+→ Mark topic as strong candidate for progression
+
+IMPORTANT:
+This must remain advisory logic, not a forced override.
+
+------------------------------------------------
+
+IMPLEMENTATION PREFERENCE
+
+Create a small utility module:
+
+src/lib/topicConfidenceGuidance.ts
+
+Functions:
+
+getConfidenceGuidance(confidence)
+
+returns:
+
+{
+  recommendedAction:
+    "practice_more" |
+    "continue_learning" |
+    "ready_for_quiz" |
+    "ready_to_progress"
+}
+
+------------------------------------------------
+
+SAFE INTEGRATION POINTS
+
+Only integrate where safe:
+
+1. lesson-viewer logic
+2. quiz readiness calculation
+3. topic progression hints
+
+DO NOT modify core difficulty engine.
+
+------------------------------------------------
+
+UI (OPTIONAL – minimal)
+
+If safe:
+
+Display small guidance text:
+
+Examples:
+
+"Нека потренираме още малко."
+"Готов си за тест!"
+"Можем да продължим към следващата тема."
+
+If UI risk is high, skip UI.
+
+------------------------------------------------
+
+SAFETY RULES
+
+No DB changes  
+No schema changes  
+No routing changes  
+No breaking changes  
+Do not replace existing logic  
+Only add a guidance layer
+
+------------------------------------------------
+
+VALIDATION
+
+Confirm:
+
+TypeScript passes  
+Junior lessons still load  
+Прогимназия lessons still load  
+topicConfidence still updates correctly  
+quiz readiness still works  
+difficulty adjustment still works  
+weakTopicMemoryTracker still works
+
+------------------------------------------------
+
+TEST STEPS (Preview)
+
+1. Open lesson
+2. Answer several correctly
+3. Confidence should increase
+4. Guidance should change accordingly
+
+Example:
+
+low confidence → practice suggestion  
+medium confidence → continue  
+high confidence → quiz suggestion
+
+------------------------------------------------
+
+FINAL REPORT
+
+State:
+
+1. What existing systems were reused
+2. What was added
+3. Why this does not duplicate existing logic
+4. Estimated impact on learning quality

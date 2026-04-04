@@ -1327,6 +1327,20 @@ export function ParentDashboard() {
     "division": { en: "Division", bg: "Деление", es: "División", de: "Division", fr: "Division" },
     "reading_comprehension_basic": { en: "Reading Comprehension", bg: "Разбиране на текст", es: "Comprensión", de: "Leseverständnis", fr: "Compréhension" },
     "word_problems": { en: "Word Problems", bg: "Текстови задачи", es: "Problemas", de: "Textaufgaben", fr: "Problèmes écrits" },
+    "perimeter-area": { en: "Perimeter & Area", bg: "Периметър и лице", es: "Perímetro y área", de: "Umfang und Fläche", fr: "Périmètre et aire" },
+    "algebra-basics": { en: "Algebra Basics", bg: "Основи на алгебра", es: "Álgebra básica", de: "Algebraische Grundlagen", fr: "Bases de l'algèbre" },
+    "fractions-adv": { en: "Fractions", bg: "Обикновени дроби", es: "Fracciones", de: "Brüche", fr: "Fractions" },
+    "decimal-fractions": { en: "Decimal Fractions", bg: "Десетични дроби", es: "Decimales", de: "Dezimalbrüche", fr: "Décimales" },
+    "natural-numbers": { en: "Natural Numbers", bg: "Естествени числа", es: "Números naturales", de: "Natürliche Zahlen", fr: "Nombres naturels" },
+    "nat-num-review": { en: "Number Review", bg: "Преговор на естествени числа", es: "Revisión", de: "Zahlenwiederholung", fr: "Révision" },
+    "addition-subtraction": { en: "Addition & Subtraction", bg: "Събиране и изваждане", es: "Suma y resta", de: "Addition und Subtraktion", fr: "Addition et soustraction" },
+    "grammar-eng": { en: "Grammar", bg: "Граматика", es: "Gramática", de: "Grammatik", fr: "Grammaire" },
+    "phonetics-review": { en: "Phonetics", bg: "Преговор по фонетика", es: "Fonética", de: "Phonetik", fr: "Phonétique" },
+    "physical-geography": { en: "Physical Geography", bg: "Физическа география", es: "Geografía física", de: "Physische Geographie", fr: "Géographie physique" },
+    "thermodynamics": { en: "Thermodynamics", bg: "Термодинамика", es: "Termodinámica", de: "Thermodynamik", fr: "Thermodynamique" },
+    "mixtures": { en: "Mixtures", bg: "Смеси", es: "Mezclas", de: "Mischungen", fr: "Mélanges" },
+    "geometry": { en: "Geometry", bg: "Геометрия", es: "Geometría", de: "Geometrie", fr: "Géométrie" },
+    "punctuation": { en: "Punctuation", bg: "Пунктуация", es: "Puntuación", de: "Satzzeichen", fr: "Ponctuation" },
   };
 
   const translateBadgeTitle = (badgeTitle: string): string => {
@@ -1335,6 +1349,11 @@ export function ParentDashboard() {
 
   const translateTopicLabel = (topicId: string): string => {
     return topicTranslations[topicId]?.[lang] ?? topicId;
+  };
+
+  /* ── Chart label formatter that translates subject names ── */
+  const formatChartSubjectLabel = (subjectId: string): string => {
+    return translateSubjectLabel(subjectId);
   };
 
   const unlockedZones = ZONE_ORDER.filter(zoneName => {
@@ -1864,11 +1883,20 @@ export function ParentDashboard() {
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={avgBySubject}>
-                    <XAxis dataKey="subject" tick={{ fontSize: 12 }} />
+                    <XAxis 
+                      dataKey="subject" 
+                      tick={({ x, y, payload }) => (
+                        <text x={x} y={y} textAnchor="middle" fontSize={12}>
+                          {formatChartSubjectLabel(payload.value)}
+                        </text>
+                      )}
+                    />
                     <YAxis domain={[0, 100]} />
                     <Tooltip
                       cursor={{ fill: 'transparent' }}
                       contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}
+                      formatter={(value) => value}
+                      labelFormatter={(label) => formatChartSubjectLabel(label)}
                     />
                     <Bar dataKey="score" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
                   </BarChart>

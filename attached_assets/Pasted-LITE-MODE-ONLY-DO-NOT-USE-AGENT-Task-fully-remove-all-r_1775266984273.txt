@@ -1,0 +1,178 @@
+LITE MODE ONLY. DO NOT USE AGENT.
+
+Task: fully remove all remaining English/raw IDs from the Parent Dashboard UI and show Bulgarian labels everywhere.
+
+IMPORTANT RULES
+- Audit first before editing.
+- Reuse existing translation/localization helpers if they already exist.
+- Do not duplicate translation maps if there is already one in the codebase.
+- Do not change business logic, DB schema, API contracts, analytics calculations, or progress logic.
+- UI display/localization fix only.
+- Test only in Replit Preview.
+- After changes, verify visually and by searching code for remaining raw strings.
+
+PROBLEM CONFIRMED FROM PREVIEW
+English/raw labels still appear in:
+1. "Зони за подобрение"
+2. badge cards
+3. chart axis / chart labels
+4. mission activity subject short labels
+
+Examples still visible:
+- mathematics-advanced → perimeter-area
+- english-advanced → grammar-eng
+- bulgarian-language-adv → phonetics-review
+- physics → thermodynamics
+- chemistry → mixtures
+- geography → physical-geography
+- mathematics → geometry
+- bulgarian_language → reading_comprehension_basic
+- On Fire!
+- mathematics / geography / reading-literature / nature-science / physics / chemistry / tts / voice_session
+- math
+
+STEP 1 — AUDIT
+Find the exact parent dashboard components rendering these strings.
+Likely areas:
+- Parent dashboard overview cards
+- improvement zones list
+- weekly progress / teacher summary helpers
+- badges grid
+- charts config / chart label formatter
+- mission activity item renderer
+- any helper that formats subjectId/topicId/achievementId
+
+STEP 2 — REUSE EXISTING TRANSLATION LAYER IF PRESENT
+Search for existing helpers/maps like:
+- translateSubject
+- translateTopic
+- displaySubjectName
+- displayTopicName
+- localization map
+- parent dashboard formatter
+If one exists, extend it instead of creating a duplicate.
+If none exists, create one shared helper used by ALL parent dashboard renderers.
+
+STEP 3 — APPLY BULGARIAN DISPLAY MAPPING EVERYWHERE
+Make sure all renderers convert raw IDs before display.
+
+Required Bulgarian mappings at minimum:
+
+SUBJECTS
+mathematics -> Математика
+mathematics-advanced -> Математика
+bulgarian_language -> Български език
+bulgarian-language-adv -> Български език
+english-language -> Английски език
+english-advanced -> Английски език
+reading-literature -> Четене и литература
+nature-science -> Околен свят
+geography -> География
+physics -> Физика
+chemistry -> Химия
+biology -> Биология
+tts -> AI четене
+voice_session -> Гласова сесия
+session -> Сесия
+math -> Математика
+
+TOPICS
+reading_comprehension_basic -> Разбиране на текст
+addition -> Събиране
+division -> Деление
+punctuation -> Пунктуация
+perimeter-area -> Периметър и лице
+algebra-basics -> Основи на алгебрата
+fractions-adv -> Обикновени дроби
+decimal-fractions -> Десетични дроби
+natural-numbers -> Естествени числа
+nat-num-review -> Преговор на естествени числа
+addition-subtraction -> Събиране и изваждане
+grammar-eng -> Граматика
+phonetics-review -> Преговор по фонетика
+physical-geography -> Физическа география
+thermodynamics -> Термодинамика
+mixtures -> Смеси
+geometry -> Геометрия
+
+ACHIEVEMENTS
+On Fire! -> В серия!
+First Steps -> Първи стъпки
+
+STEP 4 — FORMAT COMBINED LABELS
+Where UI shows:
+subjectId -> topicId
+display:
+Bulgarian Subject -> Bulgarian Topic
+
+Examples:
+mathematics-advanced -> perimeter-area
+must become:
+Математика -> Периметър и лице
+
+bulgarian_language -> reading_comprehension_basic
+must become:
+Български език -> Разбиране на текст
+
+STEP 5 — CHART LABELS
+Ensure chart axis/category labels also use the same translation helper.
+No raw IDs may remain on charts.
+
+STEP 6 — BADGES
+Ensure badge titles are localized too.
+At minimum:
+On Fire! -> В серия!
+Keep already localized badges unchanged.
+
+STEP 7 — FALLBACK SAFETY
+If a raw key is missing from map:
+- replace hyphens/underscores with spaces
+- convert to readable Bulgarian ONLY if existing map exists
+- otherwise keep readable humanized text, but no raw snake_case or kebab-case should appear in UI
+
+STEP 8 — VERIFICATION
+After implementing:
+1. Open Parent Dashboard in Preview
+2. Check:
+   - Zones for improvement
+   - Weekly progress
+   - Teacher summary
+   - Badges
+   - Performance chart
+   - Mission activity
+3. Search codebase for still-rendered raw strings in parent dashboard path
+
+STEP 9 — OUTPUT FORMAT
+Respond with exactly this structure:
+
+PARENT DASHBOARD LOCALIZATION AUDIT COMPLETE
+
+Files audited:
+- ...
+Files modified:
+- ...
+
+Existing translation helper reused:
+YES/NO
+
+New duplicate maps created:
+YES/NO
+
+Fixed areas:
+- Improvement zones
+- Badges
+- Charts
+- Mission activity
+- Weekly/summary text
+
+Still visible English/raw IDs in Preview:
+YES/NO
+
+TypeScript errors:
+YES/NO
+
+Runtime errors:
+YES/NO
+
+STATUS:
+Fully Bulgarian parent dashboard

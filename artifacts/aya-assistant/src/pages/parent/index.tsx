@@ -807,6 +807,13 @@ function TeacherExportCard({
     return focus;
   };
 
+  const translateTopicLabel = (topicId: string): string => {
+    if (lang === "bg") {
+      return topicTranslations[topicId.toLowerCase()]?.[lang] ?? topicId;
+    }
+    return topicTranslations[topicId.toLowerCase()]?.[lang] ?? topicId;
+  };
+
   if (isLoading) {
     return (
       <div className="bg-purple-50 p-5 rounded-2xl border border-purple-200 animate-pulse h-32" />
@@ -831,7 +838,7 @@ function TeacherExportCard({
             <div className="flex flex-wrap gap-1.5">
               {exportData.strongTopics.map(topic => (
                 <span key={topic} className="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full">
-                  ✓ {topic}
+                  ✓ {translateTopicLabel(topic)}
                 </span>
               ))}
             </div>
@@ -844,7 +851,7 @@ function TeacherExportCard({
             <div className="flex flex-wrap gap-1.5">
               {exportData.weakTopics.map(topic => (
                 <span key={topic} className="bg-red-100 text-red-700 text-xs font-medium px-2 py-1 rounded-full">
-                  ⚠ {topic}
+                  ⚠ {translateTopicLabel(topic)}
                 </span>
               ))}
             </div>

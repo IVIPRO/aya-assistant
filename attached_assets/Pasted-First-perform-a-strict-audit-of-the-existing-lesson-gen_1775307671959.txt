@@ -1,0 +1,54 @@
+First perform a strict audit of the existing lesson generation pipeline and determine whether true streaming or partial progressive rendering is already supported anywhere in the app.
+
+Search for:
+- streaming OpenAI responses
+- SSE / event stream / chunked response
+- incremental lesson rendering
+- partial explanation render before full lesson completes
+- async generator / streamText / stream handlers
+- frontend support for partial lesson chunks
+
+Important:
+- Do NOT implement anything until the audit is complete
+- Do NOT duplicate existing stream code
+- Do NOT refactor the working lesson engine unless absolutely required
+- If streaming is already partially implemented, report what exists and what blocks usage in lesson generation
+
+If streaming is NOT already implemented, do NOT immediately rewrite the whole system.
+Instead produce a minimal implementation plan inside the codebase context for the SAFEST Lite-compatible version.
+
+Preferred order:
+1. Reuse existing cache + prefetch system first
+2. Only then add progressive UI rendering if backend architecture safely supports it
+
+GOAL
+Reduce perceived waiting time for AI lesson generation by showing useful progress earlier without breaking lesson structure.
+
+SAFE VERSION PREFERRED
+- Show structured progressive loading states:
+  “AYA подготвя обяснение…”
+  “AYA създава примери…”
+  “AYA подготвя упражнения…”
+- If true backend streaming is easy and already supported in architecture, enable it
+- If true streaming is NOT safe, keep backend unchanged and improve only progressive UX messaging
+
+STRICT RULES
+- No breaking schema changes
+- No broken lesson JSON contract
+- No duplicate lesson saves
+- No regression in Junior or Прогимназия
+- No unnecessary migration to a new architecture
+- Keep Lite-safe scope unless impossible
+
+AFTER AUDIT / IMPLEMENTATION
+Return:
+- what already exists
+- what was added
+- whether true streaming was possible
+- whether only progressive UI was added
+- risk level
+- files changed
+- TypeScript/build status
+
+Final verdict:
+TRUE STREAMING ENABLED / SAFE PROGRESSIVE UI ONLY / AUDIT ONLY

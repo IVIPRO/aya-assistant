@@ -29,6 +29,23 @@ export type TopicCategory =
   | "social_studies"
   | "general";
 
+// ─── Semantic Intent (prevent cross-topic drift) ────────────────────────────────
+
+/**
+ * Semantic intent defines WHAT the topic is conceptually about.
+ * This prevents mixing related but distinct concepts (e.g., "breathing" vs "water evaporation").
+ * Used to validate that all generated content (question, hint, explanation) stay on the same
+ * semantic topic.
+ */
+export interface SemanticIntent {
+  /** Core concept being tested */
+  concept: string;
+  /** What the topic IS about */
+  includes: string[];
+  /** What the topic IS NOT about - explicitly exclude these */
+  excludes: string[];
+}
+
 // ─── Topic ID → Category Mapping ─────────────────────────────────────────────
 
 const TOPIC_CATEGORY_MAP: Record<string, TopicCategory> = {
@@ -671,4 +688,179 @@ CORE CONSISTENCY RULES (apply to every exercise):
 3. TOPIC FOCUS: Do NOT drift from the stated topic. If the topic is about patterns, every exercise must be about patterns. If the topic is about nouns, every exercise must test nouns. Never mix subjects within a batch.
 4. ANSWER IN OPTIONS: For multiple-choice: the "correctAnswer" string must appear EXACTLY in the "options" array. Spelling and capitalisation must match.
 5. AGE APPROPRIATE: Use vocabulary and sentence complexity appropriate for the grade level. For grades 1-2: short simple sentences only.`;
+}
+
+// ─── Semantic Intent Map ──────────────────────────────────────────────────────
+
+const SEMANTIC_INTENT_MAP: Record<string, SemanticIntent> = {
+  // Examples of precise semantic intents to prevent cross-topic drift
+  breathing_respiration: {
+    concept: "Breathing and respiration (inhaling oxygen, exhaling CO2)",
+    includes: [
+      "breathing",
+      "respiration",
+      "inhale",
+      "exhale",
+      "oxygen",
+      "air",
+      "lungs",
+      "breath",
+      "дишане",
+      "дишам",
+      "кислород",
+      "въздух",
+      "белите дробове",
+    ],
+    excludes: [
+      "water",
+      "evaporation",
+      "condensation",
+      "вода",
+      "изпарение",
+      "кондензация",
+    ],
+  },
+  water_cycle: {
+    concept: "Water cycle (evaporation, condensation, precipitation)",
+    includes: [
+      "water",
+      "evaporation",
+      "condensation",
+      "precipitation",
+      "cycle",
+      "sun",
+      "rain",
+      "cloud",
+      "вода",
+      "изпарение",
+      "кондензация",
+      "влага",
+      "слънце",
+      "облак",
+    ],
+    excludes: ["breathing", "respiration", "lungs", "дишане"],
+  },
+  addition: {
+    concept: "Addition (combining quantities with +)",
+    includes: [
+      "add",
+      "plus",
+      "sum",
+      "total",
+      "altogether",
+      "more",
+      "combine",
+      "събира",
+      "плюс",
+      "сума",
+    ],
+    excludes: ["subtract", "minus", "minus", "less", "отнема", "минус"],
+  },
+  subtraction: {
+    concept: "Subtraction (removing quantities with -)",
+    includes: [
+      "subtract",
+      "minus",
+      "less",
+      "remove",
+      "take away",
+      "difference",
+      "how many left",
+      "изважда",
+      "минус",
+      "отнема",
+    ],
+    excludes: ["add", "plus", "sum", "more", "събира", "плюс"],
+  },
+  color_patterns: {
+    concept: "Color patterns (repeating sequences of colors)",
+    includes: [
+      "color",
+      "pattern",
+      "sequence",
+      "repeat",
+      "next",
+      "alternating",
+      "цвет",
+      "закономер",
+      "редица",
+      "повтаря",
+    ],
+    excludes: [
+      "numbers",
+      "shapes",
+      "size",
+      "logic puzzle",
+      "deduction",
+      "числа",
+      "форми",
+    ],
+  },
+  nouns: {
+    concept: "Nouns (words that name people, places, things)",
+    includes: [
+      "noun",
+      "name",
+      "person",
+      "place",
+      "thing",
+      "subject",
+      "noun is",
+      "съществител",
+      "назовава",
+    ],
+    excludes: ["verb", "adjective", "action", "глагол", "прилагател"],
+  },
+};
+
+export function getSemanticIntent(topicId: string): SemanticIntent | null {
+  return SEMANTIC_INTENT_MAP[topicId] ?? null;
+}
+
+/**
+ * Check if content appears to be semantically aligned with the intent.
+ * Returns true if content appears to stay on topic, false if there's obvious drift.
+ * This is a heuristic check — uses keyword overlap to detect major semantic misalignment.
+ */
+export function validateSemanticIntent(
+  content: string,
+  intent: SemanticIntent,
+  checkIncludes: boolean = true,
+): boolean {
+  if (!content || content.length < 5) return true; // Empty content passes
+  const c = content.toLowerCase();
+
+  if (checkIncludes) {
+    // Check that content contains at least one "includes" keyword
+    const hasIncludeKeyword = intent.includes.some((kw) => c.includes(kw.toLowerCase()));
+    if (!hasIncludeKeyword) return false;
+  }
+
+  // Check that content does NOT contain "excludes" keywords
+  const hasExcludeKeyword = intent.excludes.some((kw) => c.includes(kw.toLowerCase()));
+  if (hasExcludeKeyword) return false;
+
+  return true;
+}
+
+export function validateExerciseSemanticAlignment(
+  question: string,
+  hint: string | null,
+  explanation: string | null,
+  intent: SemanticIntent,
+): boolean {
+  // Question MUST align with intent
+  if (!validateSemanticIntent(question, intent, true)) return false;
+
+  // Hint should align if present and substantial
+  if (hint && hint.length > 5) {
+    if (!validateSemanticIntent(hint, intent, false)) return false;
+  }
+
+  // Explanation should align if present and substantial
+  if (explanation && explanation.length > 5) {
+    if (!validateSemanticIntent(explanation, intent, false)) return false;
+  }
+
+  return true;
 }

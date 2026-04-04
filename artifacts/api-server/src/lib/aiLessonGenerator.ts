@@ -7,6 +7,9 @@ import {
   getCoreConsistencyRules,
   isExerciseConsistent,
   getSafeTemplates,
+  getSemanticIntent,
+  validateExerciseSemanticAlignment,
+  type SemanticIntent,
 } from "./taskConsistencyGuard";
 
 type LangCode = "en" | "bg" | "es" | "de" | "fr";
@@ -364,12 +367,23 @@ function buildExerciseBatchPrompt(
   const consistencyRules = getCoreConsistencyRules();
   const framing = getTopicAlignedFraming(category);
 
+  // Get semantic intent to prevent cross-topic drift
+  const intent = getSemanticIntent(topicId);
+  const semanticConstraint = intent
+    ? `\nSEMANTIC INTENT — PREVENT CROSS-TOPIC DRIFT:
+The topic is specifically about: ${intent.concept}
+DO include these concepts: ${intent.includes.join(", ")}
+DO NOT include these concepts: ${intent.excludes.join(", ")}
+Every question, hint, and explanation must stay aligned with the semantic intent and NOT mix unrelated concepts.
+For example, if the topic is about BREATHING, never mix in information about WATER EVAPORATION or other unrelated concepts.`
+    : "";
+
   return `Generate exactly ${count} practice exercises in ${langName} for:
 - Subject: ${subjectLabel}
 - Topic: ${topicLabel}
 - Grade: ${gradeLabel}
 - ${difficultyInstruction}
-- Thematic context: ${framing}${bulgarianNote}
+- Thematic context: ${framing}${bulgarianNote}${semanticConstraint}
 
 ${topicGuidance}
 
@@ -455,7 +469,12 @@ function hintAndQuestionMatchTopic(
 
 // ─── Exercise Batch Validator ─────────────────────────────────────────────────
 
-function validateExerciseBatch(raw: unknown, expectedCount: number, requiredTopicId: string): ExerciseItem[] {
+function validateExerciseBatch(
+  raw: unknown,
+  expectedCount: number,
+  requiredTopicId: string,
+  semanticIntent?: SemanticIntent | null,
+): ExerciseItem[] {
   if (typeof raw !== "object" || raw === null) throw new Error("Not an object");
   const obj = raw as Record<string, unknown>;
   const exercises = obj["exercises"];
@@ -495,6 +514,16 @@ function validateExerciseBatch(raw: unknown, expectedCount: number, requiredTopi
       continue;
     }
 
+    // Check semantic alignment if intent is provided
+    if (semanticIntent) {
+      if (!validateExerciseSemanticAlignment(item.question, item.hint, item.explanation, semanticIntent)) {
+        console.warn(
+          `[EXERCISE_BATCH] Semantic drift: question/hint/explanation on "${requiredTopicId}" drift from intent "${semanticIntent.concept}"`,
+        );
+        continue;
+      }
+    }
+
     result.push(item);
   }
 
@@ -521,6 +550,8 @@ export async function generateExerciseBatch(
 
   console.log(`[EXERCISE_BATCH] Generating ${count}: subject=${subjectId} topic=${topicId} grade=${grade} lang=${lang} mode=${mode}`);
 
+  const semanticIntent = getSemanticIntent(topicId);
+
   try {
     const response = await openaiClient.chat.completions.create({
       model: "gpt-4o-mini",
@@ -537,7 +568,7 @@ export async function generateExerciseBatch(
     if (!raw) throw new Error("Empty AI response");
 
     const parsed: unknown = JSON.parse(raw);
-    const exercises = validateExerciseBatch(parsed, count, topicId);
+    const exercises = validateExerciseBatch(parsed, count, topicId, semanticIntent);
 
     // If AI exercises are insufficient, supplement with safe templates
     if (exercises.length < Math.min(count * 0.5, 8) && lang === "bg") {

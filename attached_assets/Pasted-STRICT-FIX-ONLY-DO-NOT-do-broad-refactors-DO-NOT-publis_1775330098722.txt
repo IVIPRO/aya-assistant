@@ -1,0 +1,80 @@
+STRICT FIX ONLY. DO NOT do broad refactors. DO NOT publish. WORK ONLY IN PREVIEW. Audit current codebase and fix the real root cause of cross-topic exercise generation in Junior lessons.
+
+Confirmed failing example from Preview:
+Topic title: "Вода и въздух"
+Question: "Какво дишаме?"
+Hint incorrectly talks about water evaporation / leaving water in the sun.
+This proves the system still mixes semantic contexts inside the same generated task.
+
+GOAL:
+For every generated lesson/exercise, the following must always be semantically aligned:
+1. topic title
+2. explanation
+3. question
+4. hint
+5. example
+6. correct answer
+7. retry / regenerate result
+
+ROOT-CAUSE TASK:
+Audit the FULL generation path, not just surface prompts:
+- lesson generation prompt(s)
+- exercise generation prompt(s)
+- fallback templates
+- retry / “Опитай пак”
+- “Опитай друга версия”
+- validator logic
+- topic/category mapping
+- semantic consistency checks
+- post-generation repair / normalization step if needed
+
+REQUIRED FIX:
+Implement a strict semantic-consistency guard before content is returned to UI.
+
+Rules:
+- Question, hint, explanation, and example must all reference the SAME topic intent.
+- If topic is “Какво дишаме?”, hint must be about air / breathing, not water / evaporation.
+- If topic is about hygiene, hint must stay on hygiene, not food or weather.
+- If topic is about patterns, hint must stay on patterns, not unrelated objects.
+- Retry/regenerate must preserve same topic intent, not drift to neighbor concepts.
+
+MANDATORY IMPLEMENTATION:
+1. Add a normalized topic-intent field derived from topic/category/subtopic.
+2. Pass that intent through every generation and retry path.
+3. Add server-side semantic validation before returning content.
+4. If generated content fails validation, regenerate automatically up to a safe small limit.
+5. If regeneration still fails, use a SAFE deterministic fallback template for that exact topic intent.
+6. Ensure fallback templates are topic-specific, not generic per broad subject.
+7. Keep age-appropriate Bulgarian language for grade level.
+8. Do not break caching, progress tracking, resume learning, prefetch, or fast loading.
+
+IMPORTANT CONSTRAINTS:
+- Preserve existing speed optimizations.
+- Preserve React Query / cache behavior.
+- Preserve Junior + Прогимназия functionality.
+- No duplicate DB writes.
+- No Autonomous-wide architecture rewrite.
+- Minimal targeted changes only.
+
+ADD TEST COVERAGE / VALIDATION:
+Create or run targeted checks for at least these cases:
+- “Вода и въздух” → “Какво дишаме?” → all hint/example/explanation must stay about air/breathing
+- hygiene topic → no water evaporation hints
+- math topic → no language hints
+- reading topic → no logic-game hints
+- retry button stays on same intent
+- “Опитай друга версия” stays on same intent but changes content variation
+
+DELIVERABLE FORMAT:
+1. Root cause found
+2. Exact files changed
+3. What validation was added
+4. Why this fix prevents future cross-topic drift
+5. Exact Preview test steps
+6. Confirmation that build passes and Preview works
+
+Again:
+- FIX ONLY this semantic consistency bug properly
+- NO publish
+- NO broad redesign
+- TEST IN PREVIEW

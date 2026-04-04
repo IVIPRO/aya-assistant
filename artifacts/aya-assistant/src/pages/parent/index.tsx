@@ -654,6 +654,20 @@ function ParentProgressCard({
 
   const lbl = labels[lang];
 
+  /* ── Topic translation mapping (shared with Teacher Summary) ── */
+  const topicTranslations: Record<string, Record<LangCode, string>> = {
+    addition: { bg: "събиране", en: "addition", es: "suma", de: "addition", fr: "addition" },
+    subtraction: { bg: "изваждане", en: "subtraction", es: "resta", de: "subtraktion", fr: "soustraction" },
+    multiplication: { bg: "умножение", en: "multiplication", es: "multiplicación", de: "multiplikation", fr: "multiplication" },
+    division: { bg: "деление", en: "division", es: "división", de: "division", fr: "division" },
+    word_problems: { bg: "текстови задачи", en: "word problems", es: "problemas", de: "textaufgaben", fr: "problèmes écrits" },
+    reading_comprehension_basic: { bg: "разбиране на текст", en: "reading comprehension", es: "comprensión", de: "leseverständnis", fr: "compréhension" },
+  };
+
+  const translateTopicLabel = (topicId: string): string => {
+    return topicTranslations[topicId.toLowerCase()]?.[lang] ?? topicId;
+  };
+
   if (isLoading) {
     return (
       <div className="bg-blue-50 p-5 rounded-2xl border border-blue-200 animate-pulse h-32" />
@@ -681,7 +695,7 @@ function ParentProgressCard({
               <div className="flex flex-wrap gap-1.5">
                 {insights.weeklyWins.map(win => (
                   <span key={win} className="bg-green-100 text-green-700 text-xs font-medium px-2 py-1 rounded-full">
-                    ✨ {win}
+                    ✨ {translateTopicLabel(win)}
                   </span>
                 ))}
               </div>
@@ -694,7 +708,7 @@ function ParentProgressCard({
               <div className="flex flex-wrap gap-1.5">
                 {insights.weeklyNeedsSupport.map(item => (
                   <span key={item} className="bg-amber-100 text-amber-700 text-xs font-medium px-2 py-1 rounded-full">
-                    📌 {item}
+                    📌 {translateTopicLabel(item)}
                   </span>
                 ))}
               </div>

@@ -1,0 +1,95 @@
+Fix remaining English topic IDs in the "Седмичен напредък" (Weekly Progress) card so all visible topic names are Bulgarian.
+
+IMPORTANT RULES
+- Lite mode only
+- Do NOT use Agent
+- First audit existing topic label mapping before editing
+- Do NOT change backend logic
+- Do NOT change analytics calculations
+- Do NOT change database or API
+- Only fix UI topic label rendering
+- Reuse existing Bulgarian topic mapping if it already exists
+- Test in Preview only
+
+GOAL
+In the Parent dashboard, the "Седмичен напредък" card still shows English/internal topic IDs.
+Make all visible topic names Bulgarian and human-readable.
+
+CURRENT BUG
+These topic IDs appear in the Weekly Progress card:
+- division
+- addition
+- reading_comprehension_basic
+
+EXPECTED BULGARIAN LABELS
+- division → деление
+- addition → събиране
+- reading_comprehension_basic → разбиране на текст
+
+SECTIONS TO FIX
+Inside "Седмичен напредък":
+- "Седмични успехи"
+- "Нуждае се от подкрепа"
+- summary paragraph under the practice list
+
+STEP 1 — AUDIT FIRST
+Find where the Weekly Progress card renders topic labels.
+
+Check whether:
+1. it already has a topic label helper but is not using it
+2. it uses raw topic IDs directly
+3. a Bulgarian mapping already exists elsewhere in Parent dashboard
+
+Prefer reusing the same mapping/helper already used in the fixed Teacher Summary section.
+
+STEP 2 — APPLY FIX
+Use Bulgarian topic labels in all Weekly Progress displays.
+
+Examples:
+- Успехи в деление и разбиране на текст.
+- Препоръчваме малко повече упражнения в събиране и разбиране на текст.
+
+STEP 3 — KEEP LOGIC UNCHANGED
+Do NOT change:
+- success scoring
+- weak topic detection
+- recommendation logic
+- weekly analytics data source
+
+Only change presentation/localization of topic names.
+
+STEP 4 — VALIDATE
+Verify in Preview:
+- no English topic IDs remain in "Седмичен напредък"
+- the summary paragraph is fully Bulgarian
+- "Резюме за учител" remains correct
+- no TypeScript errors
+- no runtime errors
+
+STEP 5 — OUTPUT FORMAT
+
+WEEKLY PROGRESS LOCALIZATION FIX
+
+Files audited:
+(list)
+
+Files modified:
+(list)
+
+Reused existing topic mapping:
+YES / NO
+
+English topic IDs removed from Weekly Progress:
+YES / NO
+
+Teacher Summary still correct:
+YES / NO
+
+TypeScript errors:
+YES / NO
+
+Runtime errors:
+YES / NO
+
+FINAL STATUS:
+Fixed safely / Fixed partially / Needs one more small patch

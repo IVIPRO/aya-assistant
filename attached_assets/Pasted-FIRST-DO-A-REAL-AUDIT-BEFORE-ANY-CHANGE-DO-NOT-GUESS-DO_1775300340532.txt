@@ -1,0 +1,263 @@
+FIRST DO A REAL AUDIT BEFORE ANY CHANGE.  
+DO NOT GUESS.  
+DO NOT CREATE DUPLICATE CODE.  
+USE THE CURRENT CODEBASE AS SOURCE OF TRUTH.
+
+MODE: LITE (NOT AGENT)
+
+---
+
+## TASK
+
+Audit and fix the Junior / Начален етап curriculum system so it works the same way as Прогимназия.
+
+Current problem reported by user:
+
+- In Начален етап → Математика there is no "Деление" topic
+- Some lessons are not visible
+- The structure is not complete like Прогимназия
+- The UI shows only 5 topics in Mathematics
+
+The goal is NOT to redesign the system but to make Junior use the same lesson engine as Прогимназия.
+
+---
+
+# STEP 1 — CURRICULUM AUDIT
+
+Find where Junior curriculum is defined.
+
+Possible places:
+
+- juniorCurriculum.ts
+- juniorSubjects.ts
+- curriculumJunior.ts
+- data/junior/*
+- seed/junior/*
+- supabase seed data
+
+Identify:
+
+Junior subjects  
+Junior topics  
+Lessons per topic  
+
+Produce a short audit like:
+
+Junior curriculum found in:
+file/path/name
+
+Subjects:
+- mathematics
+- bulgarian_language
+- reading_literature
+- logic_thinking
+- nature_science
+- english_language
+
+Topics per subject.
+
+---
+
+# STEP 2 — COMPARE WITH PROGYMNASIUM ENGINE
+
+Find how Прогимназия loads lessons.
+
+Look for:
+
+lesson engine  
+lesson loader  
+topic → lesson mapping  
+
+Typical structure:
+
+subject  
+→ topic  
+→ lesson  
+→ exercise  
+→ test
+
+Confirm if Junior uses the same engine or a separate incomplete one.
+
+If Junior has its own broken implementation, migrate it to use the existing Progymnasium lesson system.
+
+DO NOT duplicate code.
+
+---
+
+# STEP 3 — FIX JUNIOR MATHEMATICS TOPICS
+
+Current UI topics:
+
+- Събиране
+- Изваждане
+- Текстови задачи
+- Геометрични фигури
+- Мерене
+
+Missing essential topics.
+
+Add if missing:
+
+Умножение  
+Деление  
+Числа до 10  
+Числа до 20  
+Сравнение на числа  
+Часовник (Време)
+
+Final minimal list:
+
+numbers_to_10  
+numbers_to_20  
+addition  
+subtraction  
+multiplication  
+division  
+word_problems  
+geometry  
+measurement  
+time_clock
+
+Translate UI labels to Bulgarian:
+
+numbers_to_10 → Числа до 10  
+numbers_to_20 → Числа до 20  
+addition → Събиране  
+subtraction → Изваждане  
+multiplication → Умножение  
+division → Деление  
+word_problems → Текстови задачи  
+geometry → Геометрични фигури  
+measurement → Мерене  
+time_clock → Часовник
+
+---
+
+# STEP 4 — ENSURE LESSONS EXIST
+
+Each topic must contain:
+
+lesson  
+exercise  
+test
+
+Example structure:
+
+topic: division
+
+lesson:
+intro explanation
+
+exercise:
+practice tasks
+
+test:
+short evaluation
+
+If lessons are missing, generate minimal structured lessons similar to other Junior topics.
+
+---
+
+# STEP 5 — FIX UI LESSON VISIBILITY
+
+Problem reported:
+
+"Уроците не се виждат".
+
+Check:
+
+topic view component  
+lesson loader  
+filter logic  
+
+Possible bug:
+
+lessonType filter excludes "lesson".
+
+Fix so that:
+
+Уроци  
+Упражнения  
+Тест
+
+all load correctly.
+
+---
+
+# STEP 6 — KEEP UI CONSISTENT WITH PROGYMNASIUM
+
+Ensure Junior UI uses the same components:
+
+LessonCard  
+ExerciseCard  
+TestCard  
+
+Do not create parallel UI components.
+
+---
+
+# STEP 7 — VERIFY SUBJECT COUNTS
+
+In Junior dashboard:
+
+Математика  
+Български език  
+Четене и литература  
+Логика и мислене  
+Околен свят  
+Английски език  
+
+Check the lesson counters.
+
+Example:
+
+2/5 урока
+
+must match actual lessons available.
+
+---
+
+# STEP 8 — TEST IN PREVIEW
+
+Test flow:
+
+Начален етап  
+→ Математика  
+→ Деление  
+→ Урок  
+→ Упражнение  
+→ Тест
+
+Confirm all load.
+
+---
+
+# STEP 9 — OUTPUT REPORT
+
+Return report in this format:
+
+JUNIOR CURRICULUM AUDIT COMPLETE
+
+Files inspected:
+...
+
+Files modified:
+...
+
+Junior lesson engine reused from Progymnasium:
+YES / NO
+
+Mathematics topics after fix:
+(list)
+
+Division topic added:
+YES / NO
+
+Lessons visible in UI:
+YES / NO
+
+Errors:
+NONE / list
+
+Status:
+Junior curriculum aligned with Progymnasium

@@ -1930,8 +1930,48 @@ function InteractiveLessonEngine({
                   {lang === "bg" ? `${questions.length} въпроса` : `${questions.length} questions`}
                 </p>
               </div>
-              <ActionBtn onClick={startQuiz} subject={subject} testId="btn-start-quiz">
-                {l.startQuiz} <Sparkles className="w-4 h-4" />
+
+              {/* ── Readiness Card ── */}
+              <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 rounded-2xl border-2 border-blue-300 dark:border-blue-700 p-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-bold text-blue-900 dark:text-blue-200">
+                      {lang === "bg" ? "Готовност за тест" : "Quiz Readiness"}
+                    </p>
+                    <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                      {readinessSignal.score}%
+                    </p>
+                  </div>
+                  <div className="w-full bg-blue-200 dark:bg-blue-900/40 rounded-full h-2">
+                    <div
+                      className="bg-gradient-to-r from-blue-400 to-blue-600 dark:from-blue-500 dark:to-blue-400 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${Math.min(readinessSignal.score, 100)}%` }}
+                    />
+                  </div>
+                  <p className={cn("text-sm font-semibold", 
+                    readinessSignal.score < 50 ? "text-amber-700 dark:text-amber-300" :
+                    readinessSignal.score < 75 ? "text-blue-700 dark:text-blue-300" :
+                    "text-green-700 dark:text-green-300"
+                  )}>
+                    {readinessSignal.score < 50 
+                      ? (lang === "bg" ? "Нека потренираме още." : "Let's practice more.")
+                      : readinessSignal.score < 75
+                      ? (lang === "bg" ? "Още малко и си готов." : "Almost there!")
+                      : (lang === "bg" ? "Готов/а си за тест! 🎉" : "You're ready for the quiz! 🎉")}
+                  </p>
+                </div>
+              </div>
+
+              <ActionBtn 
+                onClick={startQuiz} 
+                subject={subject} 
+                testId="btn-start-quiz"
+                disabled={readinessSignal.score < 75}
+              >
+                {readinessSignal.score >= 75 
+                  ? (lang === "bg" ? "Опитай тест" : "Attempt Quiz")
+                  : (lang === "bg" ? "Тренирай още малко" : "Practice More")}
+                {readinessSignal.score >= 75 && <Sparkles className="w-4 h-4" />}
               </ActionBtn>
             </div>
           )}

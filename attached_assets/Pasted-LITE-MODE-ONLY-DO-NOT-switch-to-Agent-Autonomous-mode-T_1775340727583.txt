@@ -1,0 +1,57 @@
+LITE MODE ONLY. DO NOT switch to Agent/Autonomous mode.
+
+Task: integrate the already-implemented session-based performance tracking + quiz readiness score into the UI for Junior and Прогимназия, using the existing logic only. Do NOT create a new tracking system. Do NOT duplicate backend work. First audit the current code and confirm which functions/state already exist for readiness/session tracking before changing anything.
+
+Goal:
+Show a small, friendly “readiness for quiz” indicator inside the lesson UI, and enable a quiz CTA only when readiness is high enough.
+
+Strict rules:
+1. Reuse the existing session-level readiness logic already implemented.
+2. No new DB tables.
+3. No schema changes.
+4. No new API endpoints unless absolutely required; prefer existing state/hooks/functions.
+5. No breaking changes to caching, prefetch, resume-learning, weak-topic memory, adaptive difficulty, progress tracking, or routing.
+6. Keep UI minimal and child-friendly.
+7. Work in Preview-safe mode only.
+8. Before coding, audit whether this UI piece already exists partially, to avoid duplicate implementation.
+
+What to add:
+A) In lesson view, display a compact readiness card/row, for example:
+- “Готовност за тест: 82%”
+- short status text:
+  - 0–49: “Нека потренираме още.”
+  - 50–74: “Още малко и си готов.”
+  - 75–100: “Готов/а си за тест!”
+
+B) Add a quiz CTA button:
+- if readiness >= 75:
+  - enabled button: “Опитай тест”
+- if readiness < 75:
+  - disabled button OR secondary muted state with text:
+    “Тренирай още малко”
+
+C) Keep the score/session info local to the current session exactly as the current implementation intends.
+D) Preserve localization style in Bulgarian.
+E) Keep the component visually lightweight and consistent with the rest of AYA.
+
+Validation checklist:
+1. Confirm the readiness score updates during the active lesson session.
+2. Confirm button state changes correctly when readiness crosses threshold 75.
+3. Confirm no duplicate tracking logic was created.
+4. Confirm Junior works.
+5. Confirm Прогимназия works.
+6. Confirm TypeScript build passes with 0 errors.
+7. Confirm Preview works.
+8. Confirm existing lesson loading speed optimizations remain intact.
+
+Output format:
+- First: AUDIT RESULT
+  - what existing readiness/session code was found
+  - where it is connected from
+  - whether any partial UI already existed
+- Then: CHANGES MADE
+- Then: FILES CHANGED
+- Then: TEST RESULTS
+- Then: FINAL STATUS
+
+If during audit you discover this exact UI integration already exists, STOP and report it instead of duplicating it.

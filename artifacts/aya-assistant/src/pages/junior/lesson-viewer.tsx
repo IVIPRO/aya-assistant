@@ -18,6 +18,7 @@ import { StoryLessonEngine } from "./story-engine";
 import { tryGenerateCurriculumTask, shouldUseCurriculumSystem, detectCurrentGrade, ensureValidTopicForGrade } from "@/lib/curriculumIntegration";
 import { diagnoseWrongAnswer, formatDiagnosisForDisplay } from "@/lib/wrongAnswerDiagnosis";
 import { buildAdaptiveProfile, getAdaptiveDifficulty } from "@/lib/adaptiveDifficulty";
+import { initializeSessionStats, recordSessionAnswer, computeReadinessScore, type SessionStats, type ReadinessSignal } from "@/lib/sessionPerformanceTracker";
 
 /* ─── Weak topic tracking ────────────────────────────────────────────── */
 const WEAK_TOPIC_THRESHOLD = 3;
@@ -760,6 +761,10 @@ function InteractiveLessonEngine({
   /* ── infinite practice state */
   const [infLoading, setInfLoading] = useState(false);
 
+  /* ── session-level readiness tracking */
+  const [sessionStats, setSessionStats] = useState<SessionStats>(() => initializeSessionStats());
+  const [readinessSignal, setReadinessSignal] = useState<ReadinessSignal>({ score: 0, level: "not_ready", details: { accuracy: 0, streakBonus: 0, consistency: 0, timeWarning: false } });
+
   /* Reset narration trigger when dialogue changes (phase transition) */
   useEffect(() => {
     setNarrationTriggered(false);
@@ -1277,6 +1282,10 @@ function InteractiveLessonEngine({
     if (given === correct) {
       trackAnswer(true);
       practiceCorrectRef.current += 1;
+      // ── Record in session readiness tracker
+      const updatedStats = recordSessionAnswer(sessionStats, true, false);
+      setSessionStats(updatedStats);
+      setReadinessSignal(computeReadinessScore(updatedStats));
       consecutiveCorrectRef.current += 1;
       curiositySolvedRef.current += 1; // count toward curiosity loop threshold
       setPhase({ kind: "practice", idx, attempts, feedback: "correct" });
@@ -1289,6 +1298,10 @@ function InteractiveLessonEngine({
       if (grade === 5 && subject.id === "mathematics") {
         trackMistake(topic.label[lang] ?? topic.label.en);
       }
+      // ── Record in session readiness tracker (mark as retry if not first attempt)
+      const updatedStats = recordSessionAnswer(sessionStats, false, attempts > 0);
+      setSessionStats(updatedStats);
+      setReadinessSignal(computeReadinessScore(updatedStats));
       const nextAttempts = attempts + 1;
       
       /* Phase 5.2: Diagnose wrong answer for grades 2 & 5 math */
@@ -1377,6 +1390,10 @@ function InteractiveLessonEngine({
     } else {
       lessonMistakesRef.current += 1;
     }
+    // ── Record in session readiness tracker
+    const updatedStats = recordSessionAnswer(sessionStats, correct, false);
+    setSessionStats(updatedStats);
+    setReadinessSignal(computeReadinessScore(updatedStats));
     setPhase({ kind: "quiz", idx, selected: optIdx, correct });
     /* Weak topics get a supportive wrong-answer message; others get generic */
     const wrongMsg = (topicContext === "weak" && ctxD.quizSupport)

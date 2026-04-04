@@ -1296,6 +1296,20 @@ export function ParentDashboard() {
   const strengths = avgBySubject.slice(0, 2);
   const weaknesses = avgBySubject.slice(-2).reverse().filter(s => s.score < 70);
 
+  /* ── Subject translation helper for UI display ── */
+  const subjectLabels: Record<string, Record<LangCode, string>> = {
+    "mathematics": { en: "Mathematics", bg: "Математика", es: "Matemáticas", de: "Mathematik", fr: "Mathématiques" },
+    "bulgarian-language": { en: "Bulgarian Language", bg: "Български език", es: "Lengua", de: "Bulgarische Sprache", fr: "Langue bulgare" },
+    "reading-literature": { en: "Reading", bg: "Четене", es: "Lectura", de: "Lesen", fr: "Lecture" },
+    "logic-thinking": { en: "Logic", bg: "Логика", es: "Lógica", de: "Logik", fr: "Logique" },
+    "nature-science": { en: "Nature", bg: "Околен свят", es: "Ciencias", de: "Naturwissenschaften", fr: "Sciences naturelles" },
+    "english-language": { en: "English", bg: "Английски език", es: "Inglés", de: "Englisch", fr: "Anglais" },
+  };
+
+  const translateSubjectLabel = (subjectId: string): string => {
+    return subjectLabels[subjectId]?.[lang] ?? subjectId;
+  };
+
   const unlockedZones = ZONE_ORDER.filter(zoneName => {
     const zone = { "Math Island": 0, "Reading Forest": 30, "Logic Mountain": 80, "English City": 150, "Science Planet": 250 };
     return (progressChild?.xp ?? 0) >= zone[zoneName as keyof typeof zone];
@@ -1698,7 +1712,7 @@ export function ParentDashboard() {
                     <span className="text-green-500">✅</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{m.title}</p>
-                      <p className="text-xs text-muted-foreground">{m.subject}</p>
+                      <p className="text-xs text-muted-foreground">{translateSubjectLabel(m.subject)}</p>
                     </div>
                     {m.completedAt && (
                       <span className="text-xs text-muted-foreground flex-shrink-0">
@@ -1720,7 +1734,7 @@ export function ParentDashboard() {
                   </h3>
                   {strengths.map(s => (
                     <div key={s.subject} className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-green-800">{s.subject}</span>
+                      <span className="text-sm font-medium text-green-800">{translateSubjectLabel(s.subject)}</span>
                       <span className="text-sm font-bold text-green-600 bg-green-100 px-2 py-0.5 rounded-full">{s.score}%</span>
                     </div>
                   ))}
@@ -1733,7 +1747,7 @@ export function ParentDashboard() {
                   </h3>
                   {weaknesses.map(s => (
                     <div key={s.subject} className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-orange-800">{s.subject}</span>
+                      <span className="text-sm font-medium text-orange-800">{translateSubjectLabel(s.subject)}</span>
                       <span className="text-sm font-bold text-orange-600 bg-orange-100 px-2 py-0.5 rounded-full">{s.score}%</span>
                     </div>
                   ))}
@@ -1849,7 +1863,7 @@ export function ParentDashboard() {
                     <span className="text-green-500 text-lg">✅</span>
                     <div>
                       <p className="text-sm font-medium">{m.title}</p>
-                      <p className="text-xs text-muted-foreground">{m.subject} · {m.completedAt ? new Date(m.completedAt as string).toLocaleDateString() : ''}</p>
+                      <p className="text-xs text-muted-foreground">{translateSubjectLabel(m.subject)} · {m.completedAt ? new Date(m.completedAt as string).toLocaleDateString() : ''}</p>
                     </div>
                   </div>
                 ))}
@@ -1858,7 +1872,7 @@ export function ParentDashboard() {
                     <span className="text-muted-foreground text-lg">⏳</span>
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">{m.title}</p>
-                      <p className="text-xs text-muted-foreground">{m.subject} · {plbl.missionPending}</p>
+                      <p className="text-xs text-muted-foreground">{translateSubjectLabel(m.subject)} · {plbl.missionPending}</p>
                     </div>
                   </div>
                 ))}

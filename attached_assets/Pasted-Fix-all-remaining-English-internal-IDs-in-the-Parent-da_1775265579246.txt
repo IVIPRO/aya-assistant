@@ -1,0 +1,116 @@
+Fix all remaining English/internal IDs in the Parent dashboard so every visible label is Bulgarian.
+
+IMPORTANT RULES
+- Lite mode only
+- Do NOT use Agent
+- Audit first before editing
+- Do NOT change backend logic
+- Do NOT change analytics logic
+- Do NOT change API responses
+- Only fix UI display/localization layer
+- Reuse existing Bulgarian mapping if already present
+- Test in Preview only
+
+GOAL
+Remove all remaining English words/internal IDs from the Parent dashboard.
+
+CURRENT ENGLISH STRINGS STILL VISIBLE
+
+In "Силни предмети":
+- mathematics
+- english-language
+
+In "Нуждае се от упражнения":
+- voice_session
+- session
+
+In "Седмичен напредък" summary paragraph:
+- division
+- reading_comprehension_basic
+- addition
+
+EXPECTED BULGARIAN LABELS
+
+Subjects:
+- mathematics → математика
+- english-language → английски език
+
+Session/activity labels:
+- voice_session → гласова сесия
+- session → сесия
+
+Topic labels:
+- division → деление
+- addition → събиране
+- reading_comprehension_basic → разбиране на текст
+
+STEP 1 — AUDIT FIRST
+Find all Parent dashboard components/widgets that render:
+- subject names
+- activity/session labels
+- topic labels
+- weekly summary paragraph
+
+Check whether:
+1. some widgets use raw IDs directly
+2. some widgets already use a Bulgarian mapping helper
+3. there are multiple separate mappings causing inconsistency
+
+STEP 2 — UNIFY DISPLAY MAPPING
+Safely reuse or create one shared UI-level Bulgarian mapping/helper for Parent dashboard visible labels.
+
+Ensure all these sections use Bulgarian display names:
+- Силни предмети
+- Нуждае се от упражнения
+- Седмичен напредък
+- summary paragraph under weekly progress
+- any similar visible analytics cards in Parent dashboard
+
+STEP 3 — KEEP LOGIC UNCHANGED
+Do NOT modify:
+- scores
+- weak-topic detection
+- ranking
+- dashboard calculations
+- database schema
+- API responses
+
+Only change rendering/display labels.
+
+STEP 4 — VALIDATE IN PREVIEW
+Verify:
+- no English words remain in Parent dashboard visible cards
+- "Силни предмети" is Bulgarian
+- "Нуждае се от упражнения" is Bulgarian
+- "Седмичен напредък" paragraph is Bulgarian
+- previously fixed "Резюме за учител" stays correct
+- no TypeScript errors
+- no runtime errors
+
+STEP 5 — OUTPUT FORMAT
+
+PARENT DASHBOARD LOCALIZATION FIX
+
+Files audited:
+(list)
+
+Files modified:
+(list)
+
+Shared Bulgarian mapping reused:
+YES / NO
+
+Remaining English labels removed:
+YES / NO
+
+Teacher Summary still correct:
+YES / NO
+
+TypeScript errors:
+YES / NO
+
+Runtime errors:
+YES / NO
+
+FINAL STATUS:
+Fully fixed / Partially fixed / One last small patch needed

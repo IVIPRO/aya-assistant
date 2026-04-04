@@ -1,0 +1,97 @@
+Fix mixed English phrases in the "Резюме за учител" (Teacher Summary) section so that all visible UI text is Bulgarian.
+
+IMPORTANT RULES
+- Lite mode only
+- Do NOT use Agent
+- Do NOT change backend logic
+- Do NOT change AI lesson generation
+- Only adjust UI text localization
+- No database or API changes
+- Test only in Preview
+
+GOAL
+Ensure that all labels, recommendation texts, and flags inside the Teacher Summary card appear fully in Bulgarian.
+
+CURRENT PROBLEM
+Inside "Резюме за учител" the following English phrases appear:
+
+repeated low success math
+repeated low success bulgarian
+needs review before advancing
+Reinforcement needed in addition
+Reinforcement needed in reading_comprehension_basic
+
+EXPECTED BULGARIAN TEXT
+
+repeated low success math
+→ Повтарящ се нисък успех по математика
+
+repeated low success bulgarian
+→ Повтарящ се нисък успех по български език
+
+needs review before advancing
+→ Нужен е преговор преди преминаване напред
+
+Reinforcement needed in addition
+→ Нужно е затвърждаване по събиране
+
+Reinforcement needed in reading_comprehension_basic
+→ Нужно е затвърждаване по разбиране на текст
+
+STEP 1 — LOCATE SOURCE
+Find the component generating the Teacher Summary block.
+
+Likely files:
+- parent dashboard
+- analytics summary
+- teacher-summary component
+- weakness flags builder
+
+STEP 2 — REPLACE HARD-CODED ENGLISH
+Replace English fallback strings with Bulgarian equivalents.
+
+If text is generated from topic IDs like:
+addition
+reading_comprehension_basic
+
+map them to Bulgarian labels:
+
+addition → събиране
+reading_comprehension_basic → разбиране на текст
+
+STEP 3 — KEEP LOGIC UNCHANGED
+Do NOT modify:
+- weakness detection
+- scoring logic
+- backend analytics
+- API endpoints
+
+Only adjust presentation text.
+
+STEP 4 — VALIDATE IN PREVIEW
+
+Verify that:
+
+"Слаби теми" remains Bulgarian  
+"Отбелязани области" shows Bulgarian phrases  
+"Препоръчан фокус" shows Bulgarian phrases  
+No English words remain in the summary card  
+No TypeScript errors appear  
+No runtime errors appear  
+
+STEP 5 — OUTPUT FORMAT
+
+FILES MODIFIED
+(list)
+
+English strings removed
+YES / NO
+
+Teacher summary now fully Bulgarian
+YES / NO
+
+TypeScript errors
+YES / NO
+
+Runtime errors
+YES / NO

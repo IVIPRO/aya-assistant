@@ -771,6 +771,42 @@ function TeacherExportCard({
 
   const lbl = labels[lang];
 
+  /* ── Translation mappings for intervention flags and teacher focus ── */
+  const topicTranslations: Record<string, Record<LangCode, string>> = {
+    addition: { bg: "събиране", en: "addition", es: "suma", de: "addition", fr: "addition" },
+    subtraction: { bg: "изваждане", en: "subtraction", es: "resta", de: "subtraktion", fr: "soustraction" },
+    multiplication: { bg: "умножение", en: "multiplication", es: "multiplicación", de: "multiplikation", fr: "multiplication" },
+    division: { bg: "деление", en: "division", es: "división", de: "division", fr: "division" },
+    word_problems: { bg: "текстови задачи", en: "word problems", es: "problemas", de: "textaufgaben", fr: "problèmes écrits" },
+    reading_comprehension_basic: { bg: "разбиране на текст", en: "reading comprehension", es: "comprensión", de: "leseverständnis", fr: "compréhension" },
+  };
+
+  const flagTranslations: Record<string, Record<LangCode, string>> = {
+    repeated_low_success_math: { bg: "Повтарящ се нисък успех по математика", en: "repeated low success math", es: "éxito bajo repetido en matemáticas", de: "wiederholter niedriger Erfolg in Mathematik", fr: "succès faible répété en mathématiques" },
+    repeated_low_success_bulgarian: { bg: "Повтарящ се нисък успех по български език", en: "repeated low success bulgarian", es: "éxito bajo repetido en búlgaro", de: "wiederholter niedriger Erfolg in Bulgarisch", fr: "succès faible répété en bulgare" },
+    needs_review_before_advancing: { bg: "Нужен е преговор преди преминаване напред", en: "needs review before advancing", es: "necesita revisión antes de avanzar", de: "benötigt Überprüfung vor dem Fortschritt", fr: "nécessite un examen avant d'avancer" },
+  };
+
+  const translateFlag = (flag: string): string => {
+    if (lang === "bg" || lang === "en") {
+      return flagTranslations[flag]?.[lang] ?? flag.replace(/_/g, " ");
+    }
+    return flag.replace(/_/g, " ");
+  };
+
+  const translateFocus = (focus: string): string => {
+    if (lang !== "bg") return focus;
+    
+    // Translate "Reinforcement needed in {topic}" to Bulgarian
+    const match = focus.match(/Reinforcement needed in (.+)/);
+    if (match) {
+      const topicId = match[1].toLowerCase();
+      const bgTopic = topicTranslations[topicId]?.[lang] ?? topicId;
+      return `Нужно е затвърждаване по ${bgTopic}`;
+    }
+    return focus;
+  };
+
   if (isLoading) {
     return (
       <div className="bg-purple-50 p-5 rounded-2xl border border-purple-200 animate-pulse h-32" />
@@ -822,7 +858,7 @@ function TeacherExportCard({
               {exportData.interventionFlags.map((flag, idx) => (
                 <li key={idx} className="flex items-center gap-2">
                   <span>🔔</span>
-                  <span>{flag.replace(/_/g, " ")}</span>
+                  <span>{translateFlag(flag)}</span>
                 </li>
               ))}
             </ul>
@@ -836,7 +872,7 @@ function TeacherExportCard({
               {exportData.suggestedTeacherFocus.map((focus, idx) => (
                 <li key={idx} className="flex items-start gap-2">
                   <span>💡</span>
-                  <span>{focus}</span>
+                  <span>{translateFocus(focus)}</span>
                 </li>
               ))}
             </ul>

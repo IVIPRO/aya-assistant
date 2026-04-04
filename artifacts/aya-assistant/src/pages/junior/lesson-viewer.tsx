@@ -2291,6 +2291,40 @@ export function LessonViewer({ subject, topic, initialMode, grade, lang, childId
 
   const topicContext: TopicContext = adaptiveProfile?.currentTopicStats?.context ?? "normal";
 
+  /* ── Silent variant prefetch after first lesson loads ── */
+  useEffect(() => {
+    if (!data || isLoading || !adaptiveProfile) return;
+
+    // Only prefetch once per variant seed
+    const prefetchVariant = lessonVariantSeed + 1;
+
+    // Silently prefetch next variant in the background
+    // This uses the same cache backend, so clicking "Try Another" will be faster
+    const prefetchLesson = async () => {
+      try {
+        const res = await fetch(
+          `/api/lessons/generate?subjectId=${subject.id}&topicId=${topic.id}&grade=${grade}&lang=${lang}&mode=${topicContext}&variant=${prefetchVariant}`,
+        );
+        if (res.ok) {
+          // Prefetch succeeded - the lesson is now cached in the database
+          // React Query will pick it up when user clicks "Try Another"
+          const lessonData = await res.json();
+          // Store in React Query cache so it's available immediately
+          queryClient.setQueryData(
+            ["lesson", subject.id, topic.id, grade, lang, prefetchVariant],
+            lessonData,
+          );
+        }
+      } catch {
+        // Silently fail - clicking "Try Another" will just regenerate if needed
+      }
+    };
+
+    // Start prefetch after a small delay to avoid competing with initial load
+    const timeoutId = setTimeout(prefetchLesson, 2000);
+    return () => clearTimeout(timeoutId);
+  }, [data, isLoading, adaptiveProfile, lessonVariantSeed, subject.id, topic.id, grade, lang, topicContext, queryClient]);
+
   const completeMutation = useMutation({
     mutationFn: async ({
       action, correctCount, totalCount,

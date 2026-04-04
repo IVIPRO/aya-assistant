@@ -1,0 +1,56 @@
+Before changing anything, audit whether the system already pre-generates or prefetches alternative AI lesson variants for the currently opened lesson.
+
+Search for:
+- prefetch on lesson open
+- background generation of variant 1 / variant 2 / variant 3
+- React Query prefetchQuery / warm cache logic
+- hidden requests after first lesson load
+- any queue / async job / silent cache warming for lessons
+
+Important:
+- Do NOT duplicate existing prefetch logic
+- Do NOT break the current working “Опитай друга версия” feature
+- Keep changes minimal and Lite-safe
+- If prefetch already exists, stop and report exactly why the button is still slow
+
+If prefetch does NOT exist, implement a safe minimal optimization for perceived speed:
+
+GOAL
+When the first lesson is opened, silently prefetch the next one or two lesson variants in the background so that clicking “Опитай друга версия” feels much faster.
+
+REQUIRED BEHAVIOR
+- Initial lesson loads normally
+- After successful lesson render, silently prefetch:
+  variant +1
+  optional: variant +2
+- Prefetch should store results through the same backend cache system
+- Clicking “Опитай друга версия” should first try prefetched/cached version
+- If prefetched result is not ready, fall back to normal generation
+- No duplicate progress writes
+- No duplicate visible lesson cards
+- No UI flicker or page reload
+
+RULES
+- Keep current query structure if possible
+- Reuse the variant-based query key already implemented
+- Do not prefetch excessively
+- Do not create infinite background loops
+- Respect current grade/subject/topic/lang
+- Junior and Student should both stay compatible if they share the same lesson backend
+
+UI
+- Keep the current button
+- Keep current loading state
+- Optional: show better progressive loading text only if trivial and safe
+
+AFTER IMPLEMENTATION
+Verify and report:
+- whether variant +1 is prefetched
+- whether second click becomes faster
+- whether variant content remains different
+- whether there are duplicate requests or not
+- whether TypeScript compiles cleanly
+- exact files changed
+
+Final verdict:
+PREFETCH IMPLEMENTED / ALREADY EXISTS / BLOCKED BY EXISTING ARCHITECTURE

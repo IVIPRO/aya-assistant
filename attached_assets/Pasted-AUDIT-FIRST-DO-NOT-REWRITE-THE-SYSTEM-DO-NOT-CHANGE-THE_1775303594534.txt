@@ -1,0 +1,54 @@
+AUDIT FIRST. DO NOT REWRITE THE SYSTEM.
+DO NOT CHANGE THE LESSON GENERATOR LOGIC UNLESS NECESSARY.
+MODE: LITE
+
+Problem:
+Junior lessons now load correctly, but opening a lesson often takes 10–15 seconds because AYA appears to regenerate content every time.
+
+Goal:
+Implement a safe persistent cache / saved lesson layer so lessons are generated once and then loaded faster on future opens.
+
+Requirements:
+
+1. First audit the current lesson flow:
+- where /api/lessons/generate is called
+- whether aiLessonGenerator runs on every request
+- whether any cache already exists
+- whether lesson history is already stored somewhere reusable
+
+2. If no persistent cache exists, add the smallest safe solution:
+- when a lesson is requested, first check if a saved generated lesson already exists for:
+  grade + subjectId + topicId + lang + mode + variant
+- if found, return the saved version immediately
+- if not found, generate with existing AI pipeline, save it, then return it
+
+3. Keep student progress separate from lesson content.
+Do NOT mix cached lesson content with progress tracking.
+
+4. Support "Опитай друга версия":
+- each variant can also be saved
+- same topic can have multiple saved variants
+- do not break current regenerate button
+
+5. Reuse existing database tables if a suitable one already exists.
+Only create a new lightweight table if absolutely necessary.
+
+6. Do NOT rewrite frontend architecture.
+Only make the minimal backend/frontend changes needed to:
+- load cached lesson if it exists
+- generate and save if it does not
+
+7. After implementation, test in Preview:
+- open one Junior lesson first time
+- open same lesson second time
+- verify second open is faster
+- test "Опитай друга версия"
+- ensure no TypeScript/runtime errors
+
+Output report:
+- whether persistent lesson cache already existed
+- what file(s) were changed
+- whether a new DB table was needed
+- first-load behavior
+- repeat-load behavior
+- whether regenerate/variant still works

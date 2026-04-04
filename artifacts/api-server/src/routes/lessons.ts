@@ -8,6 +8,7 @@ import {
   recordExerciseResult,
   getPoolStats,
 } from "../lib/exercisePoolManager";
+import { getCachedLesson, saveCachedLesson } from "../lib/lessonCacheManager";
 
 const router: IRouter = Router();
 
@@ -31,7 +32,7 @@ router.get("/lessons/content", requireAuth, (req, res): void => {
 // ─── AI-generated single lesson ───────────────────────────────────────────────
 
 router.get("/lessons/generate", requireAuth, async (req, res): Promise<void> => {
-  const { subjectId, topicId, grade, lang, mode } = req.query as Record<string, string>;
+  const { subjectId, topicId, grade, lang, mode, variant } = req.query as Record<string, string>;
 
   if (!subjectId || !topicId) {
     res.status(400).json({ error: "subjectId and topicId are required" });
@@ -43,9 +44,40 @@ router.get("/lessons/generate", requireAuth, async (req, res): Promise<void> => 
   type ValidLang = typeof validLangs[number];
   const langCode: ValidLang = (validLangs as readonly string[]).includes(lang) ? (lang as ValidLang) : "en";
   const lessonMode: LessonMode = (mode === "weak" || mode === "strong") ? mode : "normal";
+  const variantNum = Math.max(0, parseInt(variant ?? "0", 10) || 0);
 
   try {
+    // ─── Check cache first ────────────────────────────────────────────────────
+    const cached = await getCachedLesson({
+      subjectId,
+      topicId,
+      grade: gradeNum,
+      lang: langCode,
+      mode: lessonMode,
+      variant: variantNum,
+    });
+
+    if (cached) {
+      res.json(cached);
+      return;
+    }
+
+    // ─── Generate new lesson if not cached ────────────────────────────────────
     const content = await generateAILesson(subjectId, topicId, gradeNum, langCode, lessonMode);
+
+    // Save to cache (safe: handles concurrent requests with unique constraint)
+    await saveCachedLesson(
+      {
+        subjectId,
+        topicId,
+        grade: gradeNum,
+        lang: langCode,
+        mode: lessonMode,
+        variant: variantNum,
+      },
+      content,
+    );
+
     res.json(content);
   } catch (err) {
     console.error("[LESSONS_GENERATE] Unexpected error:", err);

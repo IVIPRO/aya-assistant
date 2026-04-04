@@ -14,4 +14,5 @@ export * from "./dailyPlan";
 export * from "./weaknessStats";
 export * from "./learningPath";
 export * from "./exercisePool";
+export * from "./cachedLessons";
 export * from "./friendChallenges";

@@ -15,6 +15,7 @@ import type { VideoKey } from "@/lib/videoTeacherMap";
 import { Link } from "wouter";
 import { Star, Trophy, Sparkles, Map, MessageCircle, Lock, CheckCircle2, Mic, Volume2, Video, ChevronRight, ArrowLeft, BookOpen } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useResumeLesson } from "@/hooks/use-resume-learning";
 import { useListChildren, useUpdateChild, useListMissions, useListProgress, getListChildrenQueryKey, getListMissionsQueryKey, getListProgressQueryKey } from "@workspace/api-client-react";
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { getStreakMessage, mergeWithDiscoveryPrompts } from "@/lib/curiosityEngine";
@@ -569,7 +570,7 @@ function CharacterPicker({ child, onSelect, onClose }: { child: Child; onSelect:
   );
 }
 
-function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLessons, onChangeCompanion, onChallengeClick }: {
+function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLessons, onChangeCompanion, onChallengeClick, onResumeStart }: {
   child: Child;
   character: typeof CHARACTERS[0] | undefined;
   streak: number;
@@ -578,6 +579,7 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
   onLessons: () => void;
   onChangeCompanion: () => void;
   onChallengeClick?: () => void;
+  onResumeStart?: (subject: Subject, topic: Topic) => void;
 }) {
   const lang = getLang(child.language);
   const lbl = JUNIOR_LABELS[lang];
@@ -590,6 +592,9 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
 
   // Trigger celebrations for new badges, streak milestones, and level-ups
   const { active: celebrationActive, celebration } = useCelebration(badges, streak, level);
+
+  // Load resume learning data
+  const { data: resumeData } = useResumeLesson(child.id);
 
   const welcomeMsg = lbl.readyAdventureNoChar;
 
@@ -719,6 +724,32 @@ function WelcomeScreen({ child, character, streak, onEnterWorld, onChat, onLesso
               <span className="text-2xl mb-2 block">🎯</span>
               <p className="text-xs font-medium text-blue-900">Keep learning to unlock badges</p>
             </div>
+          )}
+
+          {resumeData?.subject && resumeData?.topic && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => onResumeStart?.(resumeData.subject, resumeData.topic)}
+              className="w-full p-4 bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl border-2 border-amber-300 shadow-md hover:shadow-lg transition-all text-left"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">
+                    Продължи урока
+                  </div>
+                  <div className="text-sm font-bold text-amber-950">
+                    {resumeData.subject.label[lang] ?? resumeData.subject.label.en}
+                  </div>
+                  <div className="text-xs text-amber-900 mt-0.5">
+                    {resumeData.topic.label[lang] ?? resumeData.topic.label.en}
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-amber-700 flex-shrink-0 ml-2" />
+              </div>
+            </motion.button>
           )}
 
           <div className="grid grid-cols-1 gap-3">
@@ -1412,6 +1443,11 @@ export function Junior() {
               onChat={() => { setSelectedSubject(null); setSelectedTopic(null); setView("chat"); }}
               onLessons={() => { setSelectedGrade(activeChild.grade); setView("stages"); }}
               onChangeCompanion={() => setShowCharPicker(true)}
+              onResumeStart={(subject, topic) => {
+                setSelectedSubject(subject);
+                setSelectedTopic(topic);
+                setView("chat");
+              }}
               onChallengeClick={() => {
                 setChallengesLoading(true);
                 fetch(`/api/challenges?childId=${activeChild.id}`, {

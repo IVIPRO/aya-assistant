@@ -1,0 +1,137 @@
+FIRST: audit the current project state before implementing anything.
+
+Check the existing codebase and all features related to:
+- lesson loading
+- topic navigation
+- progress tracking
+- lesson completion
+- student history
+- React Query cache
+- Junior flow
+- Прогимназия flow
+
+Do NOT duplicate existing progress systems.
+Reuse existing progress tables and endpoints.
+
+GOAL
+
+Implement the feature:
+
+"Resume Learning"
+
+When a student opens the app, AYA should show a quick option:
+
+"Продължи урока"
+
+which opens the most recent unfinished learning position.
+
+DEFINITION OF RESUME POSITION
+
+The system should determine the resume point using this priority:
+
+1️⃣ last unfinished lesson in current subject  
+2️⃣ last opened topic if lesson not completed  
+3️⃣ next topic after last completed lesson  
+4️⃣ fallback → first topic in subject
+
+This must work for:
+
+• Начален етап  
+• Прогимназия
+
+WITHOUT breaking:
+
+• progress tracking  
+• lesson completion  
+• exercise scoring  
+• existing caches  
+• current speed optimizations  
+
+STRICT SAFETY RULES
+
+Do NOT:
+
+• create duplicate progress records  
+• change schema unless absolutely necessary  
+• rewrite the learning engine  
+• break existing cache keys  
+• break prefetch systems  
+• trigger lesson completion automatically  
+
+If resume data does not exist, fallback safely to the normal flow.
+
+IMPLEMENTATION APPROACH
+
+A) AUDIT
+
+Find where progress and lesson completion are currently stored.
+
+Identify:
+
+• tables
+• API endpoints
+• frontend hooks
+• navigation flow
+
+Explain what can be reused.
+
+B) IMPLEMENT MINIMAL RESUME SYSTEM
+
+Add a lightweight logic layer that:
+
+• queries the student's last progress
+• determines resume location
+• exposes a safe "resumeLearning()" helper
+
+Frontend behavior:
+
+When dashboard opens:
+
+Show a button/card:
+
+"Продължи урока"
+
+If clicked:
+
+navigate directly to the resume lesson/topic.
+
+C) PERFORMANCE SAFETY
+
+Resume logic must:
+
+• NOT trigger heavy AI generation
+• reuse existing lesson caches if available
+• remain compatible with prefetch systems
+• remain compatible with variant prefetch
+
+D) VALIDATION
+
+Verify:
+
+• TypeScript build passes
+• progress system unchanged
+• resume logic correct
+• no duplicate writes
+• Junior works
+• Прогимназия works
+
+E) TEST STEPS
+
+Give Preview test steps for:
+
+1. open lesson
+2. leave mid-lesson
+3. reload app
+4. click "Продължи урока"
+
+F) FINAL REPORT
+
+Return:
+
+1. AUDIT SUMMARY
+2. FILES CHANGED
+3. WHAT WAS IMPLEMENTED
+4. WHAT WAS REUSED
+5. SAFETY CHECK RESULTS
+6. TEST STEPS
+7. FINAL VERDICT

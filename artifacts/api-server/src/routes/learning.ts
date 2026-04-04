@@ -750,4 +750,71 @@ router.post("/free-conversation/session", requireAuth, async (req, res): Promise
   res.json({ ok: true, durationMinutes: mins });
 });
 
+/* ─────────────────────────────────────────────────────────────────
+   GET /api/learning/resume?childId=
+   Return the most recent unfinished or last-touched lesson for resuming.
+───────────────────────────────────────────────────────────────── */
+router.get("/learning/resume", requireAuth, async (req, res): Promise<void> => {
+  const childId = parseInt(req.query.childId as string, 10);
+  if (isNaN(childId)) {
+    res.status(400).json({ error: "childId is required" });
+    return;
+  }
+
+  const { userId } = getUser(req);
+  const familyId = await getFamilyIdFromDb(userId);
+
+  const [child] = await db
+    .select()
+    .from(childrenTable)
+    .where(and(eq(childrenTable.id, childId), eq(childrenTable.familyId, familyId ?? -1)));
+
+  if (!child) {
+    res.status(403).json({ error: "Access denied" });
+    return;
+  }
+
+  const topics = await db
+    .select()
+    .from(childTopicProgressTable)
+    .where(eq(childTopicProgressTable.childId, childId));
+
+  if (topics.length === 0) {
+    res.json({ subject: null, topic: null });
+    return;
+  }
+
+  // 1️⃣ Find in-progress topic (lesson OR practice OR quiz started, but not all complete)
+  const inProgressTopics = topics.filter(
+    (t) => (t.lessonDone || t.practiceDone || t.quizPassed) && 
+           !(t.lessonDone && t.practiceDone && t.quizPassed)
+  );
+  
+  let resumeProgress = inProgressTopics.length > 0 
+    ? inProgressTopics.sort((a, b) => (b.lastActivityAt?.getTime() ?? 0) - (a.lastActivityAt?.getTime() ?? 0))[0]
+    : null;
+
+  // 2️⃣ If no in-progress, find last touched topic (by lastActivityAt)
+  if (!resumeProgress) {
+    resumeProgress = topics.sort((a, b) => (b.lastActivityAt?.getTime() ?? 0) - (a.lastActivityAt?.getTime() ?? 0))[0];
+  }
+
+  if (!resumeProgress) {
+    res.json({ subject: null, topic: null });
+    return;
+  }
+
+  // Get curriculum data to find the actual Subject and Topic objects
+  const allTopics = getCurriculumTopics(child.grade);
+  const subject = allTopics.find((s) => s.id === resumeProgress!.subjectId);
+  const topic = subject?.topics.find((t) => t.id === resumeProgress!.topicId);
+
+  if (!subject || !topic) {
+    res.json({ subject: null, topic: null });
+    return;
+  }
+
+  res.json({ subject, topic, lastActivityAt: resumeProgress.lastActivityAt });
+});
+
 export default router;

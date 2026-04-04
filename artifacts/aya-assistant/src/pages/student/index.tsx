@@ -4,7 +4,8 @@ import { SubjectPanel } from "@/pages/junior/subjects";
 import { StageSelector } from "@/pages/junior/stage-selector";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, BookOpen, Sparkles, MessageCircle } from "lucide-react";
+import { ArrowLeft, BookOpen, Sparkles, MessageCircle, ChevronRight } from "lucide-react";
+import { useResumeLesson } from "@/hooks/use-resume-learning";
 import { AyaAvatarImage as AyaAvatar } from "@/components/AyaAvatarImage";
 import { useAuth } from "@/hooks/use-auth";
 import { useListChildren, getListChildrenQueryKey } from "@workspace/api-client-react";
@@ -120,6 +121,9 @@ export function Student() {
   const activeChild = children.find(c => c.id === activeChildId) ?? children[0] ?? null;
   const childLang = resolveLang(activeChild?.language ?? null);
   const lbl = LABELS[childLang];
+
+  // Load resume learning data
+  const { data: resumeData } = useResumeLesson(activeChild?.id ?? null);
 
   // Load saved grade from localStorage on mount
   useEffect(() => {
@@ -260,6 +264,37 @@ export function Student() {
                 </div>
               </div>
             </div>
+
+            {/* Resume card */}
+            {resumeData?.subject && resumeData?.topic && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => {
+                  setSelectedSubject(resumeData.subject);
+                  setSelectedTopic(resumeData.topic);
+                  setView("chat");
+                }}
+                className="w-full p-4 bg-gradient-to-r from-amber-100 to-orange-100 rounded-2xl border-2 border-amber-300 shadow-md hover:shadow-lg transition-all text-left mb-4"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="text-xs font-bold text-amber-900 uppercase tracking-wider mb-1">
+                      {childLang === "bg" ? "Продължи урока" : childLang === "de" ? "Unterricht fortsetzen" : childLang === "fr" ? "Continuer la leçon" : childLang === "es" ? "Continuar la lección" : "Resume lesson"}
+                    </div>
+                    <div className="text-sm font-bold text-amber-950">
+                      {resumeData.subject.label[childLang] ?? resumeData.subject.label.en}
+                    </div>
+                    <div className="text-xs text-amber-900 mt-0.5">
+                      {resumeData.topic.label[childLang] ?? resumeData.topic.label.en}
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-amber-700 flex-shrink-0 ml-2" />
+                </div>
+              </motion.button>
+            )}
 
             {/* Action cards */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

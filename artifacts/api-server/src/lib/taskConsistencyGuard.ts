@@ -693,34 +693,8 @@ CORE CONSISTENCY RULES (apply to every exercise):
 // ─── Semantic Intent Map ──────────────────────────────────────────────────────
 
 const SEMANTIC_INTENT_MAP: Record<string, SemanticIntent> = {
-  // Examples of precise semantic intents to prevent cross-topic drift
-  breathing_respiration: {
-    concept: "Breathing and respiration (inhaling oxygen, exhaling CO2)",
-    includes: [
-      "breathing",
-      "respiration",
-      "inhale",
-      "exhale",
-      "oxygen",
-      "air",
-      "lungs",
-      "breath",
-      "дишане",
-      "дишам",
-      "кислород",
-      "въздух",
-      "белите дробове",
-    ],
-    excludes: [
-      "water",
-      "evaporation",
-      "condensation",
-      "вода",
-      "изпарение",
-      "кондензация",
-    ],
-  },
-  water_cycle: {
+  // Water cycle topics — EXCLUDE breathing/respiration/lungs
+  water_cycle_g3: {
     concept: "Water cycle (evaporation, condensation, precipitation)",
     includes: [
       "water",
@@ -738,78 +712,160 @@ const SEMANTIC_INTENT_MAP: Record<string, SemanticIntent> = {
       "слънце",
       "облак",
     ],
-    excludes: ["breathing", "respiration", "lungs", "дишане"],
+    excludes: ["breathing", "respiration", "lungs", "дишане", "дышане"],
   },
-  addition: {
+
+  // Human body topics (grade 2) — breathing is part of respiration
+  human_body_g2: {
+    concept: "Human body parts and basic functions",
+    includes: [
+      "body",
+      "head",
+      "arms",
+      "legs",
+      "eyes",
+      "ears",
+      "heart",
+      "lungs",
+      "teeth",
+      "digest",
+      "breathe",
+      "дише",
+      "белите дробове",
+      "сърце",
+      "тяло",
+    ],
+    excludes: ["water", "evaporation", "вода", "изпарение"],
+  },
+
+  // Math - Addition
+  addition_to_10: {
     concept: "Addition (combining quantities with +)",
-    includes: [
-      "add",
-      "plus",
-      "sum",
-      "total",
-      "altogether",
-      "more",
-      "combine",
-      "събира",
-      "плюс",
-      "сума",
-    ],
-    excludes: ["subtract", "minus", "minus", "less", "отнема", "минус"],
+    includes: ["add", "plus", "sum", "total", "altogether", "more", "combine", "събира", "плюс", "сума"],
+    excludes: ["subtract", "minus", "less", "отнема", "минус"],
   },
-  subtraction: {
+  addition_to_20: {
+    concept: "Addition (combining quantities with +)",
+    includes: ["add", "plus", "sum", "total", "altogether", "more", "combine", "събира", "плюс", "сума"],
+    excludes: ["subtract", "minus", "less", "отнема", "минус"],
+  },
+  addition_subtraction_to_100: {
+    concept: "Addition and subtraction up to 100",
+    includes: ["add", "plus", "sum", "subtract", "minus", "difference", "събира", "плюс", "изважда"],
+    excludes: ["multiply", "divide", "multiplica", "деления"],
+  },
+
+  // Math - Subtraction
+  subtraction_to_10: {
     concept: "Subtraction (removing quantities with -)",
-    includes: [
-      "subtract",
-      "minus",
-      "less",
-      "remove",
-      "take away",
-      "difference",
-      "how many left",
-      "изважда",
-      "минус",
-      "отнема",
-    ],
+    includes: ["subtract", "minus", "less", "remove", "take away", "difference", "how many left", "изважда", "минус", "отнема"],
     excludes: ["add", "plus", "sum", "more", "събира", "плюс"],
   },
+  subtraction_to_20: {
+    concept: "Subtraction (removing quantities with -)",
+    includes: ["subtract", "minus", "less", "remove", "take away", "difference", "how many left", "изважда", "минус", "отнема"],
+    excludes: ["add", "plus", "sum", "more", "събира", "плюс"],
+  },
+
+  // Logic - Patterns
   color_patterns: {
     concept: "Color patterns (repeating sequences of colors)",
-    includes: [
-      "color",
-      "pattern",
-      "sequence",
-      "repeat",
-      "next",
-      "alternating",
-      "цвет",
-      "закономер",
-      "редица",
-      "повтаря",
-    ],
-    excludes: [
-      "numbers",
-      "shapes",
-      "size",
-      "logic puzzle",
-      "deduction",
-      "числа",
-      "форми",
-    ],
+    includes: ["color", "pattern", "sequence", "repeat", "next", "alternating", "цвет", "закономер", "редица", "повтаря"],
+    excludes: ["numbers", "shapes", "size", "logic puzzle", "deduction", "числа", "форми"],
   },
-  nouns: {
+  patterns_g2: {
+    concept: "Patterns and sequences",
+    includes: ["pattern", "sequence", "repeat", "next", "rule", "закономер", "редица", "повтаря", "правило"],
+    excludes: ["counting", "arithmetic", "calculation"],
+  },
+
+  // Logic - Puzzles & Games
+  visual_puzzles: {
+    concept: "Visual reasoning and logical deduction",
+    includes: ["puzzle", "logic", "reason", "deduction", "figure out", "puzle", "логик", "мислене", "дедукц"],
+    excludes: ["pattern", "sequence", "arithmetic"],
+  },
+  simple_puzzles_g2: {
+    concept: "Simple logic puzzles",
+    includes: ["puzzle", "logic", "think", "reason", "логик", "пъзел", "мислене"],
+    excludes: ["arithmetic", "pattern sequence"],
+  },
+
+  // Reading & Literature
+  simple_stories_g2: {
+    concept: "Reading and understanding simple stories",
+    includes: ["story", "read", "character", "plot", "event", "historia", "história", "história", "четене", "история", "персонаж"],
+    excludes: ["grammar", "spelling", "pronunciation"],
+  },
+  story_characters: {
+    concept: "Understanding story characters and their traits",
+    includes: ["character", "person", "trait", "describe", "персонаж", "описание", "характер"],
+    excludes: ["grammar", "spelling"],
+  },
+  reading_comprehension_basic: {
+    concept: "Reading comprehension from text passages",
+    includes: ["read", "understand", "passage", "question", "answer", "четене", "разбира", "текст"],
+    excludes: ["spelling", "grammar rules"],
+  },
+
+  // Language - Grammar
+  nouns_basic: {
     concept: "Nouns (words that name people, places, things)",
-    includes: [
-      "noun",
-      "name",
-      "person",
-      "place",
-      "thing",
-      "subject",
-      "noun is",
-      "съществител",
-      "назовава",
-    ],
+    includes: ["noun", "name", "person", "place", "thing", "subject", "съществител", "назовава"],
     excludes: ["verb", "adjective", "action", "глагол", "прилагател"],
+  },
+  verbs_basic: {
+    concept: "Verbs (action words)",
+    includes: ["verb", "action", "do", "move", "глагол", "действие", "прави"],
+    excludes: ["noun", "adjective", "person", "place"],
+  },
+  adjectives: {
+    concept: "Adjectives (describing words)",
+    includes: ["adjective", "describe", "quality", "color", "size", "прилагател", "описва", "качество"],
+    excludes: ["verb", "noun", "action"],
+  },
+
+  // Nature & Science - Animals
+  animals_g2: {
+    concept: "Animals - types, habitats, characteristics",
+    includes: ["animal", "creature", "habitat", "live", "zoo", "farm", "животно", "място", "живот"],
+    excludes: ["plant", "water cycle", "weather", "растение"],
+  },
+  animals_habitats: {
+    concept: "Animal habitats and where animals live",
+    includes: ["habitat", "home", "live", "environment", "jungle", "desert", "ocean", "animal", "място", "живот", "животно"],
+    excludes: ["plant", "food chain"],
+  },
+
+  // Nature & Science - Plants
+  plants_basics: {
+    concept: "Plants - basic parts and needs (roots, stems, leaves, flowers)",
+    includes: ["plant", "root", "stem", "leaf", "flower", "grow", "растение", "корен", "стъбло", "цвят"],
+    excludes: ["animal", "water cycle", "weather"],
+  },
+  plants_g2: {
+    concept: "Plants - types and characteristics",
+    includes: ["plant", "flower", "tree", "grow", "green", "растение", "дърво", "цвят"],
+    excludes: ["animal", "food chain"],
+  },
+
+  // Sorting & Classification
+  sorting_g2: {
+    concept: "Sorting and classifying objects into groups",
+    includes: ["sort", "group", "classify", "category", "same", "different", "сортира", "групира", "класифик"],
+    excludes: ["counting", "arithmetic"],
+  },
+  comparison_g2: {
+    concept: "Comparing objects (bigger, smaller, more, less)",
+    includes: ["compare", "bigger", "smaller", "more", "less", "same", "different", "сравня", "по-голям", "по-малък"],
+    excludes: ["arithmetic operations"],
+  },
+
+  // Seasons & Weather
+  seasons_g2: {
+    concept: "Seasons and their characteristics",
+    includes: ["season", "spring", "summer", "autumn", "winter", "weather", "сезон", "пролет", "лято", "есен", "зима"],
+    excludes: ["temperature scale", "thermometer"],
   },
 };
 

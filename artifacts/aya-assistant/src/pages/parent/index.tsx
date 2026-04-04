@@ -923,12 +923,23 @@ function ImprovementAreasCard({
   };
 
   const subjectLabel: Record<string, Record<LangCode, string>> = {
-    "mathematics":        { en: "Mathematics", bg: "Математика", es: "Matemáticas", de: "Mathematik", fr: "Mathématiques" },
+    "mathematics": { en: "Mathematics", bg: "Математика", es: "Matemáticas", de: "Mathematik", fr: "Mathématiques" },
+    "mathematics-advanced": { en: "Mathematics", bg: "Математика", es: "Matemáticas", de: "Mathematik", fr: "Mathématiques" },
     "bulgarian-language": { en: "Bulgarian Language", bg: "Български език", es: "Lengua", de: "Bulgarische Sprache", fr: "Langue bulgare" },
+    "bulgarian-language-adv": { en: "Bulgarian Language", bg: "Български език", es: "Lengua", de: "Bulgarische Sprache", fr: "Langue bulgare" },
+    "bulgarian_language": { en: "Bulgarian Language", bg: "Български език", es: "Lengua", de: "Bulgarische Sprache", fr: "Langue bulgare" },
     "reading-literature": { en: "Reading", bg: "Четене", es: "Lectura", de: "Lesen", fr: "Lecture" },
-    "logic-thinking":     { en: "Logic", bg: "Логика", es: "Lógica", de: "Logik", fr: "Logique" },
-    "nature-science":     { en: "Nature", bg: "Околен свят", es: "Ciencias", de: "Naturwissenschaften", fr: "Sciences naturelles" },
-    "english-language":   { en: "English", bg: "Английски", es: "Inglés", de: "Englisch", fr: "Anglais" },
+    "logic-thinking": { en: "Logic", bg: "Логика", es: "Lógica", de: "Logik", fr: "Logique" },
+    "nature-science": { en: "Nature", bg: "Околен свят", es: "Ciencias", de: "Naturwissenschaften", fr: "Sciences naturelles" },
+    "english-language": { en: "English", bg: "Английски език", es: "Inglés", de: "Englisch", fr: "Anglais" },
+    "english-advanced": { en: "English", bg: "Английски език", es: "Inglés", de: "Englisch", fr: "Anglais" },
+    "geography": { en: "Geography", bg: "География", es: "Geografía", de: "Geographie", fr: "Géographie" },
+    "physics": { en: "Physics", bg: "Физика", es: "Física", de: "Physik", fr: "Physique" },
+    "chemistry": { en: "Chemistry", bg: "Химия", es: "Química", de: "Chemie", fr: "Chimie" },
+    "biology": { en: "Biology", bg: "Биология", es: "Biología", de: "Biologie", fr: "Biologie" },
+    "tts": { en: "AI Reading", bg: "AI четене", es: "Lectura IA", de: "AI-Lesung", fr: "Lecture IA" },
+    "voice_session": { en: "Voice Session", bg: "Гласова сесия", es: "Sesión de voz", de: "Sprachsitzung", fr: "Séance vocale" },
+    "session": { en: "Session", bg: "Сесия", es: "Sesión", de: "Sitzung", fr: "Séance" },
   };
 
   const topicLabel: Record<string, Record<LangCode, string>> = {
@@ -950,6 +961,21 @@ function ImprovementAreasCard({
     "weather":         { en: "Weather",          bg: "Времето",            es: "El tiempo",        de: "Wetter",           fr: "Météo" },
     "vocabulary":      { en: "Vocabulary",       bg: "Речник",             es: "Vocabulario",      de: "Wortschatz",       fr: "Vocabulaire" },
     "simple-sentences":{ en: "Simple sentences", bg: "Прости изречения",   es: "Oraciones",        de: "Einfache Sätze",   fr: "Phrases simples" },
+    "reading_comprehension_basic": { en: "Reading Comprehension", bg: "Разбиране на текст", es: "Comprensión", de: "Leseverständnis", fr: "Compréhension" },
+    "perimeter-area": { en: "Perimeter & Area", bg: "Периметър и лице", es: "Perímetro y área", de: "Umfang und Fläche", fr: "Périmètre et aire" },
+    "algebra-basics": { en: "Algebra Basics", bg: "Основи на алгебра", es: "Álgebra básica", de: "Algebraische Grundlagen", fr: "Bases de l'algèbre" },
+    "fractions-adv": { en: "Fractions", bg: "Обикновени дроби", es: "Fracciones", de: "Brüche", fr: "Fractions" },
+    "decimal-fractions": { en: "Decimal Fractions", bg: "Десетични дроби", es: "Decimales", de: "Dezimalbrüche", fr: "Décimales" },
+    "natural-numbers": { en: "Natural Numbers", bg: "Естествени числа", es: "Números naturales", de: "Natürliche Zahlen", fr: "Nombres naturels" },
+    "nat-num-review": { en: "Number Review", bg: "Преговор на естествени числа", es: "Revisión", de: "Zahlenwiederholung", fr: "Révision" },
+    "addition-subtraction": { en: "Addition & Subtraction", bg: "Събиране и изваждане", es: "Suma y resta", de: "Addition und Subtraktion", fr: "Addition et soustraction" },
+    "grammar-eng": { en: "Grammar", bg: "Граматика", es: "Gramática", de: "Grammatik", fr: "Grammaire" },
+    "phonetics-review": { en: "Phonetics", bg: "Преговор по фонетика", es: "Fonética", de: "Phonetik", fr: "Phonétique" },
+    "physical-geography": { en: "Physical Geography", bg: "Физическа география", es: "Geografía física", de: "Physische Geographie", fr: "Géographie physique" },
+    "thermodynamics": { en: "Thermodynamics", bg: "Термодинамика", es: "Termodinámica", de: "Thermodynamik", fr: "Thermodynamique" },
+    "mixtures": { en: "Mixtures", bg: "Смеси", es: "Mezclas", de: "Mischungen", fr: "Mélanges" },
+    "geometry": { en: "Geometry", bg: "Геометрия", es: "Geometría", de: "Geometrie", fr: "Géométrie" },
+    "punctuation": { en: "Punctuation", bg: "Пунктуация", es: "Puntuación", de: "Satzzeichen", fr: "Ponctuation" },
   };
 
   return (
@@ -1299,11 +1325,22 @@ export function ParentDashboard() {
   /* ── Subject translation helper for UI display ── */
   const subjectLabels: Record<string, Record<LangCode, string>> = {
     "mathematics": { en: "Mathematics", bg: "Математика", es: "Matemáticas", de: "Mathematik", fr: "Mathématiques" },
+    "mathematics-advanced": { en: "Mathematics", bg: "Математика", es: "Matemáticas", de: "Mathematik", fr: "Mathématiques" },
     "bulgarian-language": { en: "Bulgarian Language", bg: "Български език", es: "Lengua", de: "Bulgarische Sprache", fr: "Langue bulgare" },
+    "bulgarian-language-adv": { en: "Bulgarian Language", bg: "Български език", es: "Lengua", de: "Bulgarische Sprache", fr: "Langue bulgare" },
+    "bulgarian_language": { en: "Bulgarian Language", bg: "Български език", es: "Lengua", de: "Bulgarische Sprache", fr: "Langue bulgare" },
     "reading-literature": { en: "Reading", bg: "Четене", es: "Lectura", de: "Lesen", fr: "Lecture" },
     "logic-thinking": { en: "Logic", bg: "Логика", es: "Lógica", de: "Logik", fr: "Logique" },
     "nature-science": { en: "Nature", bg: "Околен свят", es: "Ciencias", de: "Naturwissenschaften", fr: "Sciences naturelles" },
     "english-language": { en: "English", bg: "Английски език", es: "Inglés", de: "Englisch", fr: "Anglais" },
+    "english-advanced": { en: "English", bg: "Английски език", es: "Inglés", de: "Englisch", fr: "Anglais" },
+    "geography": { en: "Geography", bg: "География", es: "Geografía", de: "Geographie", fr: "Géographie" },
+    "physics": { en: "Physics", bg: "Физика", es: "Física", de: "Physik", fr: "Physique" },
+    "chemistry": { en: "Chemistry", bg: "Химия", es: "Química", de: "Chemie", fr: "Chimie" },
+    "biology": { en: "Biology", bg: "Биология", es: "Biología", de: "Biologie", fr: "Biologie" },
+    "tts": { en: "AI Reading", bg: "AI четене", es: "Lectura IA", de: "AI-Lesung", fr: "Lecture IA" },
+    "voice_session": { en: "Voice Session", bg: "Гласова сесия", es: "Sesión de voz", de: "Sprachsitzung", fr: "Séance vocale" },
+    "session": { en: "Session", bg: "Сесия", es: "Sesión", de: "Sitzung", fr: "Séance" },
   };
 
   const translateSubjectLabel = (subjectId: string): string => {
@@ -1318,6 +1355,7 @@ export function ParentDashboard() {
     "7 Day Streak": { en: "7 Day Streak", bg: "7-дневна серия", es: "Racha de 7 días", de: "7-Tage-Serie", fr: "Série de 7 jours" },
     "First Steps": { en: "First Steps", bg: "Първи стъпки", es: "Primeros Pasos", de: "Erste Schritte", fr: "Premiers pas" },
     "Lesson Master": { en: "Lesson Master", bg: "Майстор на уроци", es: "Maestro de Lecciones", de: "Unterrichts-Meister", fr: "Maître des Leçons" },
+    "On Fire!": { en: "On Fire!", bg: "В серия!", es: "¡En fuego!", de: "Im Feuer!", fr: "En feu!" },
   };
 
   const topicTranslations: Record<string, Record<LangCode, string>> = {

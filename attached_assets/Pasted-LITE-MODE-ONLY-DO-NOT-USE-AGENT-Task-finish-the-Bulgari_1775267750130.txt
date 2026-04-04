@@ -1,0 +1,248 @@
+LITE MODE ONLY. DO NOT USE AGENT.
+
+Task: finish the Bulgarian localization of the Parent Dashboard 100%, because raw English IDs are STILL visible in Preview.
+
+IMPORTANT
+- Audit first, then edit.
+- Reuse existing translation/localization helper if it already exists.
+- Do NOT create duplicate maps if a shared formatter already exists.
+- Do NOT change DB schema, APIs, business logic, analytics formulas, progress logic, or badge awarding rules.
+- This is a display-layer localization cleanup only.
+- Test ONLY in Replit Preview.
+
+CONFIRMED STILL BROKEN IN PREVIEW
+
+A) "Нуждае се от упражнения"
+Still shows:
+- voice_session
+- session
+
+B) "Зони за подобрение"
+Still shows raw subject/topic IDs like:
+- punctuation
+- mathematics-advanced
+- algebra-basics
+- english-advanced
+- grammar-eng
+- fractions-adv
+- physics
+- thermodynamics
+- chemistry
+- mixtures
+- natural-numbers
+- nat-num-review
+- addition-subtraction
+- bulgarian-language-adv
+- phonetics-review
+- geography
+- physical-geography
+- geometry
+- reading_comprehension_basic
+
+C) Badge grid
+Still shows:
+- On Fire!
+
+D) Performance chart
+Still shows:
+- geography
+- english-advanced
+- chemistry
+- tts
+- voice_session
+
+ROOT CAUSE TO VERIFY
+The dashboard likely uses multiple different renderers/formatters:
+- subject label formatter
+- topic label formatter
+- chart category formatter
+- badge title formatter
+- weak-area row formatter
+- needs-practice card formatter
+
+Some places are translated, others still render raw ids directly.
+
+STEP 1 — AUDIT EXACT DISPLAY PATHS
+Find the exact parent dashboard components/helpers responsible for:
+1. needs-practice card labels
+2. improvement-zone rows
+3. badge title rendering
+4. chart x-axis/category labels
+5. any summary cards showing subject/topic ids
+
+Search for raw rendering patterns such as:
+- subjectId
+- topicId
+- badge.name
+- achievement.title
+- chart data labels
+- Object.keys(stats)
+- raw string interpolation with ids
+- replace only in one component but not others
+
+STEP 2 — USE ONE SHARED DISPLAY FORMATTER
+Create OR reuse one shared helper for parent dashboard display.
+All parent dashboard components must call the same formatter(s), not custom inline rendering.
+
+Preferred shared helpers:
+- formatParentSubjectLabel(id)
+- formatParentTopicLabel(id)
+- formatParentBadgeLabel(idOrTitle)
+
+If equivalent helpers already exist, extend them instead of creating new ones.
+
+STEP 3 — REQUIRED BULGARIAN DISPLAY MAPPINGS
+
+SUBJECTS
+mathematics -> Математика
+mathematics-advanced -> Математика
+bulgarian_language -> Български език
+bulgarian-language-adv -> Български език
+english-language -> Английски език
+english-advanced -> Английски език
+reading-literature -> Четене и литература
+nature-science -> Околен свят
+geography -> География
+physics -> Физика
+chemistry -> Химия
+biology -> Биология
+tts -> AI четене
+voice_session -> Гласова сесия
+session -> Сесия
+math -> Математика
+
+TOPICS
+reading_comprehension_basic -> Разбиране на текст
+addition -> Събиране
+division -> Деление
+punctuation -> Пунктуация
+perimeter-area -> Периметър и лице
+algebra-basics -> Основи на алгебрата
+fractions-adv -> Обикновени дроби
+decimal-fractions -> Десетични дроби
+natural-numbers -> Естествени числа
+nat-num-review -> Преговор на естествени числа
+addition-subtraction -> Събиране и изваждане
+grammar-eng -> Граматика
+phonetics-review -> Преговор по фонетика
+physical-geography -> Физическа география
+thermodynamics -> Термодинамика
+mixtures -> Смеси
+geometry -> Геометрия
+
+BADGES
+On Fire! -> В серия!
+First Steps -> Първи стъпки
+
+STEP 4 — APPLY TO ALL PARENT DASHBOARD SURFACES
+Ensure the same shared formatter is used in:
+- "Нуждае се от упражнения"
+- "Зони за подобрение"
+- "Силни предмети"
+- "Седмичен напредък"
+- "Резюме за учител"
+- badge grid
+- performance chart labels
+- mission activity subject label
+- any subject/topic lists inside parent analytics cards
+
+STEP 5 — COMBINED LABEL RULE
+Where UI shows:
+subject -> topic
+
+render:
+Bulgarian Subject -> Bulgarian Topic
+
+Examples:
+mathematics-advanced -> algebra-basics
+must become:
+Математика -> Основи на алгебрата
+
+physics -> thermodynamics
+must become:
+Физика -> Термодинамика
+
+bulgarian_language -> reading_comprehension_basic
+must become:
+Български език -> Разбиране на текст
+
+STEP 6 — CHART LABEL FIX
+The chart must NOT use raw ids directly.
+Use formatter before building chart dataset labels or x-axis tick labels.
+
+Specifically ensure these become:
+geography -> География
+english-advanced -> Английски език
+chemistry -> Химия
+tts -> AI четене
+voice_session -> Гласова сесия
+
+STEP 7 — BADGES FIX
+Badge cards must localize title before render.
+At minimum:
+On Fire! -> В серия!
+
+STEP 8 — FALLBACK RULE
+If an unknown raw id appears:
+- first try shared map
+- then humanize underscores/hyphens to spaces
+- NEVER display raw snake_case or kebab-case directly in Parent Dashboard UI
+
+STEP 9 — VERIFICATION IN PREVIEW
+After implementation:
+1. Open Parent Dashboard in Preview
+2. Check these sections manually:
+   - Нуждае се от упражнения
+   - Зони за подобрение
+   - Badge grid
+   - Диаграма на успеваемостта
+3. Confirm there are NO visible raw ids left:
+   - no snake_case
+   - no kebab-case
+   - no English badge titles
+
+STEP 10 — CODE SEARCH VERIFICATION
+Search the parent dashboard related files for remaining direct rendering of:
+- voice_session
+- session
+- mathematics-advanced
+- english-advanced
+- bulgarian-language-adv
+- reading_comprehension_basic
+- On Fire!
+- chart labels using raw keys
+
+OUTPUT FORMAT
+Reply with exactly:
+
+PARENT DASHBOARD FINAL LOCALIZATION AUDIT
+
+Files audited:
+- ...
+
+Files modified:
+- ...
+
+Shared formatter reused:
+YES/NO
+
+New duplicate maps created:
+YES/NO
+
+Fixed sections:
+- Needs practice
+- Improvement zones
+- Badges
+- Performance chart
+
+Still visible English/raw ids in Preview:
+YES/NO
+
+TypeScript errors:
+YES/NO
+
+Runtime errors:
+YES/NO
+
+FINAL STATUS:
+Parent Dashboard fully Bulgarian

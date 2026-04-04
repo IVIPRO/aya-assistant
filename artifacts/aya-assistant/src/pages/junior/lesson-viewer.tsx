@@ -757,9 +757,6 @@ function InteractiveLessonEngine({
   /* ── infinite practice state */
   const [infLoading, setInfLoading] = useState(false);
 
-  /* ── lesson regeneration state */
-  const [regeneratingLesson, setRegeneratingLesson] = useState(false);
-
   /* Reset narration trigger when dialogue changes (phase transition) */
   useEffect(() => {
     setNarrationTriggered(false);
@@ -2229,6 +2226,7 @@ export interface LessonViewerProps {
 
 export function LessonViewer({ subject, topic, initialMode, grade, lang, childId, onBack, onAskAya, dailyPlanId, dailyPlanTaskId }: LessonViewerProps) {
   const [reward, setReward] = useState<XpReward | null>(null);
+  const [regeneratingLesson, setRegeneratingLesson] = useState(false);
   const l = L[lang];
   const queryClient = useQueryClient();
 

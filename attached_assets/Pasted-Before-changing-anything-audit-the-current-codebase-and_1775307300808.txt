@@ -1,0 +1,63 @@
+Before changing anything, audit the current codebase and confirm whether lesson caching already exists for AI-generated lessons in Junior/Начален етап and Прогимназия.
+
+Search specifically for:
+- any lesson cache table / schema
+- cached lesson fetch before OpenAI generation
+- cache key logic using subjectId + topicId + grade + lang + variant
+- TTL / expiration logic
+- reuse of previously generated lesson variants
+- any code already added for this in lessons route, lesson-viewer, ai lesson generator, db schema, or query layer
+
+Important:
+- Do NOT duplicate existing code
+- Do NOT rewrite working regeneration logic
+- Do NOT break the current “Опитай друга версия” button
+- Prefer minimal safe changes only
+- Use Lite-safe scope first
+- If caching already exists, stop and report exactly what exists and what is missing
+
+If caching does NOT exist, implement a minimal production-safe lesson cache system for AI-generated lessons with this behavior:
+
+GOAL
+- First load of a lesson variant may use OpenAI
+- Next loads of the same exact lesson variant must load from cache instantly
+- “Опитай друга версия” must still generate a different variant key
+- Already generated variants should be reused instead of regenerated
+- Cache must work for both Junior and Student/Прогимназия if they use the same lesson backend
+
+CACHE KEY
+Use a unique cache identity based on:
+subjectId + topicId + grade + lang + variant
+
+REQUIRED FLOW
+1. On GET /api/lessons/generate, first check cache by exact key
+2. If cached lesson exists, return it immediately
+3. If not found, generate with AI
+4. Save generated result in cache
+5. Return saved lesson
+6. “Опитай друга версия” must still work by requesting a different variant number
+
+DATA RULES
+- Do not store duplicate cached lessons for the same exact key
+- Add unique constraint if needed
+- Store createdAt / updatedAt
+- Optional TTL support is allowed, but do not overengineer
+
+SAFETY
+- Keep progress tracking untouched
+- Keep exercises/tests/history untouched
+- Keep current frontend rendering untouched
+- No unnecessary refactor
+- No breaking API changes
+
+AFTER IMPLEMENTATION
+Run verification and report:
+- whether cache hit works
+- whether same lesson opens faster second time
+- whether different variant still returns different content
+- whether TypeScript compiles cleanly
+- exact files changed
+- exact DB/table changes if any
+
+At the end, give a short final verdict:
+CACHE IMPLEMENTED / ALREADY EXISTS / PARTIAL

@@ -100,6 +100,14 @@ interface PoolExercise {
   difficulty: "easy" | "medium" | "hard";
 }
 
+interface LocalInfinitePracticeExercise {
+  id: string;
+  question: string;
+  correctAnswer: string;
+  hint: string;
+  explanation: string | null;
+}
+
 type Phase =
   | { kind: "greeting" }
   | { kind: "explanation" }
@@ -110,7 +118,8 @@ type Phase =
   | { kind: "quiz-intro" }
   | { kind: "quiz"; idx: number; selected: number | null; correct: boolean | null }
   | { kind: "completion"; practiceCorrect: number; quizCorrect: number; total: { practice: number; quiz: number } }
-  | { kind: "infinite-practice"; exercises: PoolExercise[]; idx: number; correct: number; selected: number | null; inputVal: string; feedback: "none" | "correct" | "wrong"; revealed: boolean };
+  | { kind: "infinite-practice"; exercises: PoolExercise[]; idx: number; correct: number; selected: number | null; inputVal: string; feedback: "none" | "correct" | "wrong"; revealed: boolean; source: "api" | "fallback" }
+  | { kind: "infinite-practice-loading"; message: string; retryCount: number };
 
 function phaseEmotion(p: Phase): AyaEmotion {
   switch (p.kind) {
@@ -124,6 +133,7 @@ function phaseEmotion(p: Phase): AyaEmotion {
     case "quiz":        return p.selected === null ? "thinking" : p.correct ? "happy" : "encourage";
     case "completion":  return "celebrate";
     case "infinite-practice": return p.feedback === "correct" ? "happy" : p.feedback === "wrong" ? "encourage" : "thinking";
+    case "infinite-practice-loading": return "thinking";
   }
 }
 
@@ -140,6 +150,7 @@ function phaseToVoiceEmotion(p: Phase): EmotionMode {
     case "quiz":              return "explain";
     case "completion":        return "completion";
     case "infinite-practice": return "explain";
+    case "infinite-practice-loading": return "intro";
   }
 }
 
@@ -170,6 +181,7 @@ const L: Record<LangCode, {
   infWrong: string;
   infScore: (c: number) => string;
   infLoading: string;
+  infRetry: string;
   infReveal: string;
   infNext: string;
 }> = {
@@ -185,7 +197,7 @@ const L: Record<LangCode, {
     showAnswer: "Покажи верния отговор",
     keepPracticing: "🔥 Безкрайна практика", infPracticeTitle: "Бонус задачи",
     infCorrect: "✅ Правилно!", infWrong: "❌ Не съвсем…",
-    infScore: (c) => `Верни отговори: ${c}`, infLoading: "Зареждам задачи…",
+    infScore: (c) => `Верни отговори: ${c}`, infLoading: "Зареждам задачи…", infRetry: "Опитвам пак…",
     infReveal: "Покажи отговора", infNext: "Следваща задача →",
   },
   en: {
@@ -200,7 +212,7 @@ const L: Record<LangCode, {
     showAnswer: "Show correct answer",
     keepPracticing: "🔥 Infinite Practice", infPracticeTitle: "Bonus Exercises",
     infCorrect: "✅ Correct!", infWrong: "❌ Not quite…",
-    infScore: (c) => `Correct answers: ${c}`, infLoading: "Loading exercises…",
+    infScore: (c) => `Correct answers: ${c}`, infLoading: "Loading exercises…", infRetry: "Retrying…",
     infReveal: "Show answer", infNext: "Next exercise →",
   },
   es: {
@@ -215,7 +227,7 @@ const L: Record<LangCode, {
     showAnswer: "Mostrar respuesta",
     keepPracticing: "🔥 Práctica infinita", infPracticeTitle: "Ejercicios bonus",
     infCorrect: "✅ ¡Correcto!", infWrong: "❌ No del todo…",
-    infScore: (c) => `Respuestas correctas: ${c}`, infLoading: "Cargando ejercicios…",
+    infScore: (c) => `Respuestas correctas: ${c}`, infLoading: "Cargando ejercicios…", infRetry: "Reintentando…",
     infReveal: "Mostrar respuesta", infNext: "Siguiente ejercicio →",
   },
   de: {
@@ -230,7 +242,7 @@ const L: Record<LangCode, {
     showAnswer: "Richtige Antwort zeigen",
     keepPracticing: "🔥 Unendlich üben", infPracticeTitle: "Bonus-Aufgaben",
     infCorrect: "✅ Richtig!", infWrong: "❌ Nicht ganz…",
-    infScore: (c) => `Richtige Antworten: ${c}`, infLoading: "Aufgaben werden geladen…",
+    infScore: (c) => `Richtige Antworten: ${c}`, infLoading: "Aufgaben werden geladen…", infRetry: "Erneut versuchen…",
     infReveal: "Antwort anzeigen", infNext: "Nächste Aufgabe →",
   },
   fr: {
@@ -245,7 +257,7 @@ const L: Record<LangCode, {
     showAnswer: "Afficher la bonne réponse",
     keepPracticing: "🔥 Pratique infinie", infPracticeTitle: "Exercices bonus",
     infCorrect: "✅ Correct!", infWrong: "❌ Pas tout à fait…",
-    infScore: (c) => `Bonnes réponses: ${c}`, infLoading: "Chargement des exercices…",
+    infScore: (c) => `Bonnes réponses: ${c}`, infLoading: "Chargement des exercices…", infRetry: "Nouvelle tentative…",
     infReveal: "Afficher la réponse", infNext: "Exercice suivant →",
   },
 };
@@ -760,6 +772,7 @@ function InteractiveLessonEngine({
 
   /* ── infinite practice state */
   const [infLoading, setInfLoading] = useState(false);
+  const [infRetryCount, setInfRetryCount] = useState(0);
 
   /* ── session-level readiness tracking */
   const [sessionStats, setSessionStats] = useState<SessionStats>(() => initializeSessionStats());
@@ -1440,9 +1453,36 @@ function InteractiveLessonEngine({
     }
   };
 
+  const buildFallbackInfinitePractice = (): PoolExercise[] => {
+    const lessonPractice = problems.slice(0, 3).map((p, i) => ({
+      id: -(i + 1),
+      question: p.question,
+      correctAnswer: p.answer,
+      options: null,
+      hint: i === 0 ? (data.lesson.tip || data.lesson.explanation || "") : null,
+      explanation: i === 0 ? (data.lesson.explanation || data.lesson.tip || null) : null,
+      exerciseType: "open-ended" as const,
+      difficulty: "easy" as const,
+    }));
+    const lessonQuiz = questions.slice(0, 2).map((q, i) => ({
+      id: -(i + 101),
+      question: q.question,
+      correctAnswer: q.options[q.correctIndex],
+      options: q.options,
+      hint: null,
+      explanation: null,
+      exerciseType: "multiple-choice" as const,
+      difficulty: "medium" as const,
+    }));
+    return [...lessonPractice, ...lessonQuiz];
+  };
+
   /* ── infinite practice: load exercises from pool */
-  const startInfinitePractice = async () => {
+  const startInfinitePractice = async (attempt: number = infRetryCount) => {
     setInfLoading(true);
+    setInfRetryCount(attempt);
+    setPhase({ kind: "infinite-practice-loading", message: attempt > 0 ? l.infRetry : l.infLoading, retryCount: attempt });
+    say(attempt > 0 ? l.infRetry : l.infLoading);
     try {
       const params = new URLSearchParams({
         childId: String(childId),
@@ -1459,10 +1499,17 @@ function InteractiveLessonEngine({
       const body = await res.json() as { exercises: PoolExercise[] };
       const exercises = body.exercises ?? [];
       if (exercises.length === 0) throw new Error("empty");
-      setPhase({ kind: "infinite-practice", exercises, idx: 0, correct: 0, selected: null, inputVal: "", feedback: "none", revealed: false });
+      setPhase({ kind: "infinite-practice", exercises, idx: 0, correct: 0, selected: null, inputVal: "", feedback: "none", revealed: false, source: "api" });
       say(l.infPracticeTitle, exercises[0].question);
     } catch {
-      say(l.infLoading);
+      const fallback = buildFallbackInfinitePractice();
+      if (fallback.length > 0) {
+        setPhase({ kind: "infinite-practice", exercises: fallback, idx: 0, correct: 0, selected: null, inputVal: "", feedback: "none", revealed: false, source: "fallback" });
+        say(l.infPracticeTitle, fallback[0].question);
+      } else {
+        setPhase({ kind: "infinite-practice-loading", message: l.infRetry, retryCount: attempt + 1 });
+        say(l.infRetry);
+      }
     } finally {
       setInfLoading(false);
     }
@@ -1511,15 +1558,27 @@ function InteractiveLessonEngine({
         const body = await res.json() as { exercises: PoolExercise[] };
         const fresh = body.exercises ?? [];
         if (fresh.length > 0) {
-          setPhase({ ...p, exercises: fresh, idx: 0, selected: null, inputVal: "", feedback: "none", revealed: false });
+          setPhase({ ...p, exercises: fresh, idx: 0, selected: null, inputVal: "", feedback: "none", revealed: false, source: "api" });
           say(l.infPracticeTitle, fresh[0].question);
         } else {
-          setPhase({ ...p, idx: nextIdx, selected: null, inputVal: "", feedback: "none", revealed: false });
-          say(l.infPracticeTitle);
+          const fallback = buildFallbackInfinitePractice();
+          if (fallback.length > 0) {
+            setPhase({ kind: "infinite-practice", exercises: fallback, idx: 0, correct: p.correct, selected: null, inputVal: "", feedback: "none", revealed: false, source: "fallback" });
+            say(l.infPracticeTitle, fallback[0].question);
+          } else {
+            setPhase({ kind: "infinite-practice-loading", message: l.infRetry, retryCount: p.correct });
+            say(l.infRetry);
+          }
         }
       } catch {
-        setPhase({ ...p, idx: 0, selected: null, inputVal: "", feedback: "none", revealed: false });
-        say(l.infPracticeTitle);
+        const fallback = buildFallbackInfinitePractice();
+        if (fallback.length > 0) {
+          setPhase({ kind: "infinite-practice", exercises: fallback, idx: 0, correct: p.correct, selected: null, inputVal: "", feedback: "none", revealed: false, source: "fallback" });
+          say(l.infPracticeTitle, fallback[0].question);
+        } else {
+          setPhase({ kind: "infinite-practice-loading", message: l.infRetry, retryCount: p.correct });
+          say(l.infRetry);
+        }
       } finally {
         setInfLoading(false);
       }
@@ -2112,7 +2171,7 @@ function InteractiveLessonEngine({
                   </motion.div>
                 )}
                 <ActionBtn
-                  onClick={startInfinitePractice}
+                  onClick={() => void startInfinitePractice(0)}
                   subject={subject}
                   testId="btn-keep-practicing"
                   disabled={infLoading}
@@ -2128,6 +2187,26 @@ function InteractiveLessonEngine({
               </div>
             );
           })()}
+
+          {phase.kind === "infinite-practice-loading" && (
+            <div className="space-y-4">
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-2xl p-5 text-center space-y-2">
+                <Loader2 className="w-5 h-5 animate-spin mx-auto text-blue-600" />
+                <p className="text-sm font-bold text-blue-900">{phase.message}</p>
+                <p className="text-xs text-blue-700">
+                  {lang === "bg" ? "Ще опитам още веднъж или ще отворя безопасна практика." : "I’ll retry once, then open safe practice."}
+                </p>
+              </div>
+              <ActionBtn
+                onClick={() => void startInfinitePractice(phase.retryCount + 1)}
+                subject={subject}
+                testId="btn-retry-infinite"
+              >
+                <RotateCcw className="w-4 h-4" />
+                {lang === "bg" ? "Опитай пак" : "Retry"}
+              </ActionBtn>
+            </div>
+          )}
 
           {/* ── Infinite Practice ── */}
           {phase.kind === "infinite-practice" && (() => {

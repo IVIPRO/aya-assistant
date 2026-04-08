@@ -1,0 +1,62 @@
+LITE MODE ONLY. DO NOT USE AGENT.
+AUDIT FIRST, THEN APPLY THE SMALLEST SAFE FIX.
+DO NOT REFACTOR UNRELATED CODE.
+DO NOT CHANGE VISUAL DESIGN UNLESS STRICTLY NECESSARY FOR STATE FEEDBACK.
+WORK ONLY IN THE CURRENT CODEBASE.
+
+Problem:
+In AYA Junior, the button "Тренирай още малко" on the post-lesson/test screen does not work reliably. From the user side it looks dead or non-responsive.
+
+First audit the current code and find the real click path and failure path before changing anything.
+
+Most likely affected areas:
+- artifacts/aya-assistant/src/pages/junior/lesson-viewer.tsx
+- the infinite practice loader / exercise pool fetch
+- API route wiring for lesson exercises if needed
+
+What to inspect:
+- which button instance renders the post-lesson CTA
+- which handler is attached to it
+- whether the click actually fires
+- whether loading state disables it incorrectly
+- whether fetch to /api/lessons/exercises fails, returns empty, or silently falls back
+- whether there is a mismatch between completion screen state and infinite-practice transition state
+
+Required fix:
+1. Make the button always do something deterministic on click.
+2. If exercise pool fetch succeeds -> enter infinite practice immediately.
+3. If fetch returns empty or fails -> do NOT silently fail.
+4. Provide a safe visible fallback path instead of staying on the same screen with no effect.
+5. The user must clearly see one of these outcomes:
+   - loading started
+   - infinite practice opened
+   - fallback practice opened
+   - readable retry state shown
+6. Do not leave the screen unchanged while only changing narration text.
+7. Keep the current AYA flow and existing styles as much as possible.
+
+Preferred minimal behavior:
+- keep current API call if it works
+- if API returns empty/error, create a small deterministic local fallback batch from the current lesson’s existing practice/quiz data and open practice mode instead of doing nothing
+- or show an explicit retry state with a working second attempt button
+- but never silent no-op
+
+Important:
+- Audit whether the current catch block only calls narration/dialogue without changing UI state.
+- Audit whether button text/state in the completion card is wired to the real handler currently rendered in Preview.
+- Fix only the real production path found in the current code.
+
+Acceptance criteria:
+- Clicking "Тренирай още малко" always triggers visible behavior
+- Button is not dead on Preview
+- If backend pool works -> bonus/infinite practice opens
+- If backend pool fails -> fallback path opens or clear retry state appears
+- No regression in lesson completion flow
+- No duplicate network requests from a single click
+- No broken auth side effects
+
+At the end give a short report:
+- actual root cause
+- exact files changed
+- exact minimal fix
+- verified click path and fallback path

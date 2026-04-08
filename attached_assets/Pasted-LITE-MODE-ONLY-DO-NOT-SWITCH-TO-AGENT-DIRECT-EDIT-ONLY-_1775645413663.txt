@@ -1,0 +1,76 @@
+LITE MODE ONLY.
+DO NOT SWITCH TO AGENT.
+DIRECT EDIT ONLY.
+DO NOT STOP AT ANALYSIS.
+DO NOT TOUCH ANYTHING OUTSIDE THE 3 REMAINING BLOCKS.
+
+Target file:
+artifacts/aya-assistant/src/pages/junior/lesson-viewer.tsx
+
+Verified current status:
+- hint phase type is already updated
+- checkPractice block is still old
+- hint render block is still old
+- startInfinitePractice fallback is still old
+
+Your task now:
+Complete ONLY the remaining 3 direct edits in the CURRENT live file.
+
+BLOCK 1 — checkPractice()
+Find the branch for first wrong answer entering hinting, currently still using generic lesson hint logic.
+It still uses generic logic equivalent to:
+  examples.find(e => e.hint) ?? examples[0]
+
+Replace ONLY that entry behavior so hinting is entered with task-bound data from the CURRENT failed problem.
+
+Required behavior:
+- use the active problem at the current index
+- create a hint payload tied to that exact task
+- populate the existing updated hint-phase state fields
+- do not use a generic lesson example as the final source of truth
+
+Safe fallback for Bulgarian:
+If no reliable matching hint/example exists, use:
+  `Помисли за верния отговор: ${currentProblem.answer}`
+
+BLOCK 2 — hint render block
+Find the render branch for:
+  phase.kind === "hinting"
+
+It still directly derives hint content from generic examples.
+Replace ONLY that logic so render priority is:
+1. stored hint payload from phase state
+2. stored hint example from phase state
+3. safe fallback from current problem question/answer
+
+The displayed task/question must remain tied to:
+  problems[phase.practiceIdx]
+
+Add dev-only warning if hint payload is missing:
+  console.warn("[AYA hint mismatch]", { practiceIdx: phase.practiceIdx, question: prob.question });
+
+BLOCK 3 — startInfinitePractice()
+Find the catch/failure path that still only calls:
+  say(l.infLoading);
+
+Replace ONLY the failure behavior with a visible local fallback:
+- build up to 5 fallback exercises from current lesson practice problems
+- open infinite-practice phase with those fallback exercises
+- call say(l.infPracticeTitle, fallbackExercises[0]?.question)
+
+Required result:
+The button "Тренирай още малко" must visibly open practice even when remote fetch fails.
+
+Rules:
+- edit only this one file
+- edit only these 3 remaining blocks
+- do not refactor
+- do not rewrite other lesson flow
+- save successfully
+
+After editing, output only:
+- changed file
+- block 1: done/not done
+- block 2: done/not done
+- block 3: done/not done
+- save succeeded: yes/no

@@ -1914,7 +1914,7 @@ function InteractiveLessonEngine({
               && (data.lesson.tip || data.lesson.explanation);
             const hintMismatch = phase.taskId && phase.taskId !== expectedTaskId;
             if (isDevMode && hintMismatch) console.warn("[AYA hint mismatch]", { practiceIdx: phase.practiceIdx, question: prob.question });
-            const hintText = phase.hintText ?? phase.explanation ?? data.lesson.tip ?? `${prob.question} = ${prob.answer}`;
+            const hintText = phase.hintText ?? `${prob.question} = ${prob.answer}`;
             const hintExample = phase.hintExample ?? { problem: prob.question, solution: prob.answer };
             return (
               <div className="space-y-4">

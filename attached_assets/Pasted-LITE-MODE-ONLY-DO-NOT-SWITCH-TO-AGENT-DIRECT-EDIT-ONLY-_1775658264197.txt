@@ -1,0 +1,70 @@
+LITE MODE ONLY.
+DO NOT SWITCH TO AGENT.
+DIRECT EDIT ONLY.
+DO NOT STOP AT ANALYSIS.
+EDIT ONLY THE 2 REMAINING BLOCKS.
+DO NOT REFACTOR ANYTHING ELSE.
+
+Target file:
+artifacts/aya-assistant/src/pages/junior/lesson-viewer.tsx
+
+Verified status:
+- checkPractice is already OK
+- only these 2 parts still fail:
+  1) hint render block
+  2) infinite practice catch fallback
+
+Task:
+Apply only the final 2 live edits now.
+
+BLOCK 1 — hint render
+Find the branch for:
+  phase.kind === "hinting"
+
+Make it fully use the stored hint payload.
+
+Required behavior:
+- displayed task stays:
+  const prob = problems[phase.practiceIdx]
+- render priority must be exactly:
+  1. phase.hintText
+  2. phase.hintExample
+  3. safe fallback from current problem:
+     `${prob.question} = ${prob.answer}`
+
+Do NOT use any direct generic lesson hint source in this block anymore.
+If any old direct generic source still exists here, remove it from the final rendered hint selection.
+
+Keep dev warning:
+  console.warn("[AYA hint mismatch]", { practiceIdx: phase.practiceIdx, question: prob.question });
+
+BLOCK 2 — infinite practice catch fallback
+Find the catch block inside startInfinitePractice().
+
+Required behavior:
+- build fallback exercises
+- if fallback has items:
+    setPhase({
+      kind: "infinite-practice",
+      exercises: fallback,
+      idx: 0,
+      correct: 0,
+      selected: null,
+      inputVal: "",
+      feedback: "none",
+      revealed: false,
+      source: "fallback"
+    });
+    say(l.infPracticeTitle, fallback[0].question);
+- if fallback is empty:
+    return to a safe visible state, not silent failure
+
+Do NOT leave the catch block incomplete.
+
+After editing, immediately verify and output only:
+- hint render edited: YES/NO
+- infinite fallback edited: YES/NO
+- hint render still contains old generic direct source: YES/NO
+- catch block now calls setPhase with fallback: YES/NO
+- catch block now calls say(...) with fallback question: YES/NO
+- save succeeded: YES/NO

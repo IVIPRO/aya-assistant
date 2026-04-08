@@ -1,0 +1,64 @@
+LITE MODE ONLY.
+DO NOT SWITCH TO AGENT.
+DIRECT EDIT FIRST, THEN SELF-VERIFY.
+DO NOT STOP AT ANALYSIS.
+EDIT ONLY ONE FILE.
+DO NOT REFACTOR.
+
+Target file:
+artifacts/aya-assistant/src/pages/junior/lesson-viewer.tsx
+
+Current known state:
+- hint phase type was updated earlier
+- these 3 runtime blocks are still not fixed:
+  1) checkPractice() wrong-answer -> hinting entry
+  2) hinting render block
+  3) startInfinitePractice() failure fallback
+
+Your task:
+Apply the remaining 3 direct live edits now, then immediately inspect the same file again and verify the edits are really present.
+
+EDIT REQUIREMENTS
+
+1) checkPractice()
+In the first-wrong-answer path for primary grades, stop using generic hint selection as the source of truth.
+Do NOT rely on:
+  examples.find(e => e.hint) ?? examples[0]
+for the final hinting behavior.
+
+Instead:
+- use the current failed problem at the active index
+- attach task-bound hint data into the already-extended hinting phase state
+- if no good hint match exists, use:
+  `Помисли за верния отговор: ${currentProblem.answer}`
+
+2) hinting render block
+When phase.kind === "hinting":
+- stop deriving hint content directly from generic lesson examples
+- render from stored phase hint payload first
+- fallback to current problem answer only if needed
+- keep the displayed task tied to problems[phase.practiceIdx]
+- add dev-only warning if hint payload is missing:
+  console.warn("[AYA hint mismatch]", { practiceIdx: phase.practiceIdx, question: prob.question })
+
+3) startInfinitePractice()
+In the failure/catch path:
+- do NOT leave only say(l.infLoading)
+- create a small local fallback set from current lesson practice problems
+- open infinite-practice with that fallback set
+- call say(l.infPracticeTitle, fallbackExercises[0]?.question)
+
+IMPORTANT:
+After editing, immediately re-open the CURRENT file and verify these exact checks:
+
+REPORT ONLY:
+- changed file
+- checkPractice edited: YES/NO
+- hint render edited: YES/NO
+- infinite fallback edited: YES/NO
+- save succeeded: YES/NO
+
+Then also report these exact verification lines:
+- checkPractice still contains generic examples.find(...): YES/NO
+- hint render still contains generic examples.find(...): YES/NO
+- startInfinitePractice catch still only says infLoading: YES/NO

@@ -1,0 +1,162 @@
+LITE MODE ONLY.
+AUDIT FIRST.
+APPLY ONLY MINIMAL SAFE CHANGES.
+DO NOT REFACTOR UNRELATED CODE.
+DO NOT REDESIGN UI.
+DO NOT CHANGE CONTENT STRUCTURE UNLESS STRICTLY NEEDED FOR PROTECTION.
+GOAL: ADD STABILITY LOCKS FOR AYA EDUCATION FLOWS.
+
+Context:
+AYA currently has working educational flows and must be protected from regressions caused by future edits.
+This task is to add lightweight stability guards for BOTH:
+- Начален етап
+- Прогимназия
+
+The purpose is NOT to redesign the app, but to make future changes safer and prevent already-fixed bugs from returning.
+
+Main risk areas to protect:
+1) stage/grade/task mismatch
+2) hint/task desynchronization
+3) broken retry flow
+4) dead CTA buttons
+5) invalid navigation between learning states
+6) empty lesson/exercise data causing silent failure
+7) future edits accidentally breaking one stage while changing another
+
+Audit first:
+Identify the current state flow and entry points for:
+- stage selection
+- grade selection
+- lesson start
+- practice/question flow
+- wrong answer -> hint -> retry flow
+- lesson completion
+- extra practice / "Тренирай още малко"
+
+Then add minimal safeguards only.
+
+Required protections:
+
+1. Stage boundary lock
+Add protection so data/state from Начален етап cannot leak into Прогимназия and vice versa.
+
+Expected behavior:
+- when a user is inside Начален етап, only Начален етап lessons/tasks/hints/practice data can render
+- when a user is inside Прогимназия, only Прогимназия lessons/tasks/hints/practice data can render
+- if mixed state is detected, restore the active stage from the current route or current user selection and log a development warning
+
+2. Grade consistency lock
+Ensure selected class/grade and loaded content always match.
+
+Expected behavior:
+- 1–4 class content must never render under 5–7 class flow
+- 5–7 class content must never render under 1–4 class flow
+- if the grade key is missing/invalid, stop the transition safely and return to the nearest valid selection state instead of showing broken content
+
+3. Current task lock
+Protect the current active question/task so it cannot silently change during:
+- wrong answer
+- hint display
+- retry
+- explanation
+- extra practice transition
+
+Expected behavior:
+- the hint must always belong to the active failed task
+- retry must always return to that same task
+- next task must only load after the current task is completed or intentionally advanced
+
+4. CTA safety lock
+Protect primary buttons, especially:
+- "Разбрах! Опитвам пак"
+- "Продължи"
+- "Започни"
+- "Тренирай още малко"
+
+Expected behavior:
+- every CTA click must trigger visible state change, loading state, or safe fallback
+- no silent no-op buttons
+- no double-trigger from rapid repeated clicks
+- add lightweight click guard if needed
+
+5. Empty data fallback lock
+If a lesson, practice set, mini test, or extra exercise pool is empty or invalid:
+- do not leave the user on a broken screen
+- show safe fallback state
+- return to valid lesson selection or build a minimal local fallback practice set from already loaded lesson data
+- never silently fail
+
+6. Route/state sync lock
+Protect against mismatches between:
+- route params
+- selected stage
+- selected grade
+- selected lesson
+- active task state
+
+Expected behavior:
+- if route says one stage/class but local state says another, resolve deterministically using current route + current valid user selection
+- do not render mixed UI from two different learning flows
+
+7. Development-only warnings
+In development mode only, log warnings for:
+- stage mismatch
+- grade mismatch
+- hint-task mismatch
+- retry-task mismatch
+- empty practice pool
+- dead CTA prevention fallback
+- invalid route/state combination
+
+Do NOT expose technical warnings in production UI.
+
+8. Non-breaking rule
+Do not alter the educational logic, texts, or design unless strictly required for stability.
+Do not change content authoring structure unless needed to prevent runtime mismatch.
+Do not touch unrelated modules.
+
+Verification requirements:
+Test both stages in Preview:
+
+A) Начален етап
+- enter stage
+- open one lesson
+- answer wrong once
+- verify hint matches same task
+- retry returns to same task
+- continue normally
+- finish mini flow
+- test "Тренирай още малко"
+
+B) Прогимназия
+- enter stage
+- open one lesson
+- answer wrong once
+- verify hint matches same task
+- retry returns to same task
+- continue normally
+- finish mini flow
+- test extra practice / continue CTA
+
+C) Cross-stage protection
+- switch between Начален етап and Прогимназия
+- verify no lesson/task/hint leakage between stages
+- verify no stale task remains from previous stage
+
+Acceptance criteria:
+- no content leakage between stages
+- no grade mismatch rendering
+- no hint/task desync
+- retry always returns to same failed task
+- CTA buttons always produce visible behavior
+- empty data never causes silent broken screen
+- switching stages does not keep stale state from previous stage
+- no visual regressions
+- no unrelated code changes
+
+At the end provide a short report:
+- files touched
+- protections added
+- warnings added in dev mode
+- flows tested in Preview
+- confirmation that no unrelated modules were changed

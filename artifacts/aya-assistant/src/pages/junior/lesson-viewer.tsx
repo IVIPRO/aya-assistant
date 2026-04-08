@@ -1517,8 +1517,8 @@ function InteractiveLessonEngine({
         say(l.infPracticeTitle, fallback[0].question);
       } else {
         if (isDevMode) console.warn("[lesson-viewer] empty practice pool", { childId, subjectId: subject.id, topicId: topic.id });
-        setPhase({ kind: "infinite-practice-loading", message: l.infRetry, retryCount: attempt + 1 });
-        say(l.infRetry);
+        setPhase({ kind: "infinite-practice", exercises: buildFallbackInfinitePractice(), idx: 0, correct: 0, selected: null, inputVal: "", feedback: "none", revealed: false, source: "fallback" });
+        say(l.infPracticeTitle, l.infLoading);
       }
     } finally {
       setInfLoading(false);

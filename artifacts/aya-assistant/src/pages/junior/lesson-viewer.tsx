@@ -113,7 +113,7 @@ type Phase =
   | { kind: "explanation" }
   | { kind: "example"; idx: number; revealed: boolean }
   | { kind: "practice"; idx: number; attempts: number; feedback: "none" | "correct" | "wrong"; explanation?: string }
-  | { kind: "hinting"; practiceIdx: number; attempts: number; hintText?: string; hintExample?: { problem: string; solution: string } }
+  | { kind: "hinting"; practiceIdx: number; attempts: number; taskId?: string; hintText?: string; hintExample?: { problem: string; solution: string } }
   | { kind: "celebrate"; nextPracticeIdx: number }
   | { kind: "quiz-intro" }
   | { kind: "quiz"; idx: number; selected: number | null; correct: boolean | null }
@@ -1359,6 +1359,11 @@ function InteractiveLessonEngine({
 
   /* ── from hinting → back to retry — speak the problem question again */
   const fromHinting = (practiceIdx: number, attempts: number) => {
+    const expectedTaskId = currentPracticeTaskId(practiceIdx);
+    const actualTaskId = currentPracticeTaskId(practiceIdx);
+    if (isDevMode && expectedTaskId !== actualTaskId) {
+      console.warn("[lesson-viewer] retry state mismatch", { expectedTaskId, actualTaskId, practiceIdx });
+    }
     go({ kind: "practice", idx: practiceIdx, attempts, feedback: "none" }, pick(d.retryAfterHint), problems[practiceIdx].question);
   };
 
@@ -1477,6 +1482,9 @@ function InteractiveLessonEngine({
     return [...lessonPractice, ...lessonQuiz];
   };
 
+  const currentPracticeTaskId = (idx: number) => `${subject.id}:${topic.id}:${idx}:${problems[idx]?.question ?? ""}`;
+  const isDevMode = typeof process !== "undefined" ? process.env.NODE_ENV !== "production" : true;
+
   /* ── infinite practice: load exercises from pool */
   const startInfinitePractice = async (attempt: number = infRetryCount) => {
     setInfLoading(true);
@@ -1507,6 +1515,7 @@ function InteractiveLessonEngine({
         setPhase({ kind: "infinite-practice", exercises: fallback, idx: 0, correct: 0, selected: null, inputVal: "", feedback: "none", revealed: false, source: "fallback" });
         say(l.infPracticeTitle, fallback[0].question);
       } else {
+        if (isDevMode) console.warn("[lesson-viewer] empty practice pool", { childId, subjectId: subject.id, topicId: topic.id });
         setPhase({ kind: "infinite-practice-loading", message: l.infRetry, retryCount: attempt + 1 });
         say(l.infRetry);
       }
@@ -1566,6 +1575,7 @@ function InteractiveLessonEngine({
             setPhase({ kind: "infinite-practice", exercises: fallback, idx: 0, correct: p.correct, selected: null, inputVal: "", feedback: "none", revealed: false, source: "fallback" });
             say(l.infPracticeTitle, fallback[0].question);
           } else {
+            if (isDevMode) console.warn("[lesson-viewer] empty practice pool", { childId, subjectId: subject.id, topicId: topic.id });
             setPhase({ kind: "infinite-practice-loading", message: l.infRetry, retryCount: p.correct });
             say(l.infRetry);
           }
@@ -1576,6 +1586,7 @@ function InteractiveLessonEngine({
           setPhase({ kind: "infinite-practice", exercises: fallback, idx: 0, correct: p.correct, selected: null, inputVal: "", feedback: "none", revealed: false, source: "fallback" });
           say(l.infPracticeTitle, fallback[0].question);
         } else {
+          if (isDevMode) console.warn("[lesson-viewer] empty practice pool", { childId, subjectId: subject.id, topicId: topic.id });
           setPhase({ kind: "infinite-practice-loading", message: l.infRetry, retryCount: p.correct });
           say(l.infRetry);
         }
@@ -1891,6 +1902,11 @@ function InteractiveLessonEngine({
           {/* ── Hinting ── */}
           {phase.kind === "hinting" && (() => {
             const prob = problems[phase.practiceIdx];
+            const expectedTaskId = currentPracticeTaskId(phase.practiceIdx);
+            const actualTaskId = phase.taskId ?? expectedTaskId;
+            if (isDevMode && actualTaskId !== expectedTaskId) {
+              console.warn("[lesson-viewer] hint-task mismatch", { expectedTaskId, actualTaskId, practiceIdx: phase.practiceIdx });
+            }
             /* Deep-struggle: weak topic + 3+ cumulative lesson mistakes → show re-explain */
             const showReExplain = topicContext === "weak"
               && lessonMistakesRef.current >= 3

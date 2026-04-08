@@ -1,0 +1,76 @@
+LITE MODE ONLY.
+AUDIT FIRST.
+APPLY MINIMAL SAFE CHANGES ONLY.
+DO NOT REFACTOR UNRELATED CODE.
+DO NOT CHANGE UI DESIGN.
+GOAL: PREVENT FUTURE REGRESSIONS.
+
+Context:
+Two bugs recently occurred in AYA Junior:
+
+1) Hint screen showing a hint that belongs to another task.
+2) Button "Тренирай още малко" appearing non-functional due to silent failure.
+
+The goal of this task is NOT to redesign logic but to add lightweight regression protection so these bugs cannot silently return.
+
+Tasks:
+
+1. Protect hint synchronization.
+
+   Ensure the hint system always derives its data from the CURRENT task state.
+
+   Add a small safety check where the hint UI is rendered:
+
+   - if the hint payload does not correspond to the current task id
+   - log a warning in console
+   - regenerate hint from the current task instead of showing unrelated hint
+
+   This must NOT break the lesson flow.
+
+2. Protect retry logic.
+
+   When user presses "Разбрах! Опитвам пак":
+
+   - verify the current task id is still the same
+   - if mismatch occurs, restore the correct task from the last failed attempt
+
+3. Protect "Тренирай още малко" button.
+
+   When this button is clicked:
+
+   - always set a visible loading state
+   - if exercise fetch fails or returns empty:
+       trigger a safe fallback practice set
+   - never leave the UI unchanged
+
+4. Add lightweight debug guards.
+
+   In development mode only:
+
+   - log warnings for:
+        hint-task mismatch
+        empty practice pool
+        retry state mismatch
+
+   Do NOT show these warnings to users in production UI.
+
+5. Verify that the following flows remain intact:
+
+   - lesson progression
+   - hint → retry loop
+   - mini test completion
+   - infinite practice entry
+
+Acceptance criteria:
+
+- hint always corresponds to the current task
+- retry always returns to the same failed task
+- "Тренирай още малко" never appears inactive
+- no silent failures
+- no visual UI changes
+
+At the end provide:
+
+- files touched
+- safeguards added
+- confirmation that no lesson logic was altered

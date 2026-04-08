@@ -105,7 +105,7 @@ type Phase =
   | { kind: "explanation" }
   | { kind: "example"; idx: number; revealed: boolean }
   | { kind: "practice"; idx: number; attempts: number; feedback: "none" | "correct" | "wrong"; explanation?: string }
-  | { kind: "hinting"; practiceIdx: number; attempts: number }
+  | { kind: "hinting"; practiceIdx: number; attempts: number; hintText?: string; hintExample?: { problem: string; solution: string } }
   | { kind: "celebrate"; nextPracticeIdx: number }
   | { kind: "quiz-intro" }
   | { kind: "quiz"; idx: number; selected: number | null; correct: boolean | null }
@@ -1332,9 +1332,10 @@ function InteractiveLessonEngine({
       
       /* First wrong in primary grades (1-4): show explanation if available, else hinting phase */
       if (isPrimary && attempts === 0 && !fullExplanation) {
-        const hintEx = examples.find(e => e.hint) ?? examples[0];
-        const hintSpoken = hintEx?.hint ?? '';
-        go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts }, pick(d.hinting), hintSpoken || undefined);
+        const hintEx = examples.find(e => e.problem === problems[idx].question && e.hint) ?? examples.find(e => e.hint) ?? examples[0];
+        const hintText = hintEx?.hint || fullExplanation || data.lesson.tip || `${problems[idx].question} = ${problems[idx].answer}`;
+        const hintExample = hintEx ? { problem: hintEx.problem, solution: hintEx.solution } : { problem: problems[idx].question, solution: problems[idx].answer };
+        go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts, hintText, hintExample }, pick(d.hinting), hintText || undefined);
       } else {
         setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong", explanation: fullExplanation });
         const wrongMsg = topicContext === "weak" ? ctxD.practiceSupport : pick(d.practiceWrong2);
@@ -1831,12 +1832,12 @@ function InteractiveLessonEngine({
           {/* ── Hinting ── */}
           {phase.kind === "hinting" && (() => {
             const prob = problems[phase.practiceIdx];
-            /* Find the most relevant example hint to show */
-            const hintEx = examples.find(e => e.hint) ?? examples[0];
             /* Deep-struggle: weak topic + 3+ cumulative lesson mistakes → show re-explain */
             const showReExplain = topicContext === "weak"
               && lessonMistakesRef.current >= 3
               && (data.lesson.tip || data.lesson.explanation);
+            const hintText = phase.hintText ?? phase.explanation ?? data.lesson.tip ?? `${prob.question} = ${prob.answer}`;
+            const hintExample = phase.hintExample ?? { problem: prob.question, solution: prob.answer };
             return (
               <div className="space-y-4">
                 {/* Deep-struggle re-explanation banner (weak topics, 3+ mistakes) */}
@@ -1862,7 +1863,7 @@ function InteractiveLessonEngine({
                 </div>
 
                 {/* Hint card from lesson examples */}
-                {hintEx && (
+                {hintText && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -1872,12 +1873,10 @@ function InteractiveLessonEngine({
                     <div className="flex items-center gap-2 text-amber-800 font-bold text-sm">
                       <span>{ctxD.hintPrefix || "💡"}</span>
                     </div>
-                    {hintEx.hint && (
-                      <p className="text-sm text-amber-900 leading-relaxed">{hintEx.hint}</p>
-                    )}
-                    {hintEx.solution && (
+                    <p className="text-sm text-amber-900 leading-relaxed">{hintText}</p>
+                    {hintExample.solution && (
                       <p className="text-xs text-amber-700 font-mono">
-                        {lang === "bg" ? "Пример:" : "Example:"} {hintEx.problem} = {hintEx.solution}
+                        {lang === "bg" ? "Пример:" : "Example:"} {hintExample.problem} = {hintExample.solution}
                       </p>
                     )}
                   </motion.div>

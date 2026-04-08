@@ -1,0 +1,55 @@
+LITE MODE ONLY. DO NOT USE AGENT.
+AUDIT FIRST, THEN APPLY THE SMALLEST SAFE FIX.
+DO NOT REFACTOR UNRELATED CODE.
+DO NOT CHANGE UI DESIGN.
+WORK ONLY IN THE CURRENT CODEBASE.
+
+Problem:
+In AYA Junior lesson flow, the hint/retry screen is not synchronized with the current task. The screenshots show that after a wrong answer, the displayed hint and example text can belong to another task/topic instead of the currently failed question.
+
+First audit the current implementation and confirm the root cause before changing anything.
+
+Most likely affected file:
+artifacts/aya-assistant/src/pages/junior/lesson-viewer.tsx
+
+What to inspect:
+- the "hinting" phase rendering
+- the wrong-answer transition inside checkPractice()
+- how the current problem is selected
+- whether hint content is derived from the current failed task or from a generic example pool
+- whether the retry button returns to the same task consistently
+
+Expected root cause to verify:
+The hinting UI currently uses a generic example hint (for example via examples.find(...) or examples[0]) instead of a hint/explanation mapped to the current failed problem, which causes mismatch between the shown task and the shown hint.
+
+Required fix:
+1. Keep the existing flow and UI.
+2. Make the hint screen always use data tied to the CURRENT failed practice problem.
+3. Do not show a hint/example from another task.
+4. If the current task has no direct hint, generate the safest fallback from:
+   - current question
+   - current correct answer
+   - current explanation for that task if available
+   - only then fall back to a generic lesson hint
+5. The retry button after hint must always return to the SAME current problem, not another one.
+6. Spoken text / dialogue bubble should also stay aligned with the current failed task.
+
+Implementation rules:
+- Minimal patch only.
+- Reuse existing structures if already available.
+- If needed, extend phase state minimally so current hint payload travels with the phase instead of being recomputed from unrelated examples.
+- Do not break quiz flow, explanation flow, or curiosity flow.
+- Keep Bulgarian UI text.
+
+After the fix, verify these acceptance criteria:
+- Wrong answer on task A -> hint screen still shows task A
+- Hint text is about task A, not a previous or unrelated task
+- "Разбрах! Опитвам пак" returns to task A
+- Next wrong answer on task B shows hint for task B
+- No regression in lesson navigation
+
+At the end give a short report:
+- root cause found
+- exact files changed
+- exact minimal fix applied
+- what was tested

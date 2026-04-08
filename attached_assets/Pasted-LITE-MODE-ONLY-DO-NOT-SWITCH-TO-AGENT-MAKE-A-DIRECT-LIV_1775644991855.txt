@@ -1,0 +1,101 @@
+LITE MODE ONLY.
+DO NOT SWITCH TO AGENT.
+MAKE A DIRECT LIVE EDIT.
+DO NOT STOP AT ANALYSIS.
+DO NOT REFACTOR UNRELATED CODE.
+
+I audited the current code and the bug is in:
+artifacts/aya-assistant/src/pages/junior/lesson-viewer.tsx
+
+This is a surgical fix. Edit ONLY this file.
+
+Confirmed root causes in current code:
+1) In checkPractice(), first wrong answer for primary grades enters hinting with:
+   const hintEx = examples.find(e => e.hint) ?? examples[0];
+   This uses a generic lesson example instead of a hint tied to the current failed task.
+
+2) In the hinting render block, it again uses:
+   const hintEx = examples.find(e => e.hint) ?? examples[0];
+   So the shown hint/example can belong to another task.
+
+3) In startInfinitePractice(), the catch block only calls:
+   say(l.infLoading);
+   which causes a visible no-op / dead-button experience.
+
+Apply these exact minimal changes:
+
+A) Extend the hinting phase type only minimally.
+Change:
+  | { kind: "hinting"; practiceIdx: number; attempts: number }
+to include a hint payload tied to the failed task, for example:
+  | { kind: "hinting"; practiceIdx: number; attempts: number; hintText?: string; hintExample?: { problem: string; solution: string; hint: string; steps?: string[] } | null }
+
+B) In checkPractice(), inside:
+   if (isPrimary && attempts === 0 && !fullExplanation) { ... }
+replace the generic hint selection with a task-bound hint payload.
+
+Use the CURRENT failed problem first:
+- const currentProblem = problems[idx]
+- build a safe taskBoundHintText using:
+   1. a matching example whose problem or solution is most related to currentProblem.question/currentProblem.answer
+   2. if no reliable match exists, fallback to:
+      `Помисли за отговора: ${problems[idx].answer}`
+      for bg
+- pass this hint data into the hinting phase state
+
+Important:
+Do NOT use plain examples.find(e => e.hint) as the final source of truth anymore.
+
+C) In the hinting render block:
+remove the direct generic line:
+  const hintEx = examples.find(e => e.hint) ?? examples[0];
+
+Instead read the hint from phase state first.
+Render priority:
+1. phase.hintText
+2. phase.hintExample
+3. safe fallback from current problem/answer
+
+The shown task must remain:
+  const prob = problems[phase.practiceIdx];
+
+D) Add a tiny dev-only warning:
+If the hint payload appears missing or unrelated to the current task, log:
+  console.warn("[AYA hint mismatch]", { practiceIdx: phase.practiceIdx, question: prob.question });
+
+E) Keep retry bound to the same task:
+Do not change fromHinting() behavior except ensuring it still returns to:
+  practiceIdx from phase.hinting
+
+F) Fix the dead extra-practice button with a minimal fallback.
+In startInfinitePractice() catch block:
+DO NOT only call say(l.infLoading).
+
+Instead do this minimal visible fallback:
+- create a small local fallback exercise set from current lesson practice problems, max 5 items
+- map each practice problem to PoolExercise-like objects
+- setPhase({
+    kind: "infinite-practice",
+    exercises: fallbackExercises,
+    idx: 0,
+    correct: 0,
+    selected: null,
+    inputVal: "",
+    feedback: "none",
+    revealed: false
+  })
+- say(l.infPracticeTitle, fallbackExercises[0]?.question)
+
+This must ensure the CTA always visibly opens practice even if the API fails.
+
+Rules:
+- edit only lesson-viewer.tsx
+- do not redesign UI
+- do not change unrelated lesson flow
+- do not broaden scope
+- save the file successfully
+
+After editing, output only:
+- changed file
+- exact fixes applied
+- save succeeded: yes/no

@@ -1345,10 +1345,11 @@ function InteractiveLessonEngine({
       
       /* First wrong in primary grades (1-4): show explanation if available, else hinting phase */
       if (isPrimary && attempts === 0 && !fullExplanation) {
-        const hintEx = examples.find(e => e.problem === problems[idx].question && e.hint) ?? examples.find(e => e.hint) ?? examples[0];
-        const hintText = hintEx?.hint || fullExplanation || data.lesson.tip || `${problems[idx].question} = ${problems[idx].answer}`;
-        const hintExample = hintEx ? { problem: hintEx.problem, solution: hintEx.solution } : { problem: problems[idx].question, solution: problems[idx].answer };
-        go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts, hintText, hintExample }, pick(d.hinting), hintText || undefined);
+        const currentProblem = problems[idx];
+        const hintEx = examples.find(e => e.problem === currentProblem.question) ?? examples.find(e => e.solution === currentProblem.answer) ?? null;
+        const hintText = hintEx?.hint || data.lesson.tip || (lang === "bg" ? `Помисли за отговора: ${currentProblem.answer}` : `${currentProblem.question} = ${currentProblem.answer}`);
+        const hintExample = hintEx ? { problem: hintEx.problem, solution: hintEx.solution } : { problem: currentProblem.question, solution: currentProblem.answer };
+        go({ kind: "hinting", practiceIdx: idx, attempts: nextAttempts, taskId: currentPracticeTaskId(idx), hintText, hintExample }, pick(d.hinting), hintText || undefined);
       } else {
         setPhase({ kind: "practice", idx, attempts: nextAttempts, feedback: "wrong", explanation: fullExplanation });
         const wrongMsg = topicContext === "weak" ? ctxD.practiceSupport : pick(d.practiceWrong2);
@@ -1360,7 +1361,7 @@ function InteractiveLessonEngine({
   /* ── from hinting → back to retry — speak the problem question again */
   const fromHinting = (practiceIdx: number, attempts: number) => {
     const expectedTaskId = currentPracticeTaskId(practiceIdx);
-    const actualTaskId = currentPracticeTaskId(practiceIdx);
+    const actualTaskId = phase.kind === "hinting" ? phase.taskId ?? expectedTaskId : expectedTaskId;
     if (isDevMode && expectedTaskId !== actualTaskId) {
       console.warn("[lesson-viewer] retry state mismatch", { expectedTaskId, actualTaskId, practiceIdx });
     }
@@ -1911,6 +1912,8 @@ function InteractiveLessonEngine({
             const showReExplain = topicContext === "weak"
               && lessonMistakesRef.current >= 3
               && (data.lesson.tip || data.lesson.explanation);
+            const hintMismatch = phase.taskId && phase.taskId !== expectedTaskId;
+            if (isDevMode && hintMismatch) console.warn("[AYA hint mismatch]", { practiceIdx: phase.practiceIdx, question: prob.question });
             const hintText = phase.hintText ?? phase.explanation ?? data.lesson.tip ?? `${prob.question} = ${prob.answer}`;
             const hintExample = phase.hintExample ?? { problem: prob.question, solution: prob.answer };
             return (

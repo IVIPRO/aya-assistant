@@ -1,0 +1,79 @@
+LITE MODE ONLY.
+DO NOT SWITCH TO AGENT.
+AUDIT FIRST, THEN APPLY A MINIMAL SHARED LOGIC FIX.
+DO NOT REFACTOR UNRELATED CODE.
+DO NOT CHANGE UI DESIGN.
+FOCUS ON ROOT CAUSE, NOT SYMPTOM PATCHES.
+
+Problem:
+AYA generated or accepted a Bulgarian syllables question with more than one correct option.
+Example from live app:
+Question: "Коя от следните думи има 3 срички?"
+Options include both "сладолед" and "прозорец", but only one is marked correct.
+This is wrong because both words have 3 syllables.
+
+This same issue affects both:
+- Начален етап
+- Прогимназия
+
+Goal:
+Fix the shared content logic so Bulgarian syllable-count questions cannot have multiple correct options while only one answer is marked as correct.
+
+Audit these likely files first:
+- artifacts/api-server/src/lib/aiLessonGenerator.ts
+- artifacts/api-server/src/lib/lessonContent.ts
+- any shared validator or generator used for quiz/practice creation
+- any Bulgarian phonics/syllables helper if already present
+
+Root cause to verify:
+1. Quiz validation currently checks only structure and correctIndex bounds, but not semantic correctness.
+2. There is no strict Bulgarian syllable-count validator ensuring exactly one correct answer in syllable MCQs.
+3. Syllable questions may be AI-generated or passed through without checking whether multiple options satisfy the same condition.
+
+Required fix:
+Implement the SMALLEST shared fix that prevents this bug in both Junior and Progimnazия.
+
+Required behavior:
+1. Add a small Bulgarian syllable utility for words:
+   - normalize Bulgarian word
+   - count syllables by Bulgarian vowel groups / vowels
+   - support Bulgarian vowels including: а, ъ, о, у, е, и, ю, я
+   - return deterministic syllable count for simple school-level words
+
+2. Detect syllable-count multiple-choice questions, such as:
+   - "Коя дума има 3 срички?"
+   - "Коя от следните думи има 3 срички?"
+   - similar Bulgarian phrasing containing "срички"
+
+3. For those questions:
+   - compute syllable count for every option
+   - ensure exactly one option matches the requested count
+   - if more than one option matches, fix the question safely by either:
+     a) replacing conflicting distractors with words of a different syllable count, or
+     b) regenerating only that question safely
+   - never keep a syllable MCQ with multiple valid answers
+
+4. Strengthen quiz validation in shared generator pipeline:
+   - not only validate correctIndex range
+   - also validate semantic uniqueness for Bulgarian syllable-count MCQs
+
+5. Add targeted tests:
+   - "прозорец" => 3 syllables
+   - "сладолед" => 3 syllables
+   - a question with both options should FAIL validation unless corrected
+   - verify one valid corrected version passes
+   - ensure fix applies to both Junior and Progimnazия shared generation path
+
+Important:
+- Keep scope tight.
+- Do not redesign curriculum.
+- Do not change unrelated task types.
+- Do not patch this only in the UI.
+- Fix it at shared generation/validation level so both stages benefit.
+
+After the fix, output only:
+- root cause confirmed
+- files changed
+- exact shared safeguard added
+- tests added
+- whether this now protects both Начален етап and Прогимназия

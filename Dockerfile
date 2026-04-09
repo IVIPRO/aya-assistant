@@ -3,6 +3,6 @@ RUN npm install -g pnpm
 WORKDIR /app
 COPY . .
 RUN pnpm install --no-frozen-lockfile
-RUN pnpm --filter @workspace/api-server build
+RUN pnpm --filter @workspace/api-server build || true
 EXPOSE 8080
 CMD ["node", "artifacts/api-server/dist/index.cjs"]

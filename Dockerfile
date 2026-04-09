@@ -1,11 +1,7 @@
 FROM node:22-alpine
-RUN npm install -g pnpm
+RUN npm install -g pnpm tsx
 WORKDIR /app
-COPY package.json pnpm-workspace.yaml pnpm-lock.yaml* ./
-COPY artifacts/api-server/package.json ./artifacts/api-server/
-COPY lib/ ./lib/
-RUN pnpm install --no-frozen-lockfile
 COPY . .
-RUN cd artifacts/api-server && npx tsx ./build.ts
+RUN pnpm install --no-frozen-lockfile
 EXPOSE 8080
-CMD ["node", "artifacts/api-server/dist/index.cjs"]
+CMD ["tsx", "artifacts/api-server/src/index.ts"]

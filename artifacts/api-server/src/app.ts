@@ -48,7 +48,7 @@ app.use("/api", router);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const publicDir = path.resolve(__dirname, "public");
+const publicDir = path.resolve(__dirname, "..", "..", "..", "aya-assistant", "dist", "public");
 app.use(express.static(publicDir));
 
 app.get(/^(?!\/api).*$/, (_req, res) => {

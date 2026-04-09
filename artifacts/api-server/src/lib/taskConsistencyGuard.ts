@@ -448,6 +448,8 @@ export function isExerciseConsistent(exercise: {
   // Question should not be identical to correct answer (degenerate)
   if (question.trim().toLowerCase() === correctAnswer.trim().toLowerCase()) return false;
 
+  if (question.toLowerCase().includes("срич") && correctAnswer.trim().length === 0) return false;
+
   return true;
 }
 

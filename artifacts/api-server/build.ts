@@ -42,11 +42,11 @@ async function buildAll() {
   await rm(distDir, { recursive: true, force: true });
 
   console.log("building server...");
-  const pkgPath = path.resolve(__dirname, "package.json");
-  const pkg = JSON.parse(await readFile(pkgPath, "utf-8"));
-  const allDeps = [
-    ...Object.keys(pkg.dependencies || {}),
-    ...Object.keys(pkg.devDependencies || {}),
+  
+  
+  
+    
+    
   ];
   const externals = allDeps.filter(
     (dep) =>

@@ -3,5 +3,6 @@ RUN npm install -g pnpm tsx
 WORKDIR /app
 COPY . .
 RUN pnpm install --no-frozen-lockfile
+RUN pnpm --filter @workspace/api-server build
 EXPOSE 8080
-CMD ["tsx", "artifacts/api-server/src/index.ts"]
+CMD ["node", "artifacts/api-server/dist/index.cjs"]

@@ -5,4 +5,4 @@ cmds = ["pnpm install --no-frozen-lockfile"]
 cmds = ["pnpm --filter @workspace/api-server build"]
 
 [start]
-cmd = "node artifacts/api-server/dist/index.cjs"
+cmd = "node artifacts/api-server/dist/index.mjs"

@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "PORT=8080 NODE_ENV=development node ./dist/index.cjs",
+    "dev": "PORT=8080 NODE_ENV=development node ./dist/index.mjs",
     "build": "tsx ./build.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node --import tsx/esm --test src/lib/__tests__/*.test.ts"

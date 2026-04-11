@@ -971,16 +971,20 @@ function InteractiveLessonEngine({
       return "division";
     }
     
-    // MULTIPLICATION keywords: всяка група има, по, еднакви групи
-    if (/(всяка група|еднакви групи|по.*\d+|всеки.*по)/.test(lower)) {
+    // MULTIPLICATION keywords: всяка група, еднакви групи, по X, всяко/всяка [noun] + число
+    // Must be checked BEFORE addition ("общо" can appear in multiplication problems too)
+    if (
+      /(всяка група|еднакви групи|всеки.*по|по.*\d+|\d+.*по)/.test(lower) ||
+      /(всяко|всяка)\s+\w+\s+(има|получава|съдържа|дава)/.test(lower)
+    ) {
       return "multiplication";
     }
-    
+
     // SUBTRACTION keywords: останаха, разлика, по-малко
     if (/(останаха|разлика|по-малко|отишла|отпадна)/.test(lower)) {
       return "subtraction";
     }
-    
+
     // ADDITION keywords: общо, заедно, още
     if (/(общо|заедно|още|и всички|плюс)/.test(lower)) {
       return "addition";
@@ -1011,10 +1015,16 @@ function InteractiveLessonEngine({
     }
     
     if (operation === "multiplication") {
-      return `Имаме ${b} групи.\n` +
-             `Всяка група има ${a} предмета.\n\n` +
-             `Правим умножение:\n${a} × ${b} = ${result}\n\n` +
-             `Значи общо имаме ${result} предмета.`;
+      // a = number of groups (first number in problem), b = items per group
+      // Bulgarian MON Grade 2 curriculum: explain multiplication as repeated addition
+      const addends = Array(a).fill(b).join(" + ");
+      return (
+        `Умножението е многократно събиране.\n\n` +
+        `Имаме ${a} групи, всяка с по ${b}.\n\n` +
+        `Добавяме ${b} точно ${a} пъти:\n${addends} = ${result}\n\n` +
+        `Затова:\n${a} × ${b} = ${result}\n\n` +
+        `Отговор: **${result}**`
+      );
     }
     
     if (operation === "subtraction") {

@@ -67,6 +67,26 @@ const diagnoseGrade2Math = (
     };
   }
 
+  // Multiplication topic — explain as repeated addition (Grade 2 MON curriculum)
+  if (topic === "multiplication") {
+    const numbers = question.match(/\d+/g);
+    if (numbers && numbers.length >= 2) {
+      const mul_a = parseInt(numbers[0]);
+      const mul_b = parseInt(numbers[1]);
+      const addends = Array(mul_a).fill(mul_b).join(" + ");
+      return {
+        errorType: "wrong-counting",
+        explanation: `Умножението е многократно събиране. ${mul_a} × ${mul_b} означава да добавяш ${mul_b} точно ${mul_a} пъти:\n${addends} = ${mul_a * mul_b}`,
+        confidence: "high",
+      };
+    }
+    return {
+      errorType: "wrong-counting",
+      explanation: "Умножението е многократно събиране. Нека проверим стъпка по стъпка.",
+      confidence: "medium",
+    };
+  }
+
   // Addition topic
   if (topic === "addition") {
     // Concatenation instead of addition (e.g., 46 + 27 = 613)

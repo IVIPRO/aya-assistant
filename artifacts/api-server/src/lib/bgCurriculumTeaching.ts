@@ -162,13 +162,17 @@ export function getGradeAwareMathExplanation(
   if (lang === "bg") {
     if (operation === "multiplication") {
       if (g <= 2) {
-        // Grade 1–2: repeated addition, very concrete
+        // Grade 1–2: repeated addition (Bulgarian MON curriculum)
+        // Step 1: explain multiplication as repeated addition
+        // Step 2: show the addition
+        // Step 3: show the multiplication equation
+        // Step 4: conclusion
         const addends = Array(a).fill(b).join(" + ");
         return (
-          `Нека помислим заедно.\n\n` +
-          `${a} по ${b} означава да повторим ${b} точно ${a} пъти.\n\n` +
-          `Ето как изглежда:\n${addends} = ${result}\n\n` +
-          `Значи:\n${a} × ${b} = ${result}\n\nОтговор: **${result}**`
+          `Умножението е многократно събиране.\n\n` +
+          `Добавяме ${b} точно ${a} пъти:\n${addends} = ${result}\n\n` +
+          `Значи:\n${a} × ${b} = ${result}\n\n` +
+          `${a} групи по ${b} = **${result}**`
         );
       } else if (g === 3) {
         // Grade 3: reference times table

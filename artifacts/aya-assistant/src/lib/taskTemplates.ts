@@ -236,9 +236,62 @@ const generateSubtractionTask = (context: TaskGenerationContext): Task | null =>
 };
 
 /**
- * Multiplication template (Grade 3+, Grade 5+)
+ * Multiplication template (Grade 2+, Grade 5+)
  */
 const generateMultiplicationTask = (context: TaskGenerationContext): Task | null => {
+  if (context.grade === 2) {
+    if (context.templateType === "solved-example") {
+      return {
+        templateType: "solved-example",
+        problem: "4 реда по 3 стола. Колко стола общо?",
+        steps: [
+          "Умножението е многократно събиране.",
+          "Добавяме 3 точно 4 пъти:",
+          "3 + 3 + 3 + 3 = 12",
+          "Значи: 4 × 3 = 12",
+        ],
+        explanation: "Умножението е многократно събиране. Вместо да събираме многократно, използваме знака ×.",
+        finalAnswer: "12",
+        reasoning: "4 групи по 3 = 3 + 3 + 3 + 3 = 12",
+        difficulty: "beginner",
+      };
+    }
+    if (context.templateType === "guided-practice") {
+      return {
+        templateType: "guided-practice",
+        problem: "3 кутии с по 2 бонбона. Колко бонбона?",
+        hint: "Помисли: добавяй 2 три пъти: 2 + 2 + 2",
+        stepGuidance: [
+          "Колко групи имаме?",
+          "Колко има във всяка група?",
+          "Събери: 2 + 2 + 2 = ?",
+          "Запиши: 3 × 2 = ?",
+        ],
+        expectedAnswer: "6",
+        difficulty: "beginner",
+      };
+    }
+    if (context.templateType === "independent-practice") {
+      return {
+        templateType: "independent-practice",
+        problem: "2 × 5 = ?",
+        expectedAnswer: "10",
+        answerValidation: "exact-match",
+        difficulty: "beginner",
+      };
+    }
+    if (context.templateType === "test-task") {
+      return {
+        templateType: "test-task",
+        problem: "5 деца, всяко има по 3 моливи. Колко молива общо?",
+        options: ["8", "15", "12", "10"],
+        correctAnswerIndex: 1,
+        explanation: "5 × 3: добавяме 3 пет пъти: 3 + 3 + 3 + 3 + 3 = 15",
+        difficulty: "beginner",
+      };
+    }
+  }
+
   if (context.grade === 5) {
     if (context.templateType === "solved-example") {
       return {
@@ -412,7 +465,7 @@ export const isTemplateTypeAvailable = (
   templateType: TemplateType
 ): boolean => {
   // Grade 2 math has all basic template types except word-problem (which is separate)
-  if (grade === 2 && ["addition", "subtraction"].includes(topic)) {
+  if (grade === 2 && ["addition", "subtraction", "multiplication"].includes(topic)) {
     return ["solved-example", "guided-practice", "independent-practice", "test-task"].includes(templateType);
   }
 

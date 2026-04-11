@@ -71,6 +71,7 @@ export const curriculumMap: Record<Grade, CurriculumGrade> = {
         topics: [
           { topicId: "addition", label: "Събиране", grades: [2], difficulty: "beginner" },
           { topicId: "subtraction", label: "Изваждане", grades: [2], difficulty: "beginner" },
+          { topicId: "multiplication", label: "Умножение", grades: [2], difficulty: "beginner" },
           { topicId: "word-problems", label: "Текстови задачи", grades: [2], difficulty: "intermediate" },
           { topicId: "geometry", label: "Геометрични фигури", grades: [2], difficulty: "beginner" },
           { topicId: "measurement", label: "Мерене", grades: [2], difficulty: "beginner" },

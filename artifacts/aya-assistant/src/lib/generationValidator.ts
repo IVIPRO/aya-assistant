@@ -179,12 +179,13 @@ export const validateWordProblem = (
   operationType: "addition" | "subtraction" | "multiplication" | "division",
   grade: Grade
 ): ValidationResult => {
-  // Grade 2 can have: addition, subtraction, simple word problems
+  // Grade 2 can have: addition, subtraction, and introductory multiplication word problems
+  // Bulgarian MON Grade 2 curriculum introduces multiplication as repeated addition
   if (grade === 2) {
-    if (operationType === "multiplication" || operationType === "division") {
+    if (operationType === "division") {
       return {
         isValid: false,
-        reason: `Grade 2 word problems cannot use ${operationType}`,
+        reason: `Grade 2 word problems cannot use division`,
         suggestedContext: {
           grade: 2,
           subject: "mathematics",
@@ -358,9 +359,9 @@ export const canGradeAccessOperation = (
   grade: Grade,
   operation: "addition" | "subtraction" | "multiplication" | "division"
 ): boolean => {
-  // Grade 2 can do addition and subtraction only
+  // Grade 2 can do addition, subtraction, and introductory multiplication (MON curriculum)
   if (grade === 2) {
-    return operation === "addition" || operation === "subtraction";
+    return operation === "addition" || operation === "subtraction" || operation === "multiplication";
   }
 
   // Grade 5+ can do all operations
